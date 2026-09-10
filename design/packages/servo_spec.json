@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "model": "Feetech STS3215-class (provisional)",
+  "protocol": "TTL half-duplex serial bus",
+  "status": "provisional-typical",
+  "note": "以下为同级别总线舵机的典型公开规格量级，用于让仿真体现非理想特性；实物到手后必须实测回填。",
+  "rated_torque_nm": 2.0,
+  "stall_torque_nm": 3.0,
+  "no_load_speed_dps": 300.0,
+  "deadband_deg": 0.5,
+  "backlash_deg": 1.0,
+  "position_accuracy_deg": 1.0,
+  "control_latency_ms": 8.0,
+  "update_rate_hz": 50,
+  "voltage_range_v": [9.0, 12.6],
+  "voltage_nominal_v": 11.1,
+  "current_limit_a": 2.5,
+  "temperature_limit_c": 70,
+  "feedback": {
+    "position": true,
+    "load": true,
+    "temperature": true,
+    "voltage": true
+  },
+  "effects_modelled_in_sim": [
+    "deadband",
+    "backlash",
+    "slew-rate limit",
+    "control latency",
+    "torque saturation"
+  ],
+  "effects_not_modelled": [
+    "thermal drift",
+    "gear wear",
+    "bus packet loss",
+    "current ripple"
+  ]
+}

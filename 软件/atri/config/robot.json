@@ -1,8 +1,11 @@
 {
   "name": "A.T.R.I.",
   "dof": 22,
-  "size_cm": [37.3, 18.7, 10.6],
+  "size_cm": [47.5, 19.0, 11.0],
+  "size_note": "由 design/robot_model.json 的关节链几何累加得出（高 475mm），非营销数字。官方上限 60 x 30 x 30 cm，仍有充足余量。",
   "mass_kg": 1.65,
+  "mass_note": "设计目标值，各 link 质量见 design/robot_model.json，合计与此一致。",
+  "model_source": "design/robot_model.json",
   "motion": {
     "backend": "scripted",
     "gait": {
@@ -17,5 +20,11 @@
   "cerebellum": {
     "servo_bus": "mock",
     "control_period_ms": 20
+  },
+  "design_status": {
+    "phase": "design-provisional",
+    "hardware": "not_manufactured",
+    "simulation": "kinematic-analytical",
+    "note": "结构尺寸与舵机参数为设计/典型值，实物到手后需复测回填。"
   }
 }

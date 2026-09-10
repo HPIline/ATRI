@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "note": "感知仿真参数：让 Mock 感知带真实噪声与丢帧，而不是返回固定值。否则闭环控制器的收敛数据没有意义。",
+  "camera": {
+    "resolution": [640, 480],
+    "fov_horizontal_deg": 70.0,
+    "fps": 30,
+    "mount_height_mm": 415.0,
+    "mount_pitch_deg": -25.0,
+    "note": "安装高度按设计模型头顶高度附近取值，实际装配后复测"
+  },
+  "face": {
+    "detect_range_mm": 1500,
+    "min_face_px": 40,
+    "false_positive_rate": 0.02,
+    "recognize_confidence_threshold": 0.75,
+    "note": "人脸库支持冷启动 2-3 人"
+  },
+  "qr": {
+    "detect_range_mm": 1000,
+    "min_qr_px": 60,
+    "decode_fail_rate": 0.05,
+    "max_tilt_deg": 45.0,
+    "note": "地面二维码，需透视矫正"
+  },
+  "ball": {
+    "diameter_mm": 40.0,
+    "detect_range_mm": 800,
+    "color_tolerance": 0.15,
+    "note": "颜色分割 + 最大轮廓"
+  },
+  "noise": {
+    "position_std_mm": 3.0,
+    "angle_std_deg": 1.5,
+    "dropout_rate": 0.03,
+    "latency_ms": 33.0
+  },
+  "degradation_profiles": {
+    "ideal": {"position_std_mm": 0.0, "dropout_rate": 0.0, "lighting_lux": 400, "note": "上界参考，非真实"},
+    "nominal": {"position_std_mm": 3.0, "dropout_rate": 0.03, "lighting_lux": 400, "note": "默认仿真条件"},
+    "harsh": {"position_std_mm": 8.0, "dropout_rate": 0.15, "lighting_lux": 120, "note": "弱光 + 高噪声"},
+    "adversarial": {"position_std_mm": 15.0, "dropout_rate": 0.30, "lighting_lux": 80, "note": "用于寻找失效边界"}
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "note": "域随机化配置：仿真时随机扰动这些参数，用于检验策略在真实世界参数不确定性下的鲁棒性。这是缩小 sim-to-real 差距的主要手段。",
+  "randomization": {
+    "mass_kg": {
+      "nominal": 1.65,
+      "range": [1.55, 1.75],
+      "unit": "kg",
+      "rationale": "3D 打印件密度波动、线束与紧固件重量未精确计入"
+    },
+    "com_offset_mm": {
+      "nominal": [0.0, 0.0, 0.0],
+      "range": 15.0,
+      "unit": "mm",
+      "rationale": "电池与计算板实际安装位置存在偏差"
+    },
+    "ground_friction": {
+      "nominal": 0.7,
+      "range": [0.5, 0.95],
+      "unit": "1",
+      "rationale": "赛场桌面材质与清洁程度未知"
+    },
+    "motor_strength_scale": {
+      "nominal": 1.0,
+      "range": [0.85, 1.15],
+      "unit": "1",
+      "rationale": "舵机个体差异与电池电压下降"
+    },
+    "control_latency_ms": {
+      "nominal": 8.0,
+      "range": [4.0, 16.0],
+      "unit": "ms",
+      "rationale": "总线通信抖动与主控调度延迟"
+    },
+    "backlash_deg": {
+      "nominal": 1.0,
+      "range": [0.5, 2.0],
+      "unit": "deg",
+      "rationale": "齿轮间隙随磨损变化"
+    },
+    "joint_offset_deg": {
+      "nominal": 0.0,
+      "range": 2.0,
+      "unit": "deg",
+      "rationale": "装配零位标定误差"
+    },
+    "lighting_lux": {
+      "nominal": 400,
+      "range": [100, 800],
+      "unit": "lux",
+      "rationale": "赛场照明条件不确定"
+    },
+    "camera_mount_tilt_deg": {
+      "nominal": 0.0,
+      "range": 3.0,
+      "unit": "deg",
+      "rationale": "相机安装角度误差"
+    }
+  },
+  "sensor_noise": {
+    "imu_gyro_std_dps": 0.5,
+    "imu_accel_std_g": 0.01,
+    "joint_feedback_std_deg": 0.3,
+    "camera_position_std_mm": 3.0,
+    "camera_angle_std_deg": 1.5,
+    "perception_dropout_rate": 0.03
+  },
+  "seed_policy": {
+    "default_seed": 20260910,
+    "note": "固定种子保证结果可复现；做鲁棒性扫描时对每个 episode 递增种子。"
+  }
+}

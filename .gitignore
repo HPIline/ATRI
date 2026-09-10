@@ -27,3 +27,7 @@ ql_thumb/
 ~$*.pptx
 ~$*.docx
 ~$*.xlsx
+
+# 仿真运行产出（可复现，无需入库）
+design/results/
+design/figures/
