@@ -6,7 +6,8 @@
 
 ```
 搞机器人/
-├── ATRI_Project_Presentation.pptx        # 当前最新版方案 PPT（9/10）
+├── ATRI_Project_Presentation-定稿.pptx  # PPT 定稿（预算口径已与 BOM 对齐）
+├── ATRI_Project_Presentation.pptx        # 上一版 PPT（备份）
 ├── 附件3：学生版系统操作手册.docx          # 省赛系统上传操作说明
 ├── 项目文档/                              # 精选项目文档
 │   ├── A.T.R.I.项目综述.md
