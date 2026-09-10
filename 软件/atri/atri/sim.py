@@ -9,7 +9,9 @@ from typing import Any, Dict, List
 
 from .brain import Brain
 from .cerebellum import Cerebellum, MockServoBus
+from .perception import MockPerception
 from .task_card import TaskCard
+from .voice import MockTTS
 
 ROOT = Path(__file__).resolve().parent.parent
 TASK_CARD_DIR = ROOT / "task_cards"
@@ -34,7 +36,9 @@ def load_robot_config() -> Dict[str, Any]:
 def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
     servo_bus = MockServoBus()
     cerebellum = Cerebellum(servo_bus=servo_bus, sleeper=sleeper)
-    brain = Brain(cerebellum=cerebellum)
+    perception = MockPerception()
+    tts = MockTTS()
+    brain = Brain(cerebellum=cerebellum, perception=perception, tts=tts)
 
     motion_cfg = config.get("motion", {})
     motion_backend = motion_cfg.get("backend", "scripted")
@@ -43,6 +47,8 @@ def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
         "brain": brain,
         "cerebellum": cerebellum,
         "servo_bus": servo_bus,
+        "perception": perception,
+        "tts": tts,
         "motion_backend": motion_backend,
     }
 
@@ -80,9 +86,9 @@ def main(argv: List[str] | None = None) -> int:
     overall = []
     for card in cards:
         print(f"--- 任务卡 {card.task_id} | {card.name} ---")
-        obs = {k: dict(v) for k, v in MOCK_OBSERVATIONS.items()}
-        obs["t"] = time.time() % 10.0
-        result = brain.execute_task(card, observation=obs)
+        # 演示改为不预填观测，由 MockPerception 提供 face/qr/ball 感知，
+        # object/speech 使用技能默认参数，验证感知接口已串入技能链。
+        result = brain.execute_task(card, observation=None)
         ok = result.get("ok", False)
         print(f"    执行结果: {'成功' if ok else '失败'}")
         if not ok:

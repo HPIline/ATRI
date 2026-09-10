@@ -9,8 +9,10 @@ from .task_card import TaskCard
 
 
 class Brain:
-    def __init__(self, cerebellum: Any) -> None:
+    def __init__(self, cerebellum: Any, perception: Any = None, tts: Any = None) -> None:
         self.cerebellum = cerebellum
+        self.perception = perception
+        self.tts = tts
         self.skills = {
             FaceSkill.name: FaceSkill(),
             QRCodeSkill.name: QRCodeSkill(),
@@ -42,6 +44,8 @@ class Brain:
                     params=card.params,
                     cerebellum=self.cerebellum,
                     observation=observation,
+                    perception=self.perception,
+                    tts_engine=self.tts,
                 )
                 result = skill.run(ctx)
                 results.append(result)

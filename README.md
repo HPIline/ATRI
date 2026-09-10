@@ -42,7 +42,7 @@ cd '/Users/hpi/Documents/搞机器人/软件/atri'
 # 编译检查
 python3 -m compileall -q atri run_demo.py && echo "compile OK"
 
-# 单元测试（当前 48 项）
+# 单元测试（当前 49 项）
 python3 -m unittest discover -s tests -v
 
 # 无硬件闭环演示（顺序执行五项任务卡；--fast 跳过 sleep 用于快速自检）

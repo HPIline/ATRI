@@ -35,6 +35,17 @@ class TestBrain(unittest.TestCase):
         result = self._run(["dance"], {"speech": {"keyword": "跳舞"}})
         self.assertTrue(result["ok"])
 
+    def test_face_uses_perception_when_no_observation(self):
+        from atri.perception import MockPerception
+        from atri.voice import MockTTS
+        tts = MockTTS()
+        brain = Brain(self.cere, perception=MockPerception(face={"name": "感知A"}), tts=tts)
+        card = TaskCard.from_dict({"task_id": "P-01", "name": "感知", "skills": ["face"]})
+        result = brain.execute_task(card, observation=None)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["result"]["results"][0]["name"], "感知A")
+        self.assertIn("感知A", tts.spoken[0])
+
 
 if __name__ == "__main__":
     unittest.main()

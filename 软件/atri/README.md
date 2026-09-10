@@ -26,6 +26,9 @@ action_library/             # 动作库 JSON 规范 + 示例（Webots 标定导�
 tests/                      # 单元测试
 ```
 
+> 大脑已支持注入 `perception` 和 `tts`：`Brain(cerebellum, perception=..., tts=...)`。
+> `run_demo.py` 默认使用 `MockPerception` + `MockTTS`，技能链无需预填观测即可从感知/语音接口取数。
+
 ## 运动控制方案（已弃用 VLA）
 
 运动控制采用 **脚本动作库 + 双足步态生成 + 视觉伺服微调**，全部本地 CPU 可运行：
@@ -51,7 +54,7 @@ python3 -m unittest discover -s tests -v
 python3 run_demo.py --fast
 ```
 
-当前测试：48 项全部通过（感知、语音、二维码生成、动作库均含单元测试）。
+当前测试：49 项全部通过（感知、语音、二维码生成、动作库均含单元测试）。
 
 ## 视觉感知（atri/perception）
 

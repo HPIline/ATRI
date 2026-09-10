@@ -13,6 +13,8 @@ class SkillContext:
     cerebellum: Any
     observation: Optional[Dict[str, Any]] = None
     log: List[str] = None
+    perception: Any = None
+    tts_engine: Any = None
 
     def __post_init__(self) -> None:
         if self.log is None:
@@ -21,10 +23,19 @@ class SkillContext:
     def perceive(self, key: str) -> Dict[str, Any]:
         if self.observation and key in self.observation:
             return self.observation[key]
+        if self.perception is not None:
+            method = getattr(self.perception, f"detect_{key}", None)
+            if method is not None:
+                result = method()
+                if result is not None and getattr(result, "data", None):
+                    return result.data
         return {}
 
     def tts(self, text: str) -> None:
-        print(f"  [TTS] {text}")
+        if self.tts_engine is not None:
+            self.tts_engine.speak(text)
+        else:
+            print(f"  [TTS] {text}")
         self.log.append(f"tts: {text}")
 
 
