@@ -306,6 +306,191 @@ def link_tube(
 # --------------------------------------------------------------------------
 # 零件登记表
 # --------------------------------------------------------------------------
+# 零件 4：俯仰关节模块（覆盖 22 DOF 中的 14 个）
+# --------------------------------------------------------------------------
+def pitch_module(
+    servo_name: str = "STS3215",
+    bearing_name: str = "MF105ZZ",
+    parent_hole_thread: str = "M3",
+    parent_pcd_mm: float = 26.0,
+    wall: float = 3.0,
+    fillet: float = 2.0,
+) -> cq.Workplane:
+    """俯仰关节模块 = 舵机支架 + 母端安装法兰 + 走线通道。
+
+    轴为 Y（俯仰）。覆盖关节：
+        hip_pitch ×2、knee ×2、ankle ×2、shoulder_pitch ×2、
+        elbow ×2、head_pitch、trunk_pitch   —— 共 14 个。
+
+    结构：
+        ┌──────────────┐  ← 母端法兰（4×M3，接上一级连杆）
+        │   ╭──────╮   │
+        │   │ 舵机 │   │  ← 两侧板夹持
+        │   ╰──────╯   │
+        └──┬───────┬───┘
+           │       └── 输出侧：25T 舵盘节圆孔 → 接下一级连杆
+           └────────── 对侧：轴承位 → 支撑下一级的副轴
+    """
+    yoke = servo_yoke(servo_name=servo_name, bearing_name=bearing_name,
+                      wall=wall, fillet=fillet)
+    s = servo(servo_name)
+    L, W, H = s["body_mm"]
+    horn = servo_horn_interface(servo_name)
+    b = bearing(bearing_name)
+
+    # --- 母端法兰：贴在支架底部，用于连接上一级 ---
+    flange_t = wall
+    flange_d = parent_pcd_mm + 12.0
+    flange = (cq.Workplane("XY")
+              .circle(flange_d / 2.0)
+              .extrude(flange_t)
+              .translate((0, 0, -flange_t)))
+    yoke = yoke.union(flange)
+
+    # 母端螺孔（节圆分布）
+    f = fastener(parent_hole_thread)
+    for i in range(4):
+        ang = 2 * math.pi * i / 4 + math.pi / 4
+        yoke = yoke.cut(
+            cq.Workplane("XY")
+            .center((parent_pcd_mm / 2.0) * math.cos(ang),
+                    (parent_pcd_mm / 2.0) * math.sin(ang))
+            .circle(f["clearance_hole_mm"] / 2.0)
+            .extrude(flange_t * 3)
+            .translate((0, 0, -flange_t * 1.5))
+        )
+
+    # --- 走线通道：从法兰中心贯穿到舵机腔 ---
+    yoke = yoke.cut(
+        cq.Workplane("XY")
+        .circle(3.0)
+        .extrude(flange_t * 4)
+        .translate((0, 0, -flange_t * 2))
+    )
+
+    return sanitize(yoke)
+
+
+# --------------------------------------------------------------------------
+# 零件 5：四肢连杆段
+# --------------------------------------------------------------------------
+def limb_segment(
+    length: float = 80.0,
+    outer_dia: float = 40.0,
+    wall: float = 3.0,
+    end_bore_mm: float = 5.0,
+    end_thickness: float = 6.0,
+    wire_hole_dia: float = 6.0,
+    lighten: bool = True,
+) -> cq.Workplane:
+    """四肢连杆段：两端带接口的空心承力管。
+
+    长度由 `robot_model.json` 的关节间距决定：
+        大腿 80 / 小腿 80 / 上臂 60 / 前臂 50  (mm)
+    """
+    seg = link_tube(length=length, outer_dia=outer_dia, wall=wall,
+                    end_bore_mm=end_bore_mm, end_thickness=end_thickness,
+                    wire_hole_dia=wire_hole_dia)
+
+    if lighten:
+        # 管身开减重窗口（两侧对称），同时便于目视检查走线
+        for sign in (-1, 1):
+            hole = (cq.Workplane("XZ")
+                    .center(sign * outer_dia / 2.0, length / 2.0)
+                    .slot2D(length * 0.45, outer_dia * 0.30)
+                    .extrude(outer_dia))
+            seg = seg.cut(hole)
+    return sanitize(seg)
+
+
+# --------------------------------------------------------------------------
+# 零件 6：足底板
+# --------------------------------------------------------------------------
+def foot_plate(
+    length: float = 110.0,
+    width: float = 60.0,
+    sole_t: float = 6.0,
+    boss_h: float = 16.0,
+    ankle_offset: float = 18.0,
+    rib_count: int = 3,
+    fillet: float = 3.0,
+) -> cq.Workplane:
+    """足底板：底板 + 踝座 + 加强筋（**非实心块**）。
+
+    踝关节位于足底后 1/3 处（ankle_offset = 踝心相对足心的前移量）。
+
+    为什么不做成实心块：实心块体积 181 cm³ ≈ 225 g(实心)/只，两只就
+    450 g，占整机 23%，质量预算直接崩。真实足部是**底板 + 筋**结构。
+    """
+    from cadquery import Solid, Vector
+
+    # --- 底板上表面在 z=0，向下为负，踝座向上 ---
+    sole = (cq.Workplane("XY")
+            .box(length, width, sole_t)
+            .translate((ankle_offset, 0, -sole_t / 2.0)))
+
+    # --- 踝座：圆柱 + 与底板相连 ---
+    boss_d = width * 0.60
+    boss = (cq.Workplane("XY")
+            .circle(boss_d / 2.0)
+            .extrude(boss_h)
+            .translate((0, 0, 0)))
+    body = sole.union(boss)
+
+    # --- 加强筋：踝座 → 底板，**必须落在足底轮廓内** ---
+    # 显式指定每根筋的 x 区间，避免用循环推导时越界（越界会让足长超标）
+    rib_t = 4.0
+    rib_h = boss_h * 0.75
+    x_rear = ankle_offset - length / 2.0      # 足跟
+    x_front = ankle_offset + length / 2.0     # 足尖
+    rib_spans = [
+        (x_rear, -boss_d / 2.0),              # 后筋
+        (boss_d / 2.0, (boss_d / 2.0 + x_front) / 2.0),   # 前筋 1
+        ((boss_d / 2.0 + x_front) / 2.0, x_front),        # 前筋 2
+    ][:max(1, rib_count)]
+    for x0, x1 in rib_spans:
+        if x1 - x0 < 3.0:
+            continue
+        body = body.union(
+            cq.Workplane("XY")
+            .box(x1 - x0, rib_t, rib_h)
+            .translate(((x0 + x1) / 2.0, 0, rib_h / 2.0))
+        )
+
+    # --- 侧面加强筋 ---
+    for sign in (-1, 1):
+        side = (cq.Workplane("XY")
+                .box(boss_d * 0.9, rib_t, rib_h)
+                .translate((0, sign * (width / 2.0 - rib_t / 2.0), rib_h / 2.0)))
+        body = body.union(side)
+
+    # --- 踝轴孔（横向 Y，Ø5）---
+    body = body.cut(
+        cq.Workplane("XZ")
+        .circle(2.5 + 0.2)
+        .extrude(width * 2)
+        .translate((0, -width, boss_h * 0.55))
+    )
+
+    # --- 底面防滑槽 ---
+    n = 5
+    for i in range(n):
+        x = ankle_offset - length / 2.0 + length * (i + 0.5) / n
+        body = body.cut(
+            cq.Workplane("XY").center(x, 0)
+            .rect(width * 0.055, width * 0.78)
+            .extrude(2.0)
+            .translate((0, 0, -sole_t - 1.0))
+        )
+
+    try:
+        body = body.edges("|Z").fillet(fillet)
+    except Exception:  # noqa: BLE001
+        pass
+    return sanitize(body)
+
+
+
 PARTS: Dict[str, Dict[str, Any]] = {
     "servo_yoke": {
         "builder": servo_yoke,
@@ -320,7 +505,24 @@ PARTS: Dict[str, Dict[str, Any]] = {
     "link_tube": {
         "builder": link_tube,
         "desc": "两端带法兰的空心承力连杆",
-        "used_by": "大腿 / 小腿 / 上臂 / 前臂",
+        "used_by": "通用管件",
+    },
+    "pitch_module": {
+        "builder": pitch_module,
+        "desc": "俯仰关节模块（舵机支架 + 母端法兰 + 走线通道）",
+        "used_by": "hip/knee/ankle/shoulder_pitch/elbow/head_pitch/trunk_pitch",
+        "count": 14,
+    },
+    "limb_segment": {
+        "builder": limb_segment,
+        "desc": "四肢连杆段（空心 + 减重窗口 + 走线孔）",
+        "used_by": "大腿 80 / 小腿 80 / 上臂 60 / 前臂 50 mm",
+    },
+    "foot_plate": {
+        "builder": foot_plate,
+        "desc": "足底板（踝关节后 1/3 位 + 防滑槽）",
+        "used_by": "左右足",
+        "count": 2,
     },
 }
 
@@ -342,3 +544,4 @@ def part_report(name: str, solid: cq.Workplane) -> Dict[str, Any]:
         "is_valid": bool(v.isValid()),
         "solids": len(solid.solids().vals()),
     }
+

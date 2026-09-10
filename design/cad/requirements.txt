@@ -1,0 +1,23 @@
+# A.T.R.I. CAD 层依赖
+#
+# ⚠️ 与主仓库的"零第三方依赖"原则分开管理：
+#    主包 软件/atri/atri/ 仍然只用标准库；本文件仅供 design/cad/ 使用。
+#
+# 安装（必须用独立 venv，不要装进主环境）：
+#     cd <repo>
+#     python3 -m venv .venv-cad
+#     .venv-cad/bin/pip install -r design/cad/requirements.txt
+#
+# 已验证组合（2026-09-11）：
+#     Python 3.9.6 / macOS arm64
+#     cadquery 2.5.2
+#     cadquery-ocp 7.7.2   ← OpenCASCADE 内核绑定，wheel 约 165 MB
+#
+# 注：cadquery-ocp 是大包，首次安装需数分钟。若网络受限，
+#    可用国内镜像：pip install -i https://mirrors.aliyun.com/pypi/simple/ ...
+
+cadquery>=2.5.0,<2.6
+
+# 可选：批量导出与格式转换
+# trimesh>=4.0        # 网格后处理
+# numpy-stl>=3.0      # STL 读写与修复

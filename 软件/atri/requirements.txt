@@ -8,3 +8,9 @@ qrcode[pil]>=7.4
 #
 # Windows 仿真环境（另一台 4060 机器）建议：
 #   pip install pybullet   # 或安装 Webots 后使用其 Python API
+# ---------------------------------------------------------------------------
+# CAD 建模依赖（不属于本包，勿装进主环境）
+#   CadQuery + OpenCASCADE 仅供 design/cad/ 使用，见：
+#       design/cad/requirements.txt
+#   安装方式：python3 -m venv .venv-cad && #             .venv-cad/bin/pip install -r design/cad/requirements.txt
+# ---------------------------------------------------------------------------
