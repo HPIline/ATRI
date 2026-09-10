@@ -41,3 +41,7 @@ design/handoff/*.png
 # Webots 联调产物（run_webots_batch.ps1 / 控制器 --report --log 生成）
 /atri_report.json
 /atri_console.log
+
+# CadQuery 独立环境与 CAD 产出（体积大，可复现）
+.venv-cad/
+design/cad/out/
