@@ -7,7 +7,7 @@ from atri.config import JOINTS
 class TestCerebellum(unittest.TestCase):
     def setUp(self):
         self.bus = MockServoBus()
-        self.cere = Cerebellum(servo_bus=self.bus)
+        self.cere = Cerebellum(servo_bus=self.bus, sleeper=lambda dt: None)
 
     def test_home(self):
         pose = self.cere.home()

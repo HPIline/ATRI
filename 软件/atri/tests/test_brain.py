@@ -7,7 +7,7 @@ from atri.task_card import TaskCard
 
 class TestBrain(unittest.TestCase):
     def setUp(self):
-        self.cere = Cerebellum(servo_bus=MockServoBus())
+        self.cere = Cerebellum(servo_bus=MockServoBus(), sleeper=lambda dt: None)
         self.brain = Brain(self.cere)
 
     def _run(self, skills, obs=None):
