@@ -1,0 +1,618 @@
+#VRML_SIM R2025a utf8
+
+# 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。
+# A.T.R.I. 22 DOF 桌面人形：躯干 2 + 头 2 + 双臂 8 + 双腿 10。
+# 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。
+
+WorldInfo {
+  title "A.T.R.I. 22 DOF 桌面人形（运动学联调）"
+  basicTimeStep 32
+  gravity 0
+  ERP 0.6
+  CFM 1e-05
+}
+
+Viewpoint {
+  orientation -0.1567 0.8935 0.4214 1.1077
+  position 0.62 -0.72 0.66
+  followType "None"
+}
+
+Robot {
+  name "ATRI"
+  controller "atri_controller"
+  translation 0 0 0.30
+  boundingObject Box {
+    size 0.16 0.10 0.08
+  }
+  physics Physics {
+    density -1
+    mass 1.0
+  }
+  children [
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 1 0 0
+        anchor 0 0 0.04
+      }
+      device [
+        RotationalMotor {
+          name "trunk_pitch"
+          maxVelocity 2
+        }
+        PositionSensor {
+          name "trunk_pitch_sensor"
+        }
+      ]
+      endPoint Solid {
+        name "trunk_pitch_link"
+        boundingObject Box {
+          size 0.14 0.09 0.05
+        }
+        physics Physics {
+          density -1
+          mass 0.2
+        }
+        children [
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 0.025
+            }
+            device [
+              RotationalMotor {
+                name "trunk_roll"
+                maxVelocity 2
+              }
+              PositionSensor {
+                name "trunk_roll_sensor"
+              }
+            ]
+            endPoint Solid {
+              name "trunk_roll_link"
+              boundingObject Box {
+                size 0.16 0.1 0.1
+              }
+              physics Physics {
+                density -1
+                mass 0.45
+              }
+              children [
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 0 0 1
+                    anchor 0 0 0.05
+                  }
+                  device [
+                    RotationalMotor {
+                      name "head_yaw"
+                      maxVelocity 2
+                    }
+                    PositionSensor {
+                      name "head_yaw_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    name "head_yaw_link"
+                    boundingObject Box {
+                      size 0.05 0.05 0.04
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.06
+                    }
+                    children [
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 1 0 0
+                          anchor 0 0 0.02
+                        }
+                        device [
+                          RotationalMotor {
+                            name "head_pitch"
+                            maxVelocity 2
+                          }
+                          PositionSensor {
+                            name "head_pitch_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          name "head_pitch_link"
+                          boundingObject Box {
+                            size 0.1 0.09 0.09
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.18
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 1 0 0
+                    anchor -0.085 0 0.03
+                  }
+                  device [
+                    RotationalMotor {
+                      name "left_shoulder_pitch"
+                      maxVelocity 2
+                    }
+                    PositionSensor {
+                      name "left_shoulder_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    name "left_shoulder_pitch_link"
+                    boundingObject Box {
+                      size 0.04 0.04 0.09
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.1
+                    }
+                    children [
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 0 1 0
+                          anchor 0 0 -0.045
+                        }
+                        device [
+                          RotationalMotor {
+                            name "left_shoulder_roll"
+                            maxVelocity 2
+                          }
+                          PositionSensor {
+                            name "left_shoulder_roll_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          name "left_shoulder_roll_link"
+                          boundingObject Box {
+                            size 0.035 0.035 0.09
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.08
+                          }
+                          children [
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                axis 1 0 0
+                                anchor 0 0 -0.045
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "left_elbow_pitch"
+                                  maxVelocity 2
+                                }
+                                PositionSensor {
+                                  name "left_elbow_pitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                name "left_elbow_pitch_link"
+                                boundingObject Box {
+                                  size 0.03 0.03 0.08
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.07
+                                }
+                                children [
+                                  HingeJoint {
+                                    jointParameters HingeJointParameters {
+                                      axis 0 0 1
+                                      anchor 0 0 -0.04
+                                    }
+                                    device [
+                                      RotationalMotor {
+                                        name "left_gripper"
+                                        maxVelocity 2
+                                      }
+                                      PositionSensor {
+                                        name "left_gripper_sensor"
+                                      }
+                                    ]
+                                    endPoint Solid {
+                                      name "left_gripper_link"
+                                      boundingObject Box {
+                                        size 0.04 0.02 0.05
+                                      }
+                                      physics Physics {
+                                        density -1
+                                        mass 0.04
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 1 0 0
+                    anchor 0.085 0 0.03
+                  }
+                  device [
+                    RotationalMotor {
+                      name "right_shoulder_pitch"
+                      maxVelocity 2
+                    }
+                    PositionSensor {
+                      name "right_shoulder_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    name "right_shoulder_pitch_link"
+                    boundingObject Box {
+                      size 0.04 0.04 0.09
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.1
+                    }
+                    children [
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 0 1 0
+                          anchor 0 0 -0.045
+                        }
+                        device [
+                          RotationalMotor {
+                            name "right_shoulder_roll"
+                            maxVelocity 2
+                          }
+                          PositionSensor {
+                            name "right_shoulder_roll_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          name "right_shoulder_roll_link"
+                          boundingObject Box {
+                            size 0.035 0.035 0.09
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.08
+                          }
+                          children [
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                axis 1 0 0
+                                anchor 0 0 -0.045
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "right_elbow_pitch"
+                                  maxVelocity 2
+                                }
+                                PositionSensor {
+                                  name "right_elbow_pitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                name "right_elbow_pitch_link"
+                                boundingObject Box {
+                                  size 0.03 0.03 0.08
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.07
+                                }
+                                children [
+                                  HingeJoint {
+                                    jointParameters HingeJointParameters {
+                                      axis 0 0 1
+                                      anchor 0 0 -0.04
+                                    }
+                                    device [
+                                      RotationalMotor {
+                                        name "right_gripper"
+                                        maxVelocity 2
+                                      }
+                                      PositionSensor {
+                                        name "right_gripper_sensor"
+                                      }
+                                    ]
+                                    endPoint Solid {
+                                      name "right_gripper_link"
+                                      boundingObject Box {
+                                        size 0.04 0.02 0.05
+                                      }
+                                      physics Physics {
+                                        density -1
+                                        mass 0.04
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor -0.045 0 -0.04
+      }
+      device [
+        RotationalMotor {
+          name "left_hip_yaw"
+          maxVelocity 2
+        }
+        PositionSensor {
+          name "left_hip_yaw_sensor"
+        }
+      ]
+      endPoint Solid {
+        name "left_hip_yaw_link"
+        boundingObject Box {
+          size 0.05 0.05 0.05
+        }
+        physics Physics {
+          density -1
+          mass 0.12
+        }
+        children [
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 -0.025
+            }
+            device [
+              RotationalMotor {
+                name "left_hip_roll"
+                maxVelocity 2
+              }
+              PositionSensor {
+                name "left_hip_roll_sensor"
+              }
+            ]
+            endPoint Solid {
+              name "left_hip_roll_link"
+              boundingObject Box {
+                size 0.045 0.045 0.05
+              }
+              physics Physics {
+                density -1
+                mass 0.12
+              }
+              children [
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 1 0 0
+                    anchor 0 0 -0.025
+                  }
+                  device [
+                    RotationalMotor {
+                      name "left_hip_pitch"
+                      maxVelocity 2
+                    }
+                    PositionSensor {
+                      name "left_hip_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    name "left_hip_pitch_link"
+                    boundingObject Box {
+                      size 0.045 0.05 0.1
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.2
+                    }
+                    children [
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 1 0 0
+                          anchor 0 0 -0.05
+                        }
+                        device [
+                          RotationalMotor {
+                            name "left_knee_pitch"
+                            maxVelocity 2
+                          }
+                          PositionSensor {
+                            name "left_knee_pitch_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          name "left_knee_pitch_link"
+                          boundingObject Box {
+                            size 0.04 0.045 0.1
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.18
+                          }
+                          children [
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                axis 1 0 0
+                                anchor 0 0 -0.05
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "left_ankle_pitch"
+                                  maxVelocity 2
+                                }
+                                PositionSensor {
+                                  name "left_ankle_pitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                name "left_ankle_pitch_link"
+                                boundingObject Box {
+                                  size 0.05 0.1 0.025
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.1
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor 0.045 0 -0.04
+      }
+      device [
+        RotationalMotor {
+          name "right_hip_yaw"
+          maxVelocity 2
+        }
+        PositionSensor {
+          name "right_hip_yaw_sensor"
+        }
+      ]
+      endPoint Solid {
+        name "right_hip_yaw_link"
+        boundingObject Box {
+          size 0.05 0.05 0.05
+        }
+        physics Physics {
+          density -1
+          mass 0.12
+        }
+        children [
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 -0.025
+            }
+            device [
+              RotationalMotor {
+                name "right_hip_roll"
+                maxVelocity 2
+              }
+              PositionSensor {
+                name "right_hip_roll_sensor"
+              }
+            ]
+            endPoint Solid {
+              name "right_hip_roll_link"
+              boundingObject Box {
+                size 0.045 0.045 0.05
+              }
+              physics Physics {
+                density -1
+                mass 0.12
+              }
+              children [
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 1 0 0
+                    anchor 0 0 -0.025
+                  }
+                  device [
+                    RotationalMotor {
+                      name "right_hip_pitch"
+                      maxVelocity 2
+                    }
+                    PositionSensor {
+                      name "right_hip_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    name "right_hip_pitch_link"
+                    boundingObject Box {
+                      size 0.045 0.05 0.1
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.2
+                    }
+                    children [
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 1 0 0
+                          anchor 0 0 -0.05
+                        }
+                        device [
+                          RotationalMotor {
+                            name "right_knee_pitch"
+                            maxVelocity 2
+                          }
+                          PositionSensor {
+                            name "right_knee_pitch_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          name "right_knee_pitch_link"
+                          boundingObject Box {
+                            size 0.04 0.045 0.1
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.18
+                          }
+                          children [
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                axis 1 0 0
+                                anchor 0 0 -0.05
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "right_ankle_pitch"
+                                  maxVelocity 2
+                                }
+                                PositionSensor {
+                                  name "right_ankle_pitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                name "right_ankle_pitch_link"
+                                boundingObject Box {
+                                  size 0.05 0.1 0.025
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.1
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

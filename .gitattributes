@@ -1,0 +1,4 @@
+# Webots 世界文件由 webots/tools/generate_atri_world.py 生成。
+# 强制 LF：Windows（core.autocrlf=true）与 macOS 上生成结果必须逐字节一致，
+# 否则 CI 里的 "世界文件与生成脚本一致" 检查会在 Windows 上误报。
+*.wbt text eol=lf
