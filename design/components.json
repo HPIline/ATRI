@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "source": "外部部件库（Gemini 白皮书）提供的真实元件参数",
+  "note": "本文件是人肉录入的**外部数据**，不是本项目推导的结果。check_fit.py 用它校验设计模型。参数若与厂商最新规格不符，以厂商数据手册为准。",
+  "cavity_wall_mm": 2.5,
+  "cable_mass_g": 90.0,
+  "fastener_mass_g": 60.0,
+  "structure_mass_estimate_g": 420.0,
+  "structure_mass_note": "22 DOF 桌面级人形的 3D 打印结构件（含关节壳、连杆、支架）经验估算；原设计预算为 0，这是首次计入。",
+  "components": [
+    {
+      "role": "servo_s",
+      "category": "舵机",
+      "name": "飞特 STS3215",
+      "qty": 22,
+      "mass_g": 55.0,
+      "size_mm": [45.2, 24.7, 35.0],
+      "spec": {
+        "rated_torque_nm": 1.0,
+        "stall_torque_nm": 3.0,
+        "speed_s_per_60deg": 0.18,
+        "protocol": "TTL 半双工串行总线 @1Mbps",
+        "feedback": "12-bit 磁编码绝对位置、温度、电压、电流/负载",
+        "voltage_v": 12.0,
+        "price_cny": "85-95"
+      },
+      "note": "白皮书首选标杆；S/M 两档统一用它，全机型号归一"
+    },
+    {
+      "role": "compute",
+      "category": "主控",
+      "name": "Raspberry Pi 4B (4GB)",
+      "qty": 1,
+      "mass_g": 46.0,
+      "size_mm": [85.0, 56.0, 17.0],
+      "spec": {"peak_power_w": 15.0, "price_cny": "330-380"},
+      "note": "散热片与风扇需额外 15mm 高度"
+    },
+    {
+      "role": "mcu",
+      "category": "下位机",
+      "name": "STM32F405RGT6 核心板",
+      "qty": 1,
+      "mass_g": 12.0,
+      "size_mm": [52.0, 24.0, 12.0],
+      "spec": {"price_cny": "35-45"},
+      "note": "硬件 FPU"
+    },
+    {
+      "role": "servo_driver",
+      "category": "驱动板",
+      "name": "飞特 URT-1 总线驱动板",
+      "qty": 1,
+      "mass_g": 15.0,
+      "size_mm": [40.0, 25.0, 12.0],
+      "spec": {"price_cny": "35-50"},
+      "note": "TTL 半双工硬件中继"
+    },
+    {
+      "role": "bec",
+      "category": "电源",
+      "name": "XL4015 降压模块",
+      "qty": 1,
+      "mass_g": 22.0,
+      "size_mm": [65.0, 35.0, 25.0],
+      "spec": {"price_cny": "8-15"},
+      "note": "白皮书标称 5.15V/5A"
+    },
+    {
+      "role": "camera",
+      "category": "感知",
+      "name": "UVC 广角相机模组 (OV9732/IMX219)",
+      "qty": 1,
+      "mass_g": 15.0,
+      "size_mm": [38.0, 38.0, 15.0],
+      "spec": {"fov_deg": "100-120", "price_cny": "45-65"},
+      "note": "需支持 MJPEG 硬压缩"
+    },
+    {
+      "role": "mic",
+      "category": "感知",
+      "name": "USB 免驱拾音模块 (CM6533)",
+      "qty": 1,
+      "mass_g": 8.0,
+      "size_mm": [25.0, 15.0, 8.0],
+      "spec": {"price_cny": "20-30"}
+    },
+    {
+      "role": "imu",
+      "category": "感知",
+      "name": "ICM-42688-P 模块",
+      "qty": 1,
+      "mass_g": 3.0,
+      "size_mm": [20.0, 15.0, 3.0],
+      "spec": {"price_cny": "20-30"}
+    },
+    {
+      "role": "amp",
+      "category": "交互",
+      "name": "PAM8403 功放模块",
+      "qty": 1,
+      "mass_g": 5.0,
+      "size_mm": [15.0, 12.0, 5.0],
+      "spec": {"price_cny": "3-5"}
+    },
+    {
+      "role": "speaker",
+      "category": "交互",
+      "name": "4Ω 3W 腔体喇叭 Φ28",
+      "qty": 1,
+      "mass_g": 25.0,
+      "size_mm": [28.0, 28.0, 15.0],
+      "spec": {"price_cny": "6-10"}
+    },
+    {
+      "role": "battery",
+      "category": "电源",
+      "name": "3S 11.1V 2200mAh 锂聚合物 (Tattu/格氏)",
+      "qty": 1,
+      "mass_g": 200.0,
+      "size_mm": [105.0, 34.0, 22.0],
+      "spec": {"price_cny": "85-120", "connector": "XT60"},
+      "note": "白皮书推荐；容量 2200mAh 低于其自身给出的 ≥2.89Ah 判据"
+    }
+  ],
+  "placements": [
+    {"component": "Raspberry Pi 4B", "link": "torso_upper", "size_mm": [85.0, 56.0, 17.0], "note": "另需 15mm 散热高度"},
+    {"component": "STM32F405 核心板", "link": "torso_upper", "size_mm": [52.0, 24.0, 12.0]},
+    {"component": "URT-1 驱动板", "link": "torso_upper", "size_mm": [40.0, 25.0, 12.0]},
+    {"component": "XL4015 降压模块", "link": "torso_upper", "size_mm": [65.0, 35.0, 25.0]},
+    {"component": "3S 2200mAh 电池", "link": "torso_upper", "size_mm": [105.0, 34.0, 22.0]},
+    {"component": "3S 2200mAh 电池(备选位)", "link": "pelvis", "size_mm": [105.0, 34.0, 22.0]},
+    {"component": "相机模组 38x38", "link": "head", "size_mm": [38.0, 38.0, 15.0]},
+    {"component": "USB 拾音模块", "link": "head", "size_mm": [25.0, 15.0, 8.0]},
+    {"component": "腔体喇叭 Φ28", "link": "torso_upper", "size_mm": [28.0, 28.0, 15.0]},
+    {"component": "ICM-42688-P", "link": "pelvis", "size_mm": [20.0, 15.0, 3.0]}
+  ]
+}
