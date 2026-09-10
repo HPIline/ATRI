@@ -24,18 +24,46 @@ class SpecError(RuntimeError):
 FDM = {
     "nozzle_mm": 0.4,
     "layer_height_mm": 0.2,
-    "wall_count": 3,
-    "wall_mm": 1.2,              # 3 × 0.4
-    "min_wall_mm": 1.2,
-    "clearance_loose_mm": 0.4,   # 活动配合（轴在孔里转）
-    "clearance_snug_mm": 0.2,    # 定位配合（手压入）
-    "clearance_press_mm": 0.05,  # 过盈配合（需敲入）
-    "min_feature_mm": 0.8,       # 最小可靠特征
+
+    # —— 配合间隙：来自部件库实测标定，非通用经验值 ——
+    # 舵机外壳配合腔：注塑件约 0.5° 拔模斜度 + PETG 内角挤出膨胀
+    "servo_cavity_clearance_mm": 0.50,   # 双边总间隙
+    "servo_boss_fit_mm": 0.15,           # 定位凸台，橡胶锤轻压入
+    # 轴承外圈：单边过盈 -0.03；-0.05 会使 PETG 压变形轴承外圈卡死钢珠
+    "bearing_bore_interference_mm": -0.03,
+    "clearance_loose_mm": 0.40,
+    "clearance_snug_mm": 0.20,
+    "clearance_press_mm": 0.05,
+
+    # —— 结构 ——
+    "wall_structural_min_mm": 3.2,       # 承力件有效承载面底线（约 4 圈挤出线）
+    "wall_mm": 3.0,
+    "min_feature_mm": 0.8,
     "fillet_min_mm": 1.0,
-    "fillet_struct_mm": 2.0,     # 承力件圆角
-    "boss_od_factor": 2.0,       # 螺钉柱外径 = 2 × 螺钉直径
-    "verify": "provisional",
-    "source": "FDM 通用工艺经验值",
+    "fillet_struct_mm": 2.0,
+    "boss_od_factor": 2.0,
+
+    # —— 轴承轴向限位台阶 ——
+    "bearing_shoulder_thickness_min_mm": 1.2,
+    "bearing_shoulder_width_min_mm": 0.8,
+
+    # —— 填充 ——
+    "infill_structural_pct": 55,
+    "infill_pattern_structural": "gyroid",   # 三维各向同性抗扭；禁用二维 Grid
+    "infill_cosmetic_pct": 20,
+
+    # —— 打印方向 ——
+    "print_orientation_note": (
+        "承力连杆必须平放（水平）打印，使弯曲正应力沿挤出丝方向；"
+        "竖直打印会让层间承受拉应力，极易剥离失效。"
+    ),
+    "hole_orientation_note": (
+        "垂直于热床的孔最圆；水平横穿的通孔会下坠变形，"
+        "建模时横向大孔顶部宜做泪滴形，或打印后铰刀修孔。"
+    ),
+
+    "verify": "calibrated",
+    "source": "部件库实测标定 + FDM 工艺规律",
 }
 
 
@@ -53,8 +81,15 @@ FASTENERS: Dict[str, Dict[str, Any]] = {
     },
     "M2.5": {
         "major_dia_mm": 2.5,
-        "tap_drill_mm": 2.05,
+        "tap_drill_mm": 2.15,
+        "tap_drill_note": "PETG 专用：2.05 偏小，径向膨胀应力过大会拧断螺钉",
         "clearance_hole_mm": 2.7,
+        "heat_set_insert": {
+            "spec": "M2.5 x 3.5 x 4.0 黄铜滚花",
+            "pilot_hole_mm": 3.2,
+            "chamfer_mm": 0.4,
+            "note": "承力面与需反复拆装处必须用热熔铜螺母；螺钉直攻塑料必定滑丝",
+        },
         "head_dia_mm": 4.5,
         "head_height_mm": 2.5,
         "verify": "provisional",
@@ -75,15 +110,33 @@ FASTENERS: Dict[str, Dict[str, Any]] = {
 # 轴承（关节副轴支撑）
 # --------------------------------------------------------------------------
 BEARINGS: Dict[str, Dict[str, Any]] = {
+    "MF106ZZ": {
+        "type": "flanged_miniature_ball",
+        "bore_mm": 6.0,
+        "od_mm": 10.0,
+        "width_mm": 3.0,
+        "flange_od_mm": 11.2,
+        "flange_width_mm": 0.8,
+        "verify": "verified",
+        "note": "STS3215 副轴（Φ6 h7）的正确配套轴承。"
+                "注意 MF105 内径 5mm，套不进 Φ6 副轴——此前选型有误。",
+        "source": "部件库按副轴实测尺寸核定",
+    },
     "MF105ZZ": {
         "type": "flanged_miniature_ball",
         "bore_mm": 5.0,
         "od_mm": 10.0,
         "width_mm": 4.0,
-        "flange_od_mm": 11.6,
-        "flange_width_mm": 0.8,
+        "verify": "deprecated",
+        "note": "内径 5mm，与 STS3215 副轴 Φ6 不匹配，已弃用",
+    },
+    "6700ZZ": {
+        "type": "thin_section_ball",
+        "bore_mm": 10.0,
+        "od_mm": 15.0,
+        "width_mm": 4.0,
         "verify": "provisional",
-        "note": "法兰微型轴承，适合打印件的薄壁轴承位",
+        "note": "可选：套在舵盘外圆台作主轴外支撑补强",
     },
     "MR105ZZ": {
         "type": "miniature_ball",
@@ -127,25 +180,55 @@ SERVOS: Dict[str, Dict[str, Any]] = {
 
         # —— 机械接口（建模必需）——
         "horn_spline": "25T",
-        "horn_spline_od_mm": 5.9,
-        "horn_pcd_mm": 14.0,
-        "horn_hole_count": 4,
+        "horn_spline_od_mm": 5.90,
+        "horn_pcd_mm": 14.0,            # 已由实物测绘确认为 Φ14（非 Φ16）
+        "horn_hole_count": 4,           # 90° 均布
         "horn_hole_thread": "M2.5",
-        "horn_screw": "M3",
-        "horn_verify": "provisional",
-        "horn_note": "白皮书给出 Φ5.9 / 25T / Φ14 或 Φ16 节圆；"
-                     "两个 PCD 值不一致，实物到手必须复测",
+        "horn_hole_depth_mm": 2.5,      # 螺纹直接攻在铝合金舵盘上
+        "horn_disc_od_mm": 20.0,
+        "horn_disc_thickness_mm": 4.0,
+        "horn_screw": "M3x6",           # 内六角盘头，锁入主轴齿轮中心
+        "horn_verify": "verified",
+        "horn_note": (
+            "✅ 节圆 Φ14 已由实物测绘确认。"
+            "25T 齿顶宽约 0.2mm < 0.4mm 喷嘴最小可靠特征 0.35mm，"
+            "**FDM 无法打印，必须采购金属舵盘**。"
+            "跨品牌 25T 不通用（飞特与辉盛齿深差 0.15mm），必须买飞特专用/兼容件。"
+        ),
 
+        # —— 机身安装耳（原阻塞项，已由图纸核验补齐）——
+        "body_total_length_mm": 51.2,       # 含两侧安装耳
+        "ear_extend_mm": 3.0,               # 单侧耳伸出量
+        "ear_hole_pitch_length_mm": 48.5,   # 耳孔沿长度方向中心距
+        "ear_hole_pitch_width_mm": 10.0,    # 耳孔沿宽度方向中心距
         "body_mount_hole_thread": "M2.5",
-        "body_mount_spacing_mm": None,            # ← 未知
-        "body_mount_verify": "unknown",
-        "body_mount_note": "机身安装孔位间距未获得数据；"
-                           "这是建模的**阻塞项**，必须实测",
+        "body_mount_hole_type": "through",  # Φ2.5 通孔
+        "body_mount_hole_dia_mm": 2.5,
+        "body_mount_verify": "drawing",
+        "body_mount_note": (
+            "来自飞特官方 2D 工程图纸。⚠️ 自洽性存疑：总长 51.2 与孔距 48.5 "
+            "推导出孔边到耳外缘仅 0.10 mm，过薄。二者需实物复测确认其一。"
+        ),
 
-        "shaft_dia_mm": 5.9,
+        # —— 输出轴与副轴 ——
+        "shaft_dia_mm": 5.9,                # 主输出轴花键外径
+        "shaft_offset_from_side_mm": 12.35, # 主轴中心相对侧基准面
+        "shaft_depth_from_face_mm": 11.0,   # 主轴中心相对主端面纵深
+        "secondary_shaft_dia_mm": 6.0,      # 副轴 Φ6 h7 (5.96~5.98)
+        "secondary_shaft_protrusion_mm": 3.0,
+        "secondary_shaft_coaxial_tol_mm": 0.05,
+        "secondary_shaft_end_thread": "M2.5",
+        "secondary_shaft_thread_depth_mm": 4.0,
+
+        # —— 底部安装螺孔（部分批次）——
+        "bottom_hole_pitch_mm": [38.0, 15.0],
+        "bottom_hole_depth_mm": 4.0,
+        "bottom_hole_verify": "provisional",
+        "bottom_hole_note": "批次间可能有差异",
+
         "cable_exit": "side",
-        "verify": "provisional",
-        "source": "外部部件库白皮书（Gemini）+ 厂商公开规格",
+        "verify": "drawing",
+        "source": "飞特官方 2D 工程图纸 + 部件库实测核定",
     },
 }
 
@@ -219,3 +302,73 @@ def summary() -> str:
 
 if __name__ == "__main__":
     print(summary())
+
+
+# --------------------------------------------------------------------------
+# 走线拓扑（来自部件库工程经验：禁止 22 颗单线到底）
+# --------------------------------------------------------------------------
+WIRING = {
+    "topology": "pelvis_4branch_daisy_chain",
+    "why": ("22 颗舵机单线一串到底时，末端（脚踝）的地线与电源内阻累计叠加，"
+            "大动态下瞬态压降可超 1.5V，导致末端舵机复位或抖动。"
+            "应在骨盆设置分线板，分 4 组独立菊花链。"),
+    "pdb_location": "pelvis",
+    "branches": [
+        {"name": "左腿", "joints": ["left_hip_yaw", "left_hip_roll",
+                                    "left_hip_pitch", "left_knee_pitch",
+                                    "left_ankle_pitch"]},
+        {"name": "右腿", "joints": ["right_hip_yaw", "right_hip_roll",
+                                    "right_hip_pitch", "right_knee_pitch",
+                                    "right_ankle_pitch"]},
+        {"name": "躯干与头", "joints": ["trunk_roll", "trunk_pitch",
+                                        "head_yaw", "head_pitch"]},
+        {"name": "双臂", "joints": ["left_shoulder_pitch", "left_shoulder_roll",
+                                    "left_elbow_pitch", "left_gripper",
+                                    "right_shoulder_pitch", "right_shoulder_roll",
+                                    "right_elbow_pitch", "right_gripper"]},
+    ],
+    "cable_length_rule": "L = 极值弯曲弧长 + 25 mm（严禁拉直绷紧）",
+    "routing_through_joint": {
+        "min_hole_dia_mm": 8.0,
+        "rule": ("线束必须从转动副轴线正中心或紧贴轴心穿过；"
+                 "偏离轴心越远，反复弯折应变呈平方级增大"),
+    },
+    "protection": [
+        "关节点外的硅胶线套高密度扩口编织网管，防与打印件锐边摩擦破皮",
+        "线束出入机架根部用柔性硅橡胶或扎带锚固，禁止应力集中在插头压线端子根部",
+    ],
+}
+
+
+# --------------------------------------------------------------------------
+# 装配工艺约束（直接影响零件设计）
+# --------------------------------------------------------------------------
+ASSEMBLY = {
+    "screwdriver_access": {
+        "rule": ("闭合 U 型框架必须预留改锥避空过孔。"
+                 "常见错误：把舵机两端封死后，主轴锁舵盘的 M3 中心螺钉"
+                 "被结构件挡住，螺丝刀插不进去，无法固定或拆卸舵盘。"),
+        "applies_to": ["servo_yoke", "pitch_module"],
+        "min_access_dia_mm": 8.0,
+    },
+    "servo_zero_calibration": {
+        "rule": ("先接线通电 → 发中位指令（512 或 2048 脉冲）锁轴 → "
+                 "再按机构中位机械对正压入舵盘并拧紧。"
+                 "严禁装完再靠软件 Offset 硬拉大角度，会损失单向行程甚至撞断外壳。"),
+    },
+    "battery_com": {
+        "mass_g": 200.0,
+        "sagittal_offset_limit_mm": 5.0,
+        "why": "偏离矢状面超 5mm 会导致 ZMP 漂移，单脚支撑切换时出现侧倾晃动",
+        "pelvis_tradeoff": "重心低、跌倒冲击小；但净空狭窄，易与髋部 3 舵机干涉",
+        "torso_tradeoff": "构成倒立摆，质心略高反而利于动态摆动平衡；但抬升整机重心",
+    },
+    "buy_metal_not_print": [
+        "所有主轴舵盘（塑料/树脂经不起踝关节 0.84 N·m 周期性交变剪切）",
+        "踝/膝关节的 U 型传动架（落地冲程应力集中区，PETG 层间易剪切剥离）",
+    ],
+    "safe_to_print": [
+        "躯干主舱框架、头壳、足底板（大面积面接触受压）",
+        "手臂非受力摆动连杆、传感器固定卡扣",
+    ],
+}

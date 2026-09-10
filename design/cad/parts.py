@@ -72,7 +72,7 @@ def screw_boss(dia: float, hole_depth: float, boss_height: float
 # --------------------------------------------------------------------------
 def servo_yoke(
     servo_name: str = "STS3215",
-    bearing_name: str = "MF105ZZ",
+    bearing_name: str = "MF106ZZ",
     wall: float = 3.0,
     clearance: Optional[float] = None,
     fillet: float = 2.0,
@@ -157,7 +157,15 @@ def servo_yoke(
     )
 
     # --- 侧板 B：法兰轴承的沉台 ---
-    if "flange_od_mm" in b:
+    # 法兰轴承必须同时给出外径与法兰厚度；缺一个就跳过，
+    # 而不是抛 KeyError（下游只看得到"构建失败"，定位困难）
+    if not {"flange_od_mm", "flange_width_mm"} <= set(b):
+        import warnings
+        warnings.warn(
+            f"轴承 {bearing_name} 缺少 flange_od_mm / flange_width_mm，"
+            f"已跳过法兰沉台特征", stacklevel=2,
+        )
+    if {"flange_od_mm", "flange_width_mm"} <= set(b):
         part = part.cut(
             cq.Workplane("YZ")
             .circle((b["flange_od_mm"] + FDM["clearance_snug_mm"]) / 2.0)
@@ -310,7 +318,7 @@ def link_tube(
 # --------------------------------------------------------------------------
 def pitch_module(
     servo_name: str = "STS3215",
-    bearing_name: str = "MF105ZZ",
+    bearing_name: str = "MF106ZZ",
     parent_hole_thread: str = "M3",
     parent_pcd_mm: float = 26.0,
     wall: float = 3.0,
