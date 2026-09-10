@@ -22,3 +22,8 @@ dist/
 *.log
 *.tmp
 ql_thumb/
+
+# Office 临时/锁文件
+~$*.pptx
+~$*.docx
+~$*.xlsx
