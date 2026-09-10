@@ -1,0 +1,10 @@
+{
+  "task_id": "T-03",
+  "name": "物品搬运",
+  "skills": ["carry"],
+  "params": {
+    "target": "红块",
+    "distance_cm": 8.0
+  },
+  "timeout_s": 90
+}

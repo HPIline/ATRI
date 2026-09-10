@@ -1,0 +1,21 @@
+{
+  "name": "A.T.R.I.",
+  "dof": 22,
+  "size_cm": [37.3, 18.7, 10.6],
+  "mass_kg": 1.65,
+  "motion": {
+    "backend": "scripted",
+    "gait": {
+      "step_length_cm": 2.0,
+      "step_height_cm": 1.2,
+      "period_s": 0.8
+    }
+  },
+  "brain": {
+    "fsm_verbosity": 1
+  },
+  "cerebellum": {
+    "servo_bus": "mock",
+    "control_period_ms": 20
+  }
+}

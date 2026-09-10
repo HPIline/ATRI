@@ -1,0 +1,10 @@
+{
+  "task_id": "T-05",
+  "name": "娱乐交互-舞蹈",
+  "skills": ["dance"],
+  "params": {
+    "keyword": "跳舞",
+    "bars": 2
+  },
+  "timeout_s": 60
+}

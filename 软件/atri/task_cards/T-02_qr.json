@@ -1,0 +1,9 @@
+{
+  "task_id": "T-02",
+  "name": "二维码循迹",
+  "skills": ["qr"],
+  "params": {
+    "default_payload": {"action": "walk", "steps": 3}
+  },
+  "timeout_s": 60
+}

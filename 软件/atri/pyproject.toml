@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atri-software"
+version = "0.1.0"
+description = "A.T.R.I. desktop humanoid robot software stack: brain-cerebellum, JSON task cards, FSM, skills and VLA adapter"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+atri-demo = "atri.sim:main"
+atri-run = "atri.run:main"
+
+[tool.setuptools.packages.find]
+include = ["atri*"]

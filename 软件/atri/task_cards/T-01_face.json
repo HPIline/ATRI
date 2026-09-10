@@ -1,0 +1,11 @@
+{
+  "task_id": "T-01",
+  "name": "人脸识别",
+  "skills": ["face"],
+  "params": {
+    "face_db": "config/face_db.json",
+    "expect_names": ["测试员A", "测试员B"],
+    "tts": true
+  },
+  "timeout_s": 60
+}

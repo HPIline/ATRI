@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>A.T.R.I. 宣传PPT</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="deck">
+
+  <!-- 01 封面 -->
+  <section class="slide cover">
+    <div class="cover-bg" style="background-image:url('assets/hero-robot.png')"></div>
+    <div class="cover-overlay"></div>
+    <div class="content">
+      <div class="tagline-top">中国国际大学生创新大赛（2026）· 陕西赛区特色专项 · 人形机器人专项 · 小人形组</div>
+      <div class="cover-main">
+        <h1 class="brand">A.T.R.I.</h1>
+        <div class="brand-cn">桌面自主人形智能</div>
+        <div class="brand-en">Autonomous Tabletop Robotic Intelligence</div>
+        <div class="slogan">一台机器人，跑完五项任务</div>
+      </div>
+      <div class="cover-footer">评审遴选汇报 · 项目简称 A.T.R.I. · 西安交通大学</div>
+    </div>
+  </section>
+
+  <!-- 02 价值主张 -->
+  <section class="slide">
+    <div class="content center">
+      <div class="kicker">VALUE PROPOSITION</div>
+      <h2 class="big-statement">我们不是做一台“会走路的机器人”，<br>而是把五项人形机器人任务，<br>压缩成<em>一张可配置的任务卡</em>。</h2>
+      <div class="chips">
+        <span class="chip">统一任务描述</span>
+        <span class="chip">离线自主执行</span>
+        <span class="chip">低成本可复现</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 痛点 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">PROBLEM</div>
+      <h2 class="title">现在的人形机器人教育，贵、散、封闭</h2>
+      <div class="grid-3 pain-grid">
+        <div class="card pain-card">
+          <div class="pain-icon">¥</div>
+          <h3>贵</h3>
+          <p>全尺寸人形机器人体积大、价格高，本科教学难以大规模配置。</p>
+        </div>
+        <div class="card pain-card">
+          <div class="pain-icon">散</div>
+          <h3>散</h3>
+          <p>五大任务散落在不同平台，训练、演示和交接成本都很高。</p>
+        </div>
+        <div class="card pain-card">
+          <div class="pain-icon">闭</div>
+          <h3>封闭</h3>
+          <p>成品竞赛套件上手快，但软件固定，二次开发与任务扩展困难。</p>
+        </div>
+      </div>
+      <div class="bottom-line">所以，我们做了 A.T.R.I.</div>
+    </div>
+  </section>
+
+  <!-- 04 系统总览 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">SYSTEM OVERVIEW</div>
+      <h2 class="title">一张图看懂 A.T.R.I.</h2>
+      <div class="system-flow">
+        <div class="flow-card task">
+          <div class="flow-label">任务卡</div>
+          <div class="flow-sub">JSON 描述指令与参数</div>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-card brain">
+          <div class="flow-label">大脑</div>
+          <div class="flow-sub">视觉 / 决策 / 离线语音</div>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-card cerebellum">
+          <div class="flow-label">小脑</div>
+          <div class="flow-sub">步态 / 姿态 / 舵机</div>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-card robot">
+          <div class="flow-label">机器人</div>
+          <div class="flow-sub">22 自由度双足平台</div>
+        </div>
+      </div>
+      <div class="offline-band">全程本地处理 · 默认离线运行 · 断网后继续自主工作</div>
+    </div>
+  </section>
+
+  <!-- 05 核心创新 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">CORE INNOVATION</div>
+      <h2 class="title">核心技术链：不是堆模块，而是一条技术链</h2>
+      <div class="chain">
+        <div class="chain-node">
+          <div class="node-num">01</div>
+          <h3>任务卡</h3>
+          <p>统一描述任务与参数</p>
+        </div>
+        <div class="chain-line"></div>
+        <div class="chain-node">
+          <div class="node-num">02</div>
+          <h3>状态机</h3>
+          <p>多任务统一调度</p>
+        </div>
+        <div class="chain-line"></div>
+        <div class="chain-node">
+          <div class="node-num">03</div>
+          <h3>技能库</h3>
+          <p>动作 / 语音 / 视觉模块复用</p>
+        </div>
+        <div class="chain-line"></div>
+        <div class="chain-node">
+          <div class="node-num">04</div>
+          <h3>感知闭环</h3>
+          <p>检测 → 调整 → 再检测 → 执行</p>
+        </div>
+      </div>
+      <div class="insight">新增任务 = 增加一张任务卡 + 一个技能模块，不需要重写整机逻辑。</div>
+    </div>
+  </section>
+
+  <!-- 06 五大任务 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">FIVE MISSIONS</div>
+      <h2 class="title">五项任务，一个平台</h2>
+      <div class="mission-grid">
+        <div class="mission-card"><span class="mission-num">01</span><h3>人脸识别</h3><p>检测 → 特征 → 匹配 → 播报</p></div>
+        <div class="mission-card"><span class="mission-num">02</span><h3>二维码循迹</h3><p>识别 → 解码 → 按路径行走</p></div>
+        <div class="mission-card"><span class="mission-num">03</span><h3>物品搬运</h3><p>检测 → 对齐 → 抓取 → 释放</p></div>
+        <div class="mission-card"><span class="mission-num">04</span><h3>体育运动</h3><p>定位 → 调整朝向 → 踢球</p></div>
+        <div class="mission-card"><span class="mission-num">05</span><h3>娱乐休闲</h3><p>关键词 → 动作 → 语音 → 音乐</p></div>
+      </div>
+      <div class="bottom-line">同一套硬件与状态机，切换任务只需换一张任务卡。</div>
+    </div>
+  </section>
+
+  <!-- 07 全离线 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">OFFLINE BY DEFAULT</div>
+      <h2 class="title">默认离线，断网也能自主</h2>
+      <div class="offline-layout">
+        <div class="offline-hero">
+          <div class="offline-word">OFFLINE</div>
+          <p>拔掉网线，任务继续。</p>
+        </div>
+        <div class="grid-3">
+          <div class="card"><h3>全部本地处理</h3><p>人脸、二维码、语音、状态机全部在板载计算单元运行。</p></div>
+          <div class="card"><h3>不怕现场断网</h3><p>现场关闭网络后，识别、决策、控制与交互继续执行。</p></div>
+          <div class="card"><h3>数据不出设备</h3><p>适合课堂、竞赛与实验室等敏感场景。</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 硬件实力 -->
+  <section class="slide">
+    <div class="content split">
+      <div class="left">
+        <div class="kicker">HARDWARE</div>
+        <h2 class="title">22 个自由度，3 个关键数字</h2>
+        <div class="stats">
+          <div class="stat"><span class="stat-num">22</span><span class="stat-unit">DOF</span><p>双腿 10 · 双臂 8 · 躯干 2 · 头部 2</p></div>
+          <div class="stat"><span class="stat-num">37.3</span><span class="stat-unit">cm</span><p>桌面级紧凑尺寸，适合实验室与教室</p></div>
+          <div class="stat"><span class="stat-num">¥3600</span><span class="stat-unit">样机预算</span><p>复用实验室设备，低成本可复现</p></div>
+        </div>
+      </div>
+      <div class="right"><img src="assets/hardware-exploded.png" alt="hardware exploded view"></div>
+    </div>
+  </section>
+
+  <!-- 09 为什么选我们 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">WHY US</div>
+      <h2 class="title">为什么是我们</h2>
+      <div class="grid-3">
+        <div class="card"><div class="feature-icon">Ｃ</div><h3>低成本</h3><p>自组构型 + 实验室设备复用，样机预算约 ¥3600。</p></div>
+        <div class="card"><div class="feature-icon">Ｕ</div><h3>一体化</h3><p>五项任务共享同一套软硬件，一机完成全部赛题。</p></div>
+        <div class="card"><div class="feature-icon">Ｏ</div><h3>可扩展</h3><p>任务卡化配置，课程、竞赛、二次开发都能复用。</p></div>
+      </div>
+      <div class="compare-bar">
+        <span>全尺寸人形</span><i>➜</i>
+        <span>教育双足</span><i>➜</i>
+        <span>成品套件</span>
+        <b>A.T.R.I.</b>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 团队技术储备 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">TEAM</div>
+      <h2 class="title">计算机 × 电子 × 自动化</h2>
+      <div class="team-banner">学科交叉，覆盖感知、控制、硬件与系统集成</div>
+      <div class="team-grid">
+        <div class="member"><div class="avatar">何</div><h3>何浩睿</h3><span>项目负责人</span><p>机械结构 · 双足步态 · 舵机配置</p></div>
+        <div class="member"><div class="avatar">周</div><h3>周柏宇</h3><span>项目统筹</span><p>系统集成 · 报名答辩</p></div>
+        <div class="member"><div class="avatar">胡</div><h3>胡晟瑞</h3><span>视觉感知</span><p>人脸识别 · 二维码 · 物体检测</p></div>
+        <div class="member"><div class="avatar">王</div><h3>王旭琪</h3><span>交互与仿真</span><p>状态机 · 离线语音 · 仿真环境</p></div>
+        <div class="member"><div class="avatar">张</div><h3>张景昆</h3><span>自动化 · 新增</span><p>运动控制 · 硬件支持</p></div>
+      </div>
+      <div class="teacher">指导老师：陈妍 · 李璐（技术方向把关 / 设备协调）</div>
+    </div>
+  </section>
+
+  <!-- 11 推进路线 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">ROADMAP</div>
+      <h2 class="title">先验证，再投入</h2>
+      <div class="timeline">
+        <div class="phase"><div class="phase-dot"></div><h3>报名与方案</h3><p>合规构型 + 五项任务路线</p><span>预算 0–100 元</span></div>
+        <div class="phase"><div class="phase-dot"></div><h3>仿真 / 借机</h3><p>跑通五项任务最小闭环</p><span>预算 0–500 元</span></div>
+        <div class="phase"><div class="phase-dot"></div><h3>自组样机</h3><p>22 DOF 样机逐项联调</p><span>预算 1500–3500 元</span></div>
+        <div class="phase"><div class="phase-dot"></div><h3>省赛冲刺</h3><p>补强演示与训练数据</p><span>按经费 / 赞助追加</span></div>
+      </div>
+      <div class="bottom-line">同一套任务卡与接口贯穿全程，进展可平滑迁移、可留痕。</div>
+    </div>
+  </section>
+
+  <!-- 12 可信度 -->
+  <section class="slide">
+    <div class="content">
+      <div class="kicker">CREDIBILITY</div>
+      <h2 class="title">为什么我们说的不是空话</h2>
+      <div class="grid-3">
+        <div class="card"><h3>仿真先行</h3><p>Webots / PyBullet 先验证步态与视觉任务，不烧硬件盲试。</p></div>
+        <div class="card"><h3>借机联调</h3><p>优先借用实验室双足平台，跑通最小闭环并录制证据。</p></div>
+        <div class="card"><h3>研发日志</h3><p>设计、代码、测试、BOM 同步留痕，材料可追溯。</p></div>
+      </div>
+      <div class="bottom-line">“仿真 → 借机 → 样机”共用同一套接口，验证结果直接迁移。</div>
+    </div>
+  </section>
+
+  <!-- 13 愿景 -->
+  <section class="slide vision">
+    <div class="vision-bg" style="background-image:url('assets/lab-vision.png')"></div>
+    <div class="vision-overlay"></div>
+    <div class="content center">
+      <div class="kicker">VISION</div>
+      <h2 class="big-statement">让低成本桌面双足机器人，<br>成为具身智能教育的<em>公共基础设施</em>。</h2>
+      <div class="chips">
+        <span class="chip">可复现</span>
+        <span class="chip">可扩展</span>
+        <span class="chip">可负担</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 结尾 -->
+  <section class="slide ending">
+    <div class="cover-bg" style="background-image:url('assets/hero-robot.png')"></div>
+    <div class="cover-overlay"></div>
+    <div class="content center">
+      <div class="brand">A.T.R.I.</div>
+      <div class="ending-slogan">一台机器人，一个统一任务链，让具身智能实验走进课堂与赛场。</div>
+      <div class="ending-thanks">恳请各位专家给予支持与指导</div>
+      <div class="ending-info">A.T.R.I. 项目组 · 西安交通大学<br>项目负责人：何浩睿 ｜ 指导老师：陈妍 · 李璐</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

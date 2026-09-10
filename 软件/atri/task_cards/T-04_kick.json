@@ -1,0 +1,7 @@
+{
+  "task_id": "T-04",
+  "name": "体育运动-踢球",
+  "skills": ["kick"],
+  "params": {},
+  "timeout_s": 60
+}
