@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1684" height="1191" viewBox="0 0 1684 1191">
+<rect width="1684" height="1191" fill="#ffffff"/>
+<rect x="12.00" y="12.00" width="1660.00" height="1167.00" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.0"/>
+<rect x="20.00" y="20.00" width="1644.00" height="1151.00" fill="none" stroke="#1a1a1a" stroke-width="1.0"/>
+<text x="40.00" y="52.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="26.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">A.T.R.I. 总装三视图（零姿态）</text>
+<text x="40.00" y="78.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">由设计模型正交投影生成 · 单位 mm · 标注为设计值，制造前需复测</text>
+<rect x="250.32" y="397.76" width="79.36" height="44.64" rx="5.95" ry="5.95" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<path d="M 314.80 444.88 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 317.78 444.88 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 314.80 469.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 317.78 469.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 312.32 477.12 L 312.32 511.84 A 22.32 22.32 0 0 0 356.96 511.84 L 356.96 477.12 A 22.32 22.32 0 0 0 312.32 477.12 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 314.80 554.00 L 314.80 593.68 A 19.84 19.84 0 0 0 354.48 593.68 L 354.48 554.00 A 19.84 19.84 0 0 0 314.80 554.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="304.88" y="640.80" width="59.52" height="24.80" rx="7.94" ry="7.94" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 225.52 444.88 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 228.50 444.88 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 225.52 469.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 228.50 469.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 223.04 477.12 L 223.04 511.84 A 22.32 22.32 0 0 0 267.68 511.84 L 267.68 477.12 A 22.32 22.32 0 0 0 223.04 477.12 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 225.52 554.00 L 225.52 593.68 A 19.84 19.84 0 0 0 265.20 593.68 L 265.20 554.00 A 19.84 19.84 0 0 0 225.52 554.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="215.60" y="640.80" width="59.52" height="24.80" rx="7.94" ry="7.94" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="272.64" y="380.40" width="34.72" height="29.76" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="245.36" y="325.84" width="89.28" height="69.44" rx="7.94" ry="7.94" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="275.12" y="241.52" width="29.76" height="29.76" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="250.32" y="194.40" width="79.36" height="54.56" rx="11.90" ry="11.90" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 344.56 345.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 347.54 345.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 344.56 335.76 L 344.56 355.60 A 19.84 19.84 0 0 0 384.24 355.60 L 384.24 335.76 A 19.84 19.84 0 0 0 344.56 335.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 347.04 397.76 L 347.04 412.64 A 17.36 17.36 0 0 0 381.76 412.64 L 381.76 397.76 A 17.36 17.36 0 0 0 347.04 397.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="349.52" y="441.65" width="29.76" height="24.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 195.76 345.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 198.74 345.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 195.76 335.76 L 195.76 355.60 A 19.84 19.84 0 0 0 235.44 355.60 L 235.44 335.76 A 19.84 19.84 0 0 0 195.76 335.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 198.24 397.76 L 198.24 412.64 A 17.36 17.36 0 0 0 232.96 412.64 L 232.96 397.76 A 17.36 17.36 0 0 0 198.24 397.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="200.72" y="441.65" width="29.76" height="24.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="290.00" y="110.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="16.0" text-anchor="middle" fill="#1a1a1a" font-weight="bold">正视图</text>
+<rect x="60.00" y="120.00" width="460.00" height="620.00" fill="none" stroke="#cfcfcf" stroke-width="1.0"/>
+<rect x="760.40" y="397.76" width="99.20" height="44.64" rx="5.95" ry="5.95" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<path d="M 790.16 444.88 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 793.14 444.88 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 469.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 793.14 469.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 787.68 477.12 L 787.68 511.84 A 22.32 22.32 0 0 0 832.32 511.84 L 832.32 477.12 A 22.32 22.32 0 0 0 787.68 477.12 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 554.00 L 790.16 593.68 A 19.84 19.84 0 0 0 829.84 593.68 L 829.84 554.00 A 19.84 19.84 0 0 0 790.16 554.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="755.44" y="640.80" width="109.12" height="24.80" rx="7.94" ry="7.94" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 444.88 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 793.14 444.88 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 469.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 793.14 469.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 787.68 477.12 L 787.68 511.84 A 22.32 22.32 0 0 0 832.32 511.84 L 832.32 477.12 A 22.32 22.32 0 0 0 787.68 477.12 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 554.00 L 790.16 593.68 A 19.84 19.84 0 0 0 829.84 593.68 L 829.84 554.00 A 19.84 19.84 0 0 0 790.16 554.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="755.44" y="640.80" width="109.12" height="24.80" rx="7.94" ry="7.94" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="792.64" y="380.40" width="34.72" height="29.76" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="760.40" y="325.84" width="99.20" height="69.44" rx="7.94" ry="7.94" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="795.12" y="241.52" width="29.76" height="29.76" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="765.36" y="194.40" width="89.28" height="54.56" rx="11.90" ry="11.90" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 345.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 793.14 345.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 335.76 L 790.16 355.60 A 19.84 19.84 0 0 0 829.84 355.60 L 829.84 335.76 A 19.84 19.84 0 0 0 790.16 335.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 792.64 397.76 L 792.64 412.64 A 17.36 17.36 0 0 0 827.36 412.64 L 827.36 397.76 A 17.36 17.36 0 0 0 792.64 397.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="793.81" y="441.65" width="49.60" height="24.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 345.68 a 19.84 19.84 0 1 0 39.68 0 a 19.84 19.84 0 1 0 -39.68 0 Z M 793.14 345.68 a 16.86 16.86 0 1 1 33.73 0 a 16.86 16.86 0 1 1 -33.73 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 790.16 335.76 L 790.16 355.60 A 19.84 19.84 0 0 0 829.84 355.60 L 829.84 335.76 A 19.84 19.84 0 0 0 790.16 335.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 792.64 397.76 L 792.64 412.64 A 17.36 17.36 0 0 0 827.36 412.64 L 827.36 397.76 A 17.36 17.36 0 0 0 792.64 397.76 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="793.81" y="441.65" width="49.60" height="24.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="810.00" y="110.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="16.0" text-anchor="middle" fill="#1a1a1a" font-weight="bold">侧视图</text>
+<rect x="580.00" y="120.00" width="460.00" height="620.00" fill="none" stroke="#cfcfcf" stroke-width="1.0"/>
+<rect x="216.40" y="858.00" width="147.20" height="184.00" rx="11.04" ry="11.04" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<path d="M 336.00 950.00 a 36.80 36.80 0 1 0 73.60 0 a 36.80 36.80 0 1 0 -73.60 0 Z M 341.52 950.00 a 31.28 31.28 0 1 1 62.56 0 a 31.28 31.28 0 1 1 -62.56 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 336.00 950.00 a 36.80 36.80 0 1 0 73.60 0 a 36.80 36.80 0 1 0 -73.60 0 Z M 341.52 950.00 a 31.28 31.28 0 1 1 62.56 0 a 31.28 31.28 0 1 1 -62.56 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="372.80" cy="950.00" r="41.40" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="372.80" cy="950.00" r="36.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="317.60" y="848.80" width="110.40" height="202.40" rx="14.72" ry="14.72" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 170.40 950.00 a 36.80 36.80 0 1 0 73.60 0 a 36.80 36.80 0 1 0 -73.60 0 Z M 175.92 950.00 a 31.28 31.28 0 1 1 62.56 0 a 31.28 31.28 0 1 1 -62.56 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 170.40 950.00 a 36.80 36.80 0 1 0 73.60 0 a 36.80 36.80 0 1 0 -73.60 0 Z M 175.92 950.00 a 31.28 31.28 0 1 1 62.56 0 a 31.28 31.28 0 1 1 -62.56 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="207.20" cy="950.00" r="41.40" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="207.20" cy="950.00" r="36.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="152.00" y="848.80" width="110.40" height="202.40" rx="14.72" ry="14.72" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="290.00" cy="950.00" r="32.20" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="207.20" y="858.00" width="165.60" height="184.00" rx="14.72" ry="14.72" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<circle cx="290.00" cy="950.00" r="27.60" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="216.40" y="867.20" width="147.20" height="165.60" rx="22.08" ry="22.08" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 391.20 950.00 a 36.80 36.80 0 1 0 73.60 0 a 36.80 36.80 0 1 0 -73.60 0 Z M 396.72 950.00 a 31.28 31.28 0 1 1 62.56 0 a 31.28 31.28 0 1 1 -62.56 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="428.00" cy="950.00" r="36.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="428.00" cy="950.00" r="32.20" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="400.40" y="919.98" width="55.20" height="92.00" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 115.20 950.00 a 36.80 36.80 0 1 0 73.60 0 a 36.80 36.80 0 1 0 -73.60 0 Z M 120.72 950.00 a 31.28 31.28 0 1 1 62.56 0 a 31.28 31.28 0 1 1 -62.56 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="152.00" cy="950.00" r="36.80" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<circle cx="152.00" cy="950.00" r="32.20" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="124.40" y="919.98" width="55.20" height="92.00" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="290.00" y="790.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="16.0" text-anchor="middle" fill="#1a1a1a" font-weight="bold">俯视图</text>
+<rect x="60.00" y="800.00" width="460.00" height="300.00" fill="none" stroke="#cfcfcf" stroke-width="1.0"/>
+<line x1="195.76" y1="774.00" x2="384.24" y2="774.00" stroke="#0b6bb5" stroke-width="1.0"/>
+<line x1="195.76" y1="768.00" x2="195.76" y2="780.00" stroke="#0b6bb5" stroke-width="1.0"/>
+<line x1="384.24" y1="768.00" x2="384.24" y2="780.00" stroke="#0b6bb5" stroke-width="1.0"/>
+<polygon points="195.76,774.00 189.76,768.00 189.76,780.00" fill="#0b6bb5"/>
+<polygon points="384.24,774.00 390.24,768.00 390.24,780.00" fill="#0b6bb5"/>
+<text x="290.00" y="769.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="middle" fill="#0b6bb5" font-weight="normal">宽 190</text>
+<line x1="755.44" y1="774.00" x2="864.56" y2="774.00" stroke="#0b6bb5" stroke-width="1.0"/>
+<line x1="755.44" y1="768.00" x2="755.44" y2="780.00" stroke="#0b6bb5" stroke-width="1.0"/>
+<line x1="864.56" y1="768.00" x2="864.56" y2="780.00" stroke="#0b6bb5" stroke-width="1.0"/>
+<polygon points="755.44,774.00 749.44,768.00 749.44,780.00" fill="#0b6bb5"/>
+<polygon points="864.56,774.00 870.56,768.00 870.56,780.00" fill="#0b6bb5"/>
+<text x="810.00" y="769.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="middle" fill="#0b6bb5" font-weight="normal">深 110</text>
+<line x1="560.00" y1="194.40" x2="560.00" y2="665.60" stroke="#0b6bb5" stroke-width="1.0"/>
+<line x1="554.00" y1="194.40" x2="566.00" y2="194.40" stroke="#0b6bb5" stroke-width="1.0"/>
+<line x1="554.00" y1="665.60" x2="566.00" y2="665.60" stroke="#0b6bb5" stroke-width="1.0"/>
+<polygon points="560.00,194.40 554.00,188.40 566.00,188.40" fill="#0b6bb5"/>
+<polygon points="560.00,665.60 554.00,671.60 566.00,671.60" fill="#0b6bb5"/>
+<text x="554.00" y="430.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="middle" fill="#0b6bb5" font-weight="normal" transform="rotate(-90.0 554.00 430.00)">高 475</text>
+<rect x="580.00" y="800.00" width="1000.00" height="300.00" fill="#fafafa" stroke="#cfcfcf" stroke-width="1.0"/>
+<text x="596.00" y="832.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="16.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">视图说明</text>
+<text x="600.00" y="862.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">正视：从机器人正前方观察，横向为左右（Y），纵向为上下（Z）。</text>
+<text x="600.00" y="888.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">侧视：从机器人左侧观察，横向为前后（X），纵向为上下（Z）。</text>
+<text x="600.00" y="914.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">俯视：从上方观察，横向为左右（Y），纵向为前后（X），前方朝上。</text>
+<text x="600.00" y="966.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">外形为设计基元（圆角壳 / 关节球壳 / 胶囊连杆 / 足底板），</text>
+<text x="600.00" y="992.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">用于表达构型与包络；圆角半径、壁厚等工艺细节见零件设计。</text>
+<text x="600.00" y="1018.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">本图为设计投影图，非 CAD 出图，也非渲染图。</text>
+<text x="600.00" y="1044.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#333" font-weight="normal">所有尺寸为设计值，实物制造前须按采购件复测。</text>
+<rect x="1104.00" y="1041.00" width="560.00" height="130.00" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.5"/>
+<line x1="1194.00" y1="1041.00" x2="1194.00" y2="1059.57" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1053.63" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">项目</text>
+<text x="1204.00" y="1053.63" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">A.T.R.I. 桌面自主人形智能</text>
+<line x1="1104.00" y1="1059.57" x2="1664.00" y2="1059.57" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1059.57" x2="1194.00" y2="1078.14" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1072.20" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">图名</text>
+<text x="1204.00" y="1072.20" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">总装三视图</text>
+<line x1="1104.00" y1="1078.14" x2="1664.00" y2="1078.14" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1078.14" x2="1194.00" y2="1096.71" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1090.77" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">图号</text>
+<text x="1204.00" y="1090.77" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">ATRI-DWG-002</text>
+<line x1="1104.00" y1="1096.71" x2="1664.00" y2="1096.71" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1096.71" x2="1194.00" y2="1115.29" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1109.34" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">单位</text>
+<text x="1204.00" y="1109.34" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">mm</text>
+<line x1="1104.00" y1="1115.29" x2="1664.00" y2="1115.29" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1115.29" x2="1194.00" y2="1133.86" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1127.91" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">比例</text>
+<text x="1204.00" y="1127.91" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">自动缩放</text>
+<line x1="1104.00" y1="1133.86" x2="1664.00" y2="1133.86" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1133.86" x2="1194.00" y2="1152.43" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1146.49" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">阶段</text>
+<text x="1204.00" y="1146.49" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">方案设计（design-provisional）</text>
+<line x1="1104.00" y1="1152.43" x2="1664.00" y2="1152.43" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1152.43" x2="1194.00" y2="1171.00" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1165.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">视图</text>
+<text x="1204.00" y="1165.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">正视/侧视/俯视</text>
+</svg>

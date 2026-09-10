@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1684" height="1191" viewBox="0 0 1684 1191">
+<rect width="1684" height="1191" fill="#ffffff"/>
+<rect x="12.00" y="12.00" width="1660.00" height="1167.00" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.0"/>
+<rect x="20.00" y="20.00" width="1644.00" height="1151.00" fill="none" stroke="#1a1a1a" stroke-width="1.0"/>
+<text x="40.00" y="52.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="26.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">A.T.R.I. 舵机安装布局（22 路总线舵机）</text>
+<text x="40.00" y="78.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">每个关节对应一路舵机 · 总线级联 · 型号与外形为设计占位值，采购后复测</text>
+<rect x="259.04" y="406.72" width="81.92" height="46.08" rx="6.14" ry="6.14" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<path d="M 325.60 455.36 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 328.67 455.36 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 325.60 480.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 328.67 480.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 323.04 488.64 L 323.04 524.48 A 23.04 23.04 0 0 0 369.12 524.48 L 369.12 488.64 A 23.04 23.04 0 0 0 323.04 488.64 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 325.60 568.00 L 325.60 608.96 A 20.48 20.48 0 0 0 366.56 608.96 L 366.56 568.00 A 20.48 20.48 0 0 0 325.60 568.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="315.36" y="657.60" width="61.44" height="25.60" rx="8.19" ry="8.19" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 233.44 455.36 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 236.51 455.36 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 233.44 480.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 236.51 480.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 230.88 488.64 L 230.88 524.48 A 23.04 23.04 0 0 0 276.96 524.48 L 276.96 488.64 A 23.04 23.04 0 0 0 230.88 488.64 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 233.44 568.00 L 233.44 608.96 A 20.48 20.48 0 0 0 274.40 608.96 L 274.40 568.00 A 20.48 20.48 0 0 0 233.44 568.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="223.20" y="657.60" width="61.44" height="25.60" rx="8.19" ry="8.19" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="282.08" y="388.80" width="35.84" height="30.72" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="253.92" y="332.48" width="92.16" height="71.68" rx="8.19" ry="8.19" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="284.64" y="245.44" width="30.72" height="30.72" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="259.04" y="196.80" width="81.92" height="56.32" rx="12.29" ry="12.29" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 356.32 352.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 359.39 352.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 356.32 342.72 L 356.32 363.20 A 20.48 20.48 0 0 0 397.28 363.20 L 397.28 342.72 A 20.48 20.48 0 0 0 356.32 342.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 358.88 406.72 L 358.88 422.08 A 17.92 17.92 0 0 0 394.72 422.08 L 394.72 406.72 A 17.92 17.92 0 0 0 358.88 406.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="361.44" y="452.02" width="30.72" height="25.60" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 202.72 352.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 205.79 352.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 202.72 342.72 L 202.72 363.20 A 20.48 20.48 0 0 0 243.68 363.20 L 243.68 342.72 A 20.48 20.48 0 0 0 202.72 342.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 205.28 406.72 L 205.28 422.08 A 17.92 17.92 0 0 0 241.12 422.08 L 241.12 406.72 A 17.92 17.92 0 0 0 205.28 406.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="207.84" y="452.02" width="30.72" height="25.60" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="300.00" y="110.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="16.0" text-anchor="middle" fill="#1a1a1a" font-weight="bold">正视图</text>
+<rect x="60.00" y="120.00" width="480.00" height="640.00" fill="none" stroke="#cfcfcf" stroke-width="1.0"/>
+<rect x="788.80" y="406.72" width="102.40" height="46.08" rx="6.14" ry="6.14" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<path d="M 819.52 455.36 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 822.59 455.36 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 480.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 822.59 480.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 816.96 488.64 L 816.96 524.48 A 23.04 23.04 0 0 0 863.04 524.48 L 863.04 488.64 A 23.04 23.04 0 0 0 816.96 488.64 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 568.00 L 819.52 608.96 A 20.48 20.48 0 0 0 860.48 608.96 L 860.48 568.00 A 20.48 20.48 0 0 0 819.52 568.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="783.68" y="657.60" width="112.64" height="25.60" rx="8.19" ry="8.19" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 455.36 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 822.59 455.36 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 480.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 822.59 480.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 816.96 488.64 L 816.96 524.48 A 23.04 23.04 0 0 0 863.04 524.48 L 863.04 488.64 A 23.04 23.04 0 0 0 816.96 488.64 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 568.00 L 819.52 608.96 A 20.48 20.48 0 0 0 860.48 608.96 L 860.48 568.00 A 20.48 20.48 0 0 0 819.52 568.00 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="783.68" y="657.60" width="112.64" height="25.60" rx="8.19" ry="8.19" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="822.08" y="388.80" width="35.84" height="30.72" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="788.80" y="332.48" width="102.40" height="71.68" rx="8.19" ry="8.19" fill="#fbe3d8" stroke="#d4572b" stroke-width="1.4"/>
+<rect x="824.64" y="245.44" width="30.72" height="30.72" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="793.92" y="196.80" width="92.16" height="56.32" rx="12.29" ry="12.29" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 352.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 822.59 352.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 342.72 L 819.52 363.20 A 20.48 20.48 0 0 0 860.48 363.20 L 860.48 342.72 A 20.48 20.48 0 0 0 819.52 342.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 822.08 406.72 L 822.08 422.08 A 17.92 17.92 0 0 0 857.92 422.08 L 857.92 406.72 A 17.92 17.92 0 0 0 822.08 406.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="823.29" y="452.02" width="51.20" height="25.60" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 352.96 a 20.48 20.48 0 1 0 40.96 0 a 20.48 20.48 0 1 0 -40.96 0 Z M 822.59 352.96 a 17.41 17.41 0 1 1 34.82 0 a 17.41 17.41 0 1 1 -34.82 0 Z" fill="#e8edf2" fill-rule="evenodd" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 819.52 342.72 L 819.52 363.20 A 20.48 20.48 0 0 0 860.48 363.20 L 860.48 342.72 A 20.48 20.48 0 0 0 819.52 342.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<path d="M 822.08 406.72 L 822.08 422.08 A 17.92 17.92 0 0 0 857.92 422.08 L 857.92 406.72 A 17.92 17.92 0 0 0 822.08 406.72 Z" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<rect x="823.29" y="452.02" width="51.20" height="25.60" fill="#e8edf2" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="840.00" y="110.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="16.0" text-anchor="middle" fill="#1a1a1a" font-weight="bold">侧视图</text>
+<rect x="600.00" y="120.00" width="480.00" height="640.00" fill="none" stroke="#cfcfcf" stroke-width="1.0"/>
+<rect x="295.50" y="256.30" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="300.00" y="264.30" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">0</text>
+<rect x="295.50" y="220.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="300.00" y="228.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">1</text>
+<rect x="294.50" y="398.66" width="11.00" height="11.00" fill="#ffffff" stroke="#d4572b" stroke-width="1.4"/>
+<text x="300.00" y="407.66" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#d4572b" font-weight="bold">2</text>
+<rect x="294.50" y="362.82" width="11.00" height="11.00" fill="#ffffff" stroke="#d4572b" stroke-width="1.4"/>
+<text x="300.00" y="371.82" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#d4572b" font-weight="bold">3</text>
+<rect x="340.58" y="449.86" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="346.08" y="458.86" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">4</text>
+<rect x="340.58" y="475.46" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="346.08" y="484.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">5</text>
+<rect x="339.58" y="500.06" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="346.08" y="510.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">6</text>
+<rect x="339.58" y="581.98" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="346.08" y="591.98" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">7</text>
+<rect x="340.58" y="664.90" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="346.08" y="673.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">8</text>
+<rect x="248.42" y="449.86" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="253.92" y="458.86" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">9</text>
+<rect x="248.42" y="475.46" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="253.92" y="484.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">10</text>
+<rect x="247.42" y="500.06" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="253.92" y="510.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">11</text>
+<rect x="247.42" y="581.98" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="253.92" y="591.98" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">12</text>
+<rect x="248.42" y="664.90" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="253.92" y="673.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">13</text>
+<rect x="372.30" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="376.80" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">14</text>
+<rect x="372.30" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="376.80" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">15</text>
+<rect x="372.30" y="409.90" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="376.80" y="417.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">16</text>
+<rect x="372.30" y="460.32" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="376.80" y="468.32" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">17</text>
+<rect x="218.70" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="223.20" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">18</text>
+<rect x="218.70" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="223.20" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">19</text>
+<rect x="218.70" y="409.90" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="223.20" y="417.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">20</text>
+<rect x="218.70" y="460.32" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="223.20" y="468.32" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">21</text>
+<rect x="835.50" y="256.30" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="264.30" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">0</text>
+<rect x="835.50" y="220.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="228.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">1</text>
+<rect x="834.50" y="398.66" width="11.00" height="11.00" fill="#ffffff" stroke="#d4572b" stroke-width="1.4"/>
+<text x="840.00" y="407.66" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#d4572b" font-weight="bold">2</text>
+<rect x="834.50" y="362.82" width="11.00" height="11.00" fill="#ffffff" stroke="#d4572b" stroke-width="1.4"/>
+<text x="840.00" y="371.82" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#d4572b" font-weight="bold">3</text>
+<rect x="834.50" y="449.86" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="458.86" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">4</text>
+<rect x="834.50" y="475.46" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="484.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">5</text>
+<rect x="833.50" y="500.06" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="510.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">6</text>
+<rect x="833.50" y="581.98" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="591.98" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">7</text>
+<rect x="834.50" y="664.90" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="673.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">8</text>
+<rect x="834.50" y="449.86" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="458.86" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">9</text>
+<rect x="834.50" y="475.46" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="484.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">10</text>
+<rect x="833.50" y="500.06" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="510.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">11</text>
+<rect x="833.50" y="581.98" width="13.00" height="13.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="591.98" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">12</text>
+<rect x="834.50" y="664.90" width="11.00" height="11.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="673.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">13</text>
+<rect x="835.50" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">14</text>
+<rect x="835.50" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">15</text>
+<rect x="835.50" y="409.90" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="417.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">16</text>
+<rect x="844.39" y="460.32" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="848.89" y="468.32" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">17</text>
+<rect x="835.50" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">18</text>
+<rect x="835.50" y="348.46" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="356.46" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">19</text>
+<rect x="835.50" y="409.90" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="840.00" y="417.90" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">20</text>
+<rect x="844.39" y="460.32" width="9.00" height="9.00" fill="#ffffff" stroke="#2b7fd4" stroke-width="1.4"/>
+<text x="848.89" y="468.32" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="8.0" text-anchor="middle" fill="#2b7fd4" font-weight="bold">21</text>
+<rect x="1110.00" y="130.00" width="520.00" height="330.00" fill="#fafafa" stroke="#cfcfcf" stroke-width="1.0"/>
+<text x="1126.00" y="160.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="15.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">图例（按额定扭矩分档）</text>
+<text x="1130.00" y="192.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">大方块 (13px)</text>
+<text x="1285.00" y="192.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="11.5" text-anchor="start" fill="#333" font-weight="normal">额定扭矩 ≥ 3.0 N·m　4 路</text>
+<text x="1144.00" y="214.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#666" font-weight="normal">L.hip_pitch、L.knee_pitch、R.hip_pitch、R.knee_pitch</text>
+<text x="1130.00" y="242.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">中方块 (11px)</text>
+<text x="1285.00" y="242.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="11.5" text-anchor="start" fill="#333" font-weight="normal">2.0 – 3.0 N·m　8 路</text>
+<text x="1144.00" y="264.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#666" font-weight="normal">trunk_roll、trunk_pitch、L.hip_yaw、L.hip_roll、L.ankle_pitch、R.hip_yaw</text>
+<text x="1144.00" y="278.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#666" font-weight="normal">R.hip_roll、R.ankle_pitch</text>
+<text x="1130.00" y="306.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">小方块 (9px)</text>
+<text x="1285.00" y="306.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="11.5" text-anchor="start" fill="#333" font-weight="normal">&lt; 2.0 N·m　10 路</text>
+<text x="1144.00" y="328.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#666" font-weight="normal">head_yaw、head_pitch、L.shoulder_pitch、L.shoulder_roll、L.elbow_pitch</text>
+<text x="1144.00" y="342.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#666" font-weight="normal">L.gripper、R.shoulder_pitch、R.shoulder_roll、R.elbow_pitch、R.gripper</text>
+<text x="1130.00" y="370.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">橙色</text>
+<text x="1285.00" y="370.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="11.5" text-anchor="start" fill="#333" font-weight="normal">躯干 2 DOF（腰 roll / pitch）</text>
+<text x="1130.00" y="394.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">方块内数字</text>
+<text x="1285.00" y="394.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="11.5" text-anchor="start" fill="#333" font-weight="normal">关节编号 0–21（与明细表一致）</text>
+<rect x="1110.00" y="490.00" width="520.00" height="270.00" fill="#fafafa" stroke="#cfcfcf" stroke-width="1.0"/>
+<text x="1126.00" y="520.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="15.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">汇总</text>
+<text x="1134.00" y="554.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">舵机总数</text>
+<text x="1606.00" y="554.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">22 路</text>
+<text x="1134.00" y="583.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">高扭矩档（≥3.0 N·m）</text>
+<text x="1606.00" y="583.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">4 路</text>
+<text x="1134.00" y="612.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">中扭矩档（2.0–3.0）</text>
+<text x="1606.00" y="612.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">8 路</text>
+<text x="1134.00" y="641.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">低扭矩档（&lt;2.0）</text>
+<text x="1606.00" y="641.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">10 路</text>
+<text x="1134.00" y="670.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">供电</text>
+<text x="1606.00" y="670.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">11.1 V 标称</text>
+<text x="1134.00" y="699.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">总线协议</text>
+<text x="1606.00" y="699.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">TTL half-duplex serial bus</text>
+<text x="1134.00" y="732.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#555" font-weight="normal">注：扭矩分档依据 design/robot_model.json 的</text>
+<text x="1134.00" y="748.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="10.5" text-anchor="start" fill="#555" font-weight="normal">effort_nm 设计值，非实测数据。</text>
+<rect x="1104.00" y="1041.00" width="560.00" height="130.00" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.5"/>
+<line x1="1194.00" y1="1041.00" x2="1194.00" y2="1059.57" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1053.63" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">项目</text>
+<text x="1204.00" y="1053.63" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">A.T.R.I. 桌面自主人形智能</text>
+<line x1="1104.00" y1="1059.57" x2="1664.00" y2="1059.57" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1059.57" x2="1194.00" y2="1078.14" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1072.20" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">图名</text>
+<text x="1204.00" y="1072.20" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">舵机布局图</text>
+<line x1="1104.00" y1="1078.14" x2="1664.00" y2="1078.14" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1078.14" x2="1194.00" y2="1096.71" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1090.77" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">图号</text>
+<text x="1204.00" y="1090.77" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">ATRI-DWG-005</text>
+<line x1="1104.00" y1="1096.71" x2="1664.00" y2="1096.71" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1096.71" x2="1194.00" y2="1115.29" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1109.34" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">单位</text>
+<text x="1204.00" y="1109.34" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">mm</text>
+<line x1="1104.00" y1="1115.29" x2="1664.00" y2="1115.29" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1115.29" x2="1194.00" y2="1133.86" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1127.91" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">比例</text>
+<text x="1204.00" y="1127.91" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">自动缩放</text>
+<line x1="1104.00" y1="1133.86" x2="1664.00" y2="1133.86" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1133.86" x2="1194.00" y2="1152.43" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1146.49" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">阶段</text>
+<text x="1204.00" y="1146.49" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">方案设计（design-provisional）</text>
+<line x1="1104.00" y1="1152.43" x2="1664.00" y2="1152.43" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1152.43" x2="1194.00" y2="1171.00" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1165.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">对象</text>
+<text x="1204.00" y="1165.06" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">22 路总线舵机</text>
+</svg>

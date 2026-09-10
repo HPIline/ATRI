@@ -2,10 +2,12 @@
 <robot name="ATRI">
   <!-- 由 design/gen_urdf.py 生成，请勿手工编辑 -->
   <!-- units: model mm -> urdf m; angles deg -> rad -->
+  <!-- visual = 真实基元；collision = 等效包围盒 -->
   <link name="pelvis">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
+    <!-- rounded_box 近似为 box -->
         <box size="0.100000 0.080000 0.045000"/>
       </geometry>
       <material>
@@ -28,7 +30,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <!-- sphere_shell 近似为外球 -->
+        <sphere radius="0.020000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -43,14 +46,15 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000010667" ixy="0" ixz="0" iyy="0.000010667" iyz="0" izz="0.000010667"/>
+      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
     </inertial>
   </link>
   <link name="left_hip_roll_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <!-- sphere_shell 近似为外球 -->
+        <sphere radius="0.020000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -65,15 +69,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000010667" ixy="0" ixz="0" iyy="0.000010667" iyz="0" izz="0.000010667"/>
+      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
     </inertial>
   </link>
   <link name="left_thigh">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.045000 0.045000 0.080000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.022500" length="0.080000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.720 0.760 0.820 1.0"/>
       </material>
@@ -87,15 +93,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.080000"/>
-      <inertia ixx="0.000056167" ixy="0" ixz="0" iyy="0.000056167" iyz="0" izz="0.000027000"/>
+      <inertia ixx="0.000042166" ixy="0" ixz="0" iyy="0.000042166" iyz="0" izz="0.000018381"/>
     </inertial>
   </link>
   <link name="left_shank">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.080000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.020000" length="0.080000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.660 0.700 0.780 1.0"/>
       </material>
@@ -109,13 +117,14 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.070000"/>
-      <inertia ixx="0.000046667" ixy="0" ixz="0" iyy="0.000046667" iyz="0" izz="0.000018667"/>
+      <inertia ixx="0.000035455" ixy="0" ixz="0" iyy="0.000035455" iyz="0" izz="0.000012880"/>
     </inertial>
   </link>
   <link name="left_foot">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
+    <!-- rounded_box 近似为 box -->
         <box size="0.110000 0.060000 0.025000"/>
       </geometry>
       <material>
@@ -138,7 +147,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <!-- sphere_shell 近似为外球 -->
+        <sphere radius="0.020000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -153,14 +163,15 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000010667" ixy="0" ixz="0" iyy="0.000010667" iyz="0" izz="0.000010667"/>
+      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
     </inertial>
   </link>
   <link name="right_hip_roll_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <!-- sphere_shell 近似为外球 -->
+        <sphere radius="0.020000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -175,15 +186,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000010667" ixy="0" ixz="0" iyy="0.000010667" iyz="0" izz="0.000010667"/>
+      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
     </inertial>
   </link>
   <link name="right_thigh">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.045000 0.045000 0.080000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.022500" length="0.080000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.720 0.760 0.820 1.0"/>
       </material>
@@ -197,15 +210,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.080000"/>
-      <inertia ixx="0.000056167" ixy="0" ixz="0" iyy="0.000056167" iyz="0" izz="0.000027000"/>
+      <inertia ixx="0.000042166" ixy="0" ixz="0" iyy="0.000042166" iyz="0" izz="0.000018381"/>
     </inertial>
   </link>
   <link name="right_shank">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.080000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.020000" length="0.080000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.660 0.700 0.780 1.0"/>
       </material>
@@ -219,13 +234,14 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.070000"/>
-      <inertia ixx="0.000046667" ixy="0" ixz="0" iyy="0.000046667" iyz="0" izz="0.000018667"/>
+      <inertia ixx="0.000035455" ixy="0" ixz="0" iyy="0.000035455" iyz="0" izz="0.000012880"/>
     </inertial>
   </link>
   <link name="right_foot">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
+    <!-- rounded_box 近似为 box -->
         <box size="0.110000 0.060000 0.025000"/>
       </geometry>
       <material>
@@ -248,7 +264,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.080000 0.030000"/>
+        <cylinder radius="0.017500" length="0.030000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -257,19 +273,20 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.080000 0.030000"/>
+        <box size="0.035000 0.035000 0.030000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000024333" ixy="0" ixz="0" iyy="0.000007083" iyz="0" izz="0.000025417"/>
+      <inertia ixx="0.000006063" ixy="0" ixz="0" iyy="0.000006063" iyz="0" izz="0.000006125"/>
     </inertial>
   </link>
   <link name="torso_upper">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
+    <!-- rounded_box 近似为 box -->
         <box size="0.100000 0.090000 0.070000"/>
       </geometry>
       <material>
@@ -292,7 +309,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.030000 0.030000 0.030000"/>
+        <cylinder radius="0.015000" length="0.030000"/>
       </geometry>
       <material>
         <color rgba="0.200 0.240 0.310 1.0"/>
@@ -307,13 +324,14 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.030000"/>
-      <inertia ixx="0.000004500" ixy="0" ixz="0" iyy="0.000004500" iyz="0" izz="0.000004500"/>
+      <inertia ixx="0.000003937" ixy="0" ixz="0" iyy="0.000003937" iyz="0" izz="0.000003375"/>
     </inertial>
   </link>
   <link name="head">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
+    <!-- rounded_box 近似为 box -->
         <box size="0.090000 0.080000 0.055000"/>
       </geometry>
       <material>
@@ -336,7 +354,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <!-- sphere_shell 近似为外球 -->
+        <sphere radius="0.020000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -351,15 +370,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000010667" ixy="0" ixz="0" iyy="0.000010667" iyz="0" izz="0.000010667"/>
+      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
     </inertial>
   </link>
   <link name="left_upper_arm">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.060000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.020000" length="0.060000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.740 0.780 0.840 1.0"/>
       </material>
@@ -373,15 +394,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.075000"/>
-      <inertia ixx="0.000032500" ixy="0" ixz="0" iyy="0.000032500" iyz="0" izz="0.000020000"/>
+      <inertia ixx="0.000024268" ixy="0" ixz="0" iyy="0.000024268" iyz="0" izz="0.000013286"/>
     </inertial>
   </link>
   <link name="left_forearm">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.035000 0.050000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.017500" length="0.050000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.660 0.700 0.780 1.0"/>
       </material>
@@ -395,7 +418,7 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.055000"/>
-      <inertia ixx="0.000017073" ixy="0" ixz="0" iyy="0.000017073" iyz="0" izz="0.000011229"/>
+      <inertia ixx="0.000012773" ixy="0" ixz="0" iyy="0.000012773" iyz="0" izz="0.000007397"/>
     </inertial>
   </link>
   <link name="left_gripper">
@@ -424,7 +447,8 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <!-- sphere_shell 近似为外球 -->
+        <sphere radius="0.020000"/>
       </geometry>
       <material>
         <color rgba="0.250 0.300 0.380 1.0"/>
@@ -439,15 +463,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.040000"/>
-      <inertia ixx="0.000010667" ixy="0" ixz="0" iyy="0.000010667" iyz="0" izz="0.000010667"/>
+      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
     </inertial>
   </link>
   <link name="right_upper_arm">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.060000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.020000" length="0.060000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.740 0.780 0.840 1.0"/>
       </material>
@@ -461,15 +487,17 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.075000"/>
-      <inertia ixx="0.000032500" ixy="0" ixz="0" iyy="0.000032500" iyz="0" izz="0.000020000"/>
+      <inertia ixx="0.000024268" ixy="0" ixz="0" iyy="0.000024268" iyz="0" izz="0.000013286"/>
     </inertial>
   </link>
   <link name="right_forearm">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.035000 0.050000"/>
+        <!-- capsule 近似为 cylinder（长度含两端球头） -->
+        <cylinder radius="0.017500" length="0.050000"/>
       </geometry>
+      <!-- 轴向 rpy: 0 0 0 -->
       <material>
         <color rgba="0.660 0.700 0.780 1.0"/>
       </material>
@@ -483,7 +511,7 @@
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.055000"/>
-      <inertia ixx="0.000017073" ixy="0" ixz="0" iyy="0.000017073" iyz="0" izz="0.000011229"/>
+      <inertia ixx="0.000012773" ixy="0" ixz="0" iyy="0.000012773" iyz="0" izz="0.000007397"/>
     </inertial>
   </link>
   <link name="right_gripper">

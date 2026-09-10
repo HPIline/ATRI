@@ -19,9 +19,16 @@
 
 ```
 design/
-├── robot_model.json          # L1 单一事实来源：link 尺寸/质量 + 22 关节定义
+├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义
+├── geometry.py               # 几何基元（6 种）+ 惯量 + 三维变换 + 正交投影
 ├── gen_urdf.py               # 纯标准库 URDF 生成器 + 设计约束校验
 ├── atri.urdf                 # 生成产物，可直接喂给 PyBullet / Webots
+├── gen_drawings.py           # 2D 工程图生成器（纯标准库 SVG）
+├── drawings/                 # 工程图产物 ★ 可直接用于报名材料
+│   ├── 01_关节编号图.svg
+│   ├── 02_三视图.svg
+│   ├── 04_尺寸链图.svg
+│   └── 05_舵机布局图.svg
 ├── realistic_sim.py          # 非理想舵机总线 + 带噪声感知 + 域随机化采样
 ├── run_sim.py                # 仿真运行器（产出 JSON / CSV / SVG）
 ├── packages/                 # L2 物理与场景数据包
@@ -29,8 +36,8 @@ design/
 │   ├── domain_random.json    #   域随机化配置
 │   ├── perception_sim.json   #   感知噪声与退化档位
 │   └── scenario_set.json     #   五项赛题场景集
-├── results/                  # 运行产出（CSV）
-└── figures/                  # 运行产出（SVG）
+├── results/                  # 仿真产出（CSV，已 gitignore）
+└── figures/                  # 仿真图表（SVG，已 gitignore）
 ```
 
 ---
@@ -43,19 +50,18 @@ cd /path/to/ATRI
 # 1) 校验设计并生成 URDF
 python3 design/gen_urdf.py --summary --validate --write
 
-# 2) 列出场景
+# 2) 生成 2D 工程图（4 张）
+python3 design/gen_drawings.py
+python3 design/gen_drawings.py --only joints      # 只出关节编号图
+python3 design/gen_drawings.py --png              # 同时导出 PNG（macOS）
+
+# 3) 跑仿真
 python3 design/run_sim.py --list
-
-# 3) 跑全部场景
 python3 design/run_sim.py --all --episodes 10
-
-# 4) 开域随机化
 python3 design/run_sim.py --all --episodes 10 --randomize
-
-# 5) 鲁棒性扫描（产出失效边界）
 python3 design/run_sim.py --sweep perception --episodes 12
 
-# 6) 测试
+# 4) 测试
 cd 软件/atri && python3 -m unittest discover -s tests
 ```
 
@@ -63,11 +69,46 @@ cd 软件/atri && python3 -m unittest discover -s tests
 
 ---
 
+## 2.1 工程图说明（★ 报名材料直接可用）
+
+| 图号 | 文件 | 内容 | 用途 |
+|---|---|---|---|
+| ATRI-DWG-001 | `01_关节编号图.svg` | 正视+侧视，22 关节全部编号，**躯干 2 DOF 橙色高亮**，附自由度构成、尺寸合规核验、22 关节明细表 | ⭐ 回答"躯干 2 DOF 在哪" |
+| ATRI-DWG-002 | `02_三视图.svg` | 正视/侧视/俯视 + 总体尺寸与官方上限对比 | 材料必交 |
+| ATRI-DWG-004 | `04_尺寸链图.svg` | 头部链/左腿链逐级累加，总高校核 + 放置校核 | 证明尺寸自洽 |
+| ATRI-DWG-005 | `05_舵机布局图.svg` | 22 路舵机安装位置、按扭矩分档图例、汇总 | 证明"算过怎么装" |
+
+**图的读法**：SVG 是矢量图，双击用浏览器打开即可；也可用 `qlmanage -t -s 2000` 转 PNG 插进 PPT。
+
+**关于这些图的诚实说明**：
+- 它们是**由设计模型正交投影生成的示意图**，不是 CAD 出图，也不是渲染图
+- 外形为设计基元（圆角壳 / 关节球壳 / 胶囊连杆 / 足底板），用于表达构型与包络
+- 所有尺寸为**设计值**，实物制造前须按采购件复测
+
+### 2.2 几何基元
+
+`geometry.py` 支持 6 种基元，全部可纯数学生成与投影：
+
+| 基元 | 用途 | URDF 导出方式 |
+|---|---|---|
+| `box` | 夹爪等方块件 | `<box>` |
+| `rounded_box` | 外壳、机身 | `<box>`（去圆角，保守） |
+| `cylinder` | 舵机本体、关节轴 | `<cylinder>` |
+| `sphere` | 关节 | `<sphere>` |
+| `capsule` | 连杆（两端圆头） | `<cylinder>`（长度含球头） |
+| `sphere_shell` | 球形关节壳 | `<sphere>`（外球半径） |
+
+**关键设计**：`visual` 用真实基元，`collision` 用**等效包围盒**——这是标准工程做法，
+碰撞检测更快更稳，且不影响外观表达。
+
+
+---
+
 ## 3. 三层数据包
 
 | 层 | 内容 | 文件 |
 |---|---|---|
-| **L1 几何** | link 尺寸、质量、22 关节（名称/编号/轴向/限位） | `robot_model.json` → `atri.urdf` |
+| **L1 几何** | link 基元几何、质量、22 关节（名称/编号/轴向/限位） | `robot_model.json` → `atri.urdf` + `drawings/` |
 | **L2 物理** | 舵机非理想特性、域随机化、感知噪声、场景 | `packages/*.json` |
 | **L3 行为** | 动作库、任务卡（复用 `软件/atri/`） | `action_library/`、`task_cards/` |
 
@@ -177,7 +218,11 @@ robot = p.loadURDF("design/atri.urdf", useFixedBase=False)
 ## 8. 已知限制
 
 - 未做刚体动力学，因此**不能**据此断言双足行走稳定性。
-- 舵机参数为典型值，实际性能可能显著不同。
-- 感知噪声为统计模型，未包含真实光照/材质变化。
-- 结构为长方体占位几何，未包含外形曲面与打印工艺约束（壁厚、支撑）。
+- 工程图为**投影示意图**，非 CAD 出图，也非渲染图；尺寸为设计值。
+- 结构为基元几何（长方体/圆柱/球/胶囊/球壳），未包含真实圆角曲面、
+  壁厚、拔模与支撑等工艺细节。
+- 零件级拆分（零件编号 / BOM / 打印参数）尚未完成，属下一阶段工作。
+- 极限姿态下的干涉校核尚未实现。
 - 夹爪以单自由度铰链近似，实际为平行开合机构。
+- 舵机参数为典型值，实际性能可能显著不同；实物到手后须复测回填。
+- 感知噪声为统计模型，未包含真实光照与材质变化。

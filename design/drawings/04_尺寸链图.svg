@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1684" height="1191" viewBox="0 0 1684 1191">
+<rect width="1684" height="1191" fill="#ffffff"/>
+<rect x="12.00" y="12.00" width="1660.00" height="1167.00" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.0"/>
+<rect x="20.00" y="20.00" width="1644.00" height="1151.00" fill="none" stroke="#1a1a1a" stroke-width="1.0"/>
+<text x="40.00" y="52.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="26.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">A.T.R.I. 关节链尺寸链（零姿态，单位 mm）</text>
+<text x="40.00" y="78.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">用于校核总高：各关节原点偏移沿 Z 累加 + 末端半高</text>
+<text x="120.00" y="140.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="17.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">头部链（骨盆 → 头顶）</text>
+<text x="120.00" y="180.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">顺序</text>
+<text x="190.00" y="180.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">关节名</text>
+<text x="420.00" y="180.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">Z 偏移</text>
+<text x="540.00" y="180.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">累计</text>
+<line x1="120.00" y1="190.00" x2="640.00" y2="190.00" stroke="#999" stroke-width="1.0"/>
+<text x="120.00" y="220.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">1</text>
+<text x="190.00" y="220.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">trunk_roll</text>
+<text x="420.00" y="220.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">+25.0</text>
+<text x="540.00" y="220.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">+25.0</text>
+<text x="120.00" y="250.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">2</text>
+<text x="190.00" y="250.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">trunk_pitch</text>
+<text x="420.00" y="250.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">+35.0</text>
+<text x="540.00" y="250.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">+60.0</text>
+<text x="120.00" y="280.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">3</text>
+<text x="190.00" y="280.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">head_yaw</text>
+<text x="420.00" y="280.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">+105.0</text>
+<text x="540.00" y="280.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">+165.0</text>
+<text x="120.00" y="310.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">4</text>
+<text x="190.00" y="310.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">head_pitch</text>
+<text x="420.00" y="310.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">+35.0</text>
+<text x="540.00" y="310.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">+200.0</text>
+<text x="120.00" y="340.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">+</text>
+<text x="190.00" y="340.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">head 半高</text>
+<text x="420.00" y="340.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">+27.5</text>
+<text x="540.00" y="340.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">+227.5</text>
+<line x1="120.00" y1="380.00" x2="640.00" y2="380.00" stroke="#1a1a1a" stroke-width="1.5"/>
+<text x="120.00" y="408.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="14.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">合计（相对骨盆中心）</text>
+<text x="540.00" y="408.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="14.0" text-anchor="start" fill="#d4572b" font-weight="bold">+227.5 mm</text>
+<text x="120.00" y="470.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="17.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">左腿链（骨盆 → 足底）</text>
+<text x="120.00" y="510.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">顺序</text>
+<text x="190.00" y="510.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">关节名</text>
+<text x="420.00" y="510.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">Z 偏移</text>
+<text x="540.00" y="510.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#555" font-weight="bold">累计</text>
+<line x1="120.00" y1="520.00" x2="640.00" y2="520.00" stroke="#999" stroke-width="1.0"/>
+<text x="120.00" y="550.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">1</text>
+<text x="190.00" y="550.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">left_hip_yaw</text>
+<text x="420.00" y="550.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">-25.0</text>
+<text x="540.00" y="550.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">-25.0</text>
+<text x="120.00" y="580.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">2</text>
+<text x="190.00" y="580.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">left_hip_roll</text>
+<text x="420.00" y="580.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">-25.0</text>
+<text x="540.00" y="580.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">-50.0</text>
+<text x="120.00" y="610.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">3</text>
+<text x="190.00" y="610.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">left_hip_pitch</text>
+<text x="420.00" y="610.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">-25.0</text>
+<text x="540.00" y="610.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">-75.0</text>
+<text x="120.00" y="640.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">4</text>
+<text x="190.00" y="640.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">left_knee_pitch</text>
+<text x="420.00" y="640.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">-80.0</text>
+<text x="540.00" y="640.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">-155.0</text>
+<text x="120.00" y="670.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">5</text>
+<text x="190.00" y="670.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">left_ankle_pitch</text>
+<text x="420.00" y="670.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">-80.0</text>
+<text x="540.00" y="670.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#555" font-weight="normal">-235.0</text>
+<text x="120.00" y="700.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">+</text>
+<text x="190.00" y="700.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">left_foot 半高</text>
+<text x="420.00" y="700.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#0b6bb5" font-weight="normal">+12.5</text>
+<text x="540.00" y="700.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">-222.5</text>
+<line x1="120.00" y1="740.00" x2="640.00" y2="740.00" stroke="#1a1a1a" stroke-width="1.5"/>
+<text x="120.00" y="768.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="14.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">合计（相对骨盆中心）</text>
+<text x="540.00" y="768.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="14.0" text-anchor="start" fill="#d4572b" font-weight="bold">-222.5 mm</text>
+<rect x="760.00" y="130.00" width="880.00" height="300.00" fill="#fafafa" stroke="#cfcfcf" stroke-width="1.0"/>
+<text x="776.00" y="162.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="17.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">总高校核</text>
+<text x="784.00" y="196.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">头顶（相对骨盆中心）</text>
+<text x="1320.00" y="196.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="end" fill="#1a1a1a" font-weight="normal">+227.5 mm</text>
+<text x="784.00" y="226.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">足底（相对骨盆中心）</text>
+<text x="1320.00" y="226.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="end" fill="#1a1a1a" font-weight="normal">-247.5 mm</text>
+<text x="784.00" y="256.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">几何总高</text>
+<text x="1320.00" y="256.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">475.0 mm</text>
+<text x="784.00" y="286.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">模型声明总高</text>
+<text x="1320.00" y="286.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="end" fill="#1a1a1a" font-weight="bold">475.0 mm</text>
+<text x="784.00" y="316.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">官方上限</text>
+<text x="1320.00" y="316.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="end" fill="#1a1a1a" font-weight="normal">600 mm</text>
+<text x="784.00" y="346.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">剩余余量</text>
+<text x="1320.00" y="346.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="end" fill="#d4572b" font-weight="bold">125.0 mm</text>
+<text x="784.00" y="386.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="14.0" text-anchor="start" fill="#1a7f37" font-weight="bold">结论：几何推导与声明值一致（差 ≤ 1 mm）。</text>
+<rect x="760.00" y="450.00" width="880.00" height="200.00" fill="#fafafa" stroke="#cfcfcf" stroke-width="1.0"/>
+<text x="776.00" y="482.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="17.0" text-anchor="start" fill="#1a1a1a" font-weight="bold">放置校核</text>
+<text x="784.00" y="516.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">base_pose_mm Z = 247.5 mm（骨盆中心离地高度）</text>
+<text x="784.00" y="546.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a7f37" font-weight="bold">放置后足底离地 = 0.0 mm</text>
+<text x="784.00" y="576.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">放置后头顶离地 = 475.0 mm</text>
+<text x="784.00" y="612.00" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="13.0" text-anchor="start" fill="#1a7f37" font-weight="normal">结论：足底与地面重合，模型可直接放入仿真场景。</text>
+<rect x="1104.00" y="1041.00" width="560.00" height="130.00" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.5"/>
+<line x1="1194.00" y1="1041.00" x2="1194.00" y2="1062.67" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1055.73" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">项目</text>
+<text x="1204.00" y="1055.73" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">A.T.R.I. 桌面自主人形智能</text>
+<line x1="1104.00" y1="1062.67" x2="1664.00" y2="1062.67" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1062.67" x2="1194.00" y2="1084.33" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1077.40" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">图名</text>
+<text x="1204.00" y="1077.40" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">关节链尺寸链图</text>
+<line x1="1104.00" y1="1084.33" x2="1664.00" y2="1084.33" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1084.33" x2="1194.00" y2="1106.00" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1099.07" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">图号</text>
+<text x="1204.00" y="1099.07" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">ATRI-DWG-004</text>
+<line x1="1104.00" y1="1106.00" x2="1664.00" y2="1106.00" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1106.00" x2="1194.00" y2="1127.67" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1120.73" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">单位</text>
+<text x="1204.00" y="1120.73" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">mm</text>
+<line x1="1104.00" y1="1127.67" x2="1664.00" y2="1127.67" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1127.67" x2="1194.00" y2="1149.33" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1142.40" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">比例</text>
+<text x="1204.00" y="1142.40" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">1:1 数值标注</text>
+<line x1="1104.00" y1="1149.33" x2="1664.00" y2="1149.33" stroke="#8a8a8a" stroke-width="0.6"/>
+<line x1="1194.00" y1="1149.33" x2="1194.00" y2="1171.00" stroke="#8a8a8a" stroke-width="0.6"/>
+<text x="1114.00" y="1164.07" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">阶段</text>
+<text x="1204.00" y="1164.07" font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="12.0" text-anchor="start" fill="#1a1a1a" font-weight="normal">方案设计（design-provisional）</text>
+</svg>

@@ -23,6 +23,10 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 MODEL_PATH = HERE / "robot_model.json"
 
+# 同目录的几何基元模块
+sys.path.insert(0, str(HERE))
+import geometry  # noqa: E402
+
 # 软件侧的关节定义是"同源"依据：关节名与限位以它为准
 sys.path.insert(0, str(REPO / "软件" / "atri"))
 try:
@@ -46,52 +50,44 @@ def deg_to_rad(value: float) -> float:
     return float(value) * math.pi / 180.0
 
 
-def box_inertia(mass: float, size_mm: list[float]) -> tuple[float, float, float]:
-    """实心长方体惯量（kg·m²），尺寸输入 mm。"""
-    w, d, h = (mm_to_m(v) for v in size_mm)
-    ixx = mass * (d * d + h * h) / 12.0
-    iyy = mass * (w * w + h * h) / 12.0
-    izz = mass * (w * w + d * d) / 12.0
-    return ixx, iyy, izz
-
-
 def build_urdf(model: dict) -> str:
-    """生成 URDF 文本，含 visual / collision / inertial。"""
+    """生成 URDF 文本，含 visual / collision / inertial。
+
+    visual    使用真实几何基元（外观）
+    collision 使用等效包围盒（标准工程做法：碰撞用简化体，更快更稳）
+    inertial  按基元形状计算惯量（球/圆柱/胶囊用精确或等效公式）
+    """
     lines: list[str] = []
     lines.append('<?xml version="1.0"?>')
     lines.append(f'<robot name="{model["name"]}">')
     lines.append("  <!-- 由 design/gen_urdf.py 生成，请勿手工编辑 -->")
     lines.append("  <!-- units: model mm -> urdf m; angles deg -> rad -->")
+    lines.append("  <!-- visual = 真实基元；collision = 等效包围盒 -->")
 
-    # 根 link
-    root = "pelvis"
     for link in model["links"]:
         name = link["name"]
-        geom = link.get("geometry", {})
-        size = geom.get("size_mm", [100.0, 100.0, 100.0])
+        geom = link.get("geometry", {"type": "box", "size_mm": [100, 100, 100]})
         color = geom.get("color", [0.7, 0.7, 0.7])
         mass = float(link["mass_kg"])
-        sx, sy, sz = (mm_to_m(v) for v in size)
-        ixx, iyy, izz = box_inertia(mass, size)
+        ixx, iyy, izz = geometry.inertia(geom, mass)
+        coll = geometry.equivalent_box(geom)
 
         lines.append(f'  <link name="{name}">')
         lines.append("    <visual>")
-        lines.append(f'      <origin xyz="0 0 0" rpy="0 0 0"/>')
-        lines.append("      <geometry>")
-        lines.append(f'        <box size="{sx:.6f} {sy:.6f} {sz:.6f}"/>')
-        lines.append("      </geometry>")
+        lines.append('      <origin xyz="0 0 0" rpy="0 0 0"/>')
+        lines.append(geometry.urdf_xml(geom, indent="      "))
         lines.append("      <material>")
-        lines.append(f'        <color rgba="{color[0]:.3f} {color[1]:.3f} {color[2]:.3f} 1.0"/>')
+        lines.append(
+            f'        <color rgba="{color[0]:.3f} {color[1]:.3f} {color[2]:.3f} 1.0"/>'
+        )
         lines.append("      </material>")
         lines.append("    </visual>")
         lines.append("    <collision>")
-        lines.append(f'      <origin xyz="0 0 0" rpy="0 0 0"/>')
-        lines.append("      <geometry>")
-        lines.append(f'        <box size="{sx:.6f} {sy:.6f} {sz:.6f}"/>')
-        lines.append("      </geometry>")
+        lines.append('      <origin xyz="0 0 0" rpy="0 0 0"/>')
+        lines.append(geometry.urdf_xml(coll, indent="      "))
         lines.append("    </collision>")
         lines.append("    <inertial>")
-        lines.append(f'      <origin xyz="0 0 0" rpy="0 0 0"/>')
+        lines.append('      <origin xyz="0 0 0" rpy="0 0 0"/>')
         lines.append(f'      <mass value="{mass:.6f}"/>')
         lines.append(
             f'      <inertia ixx="{ixx:.9f}" ixy="0" ixz="0" '
@@ -196,7 +192,65 @@ def check(model: dict) -> list[str]:
         if len(JOINTS) < c["competition_min_dof"]:
             problems.append("总自由度数不足")
 
+    # 8) 几何基元定义合法性
+    for link in model["links"]:
+        geom = link.get("geometry")
+        if not geom:
+            problems.append(f"{link['name']} 缺少 geometry")
+            continue
+        try:
+            geometry.bounding_box(geom)
+        except geometry.GeometryError as exc:
+            problems.append(f"{link['name']} 几何定义错误: {exc}")
+            continue
+        try:
+            ixx, iyy, izz = geometry.inertia(geom, link["mass_kg"])
+            if min(ixx, iyy, izz) <= 0:
+                problems.append(f"{link['name']} 惯量为非正值")
+        except geometry.GeometryError as exc:
+            problems.append(f"{link['name']} 惯量计算失败: {exc}")
+
+    # 9) 由几何实际计算包络，与声明值比对
+    try:
+        actual = measured_envelope(model)
+        for axis_name, key, limit_key in (
+            ("高度", "height_mm", "competition_max_height_mm"),
+            ("宽度", "width_mm", "competition_max_width_mm"),
+            ("深度", "depth_mm", "competition_max_depth_mm"),
+        ):
+            declared = o[key]
+            got = actual[key]
+            if abs(declared - got) > 1.0:
+                problems.append(
+                    f"{axis_name}声明 {declared:.1f} mm 与几何实测 {got:.1f} mm 不符"
+                )
+    except Exception as exc:  # noqa: BLE001
+        problems.append(f"包络计算失败: {exc}")
+
     return problems
+
+
+def measured_envelope(model: dict) -> dict:
+    """从关节链几何与各 link 包围盒，实测零姿态包络（mm）。"""
+    tfs = geometry.link_positions(model)
+    lo = [float("inf")] * 3
+    hi = [float("-inf")] * 3
+    for link in model["links"]:
+        tf = tfs.get(link["name"])
+        if tf is None:
+            continue
+        mins, maxs = geometry.link_world_aabb(model, link["name"], tf)
+        for i in range(3):
+            lo[i] = min(lo[i], mins[i])
+            hi[i] = max(hi[i], maxs[i])
+    # 足底为地面参考：height 取 z 跨度；width 取 y；depth 取 x
+    return {
+        "height_mm": hi[2] - lo[2],
+        "width_mm": hi[1] - lo[1],
+        "depth_mm": hi[0] - lo[0],
+        "min_z_mm": lo[2],
+        "max_z_mm": hi[2],
+    }
 
 
 def kinematic_chain(model: dict, leaf: str) -> list[dict]:
