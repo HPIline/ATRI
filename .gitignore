@@ -45,3 +45,17 @@ design/handoff/*.png
 # CadQuery 独立环境与 CAD 产出（体积大，可复现）
 .venv-cad/
 design/cad/out/
+# ── 答辩 PPT 生产流水线（ppt/） ─────────────────────────────
+# 虚拟环境
+.venv-ppt/
+
+# 逐页渲染图：由 build.sh 从 pptx 自动生成，无需入库（51 张 ≈ 7MB）
+ppt/out/pdf_p*.png
+ppt/out/preview/
+
+# 轻量版 PDF：由定稿 PDF 一条命令派生
+ppt/out/*轻量版.pdf
+
+# AI 生成的大图（4 张，约 19MB）：当前构建器未引用，留在本地
+# 若将来要用，删掉下面这行再 git add 即可
+ppt/assets/*.png
