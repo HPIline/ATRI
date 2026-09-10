@@ -5,14 +5,14 @@ on run argv
 	set outPath to POSIX file (item 2 of argv)
 	tell application "Microsoft PowerPoint"
 		open inPath
-		repeat 40 times
+		repeat 120 times
 			if (count of presentations) > 0 then exit repeat
 			delay 0.5
 		end repeat
 		delay 2
 		set pres to presentation 1
 		set ok to false
-		repeat 8 times
+		repeat 15 times
 			try
 				save pres in outPath as save as PDF
 				set ok to true

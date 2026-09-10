@@ -120,8 +120,8 @@ def p02(prs):
              "测试全通过 = 软件行为 51 + 设计模型与工程图 82", num_size=32)
     num_card(s, B_X, y2, cw, ch, "5/5", "",
              "五项任务无硬件闭环演示全部通过，可当场复现", num_size=32)
-    num_card(s, B_X + cw + 0.30, y2, cw, ch, "¥2755", "–3095",
-             "新增采购（全口径 ¥3105–3745；差额为实验室已有计算板）",
+    num_card(s, B_X + cw + 0.30, y2, cw, ch, "¥2100", "–2800",
+             "新增采购（全口径 ¥2788–3456；差额为借用主控与已有电池）",
              num_size=24, unit_size=12)
 
     sec_head(s, C_X, Y_BODY, C_W, "推进到哪一步")
@@ -235,15 +235,15 @@ def p06(prs):
     page_frame(s, "01", "立项基础", 6)
     page_title(s, "想开一门双足实验课，第一道坎不是教学法，是预算",
                lead="价格门槛不降下来，「成班开课」这四个字就不成立。")
-    accent(s, CONTENT_X, Y_BODY - 0.06, 6.0, "¥2755–3095", "新增采购 ／ 全口径 ¥3105–3745（一个班 20 台 ≈ 5.5–6.2 万）")
+    accent(s, CONTENT_X, Y_BODY - 0.06, 6.6, "¥2100–2800", "新增采购 ／ 全口径 ¥2788–3456（一个班 20 台 ≈ 4.2–6.9 万）")
     price_bands(s, CONTENT_X + 0.15, Y_BODY + 0.86, CONTENT_W - 3.30, 2.30, [
         ("全尺寸人形", 30000, 150000, "C9D6E2", "一个班 20 台 = 百万级"),
         ("教育型小型双足套件", 5000, 12000, "9CC0DC", "一个班 20 台 ≈ 十万级"),
-        ("A.T.R.I. 方案", 2755, 3095, ORANGE, "一个班 20 台 ≈ 5.5–6.2 万"),
+        ("A.T.R.I. 方案", 2100, 2800, ORANGE, "一个班 20 台 ≈ 4.2–5.6 万"),
     ])
     rect(s, CONTENT_X, 5.42, CONTENT_W, 1.00, fill=MIST)
     text(s, CONTENT_X + 0.24, 5.56, CONTENT_W - 0.48, 0.72,
-         [P([R("把单价压到三千元级，是「能开课」与「只能演示」的分界线。", 11, GRAPHITE)]),
+         [P([R("把单价压到两千元级（新增采购），是「能开课」与「只能演示」的分界线。", 11, GRAPHITE)]),
           P([R("口径：本方案为设计目标清单，BOM 逐项见 P49，尚未采购；"
                "竞品价格为公开产品页口径，非实测。", 8.5, GRAY)],
             space_before=6)])
@@ -362,7 +362,7 @@ def p10(prs):
                lead="这四条是我们给自己定的验收线，也是这份材料的组织逻辑。")
     rows = [("1", "合规", "过得了检录：尺寸 / 关节 / 电压 / 传感器逐项核验", "P18"),
             ("2", "能跑", "五项任务在同一台机器上闭环", "P32–P39"),
-            ("3", "便宜", "新增采购控制在三千元级", "P49"),
+            ("3", "便宜", "新增采购控制在两千元级", "P49"),
             ("4", "可复现", "设计、代码、仿真、日志在同一套仓库里", "P48")]
     y = Y_BODY + 0.20
     for no, t, d, ref in rows:
@@ -440,13 +440,13 @@ def p13(prs):
         ("陕西省普通高校", "约 90 所（公开统计口径，待逐校核实）", 1.00),
         ("开设相关专业", "自动化 / 机器人工程 / 人工智能 ≈ 40 所", 0.80),
         ("首批试点院校", "有具身智能实验室建设意向 5–8 所（估算，需调研验证）", 0.60),
-        ("单校首批订单", "2–5 台 × ¥2755–3095 ≈ 0.55–1.55 万元", 0.42),
+        ("单校首批订单", "2–5 台 × ¥2100–2800 ≈ 0.42–1.40 万元", 0.42),
     ])
     rx, rw = 7.85, 4.65
     rect(s, rx, Y_BODY + 0.10, rw, 3.30, fill=MIST)
     text(s, rx + 0.28, Y_BODY + 0.34, rw - 0.56, 0.30,
          [P([R("测算结果", 11, BLUE, heavy=True)])])
-    accent(s, rx + 0.28, Y_BODY + 0.72, rw - 0.56, "2.8–12.4", "万元", size=30, unit_size=13)
+    accent(s, rx + 0.28, Y_BODY + 0.72, rw - 0.56, "2.1–11.2", "万元", size=30, unit_size=13)
     text(s, rx + 0.28, Y_BODY + 1.34, rw - 0.56, 0.26,
          [P([R("首批试点院校合计可及规模", 10, GRAPHITE)])])
     hline(s, rx + 0.28, Y_BODY + 1.76, rw - 0.56, color=BLUE_300, width=1.0)
@@ -467,7 +467,7 @@ def p13(prs):
 def p14(prs):
     s = add_slide(prs, PAPER)
     page_frame(s, "02", "面向市场", 14)
-    page_title(s, "三千元级 + 高开放度，这一格目前人不多",
+    page_title(s, "两千元级 + 高开放度，这一格目前人不多",
                lead="我们不是在做更便宜的同类产品，是在补一个没有被占据的位置。")
     positioning_map(s, CONTENT_X + 0.60, Y_BODY + 0.46, 6.30, 3.06, [
         ("全尺寸人形", 0.92, 0.50, "9CC0DC", "l"),
@@ -504,7 +504,7 @@ def p15(prs):
         ["全尺寸人形", "数万–十余万", "超尺寸上限", "中", "需自建", "一般", "已验证"],
         ["教育型小型双足", "数千–万元", "部分低于 18", "低", "无", "部分依赖云", "已验证"],
         ["成品竞赛套件", "¥2800–6000", "合规", "低", "逐任务写脚本", "一般", "已验证"],
-        ["A.T.R.I.", "¥2755–3095", "22 DOF 合规", "高", "有（统一 FSM）", "全离线", "部分验证"],
+        ["A.T.R.I.", "¥2100–2800", "22 DOF 合规", "高", "有（统一 FSM）", "全离线", "部分验证"],
     ]
     col_w = [1.85, 1.60, 1.55, 1.40, 1.95, 1.45, 1.90]
     table(s, CONTENT_X, Y_BODY + 0.14, CONTENT_W, headers, rows,
@@ -642,35 +642,36 @@ def p17(prs):
 def p18(prs):
     s = add_slide(prs, PAPER)
     page_frame(s, "03", "技术架构与实现", 18)
-    page_title(s, "九条硬约束逐项核验：八条余量充足，一条正好压线",
-               lead="核验表对着官方要求逐条做，余量写在最后一列。")
-    accent(s, CONTENT_X, Y_BODY - 0.06, 4.5, "余量 12.5 cm", "／ 高度 47.5 cm，上限 60 cm",
+    page_title(s, "赛题约束基本合规；真正的风险在质量与力矩",
+               lead="尺寸与电气逐条过检；但整机质量超出原设计预算 37%，腿部关节力矩已越过所选舵机的额定值。")
+    accent(s, CONTENT_X, Y_BODY - 0.06, 8.0, "115%", "腿部关节力矩 ／ STS3215 额定值",
            size=20, unit_size=12)
     headers = ["约束项", "大赛要求", "本项目设计", "余量"]
     rows = [
         ["高度", "≤ 60 cm", "47.5 cm（关节链几何累加）", "+12.5 cm"],
         ["体宽", "≤ 30 cm", "19.0 cm", "+11.0 cm"],
-        ["深度（自设参考）", "官方未列", "11.0 cm", "—"],
+        ["深度（自设参考）", "官方未列", "12.3 cm", "—"],
         ["臂长（单侧）", "≤ 30 cm", "12.25 cm（肩关节→夹爪末端直线距离）", "+17.75 cm"],
         ["关节数量", "总数 ≥18 / 每腿 ≥4 / 上肢+躯干 ≥10", "22 = 10 + 8 + 2 + 2", "上肢躯干 10 = 10，无余量"],
-        ["供电电压", "锂电池、≥ 7.4 V", "11.1 V 3S", "+3.7 V"],
         ["传感配置", "IMU + 摄像头 + 麦克风 + 扬声器", "6 轴 IMU + 单目广角 + 环形麦 + 扬声器", "满足"],
-        ["场地适配", "2400×2400 mm，含 5 个任务区域", "任务卡按区域编号切换技能（scenario_set.json）", "满足"],
-        ["质量（待补舵机）", "—（官方未设上限）", "结构 1.65 kg + 22 只舵机约 1.25 kg ≈ 2.9 kg", "待样机实测"],
+        ["供电电压", "锂电池、≥ 7.4 V", "11.1 V 3S", "+3.7 V"],
+        ["场地适配", "2400×2400 mm，含 5 个任务区域", "任务卡按区域编号切换技能", "满足"],
+        ["整机质量", "官方未设上限", "2263 g（结构 552 + 舵机 1210 + 电子件 351 + 线束紧固件 150）", "超原设计预算 1650 g 的 37.2%"],
+        ["腿部关节力矩", "官方未设上限", "1.152 N·m（真实总重等比放大 ×1.372）", "占 STS3215 额定 1.0 N·m 的 115%"],
     ]
     table(s, CONTENT_X, Y_BODY + 0.42, CONTENT_W, headers, rows,
-          col_w=[1.55, 3.55, 3.70, 2.87], row_h=0.29, head_h=0.28, size=9)
-    ry = Y_BODY + 0.42 + 0.28 + 9 * 0.29 + 0.14
-    rect(s, CONTENT_X, ry, CONTENT_W, 0.86, fill=WHITE, line=ORANGE, line_w=1.25)
-    text(s, CONTENT_X + 0.24, ry + 0.08, CONTENT_W - 0.48, 0.72,
-         [P([R("压线的那一条：", 10.5, ORANGE, heavy=True),
-             R("官方口径若", 10, GRAPHITE),
-             R("不把夹爪计入「上肢关节」", 10, ORANGE, heavy=True),
-             R("，则上肢 + 躯干 = 3×2 + 2 = ", 10, GRAPHITE),
-             R("8 < 10，直接不合格", 10, ORANGE, heavy=True),
-             R("。", 10, GRAPHITE)]),
-          P([R("我们的设计把夹爪（编号 17 / 21）计入上肢自由度；此口径需在报名前向组委会书面确认，已列入 P48 风险表第一项。",
-               9, GRAY)], space_before=4)])
+          col_w=[1.75, 3.40, 4.10, 2.42], row_h=0.26, head_h=0.26, size=8.5)
+    ry = Y_BODY + 0.42 + 0.26 + 10 * 0.26 + 0.14
+    rect(s, CONTENT_X, ry, CONTENT_W, 0.90, fill=WHITE, line=ORANGE, line_w=1.25)
+    text(s, CONTENT_X + 0.24, ry + 0.08, CONTENT_W - 0.48, 0.76,
+         [P([R("两处必须讲清楚：", 10.5, ORANGE, heavy=True)]),
+          P([R("① 合规口径——", 9, ORANGE, heavy=True),
+             R("官方若", 9, GRAPHITE), R("不把夹爪计入「上肢关节」", 9, ORANGE, heavy=True),
+             R("，则上肢 + 躯干 = 3×2 + 2 = 8 < 10，直接不合格。我们的设计把夹爪（编号 17/21）计入上肢，此口径需向组委会书面确认。",
+               9, GRAPHITE)], space_before=3, line_spacing=1.28),
+          P([R("② 力矩余量——", 9, ORANGE, heavy=True),
+             R("按真实总重放大后腿部需要 1.152 N·m，已越过 STS3215 额定 1.0 N·m。三条出路见 P49，结论是「余量已耗尽，必须实测」。",
+               9, GRAPHITE)], space_before=2, line_spacing=1.28)])
     status_bar(s, ["design"])
 
 
@@ -727,7 +728,8 @@ def p19(prs):
                8.5, BLUE, heavy=True)])])
     text(s, CONTENT_X, 6.18, CONTENT_W, 0.28,
          [P([R("口径：限位与轴向取自 design/robot_model.json（config.py::JOINTS 只有 id/group/limit/rest，无轴向）；"
-               "扭矩为设计目标关节扭矩，当前值接近所选舵机的堵转档，尚未做静力学校核。", 8, GRAY)],
+               "「设计扭矩」为模型标称值；按真实总重核算后腿部关节需求 1.152 N·m 已越过所选舵机额定 1.0 N·m，" 
+               "详见 P18 与 P49。", 8, GRAY)],
             line_spacing=1.25)])
     status_bar(s, ["done"])
 
@@ -1498,8 +1500,8 @@ def p44(prs):
     def body(s):
         rows = [["全离线", "赛场断网是常态；教学场景对数据外传有顾虑",
                  "人脸检测 / 二维码解码 / TTS 全部板载，主流程零网络出站"],
-                ["三千元级", "万元级设备无法成班配置，「可复现」无从谈起",
-                 "标准总线舵机 + 3D 打印结构 + 实验室已有计算板，新增 ¥2755–3095"],
+                ["两千八百元级", "万元级设备无法成班配置，「可复现」无从谈起",
+                 "标准总线舵机 + 3D 打印结构 + 借用实验室已有计算板，新增 ¥2100–2800"],
                 ["可复现", "别人照着做不出来，就不算平台",
                  "设计模型、代码、仿真、工程图、日志同一套 Git 仓库；核心零第三方依赖"]]
         table(s, CONTENT_X, Y_BODY + 0.44, CONTENT_W, ["条件", "为什么必须", "怎么做到"],
@@ -1603,80 +1605,96 @@ def p48(prs):
     page_frame(s, "06", "验证与推进", 48)
     page_title(s, "四个阶段，每个阶段都有出口条件",
                lead="阶段二至四的时间点依赖官方赛程，不在此页承诺具体日期。")
-    gantt(s, CONTENT_X, Y_BODY + 0.10, CONTENT_W - 1.60, 1.56, [
+    gantt(s, CONTENT_X, Y_BODY + 0.08, CONTENT_W - 1.60, 1.26, [
         ("一 · 方案设计与报名", 0, 1, INK, "done"),
         ("二 · 仿真与借机验证", 1, 1, BLUE, "doing"),
         ("三 · 硬件自组与离线实测", 2, 1, "5B8FB9", "plan"),
         ("四 · 全流程彩排与优化", 3, 1, "C9D6E2", "plan"),
     ])
-    rect(s, CONTENT_X + CONTENT_W - 1.40, Y_BODY + 0.10, 1.40, 1.56, fill=MIST)
-    text(s, CONTENT_X + CONTENT_W - 1.26, Y_BODY + 0.22, 1.14, 1.32,
+    rect(s, CONTENT_X + CONTENT_W - 1.40, Y_BODY + 0.08, 1.40, 1.26, fill=MIST)
+    text(s, CONTENT_X + CONTENT_W - 1.26, Y_BODY + 0.14, 1.14, 1.14,
          [P([R("出口条件", 9.5, BLUE, heavy=True)]),
           P([R("材料可复现", 8.5, GRAPHITE)], space_before=6, line_spacing=1.30),
           P([R("（行走 ≥1 m 在阶段三）", 8, ORANGE)], space_before=2, line_spacing=1.25),
           P([R("22/22 绑定 + 五任务连续两轮", 8.5, GRAPHITE)], space_before=5, line_spacing=1.30),
           P([R("五任务各跑通一次", 8.5, GRAPHITE)], space_before=5, line_spacing=1.30),
           P([R("连续两次成功", 8.5, GRAPHITE)], space_before=5, line_spacing=1.30)])
-    ry = Y_BODY + 1.86
+    ry = Y_BODY + 1.58
     text(s, CONTENT_X, ry, 5.0, 0.24, [P([R("风险与应对", 11, INK, heavy=True)])])
-    risks = [("上肢+躯干 = 10 压线，夹爪是否计入上肢关节口径未定",
+    risks = [("整机质量 2263 g，超原设计预算 37.2%；腿部力矩占额定 115%",
+              "结构减重已在数学上堵死（需砍掉 54% 结构）；换 SM45BL 舵机可行但成本升至 ¥4856；"
+              "降动态系数（2.0 → 1.4）零硬件成本、可回到 81% 额定——待核对评分细则是否限速", True),
+             ("舵机装不进关节壳（0/8 通过）、电池放不下（105 > 94 mm）",
+              "按真实元件尺寸重做关节壳与电池仓，或改用更小容量电池", True),
+             ("上肢+躯干 = 10 压线，夹爪是否计入上肢关节口径未定",
               "报名前向组委会书面确认；若口径收紧，优先增加躯干自由度", True),
              ("技能层开环、缺雅可比；闭环待移植", "把 run_sim.py 的闭环搬进 kick.py，并标定像素—角度映射", False),
-             ("当前 Webots 世界为零重力运动学世界", "不承担「行走 ≥1 m」指标；其验证需新建带重力与接触的动力学世界", False),
-             ("人脸身份比对模块缺失", "阶段二第一优先项，先做 5 人以内的局部特征比对", False),
-             ("双足步态不稳定", "仿真先行；先调髋/踝参数再上整机", False)]
-    y = ry + 0.30
+             ("Webots 世界为零重力运动学世界", "不承担「行走 ≥1 m」指标；需新建带重力与接触的动力学世界", False),
+             ("人脸身份比对模块缺失", "阶段二第一优先项，先做 5 人以内的局部特征比对", False)]
+    y = ry + 0.26
     for t, a, hot in risks:
-        rect(s, CONTENT_X, y, CONTENT_W, 0.38, fill=WHITE if not hot else MIST,
+        h = 0.50 if len(a) > 62 else 0.32
+        rect(s, CONTENT_X, y, CONTENT_W, h, fill=WHITE if not hot else MIST,
              line=ORANGE if hot else LINE, line_w=1.0 if hot else 0.75)
-        text(s, CONTENT_X + 0.22, y, 5.60, 0.38,
-             [P([R(t, 8.5, ORANGE if hot else GRAPHITE, heavy=hot)])],
+        text(s, CONTENT_X + 0.22, y, 5.30, h,
+             [P([R(t, 8, ORANGE if hot else GRAPHITE, heavy=hot)], line_spacing=1.20)],
              anchor=MSO_ANCHOR.MIDDLE)
-        text(s, CONTENT_X + 5.95, y, CONTENT_W - 6.17, 0.38,
-             [P([R(a, 8.5, GRAPHITE)])], anchor=MSO_ANCHOR.MIDDLE)
-        y += 0.42
+        text(s, CONTENT_X + 5.65, y, CONTENT_W - 5.87, h,
+             [P([R(a, 8, GRAPHITE)], line_spacing=1.20)], anchor=MSO_ANCHOR.MIDDLE)
+        y += h + 0.04
     status_bar(s, ["done", "doing", "plan"])
 
 
 def p49(prs):
     s = add_slide(prs, PAPER)
     page_frame(s, "06", "验证与推进", 49)
-    page_title(s, "三档口径写清楚，逐项算得出来",
-               lead="设计目标清单，尚未采购。")
-    accent(s, CONTENT_X, Y_BODY - 0.06, 5.0, "¥3105–3745", "全口径 BOM 合计",
-           size=22, unit_size=12)
-    rows = [["1", "总线舵机", "22", "ST3215 / LD-1501MG 级别", "¥90", "¥1980"],
-            ["2", "下层控制板", "1", "STM32（F103/F405 级别）", "¥50", "¥50"],
-            ["3", "边缘计算板", "1", "树莓派 4B / Orange Pi 5 级别", "¥300–600", "¥300–600"],
-            ["4", "6 轴 IMU", "1", "MPU6050 / BMI160 级别", "¥15", "¥15"],
-            ["5", "单目摄像头", "1", "USB / UVC 广角", "¥50", "¥50"],
-            ["6", "麦克风 + 扬声器", "1", "USB 麦 / 3W 喇叭 + 功放", "¥40", "¥40"],
-            ["7", "锂电池 + 电源模块", "1", "2S/3S ≥7.4 V + BEC 降压", "¥110–150", "¥110–150"],
-            ["8", "3D 打印结构件", "1 套", "PLA / PETG 含损耗", "¥300–600", "¥300–600"],
-            ["9", "螺丝 / 轴承 / 线材", "1 套", "M2 / M3 + 杜邦线", "¥100", "¥100"],
-            ["10", "夹爪 / 末端", "2", "3D 打印 + 摩擦片", "¥80", "¥160"]]
-    table(s, CONTENT_X, Y_BODY + 0.42, 7.35,
-          ["#", "组件", "数量", "选型 / 规格", "单价", "小计"],
-          rows, col_w=[0.36, 1.90, 0.60, 2.44, 0.95, 1.10],
-          row_h=0.285, head_h=0.28, size=8.5)
+    page_title(s, "两千八百元级，附一条成本困局",
+               lead="基于已确认元件参数；同时把「换更强舵机」这条出路的价格也写出来。")
+    accent(s, CONTENT_X, Y_BODY - 0.06, 6.0, "¥2788–3456", "全口径 BOM（借用主控与已有电池后 ¥2100–2800）",
+           size=20, unit_size=12)
+
+    rows = [
+        ["舵机", "飞特 STS3215 × 22 @ ¥85–95", "¥1870–2090"],
+        ["电子件", "树莓派 4B / STM32F405 / URT-1 驱动板 / 相机 / 麦克风 / 功放喇叭 / IMU",
+         "¥515–735"],
+        ["电源", "3S 11.1V 2200–3000mAh + XL4015 降压 + XT60 接插件线材", "¥123–185"],
+        ["标准件", "MF106ZZ 轴承 × 22 + 25T 金属舵盘 × 22（不可打印）+ 热熔铜螺母 + 螺钉 + 线束",
+         "¥220–356"],
+        ["打印耗材", "结构件净重 552 g × 损耗 1.35 = 745 g → 1 卷 PETG", "¥60–90"],
+    ]
+    table(s, CONTENT_X, Y_BODY + 0.44, 7.55,
+          ["类别", "明细", "小计"], rows,
+          col_w=[0.95, 5.10, 1.50], row_h=0.48, head_h=0.30, size=8.5)
+    sy = Y_BODY + 0.44 + 0.30 + 5 * 0.48 + 0.06
+    rect(s, CONTENT_X, sy, 7.55, 0.44, fill=MIST_2)
+    text(s, CONTENT_X + 0.20, sy, 4.90, 0.44,
+         [P([R("合计", 11, INK, heavy=True),
+             R("　队员自备 FDM 打印机，只算耗材", 7.5, GRAY)])],
+         anchor=MSO_ANCHOR.MIDDLE)
+    text(s, 5.90, sy, 1.55, 0.44,
+         [P([R("¥2788–3456", 12, ORANGE, heavy=True)], align=PP_ALIGN.RIGHT)],
+         anchor=MSO_ANCHOR.MIDDLE)
+
     rx, rw = 8.60, 3.90
     for i, (t, v, d) in enumerate([
-            ("全口径", "¥3105–3745", "22 舵机 + 控制板 + 电源 + 3D 打印 + 传感器 + 杂项"),
-            ("新增采购", "¥2755–3095", "扣除实验室已有的边缘计算板与 STM32"),
-            ("含备用舵机", "¥2935–3455", "额外 2–4 只备用舵机，避免现场损坏无替换")]):
-        y = Y_BODY + 0.42 + i * 1.06
-        rect(s, rx, y, rw, 0.96, fill=MIST if i < 2 else MIST_2)
-        text(s, rx + 0.22, y + 0.14, rw - 0.44, 0.24,
-             [P([R(t, 10, BLUE, heavy=True)])])
-        text(s, rx + 0.22, y + 0.34, rw - 0.44, 0.30,
+            ("全口径", "¥2788–3456", "含主控与电池；上限贴 3600 元申报预算的边"),
+            ("可省后", "¥2100–2800", "借树莓派 −350~500 / 已有电池 −85~120 / 舵盘随舵机附赠 −88"),
+            ("换 SM45BL 舵机", "¥4856", "升级 7 个关节，成本 +35%；力矩回到 89% 额定")]):
+        y = Y_BODY + 0.44 + i * 1.06
+        rect(s, rx, y, rw, 0.96, fill=MIST if i < 2 else WHITE,
+             line=None if i < 2 else ORANGE, line_w=1.0)
+        text(s, rx + 0.22, y + 0.12, rw - 0.44, 0.22,
+             [P([R(t, 9.5, BLUE if i < 2 else ORANGE, heavy=True)])])
+        text(s, rx + 0.22, y + 0.34, rw - 0.44, 0.26,
              [P([R(v, 13, ORANGE, heavy=True)])])
-        text(s, rx + 0.22, y + 0.64, rw - 0.44, 0.30,
-             [P([R(d, 8, GRAY)], line_spacing=1.25)])
-    rect(s, CONTENT_X, 5.96, CONTENT_W, 0.58, fill=WHITE, line=ORANGE, line_w=1.0)
-    text(s, CONTENT_X + 0.24, 5.96, CONTENT_W - 0.48, 0.62,
-         [P([R("口径：", 9.5, ORANGE, heavy=True),
-             R("设计目标清单，尚未采购。具体型号在样机阶段按扭矩 / 重量 / 供电需求确认；"
-               "三档口径的差额来源已在右侧写明。", 9.5, GRAPHITE)])],
+        text(s, rx + 0.22, y + 0.62, rw - 0.44, 0.30,
+             [P([R(d, 7.5, GRAY)], line_spacing=1.22)])
+
+    rect(s, CONTENT_X, 5.96, CONTENT_W, 0.56, fill=WHITE, line=ORANGE, line_w=1.0)
+    text(s, CONTENT_X + 0.24, 5.96, CONTENT_W - 0.48, 0.56,
+         [P([R("口径：", 9, ORANGE, heavy=True),
+             R("设计目标清单，尚未采购；价格为量级估算，随行就市。若评分细则不限速，"
+               "降动态系数（2.0 → 1.4）是零硬件成本的出路。", 9, GRAPHITE)])],
          anchor=MSO_ANCHOR.MIDDLE)
     status_bar(s, ["plan"])
 
@@ -1768,30 +1786,22 @@ PAGES = [p01, p02, p03, p04, p05, p06, p07, p08, p09, p10,
 
 
 def apply_motion(prs, chapter_slides):
-    """给全片加转场与入场动画。
+    """给全片加转场。
 
-    转场：统一 fade 700ms——答辩场合要的是平稳，不是花哨。
-    入场：标题先落，正文元素随后按位置顺序淡入；用 afterEffect 自动播放，
-          汇报人不需要为内容额外点击（章节页只用转场，不加入场）。
+    ⚠️ 只做转场，不做逐元素入场动画——这是踩过坑之后的决定：
+
+    手写 DrawingML `<p:timing>` 实现入场动画，在页数少时 PowerPoint 能凑合打开，
+    但 45 页 × 每页若干形状时（约 3200 个 cTn 节点）PowerPoint 会**直接拒绝打开
+    文件**（表现为 AppleEvent 超时 / count of presentations = 0）。补上 bldLst
+    后仍未解决。经二分定位确认：无动画的 51 页可正常打开，加动画即失败。
+
+    交付物打不开是致命的，而入场动画只是锦上添花，所以这里只保留转场。
+    若需要入场动画，请在 PowerPoint 里手动添加（一次操作可框选多页）。
+
+    ppt/animate.py 里的 add_entrance 保留但不再调用，供后续排查。
     """
-    for idx, slide in enumerate(prs.slides, 1):
+    for slide in prs.slides:
         add_transition(slide, "fade", 700)
-        if idx in chapter_slides:
-            continue
-        cand = []
-        for sh in slide.shapes:
-            top = sh.top.inches if sh.top is not None else 0
-            if top < 0.62 or top > 6.95:          # 跳过页眉页脚
-                continue
-            if sh.height is None or sh.width is None:
-                continue
-            if sh.width.inches < 0.10 or sh.height.inches < 0.10:
-                continue                              # 跳过细线/小点
-            cand.append((round(top, 2), round(sh.left.inches, 2), sh.shape_id))
-        cand.sort()
-        ids = [c[2] for c in cand[:14]]
-        if ids:
-            add_entrance(slide, ids, dur_ms=420, delay_ms=60)
 
 
 def main():

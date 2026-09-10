@@ -102,6 +102,15 @@ def add_entrance(slide, shape_ids, dur_ms: int = 400, delay_ms: int = 0,
     nxt = etree.SubElement(seq, _p("nextCondLst"))
     _cond(nxt, "onNext", "0")
 
+    # bldLst：告诉 PowerPoint 这些形状按「整体」构建。
+    # 缺了它，动画在少量形状时能凑合，形状一多 PowerPoint 直接拒绝打开。
+    bld = etree.SubElement(timing, _p("bldLst"))
+    for sid in shape_ids:
+        bp = etree.SubElement(bld, _p("bldP"))
+        bp.set("spid", str(sid))
+        bp.set("grpId", "0")
+        bp.set("build", "allAtOnce")
+
 
 def _cond(parent, evt: str, delay: str):
     c = etree.SubElement(parent, _p("cond"))
