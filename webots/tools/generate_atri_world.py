@@ -306,7 +306,10 @@ def main() -> int:
     assert len(set(names)) == 22, "关节名重复"
 
     WORLD_PATH.parent.mkdir(parents=True, exist_ok=True)
-    WORLD_PATH.write_text(render_world(), encoding="utf-8", newline="\n")
+    # 用 open(..., newline="\n") 而不是 Path.write_text(newline=...)：
+    # write_text 的 newline 参数是 Python 3.10 才加的，CI 矩阵里有 3.9。
+    with open(WORLD_PATH, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(render_world())
     print(f"已生成 {WORLD_PATH}")
     print(f"关节数 {len(names)}: {', '.join(names)}")
     return 0
