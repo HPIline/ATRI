@@ -38,8 +38,15 @@ class MockServoBus(ServoBus):
 class Cerebellum:
     """小脑控制层：脚本动作库 + 步态生成 + 姿态微调。全部本地 CPU 可运行。"""
 
-    def __init__(self, servo_bus: Optional[ServoBus] = None) -> None:
+    def __init__(
+        self,
+        servo_bus: Optional[ServoBus] = None,
+        sleeper: Any = None,
+    ) -> None:
         self.bus = servo_bus or MockServoBus()
+        # sleeper(dt_s) 用于推进时间；Webots 控制器传入 robot.step(ms) 包装，
+        # 默认为 time.sleep，保持无仿真环境行为不变。
+        self.sleeper = sleeper or time.sleep
 
     def set_pose(self, targets: Dict[str, float]) -> Dict[str, float]:
         """下发一组关节目标角（按名称），返回实际限位后的角度。"""
@@ -95,7 +102,7 @@ class Cerebellum:
     def execute_trajectory(self, frames: List[Dict[str, float]], dt_s: float = 0.02) -> Dict[str, Any]:
         for frame in frames:
             self.set_pose(frame)
-            time.sleep(dt_s)
+            self.sleeper(dt_s)
         return {"frames": len(frames), "duration_s": round(len(frames) * dt_s, 3)}
 
     def walk(self, steps: int = 6, **kwargs: Any) -> Dict[str, Any]:
@@ -137,7 +144,7 @@ class Cerebellum:
                 "right_gripper": 20.0,
             })
         self.set_pose(target)
-        time.sleep(0.1)
+        self.sleeper(0.1)
         return {"action": "grasp", "side": side}
 
     def release(self, side: str = "both") -> Dict[str, Any]:
@@ -147,7 +154,7 @@ class Cerebellum:
         if side in ("right", "both"):
             target["right_gripper"] = 0.0
         self.set_pose(target)
-        time.sleep(0.1)
+        self.sleeper(0.1)
         self.home()
         return {"action": "release", "side": side}
 
