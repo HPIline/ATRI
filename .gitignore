@@ -31,3 +31,7 @@ ql_thumb/
 # 仿真运行产出（可复现，无需入库）
 design/results/
 design/figures/
+
+# Webots 联调产物（run_webots_batch.ps1 / 控制器 --report --log 生成）
+/atri_report.json
+/atri_console.log

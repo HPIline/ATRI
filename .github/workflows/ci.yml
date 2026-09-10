@@ -32,3 +32,28 @@ jobs:
 
       - name: No-hardware closed-loop demo
         run: python run_demo.py --fast
+
+  # Webots 控制器在没有 Webots 的机器上也能验证：
+  # webots/tests/webots_api_stub.py 顶替 Webots 的 controller 模块，
+  # 把控制器完整跑一遍（位置传感器使能、速度设置、仿真提前结束等回归点都在里面）。
+  webots-controller:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Webots controller offline tests
+        run: python -m unittest discover -s webots/tests -v
+
+      - name: World file is in sync with its generator
+        run: |
+          python webots/tools/generate_atri_world.py
+          git diff --exit-code -- webots/worlds/atri_22dof.wbt
