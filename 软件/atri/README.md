@@ -19,6 +19,7 @@ atri/
   voice/                    # 语音交互接口：Mock 关键词识别 + TTS（macOS say）
   qrgen.py                  # 二维码 JSON 指令生成器
   action_library.py         # 动作库 JSON 校验器
+  action_export.py          # 动作库导出工具（Cerebellum -> JSON）
   sim.py                    # 无硬件闭环仿真入口
 config/robot.json           # 机器人配置（motion.backend = scripted）
 task_cards/*.json           # 五项赛题任务卡
@@ -54,7 +55,7 @@ python3 -m unittest discover -s tests -v
 python3 run_demo.py --fast
 ```
 
-当前测试：49 项全部通过（感知、语音、二维码生成、动作库均含单元测试）。
+当前测试：51 项全部通过（感知、语音、二维码生成、动作库均含单元测试）。
 
 ## 视觉感知（atri/perception）
 
