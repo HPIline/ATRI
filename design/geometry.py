@@ -171,16 +171,32 @@ def half_extents(geom: Dict[str, Any]) -> List[float]:
     return [v / 2.0 for v in bounding_box(geom)]
 
 
+def geometry_origin(geom: Dict[str, Any]) -> List[float]:
+    """几何体相对关节坐标系的偏移（mm）。
+
+    关节坐标系位于转轴处，而零件实体通常不在轴上——例如大腿要从髋关节
+    一直延伸到膝关节。用 origin_mm 表达这个偏移，等价于 URDF 的
+    <visual><origin>。缺省为 [0, 0, 0]，即几何中心就在关节处。
+    """
+    o = geom.get("origin_mm", [0.0, 0.0, 0.0])
+    if len(o) != 3:
+        raise GeometryError("origin_mm 必须是 [x, y, z]")
+    return [float(v) for v in o]
+
+
 def equivalent_box(geom: Dict[str, Any]) -> Dict[str, Any]:
     """把任意基元退化为等效 box —— 用于 collision 与 AABB 干涉检查。
 
     这是标准工程做法：碰撞检测用简化体，既快又稳。
     """
     size = bounding_box(geom)
-    color = geom.get("color")
     out: Dict[str, Any] = {"type": "box", "size_mm": list(size)}
+    color = geom.get("color")
     if color:
         out["color"] = list(color)
+    origin = geom.get("origin_mm")
+    if origin:
+        out["origin_mm"] = list(origin)
     return out
 
 
@@ -260,6 +276,23 @@ def inertia(geom: Dict[str, Any], mass_kg: float) -> Tuple[float, float, float]:
     raise GeometryError(f"不支持的几何类型: {gtype!r}")
 
 
+def urdf_rpy(geom: Dict[str, Any]) -> str:
+    """回转体（cylinder/capsule）沿 x/y 轴时，需要 rpy 把 URDF 的 z 轴摆正。
+
+    URDF 的 <cylinder> 永远沿自身 +Z。模型里 axis=x 时绕 Y 转 +90°，
+    axis=y 时绕 X 转 -90°，与 mesh/投影使用的基向量保持一致。
+    """
+    gtype = geom.get("type")
+    if gtype not in ("cylinder", "capsule"):
+        return "0 0 0"
+    axis = _axis_of(geom)
+    if axis == "x":
+        return "0 1.570796 0"
+    if axis == "y":
+        return "-1.570796 0 0"
+    return "0 0 0"
+
+
 def urdf_xml(geom: Dict[str, Any], indent: str = "      ") -> str:
     """生成 URDF <geometry> 片段。
 
@@ -297,19 +330,11 @@ def urdf_xml(geom: Dict[str, Any], indent: str = "      ") -> str:
     if gtype == "capsule":
         r = float(geom["radius_mm"]) / 1000.0
         length = float(geom["length_mm"]) / 1000.0
-        axis = _axis_of(geom)
-        # URDF cylinder 沿自身 z 轴；轴向不是 z 时用 rpy 旋转
-        rpy = {
-            "z": "0 0 0",
-            "x": "0 1.570796 0",
-            "y": "1.570796 0 0",
-        }[axis]
         return (
             f"{indent}<geometry>\n"
             f"{indent}  <!-- capsule 近似为 cylinder（长度含两端球头） -->\n"
             f"{indent}  <cylinder radius=\"{r:.6f}\" length=\"{length + 2*r:.6f}\"/>\n"
-            f"{indent}</geometry>\n"
-            f"{indent}<!-- 轴向 rpy: {rpy} -->"
+            f"{indent}</geometry>"
         )
     if gtype == "sphere_shell":
         ro = float(geom["outer_r_mm"]) / 1000.0
@@ -473,9 +498,10 @@ def link_world_aabb(model: Dict[str, Any], link_name: str,
         raise GeometryError(f"未找到 link: {link_name}")
     geom = geom_override or link["geometry"]
     hx, hy, hz = half_extents(geom)
+    ox, oy, oz = geometry_origin(geom)
 
     corners = [
-        (sx * hx, sy * hy, sz * hz)
+        (ox + sx * hx, oy + sy * hy, oz + sz * hz)
         for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)
     ]
     pts = [transform_point(tf, c) for c in corners]
@@ -496,3 +522,179 @@ def aabb_overlap(a: Tuple[Tuple[float, float, float], Tuple[float, float, float]
             return False, 0.0
         overlap.append(hi - lo)
     return True, min(overlap)
+
+
+# --------------------------------------------------------------------------
+# 三角网格生成（用于等轴测渲染与后续 STL 导出）
+# --------------------------------------------------------------------------
+Triangle = Tuple[Tuple[float, float, float],
+                 Tuple[float, float, float],
+                 Tuple[float, float, float]]
+
+
+def _axis_basis(axis: str) -> Tuple[Vec3, Vec3, Vec3]:
+    """返回 (轴方向, 第一径向, 第二径向)。"""
+    if axis == "x":
+        return (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
+    if axis == "y":
+        return (0.0, 1.0, 0.0), (0.0, 0.0, 1.0), (1.0, 0.0, 0.0)
+    return (0.0, 0.0, 1.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)
+
+
+def _quad(a, b, c, d) -> List[Triangle]:
+    return [(a, b, c), (a, c, d)]
+
+
+def mesh_box(size_mm: Sequence[float]) -> List[Triangle]:
+    hx, hy, hz = (v / 2.0 for v in size_mm)
+    v = [(-hx, -hy, -hz), (hx, -hy, -hz), (hx, hy, -hz), (-hx, hy, -hz),
+         (-hx, -hy, hz), (hx, -hy, hz), (hx, hy, hz), (-hx, hy, hz)]
+    tris: List[Triangle] = []
+    tris += _quad(v[0], v[3], v[2], v[1])   # 底
+    tris += _quad(v[4], v[5], v[6], v[7])   # 顶
+    tris += _quad(v[0], v[1], v[5], v[4])   # -y
+    tris += _quad(v[1], v[2], v[6], v[5])   # +x
+    tris += _quad(v[2], v[3], v[7], v[6])   # +y
+    tris += _quad(v[3], v[0], v[4], v[7])   # -x
+    return tris
+
+
+def mesh_cylinder(radius: float, height: float, axis: str = "z",
+                  segments: int = 24, caps: bool = True) -> List[Triangle]:
+    """圆柱网格。caps=False 时不含两端盖（用于拼接胶囊，避免面片重叠闪烁）。"""
+    ax, u, w = _axis_basis(axis)
+    h = height / 2.0
+    tris: List[Triangle] = []
+
+    def pt(ang: float, along: float):
+        c, s = math.cos(ang), math.sin(ang)
+        return (
+            ax[0] * along + u[0] * radius * c + w[0] * radius * s,
+            ax[1] * along + u[1] * radius * c + w[1] * radius * s,
+            ax[2] * along + u[2] * radius * c + w[2] * radius * s,
+        )
+
+    # 端盖圆心：半径 0，位于轴线上（注意不是 pt(0.0, h)——那是角度 0 的边缘点）
+    top_c = (ax[0] * h, ax[1] * h, ax[2] * h)
+    bot_c = (-ax[0] * h, -ax[1] * h, -ax[2] * h)
+
+    for i in range(segments):
+        a0 = 2 * math.pi * i / segments
+        a1 = 2 * math.pi * (i + 1) / segments
+        tris += _quad(pt(a0, -h), pt(a1, -h), pt(a1, h), pt(a0, h))
+        if caps:
+            tris.append((top_c, pt(a0, h), pt(a1, h)))
+            tris.append((bot_c, pt(a1, -h), pt(a0, -h)))
+    return tris
+
+
+def mesh_sphere(radius: float, segments: int = 24,
+                rings: int = 12) -> List[Triangle]:
+    tris: List[Triangle] = []
+
+    def pt(theta: float, phi: float):
+        st, ct = math.sin(theta), math.cos(theta)
+        return (radius * st * math.cos(phi),
+                radius * st * math.sin(phi),
+                radius * ct)
+
+    for j in range(rings):
+        t0 = math.pi * j / rings
+        t1 = math.pi * (j + 1) / rings
+        for i in range(segments):
+            p0 = 2 * math.pi * i / segments
+            p1 = 2 * math.pi * (i + 1) / segments
+            a, b = pt(t0, p0), pt(t0, p1)
+            c, d = pt(t1, p1), pt(t1, p0)
+            if j == 0:
+                tris.append((a, c, d))
+            elif j == rings - 1:
+                tris.append((a, b, c))
+            else:
+                tris += _quad(a, b, c, d)
+    return tris
+
+
+def mesh_capsule(radius: float, length: float, axis: str = "z",
+                 segments: int = 24, rings: int = 6) -> List[Triangle]:
+    """胶囊 = 无端盖圆柱 + 两端半球。
+
+    圆柱不带端盖、半球从极点铺到赤道，两者在赤道处共边，
+    因此不会出现重叠面片导致的渲染闪烁。
+    """
+    ax, u, w = _axis_basis(axis)
+    if length <= 1e-9:
+        return mesh_sphere(radius, segments, rings * 2)
+
+    h = length / 2.0
+    tris = mesh_cylinder(radius, length, axis, segments, caps=False)
+
+    def hemi(center_along: float, sign: float) -> List[Triangle]:
+        out: List[Triangle] = []
+
+        def pt(theta: float, phi: float):
+            r = radius * math.sin(theta)
+            al = center_along + sign * radius * math.cos(theta)
+            return (
+                ax[0] * al + u[0] * r * math.cos(phi) + w[0] * r * math.sin(phi),
+                ax[1] * al + u[1] * r * math.cos(phi) + w[1] * r * math.sin(phi),
+                ax[2] * al + u[2] * r * math.cos(phi) + w[2] * r * math.sin(phi),
+            )
+
+        for j in range(rings):
+            t0 = (math.pi / 2.0) * j / rings
+            t1 = (math.pi / 2.0) * (j + 1) / rings
+            for i in range(segments):
+                p0 = 2 * math.pi * i / segments
+                p1 = 2 * math.pi * (i + 1) / segments
+                a, b = pt(t0, p0), pt(t0, p1)
+                c, d = pt(t1, p1), pt(t1, p0)
+                if j == 0:
+                    # 极点：a 与 b 重合，退化为扇形
+                    out.append((a, c, d) if sign > 0 else (a, d, c))
+                else:
+                    quad = _quad(a, b, c, d)
+                    out += quad if sign > 0 else [(x, z, y) for x, y, z in quad]
+        return out
+
+    tris += hemi(h, 1.0)
+    tris += hemi(-h, -1.0)
+    return tris
+
+
+def mesh(geom: Dict[str, Any], segments: int = 24,
+         rings: int = 10) -> List[Triangle]:
+    """按基元类型生成三角网格（link 局部坐标，单位 mm）。
+
+    已计入 origin_mm 偏移，可直接用 link 的世界变换变换到世界坐标。
+    """
+    tris = _mesh_shape(geom, segments, rings)
+    ox, oy, oz = geometry_origin(geom)
+    if ox or oy or oz:
+        tris = [tuple((v[0] + ox, v[1] + oy, v[2] + oz) for v in t)
+                for t in tris]
+    return tris
+
+
+def _mesh_shape(geom: Dict[str, Any], segments: int = 24,
+                rings: int = 10) -> List[Triangle]:
+    """仅按形状生成网格，不含 origin 偏移。"""
+    gtype = geom.get("type")
+    if gtype == "box":
+        return mesh_box(geom["size_mm"])
+    if gtype == "rounded_box":
+        # 用 box 近似（渲染层面差异很小）
+        return mesh_box(geom["size_mm"])
+    if gtype == "cylinder":
+        return mesh_cylinder(float(geom["radius_mm"]),
+                             float(geom["height_mm"]),
+                             _axis_of(geom), segments)
+    if gtype == "sphere":
+        return mesh_sphere(float(geom["radius_mm"]), segments, rings)
+    if gtype == "capsule":
+        return mesh_capsule(float(geom["radius_mm"]),
+                            float(geom["length_mm"]),
+                            _axis_of(geom), segments, max(3, rings // 2))
+    if gtype == "sphere_shell":
+        return mesh_sphere(float(geom["outer_r_mm"]), segments, rings)
+    raise GeometryError(f"无法生成网格: {gtype!r}")

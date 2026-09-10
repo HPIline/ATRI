@@ -283,9 +283,39 @@ class TestUrdfGeometryExport(unittest.TestCase):
                     if l.get("name") == "left_thigh")
         cyl = link.find("visual/geometry/cylinder")
         self.assertIsNotNone(cyl)
-        # 模型：r=22.5, length=35 -> URDF 长度 = 35 + 45 = 80mm = 0.08m
-        self.assertAlmostEqual(float(cyl.get("length")), 0.080, places=6)
+        # 模型：r=22.5、capsule length=45 -> URDF 长度 = 45 + 2*22.5 = 90mm
+        self.assertAlmostEqual(float(cyl.get("length")), 0.090, places=6)
         self.assertAlmostEqual(float(cyl.get("radius")), 0.0225, places=6)
+
+    def test_visual_origin_is_exported(self):
+        """带 origin_mm 的 link，其 visual/collision/inertial 都要写出偏移。"""
+        link = next(l for l in self.root.findall("link")
+                    if l.get("name") == "left_thigh")
+        model_link = next(l for l in self.model["links"]
+                          if l["name"] == "left_thigh")
+        ox, oy, oz = model_link["geometry"]["origin_mm"]
+        for tag in ("visual", "collision", "inertial"):
+            xyz = link.find(f"{tag}/origin").get("xyz").split()
+            self.assertAlmostEqual(float(xyz[0]), ox / 1000.0, places=6)
+            self.assertAlmostEqual(float(xyz[1]), oy / 1000.0, places=6)
+            self.assertAlmostEqual(float(xyz[2]), oz / 1000.0, places=6)
+
+    def test_segments_connect_without_gaps(self):
+        """竖直链条上相邻 link 的包围盒必须重叠，不得出现悬空段。"""
+        chain = ["head", "head_yaw_link", "torso_upper", "trunk_roll_link",
+                 "pelvis", "left_hip_yaw_link", "left_hip_roll_link",
+                 "left_thigh", "left_shank", "left_foot"]
+        tfs = geometry.link_positions(self.model)
+        ranges = []
+        for name in chain:
+            mins, maxs = geometry.link_world_aabb(self.model, name, tfs[name])
+            ranges.append((name, mins[2], maxs[2]))
+        for (n0, lo0, hi0), (n1, lo1, hi1) in zip(ranges, ranges[1:]):
+            gap = max(lo0, lo1) - min(hi0, hi1)
+            self.assertLessEqual(
+                gap, 0.5,
+                f"{n0} 与 {n1} 之间存在 {gap:.1f} mm 悬空间隙",
+            )
 
     def test_sphere_shell_exported_as_sphere(self):
         link = next(l for l in self.root.findall("link")
@@ -388,3 +418,160 @@ class TestDrawings(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestMeshes(unittest.TestCase):
+    """三角网格质量：水密性直接决定渲染有无破面。"""
+
+    def _edge_sharing(self, tris):
+        from collections import Counter
+        e = Counter()
+        for a, b, c in tris:
+            for p, q in ((a, b), (b, c), (c, a)):
+                key = tuple(sorted((
+                    tuple(round(x, 5) for x in p),
+                    tuple(round(x, 5) for x in q),
+                )))
+                e[key] += 1
+        return e
+
+    def _assert_watertight(self, geom, **kw):
+        tris = geometry.mesh(geom, **kw)
+        self.assertGreater(len(tris), 0)
+        sharing = self._edge_sharing(tris)
+        bad = [k for k, v in sharing.items() if v != 2]
+        self.assertEqual(
+            bad, [],
+            f"{geom['type']} 网格非水密：{len(bad)} 条边未恰好被两个三角形共享",
+        )
+
+    def test_box_watertight(self):
+        self._assert_watertight({"type": "box", "size_mm": [10, 20, 30]})
+
+    def test_sphere_watertight(self):
+        self._assert_watertight({"type": "sphere", "radius_mm": 7},
+                                segments=12, rings=6)
+
+    def test_cylinder_watertight_all_axes(self):
+        for axis in "xyz":
+            with self.subTest(axis=axis):
+                self._assert_watertight(
+                    {"type": "cylinder", "radius_mm": 6, "height_mm": 20,
+                     "axis": axis}, segments=12)
+
+    def test_capsule_watertight_all_axes(self):
+        for axis in "xyz":
+            with self.subTest(axis=axis):
+                self._assert_watertight(
+                    {"type": "capsule", "radius_mm": 8, "length_mm": 20,
+                     "axis": axis}, segments=12, rings=4)
+
+    def test_capsule_without_cylinder_section(self):
+        """length=0 的胶囊应退化为球，仍然水密。"""
+        self._assert_watertight(
+            {"type": "capsule", "radius_mm": 8, "length_mm": 0.0, "axis": "z"},
+            segments=12, rings=4)
+
+    def test_mesh_respects_origin_offset(self):
+        g = {"type": "sphere", "radius_mm": 5, "origin_mm": [0, 0, -40]}
+        zs = [v[2] for t in geometry.mesh(g, 12, 6) for v in t]
+        self.assertAlmostEqual(min(zs), -45.0, places=6)
+        self.assertAlmostEqual(max(zs), -35.0, places=6)
+
+    def test_mesh_matches_bounding_box(self):
+        for geom in (
+            {"type": "box", "size_mm": [10, 20, 30]},
+            {"type": "cylinder", "radius_mm": 5, "height_mm": 20, "axis": "y"},
+            {"type": "capsule", "radius_mm": 4, "length_mm": 12, "axis": "x"},
+        ):
+            with self.subTest(geom=geom["type"]):
+                tris = geometry.mesh(geom, segments=24, rings=10)
+                pts = [v for t in tris for v in t]
+                span = [max(p[i] for p in pts) - min(p[i] for p in pts)
+                        for i in range(3)]
+                want = geometry.bounding_box(geom)
+                for got, exp in zip(span, want):
+                    self.assertAlmostEqual(got, exp, delta=0.01)
+
+
+class TestRender(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.model = gen_urdf.load_model()
+
+    def test_camera_projection_is_orthographic(self):
+        cam = gen_drawings_import_camera()
+        cam.scale = 2.0
+        cam.cx = cam.cy = 0.0
+        a = cam.project((0.0, 0.0, 0.0))
+        b = cam.project((0.0, 0.0, 10.0))
+        # 纯 Z 位移在俯仰角 0 时应只改变屏幕 y
+        self.assertAlmostEqual(a[0], b[0], places=6)
+        self.assertNotAlmostEqual(a[1], b[1], places=6)
+
+    def test_camera_fit_keeps_model_inside_canvas(self):
+        cam = gen_drawings_import_camera()
+        scene = gen_drawings_import_scene()(cam)
+        scene.build(self.model, {}, segments=10, rings=5)
+        xs, ys = [], []
+        for p in scene.world_pts:
+            r = cam.rotate(p)
+            x, y = cam.project(r)
+            xs.append(x)
+            ys.append(y)
+        self.assertGreaterEqual(min(xs), -0.5)
+        self.assertLessEqual(max(xs), cam.w + 0.5)
+        self.assertGreaterEqual(min(ys), -0.5)
+        self.assertLessEqual(max(ys), cam.h + 0.5)
+
+    def test_all_render_views_produce_valid_svg(self):
+        import gen_render
+        for key in gen_render.VIEWS:
+            with self.subTest(view=key):
+                cam = gen_render.Camera(38.0, 18.0)
+                scene = gen_render.Scene(cam)
+                scene.build(self.model, gen_render.STANCE_POSE,
+                            by_group=gen_render.VIEWS[key].get("by_group", False),
+                            segments=10, rings=5)
+                svg = scene.render(title="t", subtitle="s", note="n")
+                root = ET.fromstring(svg)
+                self.assertEqual(root.tag.split("}")[-1], "svg")
+                self.assertIn("<polygon", svg)
+
+    def test_render_produces_triangles(self):
+        import gen_render
+        cam = gen_render.Camera(38.0, 18.0)
+        scene = gen_render.Scene(cam)
+        scene.build(self.model, gen_render.STANCE_POSE,
+                    segments=10, rings=5)
+        self.assertGreater(len(scene.tris), 200, "三角形太少，渲染可能未生效")
+
+    def test_backface_culling_removes_interior(self):
+        """背面剔除后可见三角形应少于全部面片。"""
+        import gen_render
+        cam = gen_render.Camera(38.0, 18.0)
+        scene = gen_render.Scene(cam)
+        scene.build(self.model, {}, segments=10, rings=5)
+        total = sum(len(geometry.mesh(l["geometry"], 10, 5))
+                    for l in self.model["links"])
+        self.assertLess(len(scene.tris), total)
+
+    def test_drawing_and_render_camera_conventions_agree(self):
+        """正视渲染的屏幕横轴应为 +Y，与工程图 front 视图一致。"""
+        import gen_render
+        cam = gen_render.Camera(gen_render.VIEWS["front"]["az"], 0.0)
+        cam.scale = 1.0
+        cam.cx = cam.cy = 0.0
+        x_plus_y = cam.project(cam.rotate((0.0, 10.0, 0.0)))[0]
+        x_zero = cam.project(cam.rotate((0.0, 0.0, 0.0)))[0]
+        self.assertGreater(x_plus_y, x_zero, "正视图中 +Y 应位于屏幕右侧")
+
+
+def gen_drawings_import_camera():
+    import gen_render
+    return gen_render.Camera(38.0, 18.0)
+
+
+def gen_drawings_import_scene():
+    import gen_render
+    return gen_render.Scene

@@ -72,9 +72,13 @@ def build_urdf(model: dict) -> str:
         ixx, iyy, izz = geometry.inertia(geom, mass)
         coll = geometry.equivalent_box(geom)
 
+        ox, oy, oz = geometry.geometry_origin(geom)
+        origin = f"{mm_to_m(ox):.6f} {mm_to_m(oy):.6f} {mm_to_m(oz):.6f}"
+        rpy = geometry.urdf_rpy(geom)
+
         lines.append(f'  <link name="{name}">')
         lines.append("    <visual>")
-        lines.append('      <origin xyz="0 0 0" rpy="0 0 0"/>')
+        lines.append(f'      <origin xyz="{origin}" rpy="{rpy}"/>')
         lines.append(geometry.urdf_xml(geom, indent="      "))
         lines.append("      <material>")
         lines.append(
@@ -83,11 +87,11 @@ def build_urdf(model: dict) -> str:
         lines.append("      </material>")
         lines.append("    </visual>")
         lines.append("    <collision>")
-        lines.append('      <origin xyz="0 0 0" rpy="0 0 0"/>')
+        lines.append(f'      <origin xyz="{origin}" rpy="{rpy}"/>')
         lines.append(geometry.urdf_xml(coll, indent="      "))
         lines.append("    </collision>")
         lines.append("    <inertial>")
-        lines.append('      <origin xyz="0 0 0" rpy="0 0 0"/>')
+        lines.append(f'      <origin xyz="{origin}" rpy="0 0 0"/>')
         lines.append(f'      <mass value="{mass:.6f}"/>')
         lines.append(
             f'      <inertia ixx="{ixx:.9f}" ixy="0" ixz="0" '

@@ -32,6 +32,9 @@ ql_thumb/
 design/results/
 design/figures/
 
+# 渲染产物（可复现，本地生成即可；SVG 入库，PNG 不入库）
+design/renders/*.png
+
 # Webots 联调产物（run_webots_batch.ps1 / 控制器 --report --log 生成）
 /atri_report.json
 /atri_console.log

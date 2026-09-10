@@ -24,6 +24,13 @@ design/
 ├── gen_urdf.py               # 纯标准库 URDF 生成器 + 设计约束校验
 ├── atri.urdf                 # 生成产物，可直接喂给 PyBullet / Webots
 ├── gen_drawings.py           # 2D 工程图生成器（纯标准库 SVG）
+├── gen_render.py             # 等轴测软件渲染器（纯标准库）
+├── renders/                  # 外观渲染产物 ★ 可直接用于宣传材料
+│   ├── 01_等轴测外观.svg
+│   ├── 02_正视外观.svg
+│   ├── 03_侧视外观.svg
+│   ├── 04_关节配色图.svg
+│   └── 05_等轴测外观-背面.svg
 ├── drawings/                 # 工程图产物 ★ 可直接用于报名材料
 │   ├── 01_关节编号图.svg
 │   ├── 02_三视图.svg
@@ -69,7 +76,33 @@ cd 软件/atri && python3 -m unittest discover -s tests
 
 ---
 
-## 2.1 工程图说明（★ 报名材料直接可用）
+## 2.1 外观渲染（软件渲染，无需 GPU / Blender）
+
+`gen_render.py` 是**纯标准库软件渲染器**：自己生成三角网格 → 轴测投影 →
+画家算法深度排序 → 背面剔除 → 平面着色，输出 SVG。
+
+```bash
+python3 design/gen_render.py                      # 全部 5 张
+python3 design/gen_render.py --views iso --png    # 单张 + PNG
+python3 design/gen_render.py --pose zero          # 换成零姿态
+```
+
+| 文件 | 视角 | 用途 |
+|---|---|---|
+| `renders/01_等轴测外观.svg` | 3/4 视角 | 封面、宣传页 |
+| `renders/02_正视外观.svg` | 正前方 | 展示左右对称构型 |
+| `renders/03_侧视外观.svg` | 侧面 | 展示前后轮廓与足长 |
+| `renders/04_关节配色图.svg` | 3/4 视角 | **按部位着色**，讲解自由度分布 |
+| `renders/05_等轴测外观-背面.svg` | 背面 | 补充视角 |
+
+**渲染特性**：自然站姿（微屈膝、手臂外展）、地面网格、自动取景、平面着色。
+
+**诚实说明**：这是**软件渲染的设计示意图**，不是照片、不是实机、
+也不是专业渲染器出图。几何为基元近似，材质为单色平面着色。
+
+---
+
+## 2.2 工程图说明（★ 报名材料直接可用）
 
 | 图号 | 文件 | 内容 | 用途 |
 |---|---|---|---|
@@ -100,6 +133,11 @@ cd 软件/atri && python3 -m unittest discover -s tests
 
 **关键设计**：`visual` 用真实基元，`collision` 用**等效包围盒**——这是标准工程做法，
 碰撞检测更快更稳，且不影响外观表达。
+
+**`origin_mm`（几何偏移）**：关节坐标系在转轴处，而零件实体通常不在轴上——
+例如大腿要从髋关节一直延伸到膝关节。`origin_mm` 表达这个偏移，等价于 URDF 的
+`<visual><origin>`，并同时作用于 URDF、AABB 与渲染。有了它，23 个 link 的实体
+首尾相接，不会出现悬空段（有回归测试 `test_segments_connect_without_gaps` 守护）。
 
 
 ---
