@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "action_id": "grasp",
+  "name": "双手抓取",
+  "description": "夹爪开合并抬臂",
+  "frames": [
+    {"index": 0, "duration_s": 0.1, "joints": {"left_shoulder_pitch": 30.0, "left_shoulder_roll": 15.0, "left_elbow_pitch": -35.0, "left_gripper": 20.0, "right_shoulder_pitch": 30.0, "right_shoulder_roll": -15.0, "right_elbow_pitch": -35.0, "right_gripper": 20.0}},
+    {"index": 1, "duration_s": 0.1, "joints": {"left_gripper": 0.0, "right_gripper": 0.0}}
+  ],
+  "meta": {"source": "webots-calibration"}
+}

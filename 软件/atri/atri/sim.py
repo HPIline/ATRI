@@ -1,6 +1,7 @@
 """无硬件闭环仿真：Mock 感知 + Mock 舵机 + 脚本运动控制（无 VLA）。"""
 from __future__ import annotations
 
+import argparse
 import json
 import time
 from pathlib import Path
@@ -30,9 +31,9 @@ def load_robot_config() -> Dict[str, Any]:
     return {}
 
 
-def build_robot(config: Dict[str, Any]) -> Dict[str, Any]:
+def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
     servo_bus = MockServoBus()
-    cerebellum = Cerebellum(servo_bus=servo_bus)
+    cerebellum = Cerebellum(servo_bus=servo_bus, sleeper=sleeper)
     brain = Brain(cerebellum=cerebellum)
 
     motion_cfg = config.get("motion", {})
@@ -54,12 +55,17 @@ def load_task_cards() -> List[TaskCard]:
 
 
 def main(argv: List[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="无硬件闭环演示")
+    parser.add_argument("--fast", action="store_true", help="跳过 time.sleep，快速跑完闭环")
+    args = parser.parse_args(argv)
+
     print("=" * 64)
     print("A.T.R.I. 软件栈 · 无硬件闭环演示")
     print("=" * 64)
 
     config = load_robot_config()
-    robot = build_robot(config)
+    sleeper = (lambda dt: None) if args.fast else None
+    robot = build_robot(config, sleeper=sleeper)
     brain = robot["brain"]
 
     print(f"运动控制后端: {robot['motion_backend']}（脚本动作库 + 步态生成，无 VLA）")

@@ -38,6 +38,21 @@ class TestCerebellum(unittest.TestCase):
         self.assertIn("left_hip_pitch", result)
         self.assertIn("action", self.cere.execute_motion("kick", {}))
 
+    def test_play_action_executes_frames(self):
+        action = {
+            "schema_version": "1.0",
+            "action_id": "walk",
+            "name": "前进",
+            "frames": [
+                {"duration_s": 0.01, "joints": {"left_hip_pitch": 8.0}},
+                {"duration_s": 0.01, "joints": {"right_hip_pitch": -8.0}},
+            ],
+        }
+        result = self.cere.play_action(action)
+        self.assertEqual(result["frames"], 2)
+        self.assertEqual(self.bus.read_angle(6), 8.0)  # left_hip_pitch id 6
+        self.assertEqual(self.bus.read_angle(11), -8.0)  # right_hip_pitch id 11
+
 
 if __name__ == "__main__":
     unittest.main()

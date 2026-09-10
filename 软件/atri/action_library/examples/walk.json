@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "action_id": "walk",
+  "name": "前进两步",
+  "description": "双足交替正弦步态关键帧示例，Webots 标定后可替换为实测数据",
+  "loop": true,
+  "frames": [
+    {"index": 0, "duration_s": 0.2, "joints": {"left_hip_pitch": 8.0, "left_knee_pitch": 12.0, "left_ankle_pitch": -6.0, "right_hip_pitch": -8.0, "trunk_pitch": 1.5}},
+    {"index": 1, "duration_s": 0.2, "joints": {"left_hip_pitch": 0.0, "left_knee_pitch": 0.0, "left_ankle_pitch": 0.0, "right_hip_pitch": 0.0, "trunk_pitch": 0.0}},
+    {"index": 2, "duration_s": 0.2, "joints": {"left_hip_pitch": -8.0, "right_hip_pitch": 8.0, "right_knee_pitch": 12.0, "right_ankle_pitch": -6.0, "trunk_pitch": -1.5}},
+    {"index": 3, "duration_s": 0.2, "joints": {"left_hip_pitch": 0.0, "left_knee_pitch": 0.0, "right_hip_pitch": 0.0, "right_knee_pitch": 0.0, "trunk_pitch": 0.0}}
+  ],
+  "meta": {"source": "generated-demo", "author": "A.T.R.I."}
+}

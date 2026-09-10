@@ -179,6 +179,23 @@ class Cerebellum:
         self.home()
         return {"action": "dance", "bars": bars}
 
+    def play_action(self, action: Dict[str, Any], dt_scale: float = 1.0) -> Dict[str, Any]:
+        """按动作库 JSON 执行关键帧序列（Webots 标定后可导入/回放）。
+
+        action 使用 action_library 规范。执行前做轻量校验，失败抛 ActionLibraryError。
+        """
+        from .action_library import ActionLibraryError, validate_action
+
+        errors = validate_action(action)
+        if errors:
+            raise ActionLibraryError("动作库校验失败:\n" + "\n".join(errors))
+        frames = action["frames"]
+        for frame in frames:
+            joints = {k: float(v) for k, v in frame["joints"].items()}
+            self.set_pose(joints)
+            self.sleeper(float(frame["duration_s"]) * dt_scale)
+        return {"action": action.get("action_id"), "frames": len(frames)}
+
     def execute_motion(self, instruction: str, observation: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """脚本运动调度：根据技能指令选择步态/关键帧动作。
 
