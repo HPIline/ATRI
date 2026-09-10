@@ -53,11 +53,42 @@ def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
     }
 
 
-def load_task_cards() -> List[TaskCard]:
+def load_task_cards(task_card_dir: str | Path | None = None) -> List[TaskCard]:
+    directory = Path(task_card_dir) if task_card_dir is not None else TASK_CARD_DIR
     cards = []
-    for path in sorted(TASK_CARD_DIR.glob("*.json")):
+    for path in sorted(directory.glob("*.json")):
         cards.append(TaskCard.load(path))
     return cards
+
+
+def run_task_cards(
+    brain: Brain,
+    task_card_dir: str | Path | None = None,
+    observation: Dict[str, Any] | None = None,
+    verbose: bool = True,
+) -> tuple[List[Dict[str, Any]], int, int]:
+    """顺序执行任务卡目录下的全部任务。
+
+    仿真（Webots / 无硬件）与命令行入口共用这一段调度逻辑，避免各自复制一份。
+    ``observation=None`` 时由 Brain 上注入的感知接口（MockPerception 等）提供观测。
+
+    返回 ``(results, passed, total)``。
+    """
+    results: List[Dict[str, Any]] = []
+    for card in load_task_cards(task_card_dir):
+        if verbose:
+            print(f"--- 任务卡 {card.task_id} | {card.name} ---")
+        result = brain.execute_task(card, observation=observation)
+        ok = bool(result.get("ok", False))
+        if verbose:
+            print(f"    执行结果: {'成功' if ok else '失败'}")
+            if not ok:
+                print(f"    错误: {result.get('error')}")
+            print(f"    FSM: {' -> '.join(result.get('history', []))}")
+            print()
+        results.append({"task_id": card.task_id, "ok": ok, **result})
+    passed = sum(1 for item in results if item.get("ok"))
+    return results, passed, len(results)
 
 
 def main(argv: List[str] | None = None) -> int:
@@ -83,25 +114,14 @@ def main(argv: List[str] | None = None) -> int:
         print("未找到任务卡")
         return 1
 
-    overall = []
-    for card in cards:
-        print(f"--- 任务卡 {card.task_id} | {card.name} ---")
-        # 演示改为不预填观测，由 MockPerception 提供 face/qr/ball 感知，
-        # object/speech 使用技能默认参数，验证感知接口已串入技能链。
-        result = brain.execute_task(card, observation=None)
-        ok = result.get("ok", False)
-        print(f"    执行结果: {'成功' if ok else '失败'}")
-        if not ok:
-            print(f"    错误: {result.get('error')}")
-        print(f"    FSM: {' -> '.join(result.get('history', []))}")
-        print()
-        overall.append({"task_id": card.task_id, "ok": ok, **result})
+    # 演示不预填观测：由 MockPerception 提供 face/qr/ball 感知，
+    # object/speech 使用技能默认参数，验证感知接口已串入技能链。
+    overall, passed, total = run_task_cards(brain, observation=None)
 
     print("=" * 64)
-    passed = sum(1 for item in overall if item.get("ok"))
-    print(f"闭环演示完成: {passed}/{len(overall)} 项任务通过")
+    print(f"闭环演示完成: {passed}/{total} 项任务通过")
     print("=" * 64)
-    return 0 if passed == len(overall) else 2
+    return 0 if passed == total else 2
 
 
 if __name__ == "__main__":
