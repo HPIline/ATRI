@@ -616,11 +616,11 @@
         15.0
       ],
       "position_mm": [
-        18.0,
+        38.0,
         0.0,
         13.5
       ],
-      "note": "装在头部前方，随 head_pitch 俯仰"
+      "note": "装在头部前方，随 head_pitch 俯仰；第 5 轮沿 +X 再送出 20 mm，避开 head_pitch 舵机"
     },
     {
       "id": "USB 免驱拾音模块 (CM6533)",

@@ -305,11 +305,11 @@
       ],
       "mass_g": 15.0,
       "position_mm": [
-        18.0,
+        38.0,
         0.0,
         13.5
       ],
-      "note": "装在头部前方，随 head_pitch 俯仰",
+      "note": "装在头部前方，随 head_pitch 俯仰；第 5 轮沿 +X 再送出 20 mm，避开 head_pitch 舵机",
       "kind": "camera",
       "convention_note": "position_mm 按**几何中心**；本件原值按底面写，已补半身位以保持实物位置不变"
     },

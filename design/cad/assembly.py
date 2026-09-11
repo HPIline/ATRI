@@ -30,7 +30,7 @@ import cadquery as cq
 
 import skeleton as sk
 from fitcheck import overlap_report
-from kit import MATERIALS, apply_trsf, box, cyl, printed_mass, servo_frame
+from kit import DIRS, MATERIALS, apply_trsf, box, cyl, printed_mass, servo_frame
 from parts import sanitize
 from standards import SERVOS, servo
 
@@ -149,27 +149,28 @@ OPP = {"+x": "-x", "-x": "+x", "+y": "-y", "-y": "+y", "+z": "-z", "-z": "+z"}
 # 22 个关节的装配方案：
 #   shaft  输出轴方向（世界系，零位）
 #   parent 母端结构朝向（= 舵机笼往哪边固定在上级结构上）
-#   cage   母端笼的实现：ortho=独立关节笼 / yaw=偏转笼 / adapter=集成在紧凑转接块里
-#   fork   子端叉的实现：fork=独立连杆叉 / adapter=转接块自带舵盘面 / part=大件自带
-JOINT_SCHEME: Dict[str, Dict[str, str]] = {
+#   cage    母端笼：ortho / yaw / adapter / cluster（髋肩错轴抱箍）
+#   fork    子端叉：fork / adapter / part
+#   stagger 沿自身 shaft 的机体偏置 mm（来自 fit_stagger.py，禁止手写）
+JOINT_SCHEME: Dict[str, Dict[str, Any]] = {
     "head_yaw":          {"shaft": "+z", "parent": "+z", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
     "head_pitch":        {"shaft": "+y", "parent": "-z", "cage": "adapter", "fork": "part"},
     "trunk_roll":        {"shaft": "+x", "parent": "-z", "cage": "ortho",   "fork": "adapter"},
     "trunk_pitch":       {"shaft": "+y", "parent": "-z", "cage": "adapter", "fork": "part"},
     "left_hip_yaw":      {"shaft": "-z", "parent": "+z", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
     "right_hip_yaw":     {"shaft": "-z", "parent": "+z", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
-    "left_hip_roll":     {"shaft": "-x", "parent": "+z", "cage": "adapter", "fork": "adapter"},
-    "right_hip_roll":    {"shaft": "-x", "parent": "+z", "cage": "adapter", "fork": "adapter", "clock": "flip"},
-    "left_hip_pitch":    {"shaft": "+y", "parent": "+z", "cage": "adapter", "fork": "fork", "clock": "flip"},
-    "right_hip_pitch":   {"shaft": "-y", "parent": "+z", "cage": "adapter", "fork": "fork"},
+    "left_hip_roll":     {"shaft": "-x", "parent": "+z", "cage": "cluster", "fork": "adapter", "stagger": 35.0},
+    "right_hip_roll":    {"shaft": "-x", "parent": "+z", "cage": "cluster", "fork": "adapter", "clock": "flip", "stagger": 35.0},
+    "left_hip_pitch":    {"shaft": "+y", "parent": "+z", "cage": "cluster", "fork": "fork", "clock": "flip", "stagger": 30.0},
+    "right_hip_pitch":   {"shaft": "-y", "parent": "+z", "cage": "cluster", "fork": "fork", "stagger": 30.0},
     "left_knee_pitch":   {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
     "right_knee_pitch":  {"shaft": "-y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
     "left_ankle_pitch":  {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "part"},
     "right_ankle_pitch": {"shaft": "-y", "parent": "+z", "cage": "ortho",   "fork": "part"},
-    "left_shoulder_pitch":  {"shaft": "+y", "parent": "-y", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
-    "right_shoulder_pitch": {"shaft": "-y", "parent": "+y", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
-    "left_shoulder_roll":   {"shaft": "-x", "parent": "+y", "cage": "adapter", "fork": "fork"},
-    "right_shoulder_roll":  {"shaft": "+x", "parent": "-y", "cage": "adapter", "fork": "fork"},
+    "left_shoulder_pitch":  {"shaft": "+y", "parent": "-y", "cage": "cluster", "fork": "adapter", "clock": "flip", "stagger": 35.0},
+    "right_shoulder_pitch": {"shaft": "-y", "parent": "+y", "cage": "cluster", "fork": "adapter", "clock": "flip", "stagger": 35.0},
+    "left_shoulder_roll":   {"shaft": "-x", "parent": "+y", "cage": "cluster", "fork": "fork"},
+    "right_shoulder_roll":  {"shaft": "+x", "parent": "-y", "cage": "cluster", "fork": "fork"},
     "left_elbow_pitch":  {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
     "right_elbow_pitch": {"shaft": "-y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
     "left_gripper":      {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "part"},
@@ -180,7 +181,8 @@ JOINT_SCHEME: Dict[str, Dict[str, str]] = {
 LINK_BULK: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
     "pelvis": [("pelvis_frame", {})],
     "torso_upper": [("torso_frame", {}), ("electronics_deck", {}),
-                    ("battery_tray", {}), ("pdb_mount", {})],
+                    ("battery_tray", {}), ("pdb_mount", {}),
+                    ("backpack_plate", {})],
     "head": [("head_shell", {})],
     "left_thigh": [("limb_tube", {"length": 62.8, "z0": -62.8})],
     "right_thigh": [("limb_tube", {"length": 62.8, "z0": -62.8})],
@@ -196,16 +198,27 @@ LINK_BULK: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
     "right_gripper": [("gripper_jaw", {})],
 }
 
-# 紧凑转接块：一次覆盖"上一级舵盘 + 下一级舵机笼"两件事
+# 紧凑转接块：只留给颈/腰短链（轴距 27.5，不走错轴）
 ADAPTERS: Dict[str, Dict[str, Any]] = {
     "head_yaw_link": {"in_shaft": "+z", "out_shaft": "+y", "drop": 27.5},
     "trunk_roll_link": {"in_shaft": "+x", "out_shaft": "+y", "drop": 27.5},
-    "left_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6},
-    "right_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6},
-    "left_hip_roll_link": {"in_shaft": "-x", "out_shaft": "+y", "drop": 19.6},
-    "right_hip_roll_link": {"in_shaft": "-x", "out_shaft": "-y", "drop": 19.6},
-    "left_shoulder_pitch_link": {"in_shaft": "+y", "out_shaft": "-x", "drop": 0.0},
-    "right_shoulder_pitch_link": {"in_shaft": "-y", "out_shaft": "+x", "drop": 0.0},
+}
+
+# 髋/肩错轴：单侧臂锁上一级舵盘，把下一级轴线拉到 19.6 mm；
+# stagger 取被托住的那只舵机（fit_stagger.py 的数，禁止在这里另写一套）。
+CLUSTER_ARMS: Dict[str, Dict[str, Any]] = {
+    "left_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6,
+                          "stagger_of": "left_hip_roll"},
+    "right_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6,
+                           "stagger_of": "right_hip_roll"},
+    "left_hip_roll_link": {"in_shaft": "-x", "out_shaft": "+y", "drop": 19.6,
+                           "stagger_of": "left_hip_pitch"},
+    "right_hip_roll_link": {"in_shaft": "-x", "out_shaft": "-y", "drop": 19.6,
+                            "stagger_of": "right_hip_pitch"},
+    "left_shoulder_pitch_link": {"in_shaft": "+y", "out_shaft": "-x", "drop": 0.0,
+                                 "stagger_of": "left_shoulder_roll"},
+    "right_shoulder_pitch_link": {"in_shaft": "-y", "out_shaft": "+x", "drop": 0.0,
+                                  "stagger_of": "right_shoulder_roll"},
 }
 
 
@@ -355,8 +368,29 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
             add(f"{link}__compact_adapter",
                 _place(sk.build("compact_adapter", **cfg), kin.world[link]),
                 "adapter")
-        except Exception as exc:  # noqa: BLE001
-            fail(f"{link}/compact_adapter", "adapter", exc)
+        except Exception as cop:  # noqa: BLE001
+            fail(f"{link}/compact_adapter", "adapter", cop)
+
+    # --- 2b. 髋/肩错轴单侧臂（锁上一级舵盘，托住错开后的下一级轴线）---
+    for link, cfg in CLUSTER_ARMS.items():
+        if link not in kin.world:
+            continue
+        try:
+            src = cfg["stagger_of"]
+            stagger = float(JOINT_SCHEME[src].get("stagger", 0.0))
+            parent_j = link[:-5] if link.endswith("_link") else ""
+            parent_stagger = float(JOINT_SCHEME.get(parent_j, {}).get("stagger", 0.0) or 0.0)
+            add(f"{link}__cluster_horn_arm",
+                _place(sk.build("cluster_horn_arm",
+                                in_shaft=cfg["in_shaft"],
+                                out_shaft=cfg["out_shaft"],
+                                drop=cfg["drop"],
+                                stagger=stagger,
+                                parent_stagger=parent_stagger),
+                       kin.world[link]),
+                "cluster_arm")
+        except Exception as cop:  # noqa: BLE001
+            fail(f"{link}/cluster_horn_arm", "cluster_arm", cop)
 
     # --- 3. 每个关节：母端笼（装在父 link）+ 子端叉（装在子 link）---
     for jname, sc in JOINT_SCHEME.items():
@@ -380,6 +414,21 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                     "cage")
             except Exception as exc:  # noqa: BLE001
                 fail(f"cage/{jname}", "cage", exc)
+        elif sc["cage"] == "cluster":
+            try:
+                par = sc["parent"]
+                if par.strip("+-") == sc["shaft"].strip("+-"):
+                    par = next(d for d in ("+z", "-z", "+y", "-y", "+x", "-x")
+                               if d.strip("+-") != sc["shaft"].strip("+-"))
+                add(f"outrigger__{jname}",
+                    _place(sk.build("cluster_outrigger",
+                                    shaft=sc["shaft"],
+                                    parent=par,
+                                    stagger=float(sc.get("stagger", 0.0))),
+                           m),
+                    "cluster")
+            except Exception as cop:  # noqa: BLE001
+                fail(f"outrigger/{jname}", "cluster", cop)
         if sc["fork"] == "fork":
             try:
                 add(f"fork__{jname}",
@@ -407,7 +456,13 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
             if sc.get("clock") == "flip":
                 par = OPP[par]
             body = orient(servo_placeholder(), sc["shaft"], par)
-            add(f"servo__{jname}", _place(body, kin.joint_world(jname)), "servo")
+            # stagger：沿自身输出轴平移机体，关节原点不动（fit_stagger.py）
+            pose = kin.joint_world(jname)
+            st = float(sc.get("stagger", 0.0) or 0.0)
+            if abs(st) > 1e-9:
+                dx, dy, dz = DIRS[sc["shaft"]]
+                pose = mat_mul(pose, mat_trans(dx * st, dy * st, dz * st))
+            add(f"servo__{jname}", _place(body, pose), "servo")
         except Exception as exc:  # noqa: BLE001
             fail(f"servo/{jname}", "servo", exc)
 
