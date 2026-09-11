@@ -102,7 +102,7 @@ $result = Get-Content $Report -Raw -Encoding UTF8 | ConvertFrom-Json
 Write-Host ""
 Write-Host ("=" * 60)
 Write-Host ("Webots 闭环: {0}/{1} 项任务通过" -f $result.passed, $result.total)
-Write-Host ("  关节绑定  : {0}/{1}（未绑定 {2} 个）" -f $result.bound_joints, $result.expected_joints, $result.unbound_joints.Count)
+Write-Host ("  关节绑定  : {0}/{1}（映射应绑定 {2}，未绑定 {3} 个）" -f $result.bound_joints, $result.expected_joints, $result.mapped_joints, $result.unbound_joints.Count)
 Write-Host ("  有行程关节: {0}/{1}" -f $result.moved_joints, $result.expected_joints)
 Write-Host ("  仿真时间  : {0} s（{1} 步，墙钟 {2} s）" -f $result.sim_seconds, $result.sim_steps, $result.wall_seconds)
 Write-Host ("  报告      : {0}" -f $Report)
@@ -114,7 +114,15 @@ if ($zero) {
     foreach ($z in $zero) { Write-Host ("  {0}" -f $z.Name) }
 }
 
-if ($result.passed -eq $result.total -and $result.total -gt 0 -and $result.simulation_alive) {
+# 绑定判据：实际绑定数 == 映射中非空条目数，且 > 0。
+# 映射留空 = 该机型没有这个自由度（Nao 的 4 个），不算失败；
+# 非空条目没绑上（电机改名、世界损坏）= 世界与映射不匹配，任务跑得再顺也不算通过。
+$bindingOk = ($result.bound_joints -gt 0) -and ($result.bound_joints -eq $result.mapped_joints)
+if (-not $bindingOk) {
+    Write-Host ("绑定不完整：映射应绑定 {0} 个关节，实际绑定 {1} 个，联调结果不可信。" -f $result.mapped_joints, $result.bound_joints) -ForegroundColor Red
+}
+
+if ($result.passed -eq $result.total -and $result.total -gt 0 -and $result.simulation_alive -and $bindingOk) {
     Write-Host "联调通过。" -ForegroundColor Green
     exit 0
 }

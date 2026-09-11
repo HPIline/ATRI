@@ -13,6 +13,9 @@
 | `STS3215_7.4V_19kg_spec.pdf` | 飞特《产品规格书》STS3215 A/0，8 页，2020-04-10；**第 6 页＝外形尺寸图**（8-PA2.0 自攻、25T 输出齿、M3X6 机牙螺丝、Φ6 副轴、4.1 副轴伸出、45.23/24.73/35/36.5/3.4/29/32、5264/2.54 3P 端子） | `feetechrc.com` 产品页附件 |
 | `STS3235_12V_30kg_spec.pdf` | 飞特《产品规格书》STS3235 A/0，8 页，2021-11-19；**同尺寸（45.22×24.72×35）铝壳钢齿版**：70.5±1 g、额定负载 10 kg·cm、堵转 30 kg·cm、工作电压 6–12V | `feetechrc.com` 产品页附件 |
 
+> **许可**：以上 PDF 为厂商官方文档，**未授予再分发授权**，仅作项目内部技术核验参考；
+> 归属与公开分发处理见仓库根 `NOTICE`。
+
 抓取方式（**注意 `--max-time` 必须给足：首字节约 8 秒**）：
 
 ```bash
@@ -29,6 +32,9 @@ curl -sL --max-time 120 -o design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf 
 ## 2. `so-arm100/` —— 开源整机参考（Apache-2.0）
 
 来源：<https://github.com/TheRobotStudio/SO-ARM100>（★7426，LeRobot 生态标准机械臂，整机就用 STS3215）
+
+> **许可**：**Apache-2.0**；许可副本见 `design/cad/vendor/LICENSE-Apache-2.0.txt`，
+> 归属见仓库根 `NOTICE`。
 
 | 文件 | 用途 |
 |---|---|
@@ -56,7 +62,7 @@ curl -sL --max-time 120 -o design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf 
 ## 3. 复现命令
 
 ```bash
-cd /Users/zhangjingkun/Projects/github/ATRI
+cd <repo>   # 仓库根目录（本 README 位于 design/cad/vendor/）；以下路径均相对仓库根
 
 # 接口几何（包络 / 圆柱面按轴分组 / 孔与轴判别）
 .venv-cad/bin/python design/cad/measure_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
@@ -83,6 +89,8 @@ cd /Users/zhangjingkun/Projects/github/ATRI
 
 - 这些文件**入 git**（单文件最大 7 MB < 50 MB 上限），因为验收标准要求
   "核验过程可复现（保留脚本与原始 STEP/STL）"。
+- ⚠️ **公开分发前**：`feetech/` 下的厂商 PDF 无再分发授权，须按仓库根 `NOTICE` 处理
+  （移除这些 PDF，或改为仅保留官网下载链接与页码引用）。
 - `.stl` 是二进制网格，只在做"含/不含舵盘"顶点比对时用；如体积敏感可只留 STEP。
 - `design/cad/out/`（渲染图、PDF 页面 PNG）**不入 git**，均可由上述命令重新生成。
 - 读 PDF 需要 `pypdf` + `pypdfium2`，已装入 `.venv-cad`：

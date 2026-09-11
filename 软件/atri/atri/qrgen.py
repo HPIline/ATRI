@@ -8,21 +8,68 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-DEFAULT_ACTIONS = {"walk", "turn", "kick", "carry", "dance", "grasp", "release"}
+from .config import MAX_BARS, MAX_STEPS, MAX_TURN_DEG, VALID_ACTIONS
+from .skills.base import as_finite_float, as_int_in_range
 
 
 class QRGeneratorError(RuntimeError):
     pass
 
 
+def _reject_constant(value: str) -> Any:
+    """json.loads 的 parse_constant 钩子：拒绝 JSON 标准之外的 NaN/Infinity。"""
+    raise QRGeneratorError(f"JSON 不允许常量 {value}（NaN/Infinity）")
+
+
+def validate_params(action: str, params: Dict[str, Any]) -> None:
+    """生成前按技能侧同一口径校验参数，非法指令直接报错，不留到运行时。
+
+    复用 `config` 的 MAX_STEPS/MAX_BARS/MAX_TURN_DEG/VALID_ACTIONS，与
+    `skills/qr.py` 的执行期校验同源，避免生成端放过跑不通的二维码。
+    """
+    if not isinstance(action, str) or action not in VALID_ACTIONS:
+        raise QRGeneratorError(f"未知动作 {action!r}，可选: {sorted(VALID_ACTIONS)}")
+    if action == "walk":
+        if as_int_in_range(params.get("steps", 3), 1, MAX_STEPS) is None:
+            raise QRGeneratorError(
+                f"walk.steps 非法: {params.get('steps')!r}（应为 1..{MAX_STEPS} 整数）"
+            )
+    elif action == "turn":
+        deg = as_finite_float(params.get("deg", 30.0))
+        if deg is None or abs(deg) > MAX_TURN_DEG:
+            raise QRGeneratorError(
+                f"turn.deg 非法: {params.get('deg')!r}"
+                f"（应为 ±{MAX_TURN_DEG:g} 内的有限数值）"
+            )
+    elif action == "dance":
+        if as_int_in_range(params.get("bars", 2), 1, MAX_BARS) is None:
+            raise QRGeneratorError(
+                f"dance.bars 非法: {params.get('bars')!r}（应为 1..{MAX_BARS} 整数）"
+            )
+
+
 def build_qr_payload(action: str, **params: Any) -> str:
     """构造二维码内嵌 JSON 指令字符串。"""
     payload = {"action": action, **params}
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+def parse_param_value(value: str) -> Any:
+    """把 CLI 的 key=value 值转成 int/float；转不动或非有限值时保留字符串。"""
+    for cast in (int, float):
+        try:
+            number = cast(value)
+        except ValueError:
+            continue
+        if isinstance(number, float) and not math.isfinite(number):
+            break
+        return number
+    return value
 
 
 class QRCodeGenerator:
@@ -48,6 +95,7 @@ class QRCodeGenerator:
         **params: Any,
     ) -> str:
         """生成二维码图片并保存到 output_path，返回保存路径。"""
+        validate_params(action, params)
         payload = build_qr_payload(action, **params)
         qr = self._get_qrcode()
         img = qr.make(payload)
@@ -57,9 +105,10 @@ class QRCodeGenerator:
 
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="生成内嵌 JSON 指令的二维码")
-    parser.add_argument("--action", required=True, help="指令动作，如 walk/turn/kick")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--action", help="指令动作，如 walk/turn/kick")
+    source.add_argument("--json", dest="raw_json", help="直接传入完整 JSON 指令字符串（与 --action 二选一）")
     parser.add_argument("--output", "-o", required=True, help="输出图片路径，如 qr_walk.png")
-    parser.add_argument("--json", dest="raw_json", help="直接传入完整 JSON 指令字符串（与 --action 二选一）")
     parser.add_argument("--param", "-p", action="append", default=[], help="附加参数 key=value，可多次")
     parser.add_argument("--steps", type=int, help="快捷参数：行走步数")
     parser.add_argument("--deg", type=int, help="快捷参数：转向角度")
@@ -68,21 +117,24 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     if args.raw_json:
         try:
-            data = json.loads(args.raw_json)
-            action = str(data.get("action", ""))
-            params = {k: v for k, v in data.items() if k != "action"}
-        except json.JSONDecodeError as exc:
+            data = json.loads(args.raw_json, parse_constant=_reject_constant)
+        except (json.JSONDecodeError, QRGeneratorError) as exc:
             print(f"错误：JSON 解析失败 {exc}", file=sys.stderr)
             return 2
+        if not isinstance(data, dict):
+            print("错误：--json 必须是 JSON 对象", file=sys.stderr)
+            return 2
+        action = str(data.get("action", ""))
+        params: Dict[str, Any] = {k: v for k, v in data.items() if k != "action"}
     else:
         action = args.action
-        params: Dict[str, Any] = {}
+        params = {}
         for item in args.param:
             if "=" not in item:
                 print(f"错误：--param 需要 key=value 格式：{item}", file=sys.stderr)
                 return 2
             key, value = item.split("=", 1)
-            params[key] = value
+            params[key] = parse_param_value(value)
 
     if not action:
         print("错误：action 不能为空", file=sys.stderr)

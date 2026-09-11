@@ -17,7 +17,7 @@
 ## 用法
 
 ```bash
-cd '/Users/hpi/Documents/搞机器人'
+cd <repo>   # 仓库根目录
 
 # 一键：生成 + 导出 PDF + 栅格化
 bash ppt/build.sh ppt/build_sample.py "ATRI_答辩PPT-样张"

@@ -38,7 +38,10 @@ ELEC_G = 316.0
 HARNESS_G = 120.0
 BUDGET_STRUCT_G = 1790.0    # v3：CAD 实装实算（74 件）；v2 的合成预算 500 g 已弃用
 BUDGET_TOTAL_G = 3437.0     # = 1790 + 1210 + 316 + 120
-CRITERION_NM = 1.47          # 堵转 × 50%
+# 扭矩双口径：主判据 = 官方连续额定（额定负载 10 kg·cm @12V）；
+# 峰值 = 堵转 × 50%，仅短时参考（与 components.json / robot_model.json 同源）
+CONTINUOUS_NM = 0.98
+PEAK_NM = 1.47
 
 
 def build_one(name: str, export: bool = True) -> Dict[str, Any]:
@@ -71,7 +74,8 @@ def closure(struct_g: float) -> Dict[str, float]:
         "budget_total_g": BUDGET_TOTAL_G,
         "struct_over_pct": round((struct_g / BUDGET_STRUCT_G - 1) * 100, 1),
         "ankle_torque_nm": round(torque, 3),
-        "ankle_share_pct": round(torque / CRITERION_NM * 100, 1),
+        "ankle_continuous_pct": round(torque / CONTINUOUS_NM * 100, 1),
+        "ankle_peak_pct": round(torque / PEAK_NM * 100, 1),
     }
 
 
@@ -112,7 +116,8 @@ def write_report(reports: List[Dict[str, Any]]) -> Path:
 | 线束 + 紧固件 | {c['harness_g']:.0f} | v2 摊派 |
 | **整机合计** | **{c['total_g']:.0f}** | v2 设计值 {c['budget_total_g']:.0f} |
 | 踝关节力矩需求 | **{c['ankle_torque_nm']:.2f} N·m** | τ ≈ 0.49 × 整机质量 |
-| 占「堵转×50% = {CRITERION_NM} N·m」 | **{c['ankle_share_pct']:.0f}%** | {'✅ 可行' if c['ankle_share_pct'] <= 90 else '❌ 超判据，需减重或换舵机'} |
+| 占连续额定 {CONTINUOUS_NM} N·m（主判据） | **{c['ankle_continuous_pct']:.0f}%** | {'✅ 可行' if c['ankle_continuous_pct'] <= 90 else '❌ 超连续额定，需减重或换舵机'} |
+| 占峰值 {PEAK_NM} N·m（堵转×50%，仅短时参考） | **{c['ankle_peak_pct']:.0f}%** | {'✅ 可行' if c['ankle_peak_pct'] <= 90 else '❌ 超峰值'} |
 
 > ⚠️ **这是本轮最重要的结论**：薄壁打印件的质量 ≈ 材料体积 × 密度，
 > 提高填充率或加厚壁只会更重；**减重只能靠减少材料体积（挖料/改形态/改工艺路线）**。
@@ -183,7 +188,8 @@ def main(argv: Optional[List[str]] = None) -> int:
           f"{c['struct_over_pct']:+.0f}%）")
     print(f"  整机合计          {c['total_g']:>8.1f} g   （v2 设计值 {c['budget_total_g']:.0f} g）")
     print(f"  踝关节力矩需求    {c['ankle_torque_nm']:>8.2f} N·m "
-          f"（占堵转×50% 判据 {c['ankle_share_pct']:.0f}%）")
+          f"（占连续额定 {CONTINUOUS_NM} 判据 {c['ankle_continuous_pct']:.0f}%，"
+          f"占峰值 {PEAK_NM} {c['ankle_peak_pct']:.0f}%）")
     path = write_report(reports)
     json.dump(reports, (OUT / "skeleton_parts.json").open("w", encoding="utf-8"),
               ensure_ascii=False, indent=1)

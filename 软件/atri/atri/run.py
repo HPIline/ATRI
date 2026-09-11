@@ -4,10 +4,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
 
 from .sim import build_robot, load_robot_config
-from .task_card import TaskCard
+from .task_card import TaskCard, TaskCardError
 
 
 def main() -> int:
@@ -16,11 +15,27 @@ def main() -> int:
     parser.add_argument("--observation", help="观测 JSON 路径（可选，默认使用内置 Mock 观测）")
     args = parser.parse_args()
 
-    card = TaskCard.load(args.task_card)
+    try:
+        card = TaskCard.load(args.task_card)
+    except TaskCardError as exc:
+        print(f"错误：{exc}", file=sys.stderr)
+        return 2
+
     obs = None
     if args.observation:
-        with open(args.observation, "r", encoding="utf-8") as fh:
-            obs = json.load(fh)
+        try:
+            with open(args.observation, "r", encoding="utf-8") as fh:
+                obs = json.load(fh)
+        except UnicodeDecodeError as exc:
+            # UnicodeDecodeError 是 ValueError 子类，不在 OSError/JSONDecodeError 之内
+            print(f"错误：观测文件不是 UTF-8 编码：{exc}", file=sys.stderr)
+            return 2
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"错误：观测文件读取失败：{exc}", file=sys.stderr)
+            return 2
+        if not isinstance(obs, dict):
+            print("错误：观测文件必须是 JSON 对象", file=sys.stderr)
+            return 2
 
     robot = build_robot(load_robot_config())
     result = robot["brain"].execute_task(card, observation=obs)

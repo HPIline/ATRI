@@ -145,7 +145,7 @@
 | `fore_arm_l/r` | 30 × 30 × 45 | 0.04 | |
 | `gripper_l/r` | 40 × 25 × 20 | 0.03 | |
 
-**质量合计校验**（v3）：`sum(link mass)` = **3.437 kg** ✅ 与 `robot_model.json` 的 `mass_budget.total_g` 一致（结构 500 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g）
+**质量合计校验**（v3）：`sum(link mass)` = **3.437 kg** ✅ 与 `robot_model.json` 的 `mass_budget.total_g` 一致（结构 1790 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 = 3436 g，取整 3.437 kg）
 
 **高度校验**：feet 23 + shank 75 + thigh 75 + pelvis 45 + torso_lower 55 + torso_upper 70 + neck 20 + head 60 = **423mm** ⚠️ 超了
 
@@ -256,7 +256,8 @@ design/
   "schema_version": "1.0",
   "model": "Feetech STS3215",
   "protocol": "TTL 半双工串行总线",
-  "rated_torque_nm": 2.0,
+  "continuous_rated_torque_nm": 0.98,
+  "peak_torque_nm": 1.47,
   "stall_torque_nm": 3.0,
   "no_load_speed_dps": 300.0,
   "deadband_deg": 0.5,

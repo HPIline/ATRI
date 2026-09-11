@@ -5,6 +5,8 @@
   - 腿部关节必须由单腿支撑工况主导（否则会选小舵机）
   - 分档数量之和 = 22
   - 假设值全部显式写出，不被当成实测
+  - 扭矩双口径：主判据连续额定 0.98 N·m，超限关节必须显式列出
+  - 参数总表/交接包等生成物不得回落 v2 或旧口径
   - 交接文档包含必要章节
 
 运行：
@@ -201,6 +203,138 @@ class TestHandoffDocument(unittest.TestCase):
         self.assertIn("舵机选型", text)
         self.assertIn("S 档", text)
         self.assertIn("M 档", text)
+
+
+class TestTorqueCriterion(unittest.TestCase):
+    """D-1/D-9：扭矩裕度必须按连续额定 0.98 计算，超额定的关节必须被显式列出。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model = gen_urdf.load_model()
+        cls.joints = [gen_handoff.joint_torque(cls.model, j)
+                      for j in sorted(cls.model["joints"],
+                                      key=lambda x: x["id"])]
+        cls.data = json.loads(
+            (DESIGN / "handoff" / "hardware_requirements.json")
+            .read_text(encoding="utf-8"))
+
+    def test_primary_criterion_is_continuous_rated(self):
+        crit = self.data["torque_criterion"]
+        self.assertEqual(crit["primary"], "continuous_rated")
+        self.assertAlmostEqual(crit["continuous_rated_torque_nm"], 0.98,
+                               places=3)
+        self.assertAlmostEqual(crit["peak_torque_nm"], 1.47, places=3)
+
+    def test_margins_computed_against_continuous_rated(self):
+        for t in self.joints:
+            with self.subTest(joint=t["joint"]):
+                self.assertAlmostEqual(
+                    t["margin_vs_continuous_rated"],
+                    t["required_torque_nm"] / 0.98, places=3)
+                self.assertEqual(
+                    t["exceeds_continuous_rated"],
+                    t["required_torque_nm"] / 0.98 > 1.0 + 1e-9)
+
+    def test_over_limit_joints_are_explicitly_listed(self):
+        expected = sorted(t["joint"] for t in self.joints
+                          if t["required_torque_nm"] / 0.98 > 1.0 + 1e-9)
+        self.assertTrue(expected, "当前质量下应有超连续额定的关节")
+        listed = sorted(self.data["torque_criterion"]
+                        ["joints_exceeding_continuous"])
+        self.assertEqual(listed, expected)
+        # 关键结论：腿链与腰部横滚确实超标，且必须出现在清单里
+        for joint in ("trunk_roll", "left_ankle_pitch", "right_ankle_pitch",
+                      "left_knee_pitch", "right_knee_pitch"):
+            self.assertIn(joint, listed)
+
+    def test_document_flags_over_limit_joints(self):
+        text = (DESIGN / "handoff" / "设计交接包-硬件选型需求.md").read_text(
+            encoding="utf-8")
+        self.assertIn("超连续额定", text)
+        self.assertIn("trunk_roll", text)
+
+
+class TestSpecSheetConsistency(unittest.TestCase):
+    """D-2：参数总表是生成物，必须与当前 v3 模型一致，不得停留在 v2。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sheet = DESIGN / "handoff" / "新架构参数总表.md"
+
+    def test_sheet_exists(self):
+        self.assertTrue(self.sheet.exists(),
+                        "参数总表未生成，先跑 gen_spec_sheet.py")
+
+    def test_sheet_uses_v3_link_masses(self):
+        text = self.sheet.read_text(encoding="utf-8")
+        self.assertIn("| `pelvis` | trunk | rounded_box | 100 × 80 × 35 | 160 | 340 |",
+                      text)
+        self.assertNotIn(
+            "| `pelvis` | trunk | rounded_box | 100 × 80 × 35 | 45 | 225 |",
+            text)
+        self.assertIn("3.437", text)
+        self.assertNotIn("2146", text)
+
+    def test_sheet_states_dual_criterion(self):
+        text = self.sheet.read_text(encoding="utf-8")
+        self.assertIn("连续额定", text)
+        self.assertIn("0.98", text)
+
+
+class TestBatteryAndServoPresentation(unittest.TestCase):
+    """D-3/D-5：电池容量口径与舵机外形必须与生成器一致。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.data = json.loads(
+            (DESIGN / "handoff" / "hardware_requirements.json")
+            .read_text(encoding="utf-8"))
+        cls.md = (DESIGN / "handoff" / "设计交接包-硬件选型需求.md").read_text(
+            encoding="utf-8")
+
+    def test_battery_requirement_is_current(self):
+        pb = self.data["power_budget"]
+        self.assertAlmostEqual(pb["required_nameplate_ah"], 4.53, places=2)
+        self.assertAlmostEqual(pb["consumed_ah"], 3.63, places=2)
+        self.assertIn("4.53", self.md)
+        self.assertNotIn("2.89", self.md)
+
+    def test_servo_size_is_model_size(self):
+        text = " ".join(self.data["what_is_placeholder"])
+        self.assertIn("45.2×24.7×35.0", text)
+        self.assertNotIn("40×20×40.5", text)
+
+
+class TestProjectDocsConsistency(unittest.TestCase):
+    """项目文档不得残留旧电源口径（标称 2.89 Ah）；17DOF 核查必须用现行数字。"""
+
+    DOC_DIR = REPO / "项目文档"
+
+    def test_no_stale_battery_nameplate(self):
+        for path in sorted(self.DOC_DIR.glob("*.md")):
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(doc=path.name):
+                self.assertNotIn("2.89", text,
+                                 f"{path.name} 残留旧电池标称 2.89 Ah")
+
+    def test_17dof_doc_uses_current_power_numbers(self):
+        text = (self.DOC_DIR / "两套17自由度方案可行性核查.md").read_text(
+            encoding="utf-8")
+        for token in ("3.63", "4.53", "7.25"):
+            with self.subTest(token=token):
+                self.assertIn(token, text)
+
+    def test_design_generators_carry_no_stale_nameplate(self):
+        """生成器脚本里的 note 会被写进 components/placements.json。
+
+        即使 v1→v2 迁移当前对 v3 模型拒绝执行，字符串留着旧口径就是一枚
+        待触发的回归——回退模型重跑迁移会把 2.89 Ah 写回生成物。
+        """
+        for path in sorted(DESIGN.glob("gen_*.py")):
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(script=path.name):
+                self.assertNotIn("2.89", text,
+                                 f"{path.name} 残留旧电池标称 2.89 Ah")
 
 
 if __name__ == "__main__":

@@ -37,6 +37,10 @@ class PerceptionBackend(ABC):
 
     name: str = "base"
 
+    def available(self) -> bool:
+        """该后端在当前环境是否可用；需要第三方依赖的后端覆盖它。"""
+        return True
+
     @abstractmethod
     def detect_face(self, frame: Any = None) -> PerceptionResult:
         """检测画面中的人脸。"""

@@ -26,6 +26,7 @@ sys.path.insert(0, str(DESIGN))
 sys.path.insert(0, str(REPO / "软件" / "atri"))
 
 from atri.config import JOINTS, GROUP_DOF  # noqa: E402
+from atri.cerebellum import ServoBus  # noqa: E402
 from realistic_sim import (  # noqa: E402
     NoisyPerception,
     RealisticServoBus,
@@ -66,6 +67,49 @@ class TestRobotModel(unittest.TestCase):
     def test_mass_sums_to_declared(self):
         total = sum(l["mass_kg"] for l in self.model["links"])
         self.assertAlmostEqual(total, self.model["overall"]["mass_kg"], places=2)
+
+    def test_servo_torque_uses_dual_criteria(self):
+        """D-1：扭矩必须双口径——连续额定 0.98（主判据）+ 峰值 1.47（堵转 × 50%）。"""
+        sd = self.model["servo_defaults"]
+        self.assertAlmostEqual(sd["continuous_rated_torque_nm"], 0.98, places=3)
+        self.assertAlmostEqual(sd["peak_torque_nm"], 1.47, places=3)
+        self.assertAlmostEqual(sd["stall_torque_nm"], 2.94, places=3)
+        self.assertGreater(sd["peak_torque_nm"],
+                           sd["continuous_rated_torque_nm"])
+        # 两个口径显式分开，不能再留含糊的旧单口径键
+        _legacy_key = "rated" + "_torque_nm"
+        self.assertNotIn(_legacy_key, sd)
+        for key in ("continuous_rated_torque_basis", "peak_torque_basis"):
+            self.assertIn(key, sd)
+
+    def test_components_match_model_servo(self):
+        """components.json 的舵机口径必须与 robot_model.json 同源，防止两套判据。"""
+        comps = json.loads((DESIGN / "components.json").read_text(encoding="utf-8"))
+        servo = next(c for c in comps["components"] if c["role"] == "servo_s")
+        sd = self.model["servo_defaults"]
+        self.assertEqual(servo["size_mm"], sd["size_mm"])
+        self.assertAlmostEqual(servo["mass_g"], sd["mass_g"], places=1)
+        spec = servo["spec"]
+        self.assertAlmostEqual(spec["continuous_rated_torque_nm"],
+                               sd["continuous_rated_torque_nm"], places=3)
+        self.assertAlmostEqual(spec["peak_torque_nm"],
+                               sd["peak_torque_nm"], places=3)
+        self.assertAlmostEqual(spec["stall_torque_nm"],
+                               sd["stall_torque_nm"], places=3)
+
+    def test_structure_mass_matches_cad_measurement(self):
+        """D-4：结构件质量与件数以 CAD 实测（74 件 / 1790 g）为事实源。"""
+        cad = json.loads(
+            (DESIGN / "reference" / "cad_assembly_measurements.json")
+            .read_text(encoding="utf-8"))
+        self.assertEqual(cad["part_count"], 74)
+        self.assertAlmostEqual(self.model["mass_budget"]["structure_g"],
+                               cad["structure_total_g"], delta=1.0)
+        comps = json.loads((DESIGN / "components.json").read_text(encoding="utf-8"))
+        self.assertAlmostEqual(comps["structure_mass_estimate_g"],
+                               cad["structure_total_g"], delta=1.0)
+        self.assertAlmostEqual(self.model["overall"]["mass_kg"] * 1000.0,
+                               cad["total_mass_g"], delta=5.0)
 
     def test_within_competition_bounds(self):
         o, c = self.model["overall"], self.model["design_constraints"]
@@ -199,6 +243,11 @@ class TestRealisticServoBus(unittest.TestCase):
         for _ in range(200):
             bus.step()
         self.assertLessEqual(bus.read_angle(jid), 90.0 + 1e-6)
+
+    def test_uses_base_template_method(self):
+        """不再覆写 set_angle：限位必须由 ServoBus 模板方法统一钳制。"""
+        self.assertNotIn("set_angle", RealisticServoBus.__dict__)
+        self.assertIs(RealisticServoBus.set_angle, ServoBus.set_angle)
 
 
 class TestNoisyPerception(unittest.TestCase):

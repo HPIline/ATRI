@@ -43,7 +43,7 @@ tests/                      # 单元测试
 ## 快速开始
 
 ```bash
-cd /Users/hpi/Documents/搞机器人/软件/atri
+cd <repo>/软件/atri   # 从仓库根出发
 
 # 1) 编译检查（标准库即可）
 python3 -m compileall -q atri run_demo.py && echo "compile OK"
@@ -55,7 +55,7 @@ python3 -m unittest discover -s tests -v
 python3 run_demo.py --fast
 ```
 
-当前测试：51 项全部通过（感知、语音、二维码生成、动作库均含单元测试）。
+当前测试：316 项全部通过（感知、语音、二维码生成、动作库均含单元测试）。
 
 ## 视觉感知（atri/perception）
 

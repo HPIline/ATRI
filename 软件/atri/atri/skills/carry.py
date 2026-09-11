@@ -3,22 +3,38 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from .base import Skill, SkillContext
+from ..config import MAX_STEPS
+from .base import Skill, SkillContext, as_finite_float, failed, perception_data
+
+# 步长约 2cm/步：上限与 MAX_STEPS 对齐，防止观测距离被放大成超长轨迹。
+MAX_CARRY_DISTANCE_CM = 2.0 * MAX_STEPS
 
 
 class CarrySkill(Skill):
     name = "carry"
 
     def run(self, ctx: SkillContext) -> Dict[str, Any]:
-        obs = ctx.perceive("object")
-        target = obs.get("target") or ctx.params.get("target", "红块")
-        distance_cm = float(obs.get("distance_cm", 8.0))
+        obs, reason = perception_data(ctx, "object", optional=True)
+        if reason:
+            return failed(self.name, reason)
+
+        target = obs.get("target") or ctx.params.get("target") or "红块"
+        raw_distance = obs.get("distance_cm", ctx.params.get("distance_cm", 8.0))
+        distance_cm = as_finite_float(raw_distance)
+        if distance_cm is None or distance_cm <= 0.0:
+            return failed(self.name, f"搬运距离非法: {raw_distance!r}")
+        if distance_cm > MAX_CARRY_DISTANCE_CM:
+            return failed(
+                self.name,
+                f"搬运距离 {distance_cm:g}cm 超出上限 {MAX_CARRY_DISTANCE_CM:g}cm",
+            )
+        steps = max(2, int(distance_cm // 2.0))
 
         print(f"  [Carry] 目标={target}, 距离={distance_cm}cm, 视觉对齐中...")
         ctx.cerebellum.execute_motion("align", obs)
 
         grasp_result = ctx.cerebellum.grasp()
-        walk_result = ctx.cerebellum.walk(steps=max(2, int(distance_cm // 2.0)))
+        walk_result = ctx.cerebellum.walk(steps=steps, **ctx.gait)
         release_result = ctx.cerebellum.release()
 
         ctx.tts(f"已将{target}搬运至目标区")
@@ -26,6 +42,8 @@ class CarrySkill(Skill):
             "skill": self.name,
             "status": "ok",
             "target": target,
+            "distance_cm": distance_cm,
+            "steps": steps,
             "grasp": grasp_result,
             "walk": walk_result,
             "release": release_result,

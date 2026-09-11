@@ -16,7 +16,11 @@
     "mass_breakdown_kg": {
       "links_total": 3.437,
       "cables": 0.0,
-      "fasteners": 0.0
+      "fasteners": 0.0,
+      "structure_g": 1790.0,
+      "servos_g": 1210.0,
+      "electronics_g": 316.0,
+      "harness_fasteners_g": 120.0
     },
     "competition_class": "小人形组（高≤600 宽≤300 厚≤300 mm，≥18 DOF，≥7.4V）"
   },
@@ -68,6 +72,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
       "detail": [
@@ -106,6 +116,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
       "detail": [
@@ -139,6 +155,12 @@
       "required_torque_nm": 2.0918,
       "requirements_driver": "gravity",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 2.134,
+      "margin_vs_peak": 1.423,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
       "detail": [
@@ -227,6 +249,12 @@
       "required_torque_nm": 0.9405,
       "requirements_driver": "gravity",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.96,
+      "margin_vs_peak": 0.64,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 2.0,
       "detail": [
@@ -310,6 +338,12 @@
       "required_torque_nm": 1.3747,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.403,
+      "margin_vs_peak": 0.935,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
       "detail": [
@@ -363,6 +397,12 @@
       "required_torque_nm": 1.4262,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.455,
+      "margin_vs_peak": 0.97,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
       "detail": [
@@ -411,6 +451,12 @@
       "required_torque_nm": 1.4776,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.508,
+      "margin_vs_peak": 1.005,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
       "detail": [
@@ -454,6 +500,12 @@
       "required_torque_nm": 1.5578,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.59,
+      "margin_vs_peak": 1.06,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
       "detail": [
@@ -492,6 +544,12 @@
       "required_torque_nm": 1.6296,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.663,
+      "margin_vs_peak": 1.109,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
       "detail": [
@@ -525,6 +583,12 @@
       "required_torque_nm": 1.3747,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.403,
+      "margin_vs_peak": 0.935,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
       "detail": [
@@ -578,6 +642,12 @@
       "required_torque_nm": 1.4262,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.455,
+      "margin_vs_peak": 0.97,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
       "detail": [
@@ -626,6 +696,12 @@
       "required_torque_nm": 1.4776,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.508,
+      "margin_vs_peak": 1.005,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
       "detail": [
@@ -669,6 +745,12 @@
       "required_torque_nm": 1.5578,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.59,
+      "margin_vs_peak": 1.06,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
       "detail": [
@@ -707,6 +789,12 @@
       "required_torque_nm": 1.6296,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 1.663,
+      "margin_vs_peak": 1.109,
+      "exceeds_continuous_rated": true,
+      "exceeds_peak": true,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
       "detail": [
@@ -740,6 +828,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
       "detail": [
@@ -788,6 +882,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
       "detail": [
@@ -831,6 +931,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
       "detail": [
@@ -869,6 +975,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 0.4,
       "detail": [
@@ -902,6 +1014,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
       "detail": [
@@ -950,6 +1068,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
       "detail": [
@@ -993,6 +1117,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
       "detail": [
@@ -1031,6 +1161,12 @@
       "required_torque_nm": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
+      "continuous_rated_torque_nm": 0.98,
+      "peak_torque_nm": 1.47,
+      "margin_vs_continuous_rated": 0.255,
+      "margin_vs_peak": 0.17,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
       "torque_tier": "S",
       "design_placeholder_nm": 0.4,
       "detail": [
@@ -1042,6 +1178,36 @@
       ]
     }
   ],
+  "torque_criterion": {
+    "primary": "continuous_rated",
+    "description": "主判据 = 官方连续额定 0.98 N·m（额定负载 10 kg·cm @12V，对应额定电流 900 mA）；peak_torque_nm 1.47 只作短时峰值参考，比官方额定乐观 50%。0.98 属 12V 变体推断值，待实测（仓库唯一的 STS3215 官方规格书为 7.4V 版，额定 0.49 N·m；按 0.49 N·m 踝关节约 333%）。",
+    "continuous_rated_torque_nm": 0.98,
+    "peak_torque_nm": 1.47,
+    "stall_torque_nm": 2.94,
+    "joints_exceeding_continuous": [
+      "trunk_roll",
+      "left_hip_yaw",
+      "left_hip_roll",
+      "left_hip_pitch",
+      "left_knee_pitch",
+      "left_ankle_pitch",
+      "right_hip_yaw",
+      "right_hip_roll",
+      "right_hip_pitch",
+      "right_knee_pitch",
+      "right_ankle_pitch"
+    ],
+    "joints_exceeding_peak": [
+      "trunk_roll",
+      "left_hip_pitch",
+      "left_knee_pitch",
+      "left_ankle_pitch",
+      "right_hip_pitch",
+      "right_knee_pitch",
+      "right_ankle_pitch"
+    ],
+    "source": "design/handoff/STS3215-官方规格书核验.md"
+  },
   "summary_by_tier": {
     "S": {
       "count": 11,
@@ -1130,7 +1296,7 @@
     "servo_count": 22,
     "current_model": "电流 ∝ 输出扭矩（线性近似）",
     "operating_fraction": 0.35,
-    "rated_torque_nm": 2.94,
+    "stall_torque_ref_nm": 2.94,
     "stall_current_a": 2.7,
     "avg_servo_current_a": 6.58,
     "logic_rail_v": 5.0,
@@ -1144,6 +1310,7 @@
     "required_nameplate_ah": 4.53,
     "required_nameplate_wh": 50.3,
     "estimated_battery_mass_kg": 0.46,
+    "sensitivity_note": "满足 30 min 需把电池由 165 g 增到约 460 g，整机约 3.73 kg，单腿支撑扭矩随之上升约 8.6%（踝约 1.77 N·m ≈ 181%），即结论只会更差。",
     "per_joint_current": [
       {
         "joint": "head_yaw",
@@ -1315,14 +1482,14 @@
       }
     },
     "power": {
-      "battery": "3S 11.1V 锂聚合物，≥2200 mAh",
+      "battery": "3S 11.1V 锂聚合物，≥4530 mAh（4.53 Ah，按 30 min 任务由 power_budget 派生）",
       "regulation": "独立 BEC 给舵机供电，与逻辑电源隔离",
       "connector": "XT60 主接口"
     }
   },
   "what_is_placeholder": [
     "所有 link 的几何是**基元占位**（长方体/圆柱/球/胶囊），只表达包络与连接关系，不是可加工零件。",
-    "舵机外形（40×20×40.5 mm）为同级别产品典型值，非实测。",
+    "舵机外形（45.2×24.7×35.0 mm）取自模型 servo_defaults，与全机其它文档一致；本身仍为厂商标称值，非实测。",
     "未建模：舵机支架、轴承、走线槽、螺钉柱、拔模与圆角。",
     "未建模：电池与电路板的实际安装位置与固定方式。",
     "力矩需求为**静力估算**，未做动力学仿真。"
@@ -1331,6 +1498,7 @@
     "关节数量、编号、名称、轴向、角度限位 —— 与固件 config.py 同源。",
     "运动学树（父子关系与关节原点）—— 可直接加载 URDF 验证。",
     "整机包络尺寸与质量预算 —— 由几何推导，与声明值一致。",
-    "力矩需求的**推导方法**与量级 —— 基于质量分布与力臂计算。"
+    "力矩需求的**推导方法**与量级 —— 基于质量分布与力臂计算。",
+    "扭矩判据：主判据为官方连续额定 0.98 N·m，峰值参考 1.47 N·m（堵转 × 50%）；11 个关节超连续额定，已在 torque_criterion 与本文档显式列出。"
   ]
 }

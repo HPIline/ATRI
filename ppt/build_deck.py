@@ -22,6 +22,7 @@ from diagrams import (chapter_page, fsm_diagram, gait_phase, servo_loop,
                       _rarrow, joint_topology)
 
 OUT = Path(__file__).resolve().parent / "out"
+REPO = OUT.parent.parent          # 仓库根（<repo>/ppt/out → 上两级）
 AST = OUT.parent / "assets"
 DWG = AST / "drawings"
 
@@ -643,8 +644,8 @@ def p18(prs):
     s = add_slide(prs, PAPER)
     page_frame(s, "03", "技术架构与实现", 18)
     page_title(s, "赛题约束基本合规；真正的风险在质量与力矩",
-               lead="尺寸与电气逐条过检；但整机质量 3437 g，腿部关节力矩已越过「堵转 × 50%」判据，必须走减重路径。")
-    accent(s, CONTENT_X, Y_BODY - 0.06, 8.0, "111%", "腿部关节力矩 ／ 堵转×50% 判据",
+               lead="尺寸与电气逐条过检；但整机质量 3437 g，腿部关节力矩占官方连续额定 0.98 N·m 的 167%，已越过主判据，必须走减重路径。")
+    accent(s, CONTENT_X, Y_BODY - 0.06, 8.0, "167%", "腿部关节力矩 ／ 连续额定 0.98 N·m（主判据）",
            size=20, unit_size=12)
     headers = ["约束项", "大赛要求", "本项目设计", "余量"]
     rows = [
@@ -657,7 +658,7 @@ def p18(prs):
         ["供电电压", "锂电池、≥ 7.4 V", "11.1 V 3S", "+3.7 V"],
         ["场地适配", "2400×2400 mm，含 5 个任务区域", "任务卡按区域编号切换技能", "满足"],
         ["整机质量", "官方未设上限", "3437 g（结构 1790〔CAD 实算〕+ 舵机 1210 + 电子件与电池 316 + 线束 120）", "超判据；减重后目标 2.2–2.7 kg"],
-        ["腿部关节力矩", "官方未设上限", "1.629 N·m（CoP 25 mm × 动载 2.0）", "占「堵转×50% = 1.47 N·m」的 111% ❌"],
+        ["腿部关节力矩", "官方未设上限", "1.629 N·m（CoP 25 mm × 动载 2.0）", "占连续额定 0.98 N·m 的 167% ❌（峰值 1.47 为 111%）"],
     ]
     table(s, CONTENT_X, Y_BODY + 0.42, CONTENT_W, headers, rows,
           col_w=[1.75, 3.40, 4.10, 2.42], row_h=0.26, head_h=0.26, size=8.5)
@@ -670,7 +671,7 @@ def p18(prs):
              R("，则上肢 + 躯干 = 3×2 + 2 = 8 < 10，直接不合格。我们的设计把夹爪（编号 17/21）计入上肢，此口径需向组委会书面确认。",
                9, GRAPHITE)], space_before=3, line_spacing=1.28),
           P([R("② 力矩余量——", 9, ORANGE, heavy=True),
-             R("按 CAD 实装质量，腿部关节需要 1.629 N·m，占「堵转 × 50% = 1.47 N·m」判据的 111% —— 超标。三条减重路径（A 拓扑 / B 买金属件 / C 减自由度）见 P49，目标是压到 73–90%。",
+             R("按 CAD 实装质量，腿部关节需要 1.629 N·m，占官方连续额定 0.98 N·m 的 167% ❌，峰值口径 1.47 N·m 也已到 111%。三条减重路径（A 拓扑 / B 买金属件 / C 减自由度）见 P49，可把峰值口径压到 73–90%，但连续额定口径仍超载——连续工况还需放缓步态或换更大扭矩舵机。",
                9, GRAPHITE)], space_before=2, line_spacing=1.28)])
     status_bar(s, ["design"])
 
@@ -728,7 +729,7 @@ def p19(prs):
                8.5, BLUE, heavy=True)])])
     text(s, CONTENT_X, 6.18, CONTENT_W, 0.28,
          [P([R("口径：限位与轴向取自 design/robot_model.json（config.py::JOINTS 只有 id/group/limit/rest，无轴向）；"
-               "「设计扭矩」为模型标称值；按 CAD 实装质量腿部关节需求 1.629 N·m，占「堵转 × 50%」判据的 111%，"
+               "「设计扭矩」为模型标称值；按 CAD 实装质量腿部关节需求 1.629 N·m，占连续额定 0.98 的 167%（峰值 111%），"
                "减重路径详见 P18 与 P49。", 8, GRAY)],
             line_spacing=1.25)])
     status_bar(s, ["done"])
@@ -1279,7 +1280,7 @@ def p35(prs):
     progress_bar(s, CONTENT_X + 4.55, Y_BODY + 0.24, 2.60, 3, 5)
     lx, lw = CONTENT_X, 4.20
     rect(s, lx, Y_BODY + 0.50, lw, 3.36, fill=WHITE, line=LINE, line_w=0.75)
-    qr = Path("/Users/hpi/Documents/搞机器人/软件/atri/qr_samples/qr_walk_steps3.png")
+    qr = REPO / "软件" / "atri" / "qr_samples" / "qr_walk_steps3.png"
     if qr.exists():
         s.shapes.add_picture(str(qr), Inches(lx + 1.02), Inches(Y_BODY + 0.78),
                              width=Inches(2.16), height=Inches(2.16))
@@ -1621,9 +1622,9 @@ def p48(prs):
           P([R("连续两次成功", 8.5, GRAPHITE)], space_before=5, line_spacing=1.30)])
     ry = Y_BODY + 1.58
     text(s, CONTENT_X, ry, 5.0, 0.24, [P([R("风险与应对", 11, INK, heavy=True)])])
-    risks = [("整机质量 3437 g（CAD 实装）；腿部力矩占「堵转×50%」判据 111%，必须执行减重路径 A+B",
+    risks = [("整机质量 3437 g（CAD 实装）；腿部力矩占连续额定 0.98 N·m 的 167%（峰值 1.47 的 111%），必须执行减重路径 A+B",
               "结构减重已在数学上堵死（需砍掉 54% 结构）；换 SM45BL 舵机可行但成本升至 ¥4856；"
-              "降动态系数（2.0 → 1.4）零硬件成本、可回到 81% 额定——待核对评分细则是否限速", True),
+              "降动态系数（2.0 → 1.4）零硬件成本、峰值口径回到 78%（连续额定口径仍 116%）——待核对评分细则是否限速", True),
              ("舵机装不进关节壳（0/8 通过）、电池放不下（105 > 94 mm）",
               "按真实元件尺寸重做关节壳与电池仓，或改用更小容量电池", True),
              ("上肢+躯干 = 10 压线，夹爪是否计入上肢关节口径未定",

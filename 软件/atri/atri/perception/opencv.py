@@ -6,7 +6,8 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional, Tuple
+import math
+from typing import Any, Optional, Tuple
 
 from .base import PerceptionBackend, PerceptionError, PerceptionResult
 
@@ -33,8 +34,21 @@ class OpenCVPerception(PerceptionBackend):
         self.ball_hsv_lower = ball_hsv_lower
         self.ball_hsv_upper = ball_hsv_upper
         self.ball_diameter_cm = ball_diameter_cm
-        self.focal_px = focal_px
-        self.pixels_per_cm = pixels_per_cm
+        self.focal_px = self._checked_positive("focal_px", focal_px, allow_none=True)
+        self.pixels_per_cm = self._checked_positive("pixels_per_cm", pixels_per_cm, allow_none=False)
+
+    @staticmethod
+    def _checked_positive(name: str, value: Any, allow_none: bool) -> Optional[float]:
+        """标定参数必须是正有限数：像素当量为 0 会在换算时除零。"""
+        if value is None and allow_none:
+            return None
+        try:
+            number = float(value)
+        except (TypeError, ValueError) as exc:
+            raise PerceptionError(f"{name} 必须是正有限数，收到 {value!r}") from exc
+        if not math.isfinite(number) or number <= 0.0:
+            raise PerceptionError(f"{name} 必须是正有限数，收到 {value!r}")
+        return number
 
     def available(self) -> bool:
         try:
@@ -125,16 +139,19 @@ class OpenCVPerception(PerceptionBackend):
         x_cm = (cx - width / 2.0) / self.pixels_per_cm
 
         ball_diameter_px = max(w, h)
-        distance_cm = 0.0
+        distance_cm: Optional[float] = None
         if self.focal_px and ball_diameter_px > 0:
-            distance_cm = self.ball_diameter_cm * self.focal_px / float(ball_diameter_px)
+            distance_cm = round(
+                self.ball_diameter_cm * self.focal_px / float(ball_diameter_px), 2
+            )
 
         return PerceptionResult(
             kind="ball",
             data={
                 "found": True,
                 "x_cm": round(x_cm, 2),
-                "distance_cm": round(distance_cm, 2),
+                # 焦距未标定时返回 None，让搬运技能判空而不是把缺测距当成 0cm
+                "distance_cm": distance_cm,
                 "bbox": [int(x), int(y), int(w), int(h)],
                 "center_px": [int(cx), int(cy)],
             },

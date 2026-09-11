@@ -2,6 +2,7 @@
 
 # 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。
 # A.T.R.I. 22 DOF 桌面人形：几何与质量派生自 design/robot_model.json。
+# 关节限位与电机速度上限同样来自模型（minStop/maxStop/maxVelocity）。
 # 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。
 
 WorldInfo {
@@ -34,11 +35,13 @@ Robot {
       jointParameters HingeJointParameters {
         axis 1 0 0
         anchor 0 0 0.0196
+        minStop -0.1745
+        maxStop 0.1745
       }
       device [
         RotationalMotor {
           name "trunk_roll"
-          maxVelocity 2
+          maxVelocity 3.1416
         }
         PositionSensor {
           name "trunk_roll_sensor"
@@ -58,11 +61,13 @@ Robot {
             jointParameters HingeJointParameters {
               axis 0 1 0
               anchor 0 0 0.0275
+              minStop -0.2618
+              maxStop 0.2618
             }
             device [
               RotationalMotor {
                 name "trunk_pitch"
-                maxVelocity 2
+                maxVelocity 3.1416
               }
               PositionSensor {
                 name "trunk_pitch_sensor"
@@ -82,11 +87,13 @@ Robot {
                   jointParameters HingeJointParameters {
                     axis 0 0 1
                     anchor 0 0 0.0824
+                    minStop -1.5708
+                    maxStop 1.5708
                   }
                   device [
                     RotationalMotor {
                       name "head_yaw"
-                      maxVelocity 2
+                      maxVelocity 4.1888
                     }
                     PositionSensor {
                       name "head_yaw_sensor"
@@ -106,11 +113,13 @@ Robot {
                         jointParameters HingeJointParameters {
                           axis 0 1 0
                           anchor 0 0 0.0275
+                          minStop -0.7854
+                          maxStop 0.7854
                         }
                         device [
                           RotationalMotor {
                             name "head_pitch"
-                            maxVelocity 2
+                            maxVelocity 4.1888
                           }
                           PositionSensor {
                             name "head_pitch_sensor"
@@ -134,11 +143,13 @@ Robot {
                   jointParameters HingeJointParameters {
                     axis 0 1 0
                     anchor 0 0.075 0.0118
+                    minStop -1.5708
+                    maxStop 1.5708
                   }
                   device [
                     RotationalMotor {
                       name "left_shoulder_pitch"
-                      maxVelocity 2
+                      maxVelocity 4.1888
                     }
                     PositionSensor {
                       name "left_shoulder_pitch_sensor"
@@ -158,11 +169,13 @@ Robot {
                         jointParameters HingeJointParameters {
                           axis 1 0 0
                           anchor 0 0 0
+                          minStop -1.5708
+                          maxStop 1.5708
                         }
                         device [
                           RotationalMotor {
                             name "left_shoulder_roll"
-                            maxVelocity 2
+                            maxVelocity 4.1888
                           }
                           PositionSensor {
                             name "left_shoulder_roll_sensor"
@@ -182,11 +195,13 @@ Robot {
                               jointParameters HingeJointParameters {
                                 axis 0 1 0
                                 anchor 0 0 -0.0471
+                                minStop -2.0944
+                                maxStop 0
                               }
                               device [
                                 RotationalMotor {
                                   name "left_elbow_pitch"
-                                  maxVelocity 2
+                                  maxVelocity 4.1888
                                 }
                                 PositionSensor {
                                   name "left_elbow_pitch_sensor"
@@ -206,11 +221,13 @@ Robot {
                                     jointParameters HingeJointParameters {
                                       axis 0 1 0
                                       anchor 0 0 -0.0392
+                                      minStop 0
+                                      maxStop 1.0472
                                     }
                                     device [
                                       RotationalMotor {
                                         name "left_gripper"
-                                        maxVelocity 2
+                                        maxVelocity 4.1888
                                       }
                                       PositionSensor {
                                         name "left_gripper_sensor"
@@ -240,11 +257,13 @@ Robot {
                   jointParameters HingeJointParameters {
                     axis 0 1 0
                     anchor 0 -0.075 0.0118
+                    minStop -1.5708
+                    maxStop 1.5708
                   }
                   device [
                     RotationalMotor {
                       name "right_shoulder_pitch"
-                      maxVelocity 2
+                      maxVelocity 4.1888
                     }
                     PositionSensor {
                       name "right_shoulder_pitch_sensor"
@@ -264,11 +283,13 @@ Robot {
                         jointParameters HingeJointParameters {
                           axis 1 0 0
                           anchor 0 0 0
+                          minStop -1.5708
+                          maxStop 1.5708
                         }
                         device [
                           RotationalMotor {
                             name "right_shoulder_roll"
-                            maxVelocity 2
+                            maxVelocity 4.1888
                           }
                           PositionSensor {
                             name "right_shoulder_roll_sensor"
@@ -288,11 +309,13 @@ Robot {
                               jointParameters HingeJointParameters {
                                 axis 0 1 0
                                 anchor 0 0 -0.0471
+                                minStop -2.0944
+                                maxStop 0
                               }
                               device [
                                 RotationalMotor {
                                   name "right_elbow_pitch"
-                                  maxVelocity 2
+                                  maxVelocity 4.1888
                                 }
                                 PositionSensor {
                                   name "right_elbow_pitch_sensor"
@@ -312,11 +335,13 @@ Robot {
                                     jointParameters HingeJointParameters {
                                       axis 0 1 0
                                       anchor 0 0 -0.0392
+                                      minStop 0
+                                      maxStop 1.0472
                                     }
                                     device [
                                       RotationalMotor {
                                         name "right_gripper"
-                                        maxVelocity 2
+                                        maxVelocity 4.1888
                                       }
                                       PositionSensor {
                                         name "right_gripper_sensor"
@@ -352,11 +377,13 @@ Robot {
       jointParameters HingeJointParameters {
         axis 0 0 1
         anchor 0 0.045 -0.0196
+        minStop -0.7854
+        maxStop 0.7854
       }
       device [
         RotationalMotor {
           name "left_hip_yaw"
-          maxVelocity 2
+          maxVelocity 3.1416
         }
         PositionSensor {
           name "left_hip_yaw_sensor"
@@ -376,11 +403,13 @@ Robot {
             jointParameters HingeJointParameters {
               axis 1 0 0
               anchor 0 0 -0.0196
+              minStop -0.4363
+              maxStop 0.4363
             }
             device [
               RotationalMotor {
                 name "left_hip_roll"
-                maxVelocity 2
+                maxVelocity 3.1416
               }
               PositionSensor {
                 name "left_hip_roll_sensor"
@@ -400,11 +429,13 @@ Robot {
                   jointParameters HingeJointParameters {
                     axis 0 1 0
                     anchor 0 0 -0.0196
+                    minStop -1.0472
+                    maxStop 1.0472
                   }
                   device [
                     RotationalMotor {
                       name "left_hip_pitch"
-                      maxVelocity 2
+                      maxVelocity 3.1416
                     }
                     PositionSensor {
                       name "left_hip_pitch_sensor"
@@ -424,11 +455,13 @@ Robot {
                         jointParameters HingeJointParameters {
                           axis 0 1 0
                           anchor 0 0 -0.0628
+                          minStop 0
+                          maxStop 1.5708
                         }
                         device [
                           RotationalMotor {
                             name "left_knee_pitch"
-                            maxVelocity 2
+                            maxVelocity 3.1416
                           }
                           PositionSensor {
                             name "left_knee_pitch_sensor"
@@ -448,11 +481,13 @@ Robot {
                               jointParameters HingeJointParameters {
                                 axis 0 1 0
                                 anchor 0 0 -0.0628
+                                minStop -0.6981
+                                maxStop 0.6981
                               }
                               device [
                                 RotationalMotor {
                                   name "left_ankle_pitch"
-                                  maxVelocity 2
+                                  maxVelocity 3.1416
                                 }
                                 PositionSensor {
                                   name "left_ankle_pitch_sensor"
@@ -485,11 +520,13 @@ Robot {
       jointParameters HingeJointParameters {
         axis 0 0 1
         anchor 0 -0.045 -0.0196
+        minStop -0.7854
+        maxStop 0.7854
       }
       device [
         RotationalMotor {
           name "right_hip_yaw"
-          maxVelocity 2
+          maxVelocity 3.1416
         }
         PositionSensor {
           name "right_hip_yaw_sensor"
@@ -509,11 +546,13 @@ Robot {
             jointParameters HingeJointParameters {
               axis 1 0 0
               anchor 0 0 -0.0196
+              minStop -0.4363
+              maxStop 0.4363
             }
             device [
               RotationalMotor {
                 name "right_hip_roll"
-                maxVelocity 2
+                maxVelocity 3.1416
               }
               PositionSensor {
                 name "right_hip_roll_sensor"
@@ -533,11 +572,13 @@ Robot {
                   jointParameters HingeJointParameters {
                     axis 0 1 0
                     anchor 0 0 -0.0196
+                    minStop -1.0472
+                    maxStop 1.0472
                   }
                   device [
                     RotationalMotor {
                       name "right_hip_pitch"
-                      maxVelocity 2
+                      maxVelocity 3.1416
                     }
                     PositionSensor {
                       name "right_hip_pitch_sensor"
@@ -557,11 +598,13 @@ Robot {
                         jointParameters HingeJointParameters {
                           axis 0 1 0
                           anchor 0 0 -0.0628
+                          minStop 0
+                          maxStop 1.5708
                         }
                         device [
                           RotationalMotor {
                             name "right_knee_pitch"
-                            maxVelocity 2
+                            maxVelocity 3.1416
                           }
                           PositionSensor {
                             name "right_knee_pitch_sensor"
@@ -581,11 +624,13 @@ Robot {
                               jointParameters HingeJointParameters {
                                 axis 0 1 0
                                 anchor 0 0 -0.0628
+                                minStop -0.6981
+                                maxStop 0.6981
                               }
                               device [
                                 RotationalMotor {
                                   name "right_ankle_pitch"
-                                  maxVelocity 2
+                                  maxVelocity 3.1416
                                 }
                                 PositionSensor {
                                   name "right_ankle_pitch_sensor"

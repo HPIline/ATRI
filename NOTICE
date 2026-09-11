@@ -1,0 +1,66 @@
+# NOTICE —— 第三方素材归属与许可
+
+本文件记录本仓库内第三方素材的来源、许可与修改状态，仅针对这些第三方素材；
+不对本仓库自身代码与文档的许可作出声明。
+
+---
+
+## 1. `design/cad/vendor/so-arm100/` —— SO-ARM100 开源机械臂几何
+
+- **来源**：TheRobotStudio / SO-ARM100，<https://github.com/TheRobotStudio/SO-ARM100>
+- **许可**：Apache License, Version 2.0；许可副本见
+  `design/cad/vendor/LICENSE-Apache-2.0.txt`
+- **用途**：舵机接口几何与整机装配配合的一手实测证据；`design/cad/` 下
+  `measure_vendor.py`、`probe_assembly.py`、`check_mate.py`、`render_vendor.py` 的输入
+- **是否修改**：未修改。下列 10 个文件的内容与上游 `main` 分支逐字节一致（git blob SHA 相同）；
+  其中 `SO100_Follower_Assembly.step` 为上游
+  `STEP/SO100/Follower_Specific/SO_5DOF_ARM100_Assembly.step` 的重命名副本。
+  上游 LICENSE 为 Apache-2.0 标准正文，无附加版权行、无 NOTICE 文件；
+  这些几何文件内部亦不含版权声明。
+
+| 本地文件 | 上游路径 |
+|---|---|
+| `STS3215_03a.step` | `STEP/SO100/STS3215_03a.step` |
+| `Passive_Horn_01.step` | `STEP/SO100/Passive_Horn_01.step` |
+| `Motor1_holder.step` | `STEP/SO100/Motor1_holder.step` |
+| `Motor_holder_SO101_Base.step` | `STEP/SO101/Motor_holder_SO101_Base.step` |
+| `Motor_holder_SO101_Wrist.step` | `STEP/SO101/Motor_holder_SO101_Wrist.step` |
+| `SO100_Follower_Assembly.step` | `STEP/SO100/Follower_Specific/SO_5DOF_ARM100_Assembly.step`（重命名） |
+| `sts3215_03a_v1.stl` | `Simulation/SO101/assets/sts3215_03a_v1.stl` |
+| `sts3215_03a_no_horn_v1.stl` | `Simulation/SO101/assets/sts3215_03a_no_horn_v1.stl` |
+| `sts3215_03a_v1.part` | `Simulation/SO101/assets/sts3215_03a_v1.part` |
+| `sts3215_03a_no_horn_v1.part` | `Simulation/SO101/assets/sts3215_03a_no_horn_v1.part` |
+
+英文归属声明（满足 Apache-2.0 第 4 节）：
+
+> This repository includes material from the SO-ARM100 project
+> (https://github.com/TheRobotStudio/SO-ARM100), licensed under the
+> Apache License, Version 2.0. A copy of the license is provided at
+> design/cad/vendor/LICENSE-Apache-2.0.txt.
+
+---
+
+## 2. `design/cad/vendor/feetech/` —— 飞特（FEETECH）官方产品规格书
+
+- **来源**：深圳飞特模型有限公司（SHENZHEN FEETECH RC MODEL CO.,LTD.）官网
+  <https://www.feetechrc.com> 产品页附件（下载记录见 `design/cad/vendor/README.md`）
+- **许可**：厂商产品规格书，**未授予再分发许可**；本仓库内无任何再分发授权说明，
+  本仓库不对这些文档主张任何权利
+- **用途**：仅作项目内部技术核验参考（外形尺寸图与电气参数），不作对外分发
+- **是否修改**：未修改（原样下载）
+- **公开分发处理**：若本仓库公开分发，必须先移除这些 PDF，或改为仅保留
+  官网下载链接与页码引用
+
+| 文件 | 正文型号 | 页数 | 备注 |
+|---|---|---|---|
+| `STS3215_7.4V_19kg_spec.pdf` | STS3215（7.4V 19KG.CM，版本 A/0） | 8 | — |
+| `STS3235_12V_30kg_spec.pdf` | STS3235（12V 30KG，版本 A/0） | 8 | — |
+| `STS3215_12V_30kg_spec.pdf` | STS3025BL-C001（12V 20KG.CM，版本 A/0） | 8 | **文件名与正文型号不一致**：正文为 STS3025BL 规格书 |
+
+---
+
+## 范围说明
+
+- 本 NOTICE 覆盖 `design/cad/vendor/` 下归档的上述第三方素材；
+  来源、许可与用途的详细记录见 `design/cad/vendor/README.md`。
+- 仓库后续新增第三方素材时，应同步更新本文件。

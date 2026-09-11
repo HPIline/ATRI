@@ -23,7 +23,7 @@
 
 ```
 design/
-├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义（v2）
+├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义（v3）
 ├── placements.json           # ★ 配件位置总表：22 舵机 + 10 电子件 + 23 结构件（宿主/坐标/尺寸/质量）
 ├── reference/
 │   └── tonypi_pro_baseline.json  # 参考机（幻尔 TonyPi Pro）公开参数与可迁移结论
@@ -45,7 +45,7 @@ design/
 ├── drawings/                 # 工程图产物 ★ 可直接用于报名材料
 │   ├── 01_关节编号图.svg
 │   ├── 02_三视图.svg
-│   ├── 04_尺寸链图.svg
+│   ├── 04_尺寸链图.svg       # 编号跳过 03：原计划的"爆炸图"未实现
 │   └── 05_舵机布局图.svg
 ├── realistic_sim.py          # 非理想舵机总线 + 带噪声感知 + 域随机化采样
 ├── run_sim.py                # 仿真运行器（产出 JSON / CSV / SVG）
@@ -127,6 +127,10 @@ python3 design/gen_render.py --pose zero          # 换成零姿态
 | ATRI-DWG-005 | `05_舵机布局图.svg` | 22 路舵机安装位置、按扭矩分档图例、汇总 | 证明"算过怎么装" |
 
 **图的读法**：SVG 是矢量图，双击用浏览器打开即可；也可用 `qlmanage -t -s 2000` 转 PNG 插进 PPT。
+
+> **关于图号**：编号 **跳过 03**——原计划第 3 张为"爆炸图"（见
+> `项目文档/外观尺寸零件设计Prompt.md` §五），未实现；`gen_drawings.DRAWINGS` 里没有 03，
+> 现有 4 张编号为 01 / 02 / 04 / 05。
 
 **关于这些图的诚实说明**：
 - 它们是**由设计模型正交投影生成的示意图**，不是 CAD 出图，也不是渲染图

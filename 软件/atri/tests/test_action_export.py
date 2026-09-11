@@ -5,6 +5,7 @@ from pathlib import Path
 
 from atri.action_export import export_walk, frames_to_action
 from atri.action_library import validate_action, ACTION_SCHEMA_VERSION
+from atri.config import MAX_STEPS
 
 
 class TestActionExport(unittest.TestCase):
@@ -26,6 +27,12 @@ class TestActionExport(unittest.TestCase):
             data = json.loads(out.read_text(encoding="utf-8"))
             self.assertEqual(data["action_id"], "walk")
             self.assertEqual(validate_action(data), [])
+
+    def test_export_walk_rejects_out_of_range_steps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "walk.json"
+            with self.assertRaises(ValueError):
+                export_walk(out, steps=MAX_STEPS + 1)
 
 
 if __name__ == "__main__":

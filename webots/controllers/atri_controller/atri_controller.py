@@ -29,8 +29,10 @@
     webots --batch --mode=fast --stdout --stderr `
         webots/worlds/atri_nao.wbt -- --exit-on-done --mapping joint_mapping_nao.json
 
-退出码：``0`` = 五项任务全过且仿真全程存活；``2`` = 有任务失败、或仿真提前结束
-（此时任务只是"逻辑上"跑完，动作并没有真的走完，不能算联调通过）。
+退出码：``0`` = 五项任务全过、仿真全程存活、映射覆盖 22 个关节且全部绑定，
+并且至少有一个关节产生了实际行程；``2`` = 上述任一条不满足。
+任务卡跑完只证明 FSM 逻辑走通：映射被截断、ATRI 侧键名写错、电机被锁死
+（``--velocity 0``）时动作并没有真的走完，不能算联调通过。
 """
 from __future__ import annotations
 
@@ -41,7 +43,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 try:
     from controller import Robot
@@ -86,13 +88,18 @@ class WebotsServoBus(ServoBus):
         mapping: Dict[str, str],
         timestep_ms: int,
         velocity: float = DEFAULT_VELOCITY,
+        alive: Optional[Callable[[], bool]] = None,
     ) -> None:
         self.robot = robot
         self.timestep_ms = int(timestep_ms)
         self.velocity = float(velocity)
+        # 仿真存活判据：robot.step 返回 -1 后 alive() 变 False，之后不得再下发角度
+        self._is_alive = alive or (lambda: True)
         self.motors: Dict[str, Any] = {}
         self.sensors: Dict[str, Any] = {}
         self.missing: List[Tuple[str, str]] = []
+        # 映射里非空的条目数 = 该机型"应绑定"的关节数；留空表示没有这个自由度
+        self.mapped_count = sum(1 for value in mapping.values() if str(value).strip())
 
         for atri_name, webots_name in mapping.items():
             if not webots_name:
@@ -124,7 +131,14 @@ class WebotsServoBus(ServoBus):
             self.sensors[atri_name] = sensor
 
     # -- ServoBus 接口 ---------------------------------------------------
-    def set_angle(self, joint_id: int, deg: float) -> None:
+    def _write_angle(self, joint_id: int, deg: float) -> None:
+        """把基类按 ``limit_deg`` 钳制后的角度换算成弧度下发给电机。
+
+        限位由 ``ServoBus.set_angle`` 模板方法统一保证，这里不再重复钳制。
+        仿真已结束（``robot.step`` 返回 -1）时直接返回，不再对已停止的仿真下发。
+        """
+        if not self._is_alive():
+            return
         name = ID_TO_NAME.get(joint_id)
         motor = self.motors.get(name) if name else None
         if motor is not None:
@@ -168,6 +182,26 @@ def load_mapping(path: Path) -> Dict[str, str]:
     if not isinstance(data, dict):
         raise ValueError(f"关节映射必须是 JSON 对象: {path}")
     return {str(k): str(v) for k, v in data.items()}
+
+
+def mapping_problems(mapping: Dict[str, str]) -> List[str]:
+    """校验映射的键集合恰好是 22 个 ATRI 关节名。
+
+    只比对"绑定数 == 映射非空条目数"无法发现两类配置错误：映射被截断时两个计数
+    一起变小；ATRI 侧键名写错时坏条目同时被计入两个计数。两种情况下对应关节
+    整轮都不会收到指令，却仍会判通过。值留空是合法的（该机型无此自由度）。
+    """
+    problems = []
+    unknown = sorted(set(mapping) - set(JOINTS))
+    if unknown:
+        problems.append(f"映射含非法 ATRI 关节名: {', '.join(unknown)}")
+    absent = sorted(set(JOINTS) - set(mapping))
+    if absent:
+        problems.append(
+            f"映射缺少 {len(absent)} 个关节（留空值表示该机型无此自由度，不能整条省略）: "
+            + ", ".join(absent)
+        )
+    return problems
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -283,6 +317,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not mapping_path.is_absolute():
         mapping_path = CONTROLLER_DIR / mapping_path
     mapping = load_mapping(mapping_path)
+    mapping_issues = mapping_problems(mapping)
 
     print("=" * 64)
     print("A.T.R.I. Webots 控制器启动")
@@ -291,13 +326,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"  关节角速度    = {args.velocity} rad/s")
     print("=" * 64)
 
-    bus = WebotsServoBus(robot, mapping, timestep, velocity=args.velocity)
+    # 用 robot.step 推进仿真时间，而不是 time.sleep；alive 与总线共享，
+    # 仿真结束后总线不再下发角度。
+    state: Dict[str, Any] = {"alive": True, "sim_ms": 0}
+
+    bus = WebotsServoBus(
+        robot, mapping, timestep, velocity=args.velocity,
+        alive=lambda: state["alive"],
+    )
     print(f"  [WebotsServoBus] {bus.summary()}")
     if bus.bound_count == 0:
         print("  [控制器] 一个关节都没绑定上，检查关节映射与机器人模型是否匹配。", file=sys.stderr)
-
-    # 用 robot.step 推进仿真时间，而不是 time.sleep
-    state: Dict[str, Any] = {"alive": True, "sim_ms": 0}
 
     # 关节实际行程追踪。任务卡跑完只说明 FSM 走通了，不能证明电机真的动了；
     # 这里在每个仿真步之后用位置传感器回读，记录各关节在整轮联调里到过的
@@ -356,9 +395,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     wall = time.time() - started
     sim_seconds = state["sim_ms"] / 1000.0
+
+    # 绑定判据：实际绑定数 == 映射中非空条目数，且 > 0。
+    # 不能写成"必须 22/22"——joint_mapping_nao.json 故意留空 4 个自由度（Nao 没有），
+    # 绑定 18/22 是预期行为；但非空条目没绑上（电机改名、世界损坏）必须判失败。
+    binding_ok = (
+        not mapping_issues
+        and bus.mapped_count > 0
+        and bus.bound_count == bus.mapped_count
+    )
+    # 绑定完整不等于真的动了：velocity=0 时电机锁死，任务卡照样"逻辑上"跑完。
+    motion_ok = len(moved_joints) > 0
+
     print("=" * 64)
     print(f"Webots 闭环: {passed}/{total} 项任务通过")
-    print(f"  关节绑定: {bus.bound_count}/{len(JOINTS)}")
+    print(f"  关节绑定: {bus.bound_count}/{len(JOINTS)}（映射应绑定 {bus.mapped_count}）")
     print(f"  有实际行程的关节: {len(moved_joints)}/{len(JOINTS)}")
     print(f"  仿真时间: {sim_seconds:.2f} s（墙钟 {wall:.2f} s，{state['sim_ms'] // timestep} 步）")
     print("=" * 64)
@@ -367,6 +418,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "passed": passed,
         "total": total,
         "bound_joints": bus.bound_count,
+        "mapped_joints": bus.mapped_count,
+        "binding_ok": binding_ok,
+        "mapping_problems": mapping_issues,
+        "motion_ok": motion_ok,
         "expected_joints": len(JOINTS),
         "unbound_joints": [{"atri": a, "webots": w} for a, w in bus.missing],
         "mapping": mapping_path.name,
@@ -398,9 +453,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
         print(f"  联调报告已写入: {report_path}")
 
-    # 退出码：0 = 五项任务全过且仿真全程存活；2 = 有任务失败，或仿真提前结束
-    # （仿真提前结束时任务只是"逻辑上"跑完了，运动并没有真的走完，不能算通过）
-    success = passed == total and total > 0 and state["alive"]
+    # 退出码：0 = 五项任务全过、仿真全程存活，且映射中声明的关节全部绑定；
+    # 绑定不完整（0 绑定、电机名写错、世界损坏）时任务只是"逻辑上"跑完了，
+    # 运动并没有真的走完，不能算通过。
+    success = (
+        passed == total and total > 0 and state["alive"] and binding_ok and motion_ok
+    )
+    for issue in mapping_issues:
+        print(f"  [控制器] 关节映射配置错误：{issue}", file=sys.stderr)
+    if not binding_ok and not mapping_issues:
+        print(
+            f"  [控制器] 绑定不完整：映射应绑定 {bus.mapped_count} 个关节，实际绑定 "
+            f"{bus.bound_count} 个，本次联调结果不可信。",
+            file=sys.stderr,
+        )
+    if not motion_ok:
+        print(
+            "  [控制器] 没有任何关节产生实际行程（检查 --velocity 是否为 0、"
+            "电机是否被锁死），任务卡只是逻辑上跑完，不算联调通过。",
+            file=sys.stderr,
+        )
     if not state["alive"]:
         print(
             "  [控制器] 仿真在任务跑完前结束（robot.step 返回 -1），本次联调结果不可信。",

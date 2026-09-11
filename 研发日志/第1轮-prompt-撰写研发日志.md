@@ -6,19 +6,21 @@
 > **归档说明（2026-09-11 补记）**：本提示词原在仓库外的
 > `research/xjtu-innovation-2026/研发日志/` 执行，产出的《研发日志》已随本轮整理
 > **归并入本仓库** `研发日志/`（卷 1）。为保留"当时是怎么要求写作的"这一过程记录，
-> 本文件**按原样归档，正文不改**——因此下文出现的绝对路径与
+> 本文件**按原样归档**——下文出现的路径与
 > "禁止写入 `github/ATRI/`"的隔离约束，描述的是**当时**的作业方式，现已不适用。
 > 后续卷次请以仓库内路径为准。
+> **脱敏补记（2026-09-11）**：原内嵌的绝对路径已替换为 `<repo>`（本仓库根，从仓库根执行）
+> 与 `<外部工作目录>` 占位，文字内容未改。
 
 ---
 
 ## 0. 隔离约束（最高优先级；违反即停止）
 
 **工作目录（只在这里写）**
-`/Users/zhangjingkun/Projects/research/xjtu-innovation-2026/研发日志/`
+`<外部工作目录>/研发日志/`
 
 **素材来源（只读）**
-`/Users/zhangjingkun/Projects/github/ATRI/`
+`<repo>/`
 
 ### 硬性禁令
 
@@ -41,13 +43,13 @@
 
 ```bash
 # 确认工作目录不是 git 仓库、无远端（应当输出"非 Git"）
-git -C /Users/zhangjingkun/Projects/research/xjtu-innovation-2026 rev-parse --git-dir 2>&1 | head -1
+git -C <外部工作目录> rev-parse --git-dir 2>&1 | head -1
 
 # 确认 ATRI 远端存在（提醒自己不要碰）
-git -C /Users/zhangjingkun/Projects/github/ATRI remote -v
+git -C <repo> remote -v
 ```
 
-**本轮结束时必须复查**：`git -C /Users/zhangjingkun/Projects/github/ATRI status --short`
+**本轮结束时必须复查**：`git -C <repo> status --short`
 的输出**与开工前完全一致**（记录开工前的项数，结束时比对）。
 
 ---
@@ -145,7 +147,7 @@ git -C /Users/zhangjingkun/Projects/github/ATRI remote -v
 ### 4.1 真实时间线（可用）
 
 ```bash
-cd /Users/zhangjingkun/Projects/github/ATRI
+cd <repo>   # 仓库根目录
 git log --date=format:'%Y-%m-%d %H:%M' --pretty='%h | %ad | %s' | head -40
 ```
 
@@ -193,7 +195,7 @@ git log --date=format:'%Y-%m-%d %H:%M' --pretty='%h | %ad | %s' | head -40
 
 ## 5. 输出物
 
-全部写入 `/Users/zhangjingkun/Projects/research/xjtu-innovation-2026/研发日志/`：
+全部写入 `<外部工作目录>/研发日志/`：
 
 | 文件 | 内容 |
 |---|---|

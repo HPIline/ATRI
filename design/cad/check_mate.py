@@ -9,7 +9,7 @@ T1 的核心工具。做法：
   "支架上的 Φ2.0 孔与舵机 Φ1.5 底孔同轴" ⇒ 支架是用 M2 自攻拧进舵机侧孔的。
 
     .venv-cad/bin/python design/cad/check_mate.py <assembly.step> \
-        --target-volume 36217 [--tol 0.35]
+        --target-volume 36217 [--tol 0.35] [--gap-tol 3.0]
 """
 from __future__ import annotations
 
@@ -53,8 +53,13 @@ def small_holes(solid, r_min=0.5, r_max=2.6):
     return out
 
 
-def match(a_holes, b_holes, tol=0.35):
-    """找同轴孔对。"""
+def match(a_holes, b_holes, tol=0.35, gap_tol=3.0):
+    """找同轴孔对。
+
+    tol：横向偏移上限（mm），两轴间最短距离。
+    gap_tol：轴向间隔上限（mm）——轴向相隔超过此值的孔不算同一螺钉通道，
+             否则会把零件上相隔很远的孔也配成"同轴孔对"，削弱结论。
+    """
     hits = []
     for a in a_holes:
         for b in b_holes:
@@ -66,8 +71,10 @@ def match(a_holes, b_holes, tol=0.35):
             lat = float(np.linalg.norm(w_perp))
             if lat > tol:
                 continue
-            # 轴向相邻（间隔 < 3mm 视为同一螺钉通道）
+            # 轴向相邻（间隔 < gap_tol 视为同一螺钉通道）
             gap = max(a["lo"], b["lo"]) - min(a["hi"], b["hi"])
+            if gap > gap_tol:
+                continue
             hits.append({"a_r": 2 * a["r"], "b_r": 2 * b["r"], "lat": lat,
                          "gap": gap, "a_pos": a["c"], "b_pos": b["c"],
                          "axis": axis_letter(a["n"])})
@@ -81,6 +88,7 @@ def main(argv):
     path = Path(argv[1])
     target = float(argv[argv.index("--target-volume") + 1]) if "--target-volume" in argv else 36217.0
     tol = float(argv[argv.index("--tol") + 1]) if "--tol" in argv else 0.35
+    gap_tol = float(argv[argv.index("--gap-tol") + 1]) if "--gap-tol" in argv else 3.0
 
     shape = cq.importers.importStep(str(path)).val()
     solids = list(shape.Solids())
@@ -88,6 +96,7 @@ def main(argv):
     others = [s for s in solids if s not in targets]
     print(f"# {path.name}: {len(solids)} 实体，其中目标件 {len(targets)} 个"
           f"（体积≈{target:.0f} mm³）")
+    print(f"# 判据：横向偏移 ≤ {tol} mm，轴向间隔 ≤ {gap_tol} mm")
 
     summary = defaultdict(int)
     detail = []
@@ -100,7 +109,7 @@ def main(argv):
             oh = small_holes(o)
             if not oh:
                 continue
-            for h in match(th, oh, tol):
+            for h in match(th, oh, tol, gap_tol):
                 summary[(round(h["a_r"], 1), round(h["b_r"], 1), h["axis"])] += 1
                 detail.append((ti, tctr, o.Volume(), h))
 

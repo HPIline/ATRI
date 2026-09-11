@@ -13,7 +13,8 @@ TRIES="${TRIES:-8}"
 WAIT="${WAIT:-20}"
 
 source "$HOME/.config/xbcl-imagegen.env"
-GEN="/Users/hpi/.agents/skills/xbcl-imagegen/scripts/generate_grok_image.py"
+# 出图脚本装在用户主目录（非仓库内），按 $HOME 运行时推导
+GEN="$HOME/.agents/skills/xbcl-imagegen/scripts/generate_grok_image.py"
 
 for i in $(seq 1 "$TRIES"); do
   echo "[$(date +%H:%M:%S)] 第 $i/$TRIES 次 -> $(basename "$OUT")"

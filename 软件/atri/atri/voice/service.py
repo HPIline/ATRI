@@ -13,6 +13,10 @@ class VoiceService:
 
     def respond(self, audio: Any = None, reply_template: str = "{keyword}") -> Dict[str, Any]:
         keyword = self.recognizer.recognize(audio)
-        text = reply_template.format(keyword=keyword)
+        try:
+            text = reply_template.format(keyword=keyword)
+        except (KeyError, IndexError, ValueError):
+            # 模板含未知占位符时退回播报关键词本身，不中断整条语音链路
+            text = keyword
         self.tts.speak(text)
         return {"keyword": keyword, "reply": text}

@@ -8,7 +8,9 @@
 （``Robot`` / ``HingeJoint`` / ``RotationalMotor`` / ``PositionSensor`` / ``Solid`` / ``Box``）。
 
 电机名与 ``controllers/atri_controller/joint_mapping.json`` 完全一致（默认同名映射），
-所以 22 个关节全部能绑定上，联调跑的就是全关节。
+所以 22 个关节全部能绑定上，联调跑的就是全关节。关节硬限位（``minStop``/``maxStop``）
+与电机 ``maxVelocity`` 也逐关节取自 ``design/robot_model.json`` 的
+``limit_deg`` / ``velocity_dps``，世界与模型不再各写一套。
 
 用法::
 
@@ -17,6 +19,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
@@ -34,9 +37,6 @@ import geometry  # noqa: E402  （纯标准库）
 # 世界标称版本：与本机验证用的 Webots R2025a 对齐（工程说明要求 R2023b 或更新）
 WORLD_VERSION = "R2025a"
 BASIC_TIME_STEP = 32
-
-# 关节最大角速度（rad/s），与控制器默认值保持一致
-MOTOR_MAX_VELOCITY = 2.0
 
 # 重力置零：这是"运动学联调"世界，验证的是 22 个关节角是否被正确下发与跟随，
 # 不是双足平衡。零重力下机器人不会倒地，关节可以自由摆动，轨迹看得最清楚。
@@ -64,15 +64,23 @@ def joint(
     anchor: Sequence[float],
     size: Sequence[float],
     mass: float = 0.15,
+    limit_deg: Sequence[float] = (-180.0, 180.0),
+    velocity_dps: float = 180.0,
     children: Sequence[Dict[str, Any]] = (),
 ) -> Dict[str, Any]:
-    """一个 ATRI 关节 = HingeJoint + 电机 + 位置传感器 + 一段连杆。"""
+    """一个 ATRI 关节 = HingeJoint + 电机 + 位置传感器 + 一段连杆。
+
+    ``limit_deg``/``velocity_dps`` 原样来自 L1 模型：世界里的硬限位与电机
+    ``maxVelocity`` 必须和模型一致，否则 Webots 会按默认"无限位 + 统一速度"跑。
+    """
     return {
         "name": name,
         "axis": tuple(axis),
         "anchor": tuple(anchor),
         "size": tuple(size),
         "mass": mass,
+        "limit_deg": tuple(limit_deg),
+        "velocity_dps": float(velocity_dps),
         "children": list(children),
     }
 
@@ -119,6 +127,8 @@ def robot_children(model: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
             anchor=[v / 1000.0 for v in j["origin_xyz_mm"]],
             size=_bbox_m(child["geometry"]),
             mass=float(child["mass_kg"]),
+            limit_deg=j["limit_deg"],
+            velocity_dps=float(j["velocity_dps"]),
             children=[node(k) for k in by_parent.get(j["child"], [])],
         )
 
@@ -141,16 +151,20 @@ def joint_names() -> List[str]:
 
 def render_joint(node: Dict[str, Any], indent: int) -> List[str]:
     pad = "  " * indent
+    lo, hi = node["limit_deg"]
     lines = [
         f"{pad}HingeJoint {{",
         f"{pad}  jointParameters HingeJointParameters {{",
         f"{pad}    axis {vec(node['axis'])}",
         f"{pad}    anchor {vec(node['anchor'])}",
+        # Webots 不写 minStop/maxStop 就是无限位，控制器钳制再严也只是软件层
+        f"{pad}    minStop {num(math.radians(lo))}",
+        f"{pad}    maxStop {num(math.radians(hi))}",
         f"{pad}  }}",
         f"{pad}  device [",
         f"{pad}    RotationalMotor {{",
         f'{pad}      name "{node["name"]}"',
-        f"{pad}      maxVelocity {num(MOTOR_MAX_VELOCITY)}",
+        f"{pad}      maxVelocity {num(math.radians(node['velocity_dps']))}",
         f"{pad}    }}",
         f"{pad}    PositionSensor {{",
         f'{pad}      name "{node["name"]}_sensor"',
@@ -183,6 +197,7 @@ def render_world() -> str:
         "",
         "# 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。",
         "# A.T.R.I. 22 DOF 桌面人形：几何与质量派生自 design/robot_model.json。",
+        "# 关节限位与电机速度上限同样来自模型（minStop/maxStop/maxVelocity）。",
         "# 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。",
         "",
         "WorldInfo {",

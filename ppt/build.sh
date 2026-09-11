@@ -3,7 +3,9 @@
 # 用法： bash ppt/build.sh ppt/build_sample.py
 set -euo pipefail
 
-ROOT="/Users/hpi/Documents/搞机器人"
+# 仓库根：本脚本位于 <repo>/ppt/ 下，运行时按脚本位置推导
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PY="$ROOT/.venv-ppt/bin/python"
 SCRIPT="${1:-ppt/build_sample.py}"
 NAME="${2:-$(basename "$SCRIPT" .py)}"

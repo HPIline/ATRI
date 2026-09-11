@@ -5,10 +5,17 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any, Dict
 
 DOF_COUNT = 22
+
+# 单条指令上限：技能层与运动层共用的合法性边界，防止越界参数生成超长轨迹。
+MAX_STEPS = 20
+MAX_BARS = 8
+MAX_TURN_DEG = 135.0
+VALID_ACTIONS = {"walk", "turn", "kick", "carry", "dance", "grasp", "release"}
 
 JOINTS: Dict[str, Dict[str, Any]] = {
     "head_yaw":        {"id": 0,  "group": "head",    "limit_deg": [-90, 90],   "rest_deg": 0.0},
@@ -48,20 +55,36 @@ GROUP_DOF = {
     "arm_r": 4,
 }
 
+# 舵机总线按 id 下发，需要 O(1) 反查关节名以统一做限位。
+JOINT_BY_ID: Dict[int, str] = {spec["id"]: name for name, spec in JOINTS.items()}
+
 
 def _assert_topology() -> None:
     ids = [v["id"] for v in JOINTS.values()]
-    assert len(JOINTS) == DOF_COUNT, f"joint count {len(JOINTS)} != {DOF_COUNT}"
-    assert ids == list(range(DOF_COUNT)), "joint ids must be 0..21"
-    assert sum(GROUP_DOF.values()) == DOF_COUNT, "group DOF sum != 22"
+    if len(JOINTS) != DOF_COUNT:
+        raise RuntimeError(f"关节数量 {len(JOINTS)} != {DOF_COUNT}")
+    if ids != list(range(DOF_COUNT)):
+        raise RuntimeError("关节 id 必须为连续的 0..21")
+    if sum(GROUP_DOF.values()) != DOF_COUNT:
+        raise RuntimeError(f"分组自由度之和 != {DOF_COUNT}")
 
 
 _assert_topology()
 
 
 def clamp_angle(name: str, deg: float) -> float:
-    lo, hi = JOINTS[name]["limit_deg"]
-    return max(lo, min(hi, float(deg)))
+    """把关节角钳制到限位内；未知关节、非数字或非有限值一律抛 ValueError。"""
+    spec = JOINTS.get(name)
+    if spec is None:
+        raise ValueError(f"未知关节: {name!r}")
+    try:
+        value = float(deg)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"关节 {name} 收到无效角度: {deg!r}") from exc
+    if not math.isfinite(value):
+        raise ValueError(f"关节 {name} 收到非有限角度: {deg!r}")
+    lo, hi = spec["limit_deg"]
+    return max(float(lo), min(float(hi), value))
 
 
 def rest_pose() -> Dict[str, float]:

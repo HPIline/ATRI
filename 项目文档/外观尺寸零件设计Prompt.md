@@ -304,11 +304,15 @@ ATRI-<部位>-<序号>
 - [ ] `design/gen_drawings.py`
 - [ ] `design/drawings/01_关节编号图.svg` ⭐
 - [ ] `design/drawings/02_三视图.svg`
-- [ ] `design/drawings/03_爆炸图.svg`
+- [ ] `design/drawings/03_爆炸图.svg` ⚠️ **未产出（编号跳过，见下方复核）**
 - [ ] `design/drawings/04_尺寸链图.svg`
 - [ ] `design/drawings/05_舵机布局图.svg`
 - [ ] PNG 版本（用 `qlmanage -t -s 2000` 转换，方便插 PPT）
 - [ ] 测试：SVG 可被 XML 解析；关节数=22；标注不重叠（基本检查）
+
+> **复核（2026-09-11）**：`03_爆炸图.svg` 未实现，故 `design/drawings/` 现有 4 张编号为
+> 01 / 02 / **04** / 05（`gen_drawings.DRAWINGS` 里没有 03）。其余 4 张已由
+> `design/gen_drawings.py` 生成并入库。
 
 ---
 
@@ -366,10 +370,17 @@ ATRI-<部位>-<序号>
 
 ### 7.3 交付
 
-- [ ] `design/check_interference.py`
-- [ ] `design/drawings/interference_report.md`（冲突清单）
+- [ ] `design/check_interference.py` ❌ **未按此路径落地**
+- [ ] `design/drawings/interference_report.md`（冲突清单）❌ **该文件不存在**
 - [ ] 若有冲突：给出**修正建议**（改限位 or 改尺寸）
 - [ ] 测试：已知会冲突的构造用例能被检出
+
+> **复核（2026-09-11）**：本任务最终**没有**采用 `design/check_interference.py` + AABB 的方案，
+> 而是在 CAD 装配体上做了更强的**精确干涉普查**：脚本 `design/cad/interference.py`，
+> 用 OpenCASCADE 布尔求交算真实干涉体积，报告写到 `design/cad/out/interference_report.md`
+> （生成物，不入库；判定口径 >100 mm³ 严重 / 10–100 mm³ 轻微 / <10 mm³ 接触）。
+> 因此仓库里**不存在** `design/check_interference.py` 与 `design/drawings/interference_report.md`。
+> 仍未做的是**关节运动包络**（限位两端 + 中间姿态的扫掠）检查，属下一阶段工作。
 
 ---
 
@@ -418,6 +429,15 @@ screen_y = (x + y) * sin(30°) - z
 ---
 
 ## 十、交付清单
+
+> **复核（2026-09-11）**：本清单是 2026-09-10 的原始任务书，部分条目后来以**别的路径**落地或未做，
+> 引用时以实际存在的文件为准：
+> - 工程图实产 4 张（01/02/**04**/05），`design/drawings/03_爆炸图.svg` 未做；
+> - 干涉检查用 `design/cad/interference.py`（OCCT 布尔求交），其报告为 `design/cad/out/interference_report.md`（生成物）；
+>   `design/check_interference.py` 与 `design/drawings/interference_report.md` **不存在**；
+> - 零件/整机 STEP+STL 由 CAD 层 `design/cad/build.py` / `assembly.py` 导出到 `design/cad/out/`（生成物，不入库），
+>   并非本清单的 `design/parts/`、`design/gen_bom.py`、`design/gen_mesh.py`、`design/stl/`；
+> - `design/parts/*.json`、`design/gen_iso_view.py` 未按本清单产出，零件级 BOM/STL 属下一阶段工作。
 
 **数据层**
 - [ ] `design/robot_model.json` 扩展：6 种几何基元、23 link 全部改型

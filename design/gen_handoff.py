@@ -148,10 +148,31 @@ def _tier(tau_req_nm: float) -> str:
     return "S"
 
 
+def pct_str(margin: float) -> str:
+    """裕度百分比（向上取整）：避免 100.5% 被显示成 100%，看不出已超限。"""
+    return f"{math.ceil(margin * 100.0 - 1e-9)}%"
+
+
 def total_mass_of(model: Dict[str, Any]) -> float:
     """整机质量（含线束与紧固件），用于单腿支撑载荷计算。"""
     return (sum(l["mass_kg"] for l in model["links"])
             + ASSUMPTIONS["cable_mass_kg"] + ASSUMPTIONS["fastener_mass_kg"])
+
+
+def torque_criteria(model: Dict[str, Any]) -> Dict[str, Any]:
+    """舵机扭矩的两个口径（均取自 servo_defaults，缺省回退到已知值）。
+
+    - continuous_rated_torque_nm：官方额定负载，可持续工况，**选型主判据**；
+    - peak_torque_nm：堵转 × 50%，只能短时峰值，比官方额定乐观 50%。
+    """
+    ts = model.get("servo_defaults", {})
+    return {
+        "continuous_rated_torque_nm":
+            float(ts.get("continuous_rated_torque_nm", 0.98)),
+        "peak_torque_nm": float(ts.get("peak_torque_nm", 1.47)),
+        "stall_torque_nm": float(ts.get("stall_torque_nm", 2.94)),
+    }
+
 
 
 _TOTAL_MASS_CACHE: Dict[int, float] = {}
@@ -206,6 +227,11 @@ def joint_torque(model: Dict[str, Any], joint: Dict[str, Any]) -> Dict[str, Any]
 
     tau_req = max(tau_grav * sf, tau_inertia * sf, tau_stance, floor)
 
+    # 两个口径的裕度：主判据是官方连续额定，堵转 × 50% 只作短时峰值参考
+    crit = torque_criteria(model)
+    margin_continuous = tau_req / crit["continuous_rated_torque_nm"]
+    margin_peak = tau_req / crit["peak_torque_nm"]
+
     # 主导因素，便于下游理解这个数是怎么来的
     cands = {
         "gravity": tau_grav * sf,
@@ -233,6 +259,12 @@ def joint_torque(model: Dict[str, Any], joint: Dict[str, Any]) -> Dict[str, Any]
         "required_torque_nm": round(tau_req, 4),
         "requirements_driver": driver,
         "safety_factor": sf,
+        "continuous_rated_torque_nm": crit["continuous_rated_torque_nm"],
+        "peak_torque_nm": crit["peak_torque_nm"],
+        "margin_vs_continuous_rated": round(margin_continuous, 3),
+        "margin_vs_peak": round(margin_peak, 3),
+        "exceeds_continuous_rated": bool(margin_continuous > 1.0 + 1e-9),
+        "exceeds_peak": bool(margin_peak > 1.0 + 1e-9),
         "torque_tier": _tier(tau_req),
         "design_placeholder_nm": joint.get("effort_nm"),
         "detail": detail,
@@ -268,18 +300,18 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
 
     方法：舵机电流与输出扭矩近似成正比。
         工作扭矩   = 需求扭矩 × operating_fraction
-        单关节电流 = 堵转电流 × (工作扭矩 / 额定扭矩)，上限为堵转电流
+        单关节电流 = 堵转电流 × (工作扭矩 / 堵转扭矩)，上限为堵转电流
     不能给"总堵转电流"乘占空比——那会把电流高估数倍。
     """
     operating_fraction = 0.35   # 行走时平均输出占"最大静力保持"的比例
-    rated_torque = 2.94         # N·m，STS3215 级额定扭矩
+    stall_torque = 2.94         # N·m，STS3215 级堵转扭矩（电流-扭矩线性模型的参考点）
     stall_current = 2.7         # A，同级别堵转电流
 
     per_joint = []
     total_current = 0.0
     for t in torques:
         tau_op = t["required_torque_nm"] * operating_fraction
-        ratio = min(1.0, tau_op / rated_torque) if rated_torque > 0 else 0.0
+        ratio = min(1.0, tau_op / stall_torque) if stall_torque > 0 else 0.0
         i = stall_current * ratio
         total_current += i
         per_joint.append({
@@ -301,12 +333,31 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
     nameplate_wh = energy_wh / usable
     mass_kg = nameplate_wh / ASSUMPTIONS["battery_energy_density_wh_per_kg"]
 
+    # 敏感性：现电池 165 g（components.json battery），换 mass_kg 级后总重与单腿支撑扭矩上升。
+    # 只作说明，不改 robot_model.json 的质量分布（改质量会连带 URDF 与全部生成物）。
+    cur_batt_kg = 0.165
+    new_batt_kg = round(mass_kg, 2)
+    base_total_kg = total_mass_of(model)
+    new_total_kg = base_total_kg - cur_batt_kg + new_batt_kg
+    mass_ratio = new_total_kg / base_total_kg
+    ankle = next((t for t in torques if t["joint"] == "left_ankle_pitch"), None)
+    sensitivity_note = ""
+    if ankle is not None:
+        cont = ankle["continuous_rated_torque_nm"]
+        new_ankle = ankle["required_torque_nm"] * mass_ratio
+        new_pct = math.ceil(new_ankle / cont * 100.0 - 1e-9)
+        sensitivity_note = (
+            f"满足 {mission_min:.0f} min 需把电池由 {cur_batt_kg * 1000:.0f} g "
+            f"增到约 {new_batt_kg * 1000:.0f} g，整机约 {new_total_kg:.2f} kg，"
+            f"单腿支撑扭矩随之上升约 {(mass_ratio - 1) * 100:.1f}%"
+            f"（踝约 {new_ankle:.2f} N·m ≈ {new_pct}%），即结论只会更差。")
+
     return {
         "servo_bus_voltage_v": voltage,
         "servo_count": len(torques),
         "current_model": "电流 ∝ 输出扭矩（线性近似）",
         "operating_fraction": operating_fraction,
-        "rated_torque_nm": rated_torque,
+        "stall_torque_ref_nm": stall_torque,
         "stall_current_a": stall_current,
         "avg_servo_current_a": round(total_current, 2),
         "logic_rail_v": 5.0,
@@ -320,6 +371,7 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
         "required_nameplate_ah": round(nameplate_ah, 2),
         "required_nameplate_wh": round(nameplate_wh, 1),
         "estimated_battery_mass_kg": round(mass_kg, 2),
+        "sensitivity_note": sensitivity_note,
         "per_joint_current": per_joint,
         "note": ("工作占比 0.35 与额定参数为同级别舵机的典型值，非实测；"
                  "选定舵机后必须按数据手册回填重算。"),
@@ -339,6 +391,7 @@ def emit_markdown(data: Dict[str, Any],
     j = data["joints"]
     pb = data["power_budget"]
     asm = data["assumptions"]
+    crit = data["torque_criterion"]
 
     def tier_rows() -> str:
         order = ["XL", "L", "M", "S"]
@@ -351,20 +404,60 @@ def emit_markdown(data: Dict[str, Any],
             out.append(f"| {k} | {v['count']} | {v['max_torque_nm']:.2f} | {names} |")
         return "\n".join(out)
 
+    def tier_example() -> str:
+        """输出格式示例里按当前模型的分档实况填数，避免模板写死后漂移。"""
+        out = []
+        for k in ("XL", "L", "M", "S"):
+            v = data["summary_by_tier"].get(k)
+            if not v:
+                continue
+            out.append(f"### {k} 档（{v['count']} 路，最大需求 "
+                       f"{v['max_torque_nm']:.2f} N·m）")
+            out.append("| 型号 | 扭矩 | 速度 | 重量 | 尺寸 | 协议 | 回读 | 价格 | 备注 |")
+            out.append("| ... |")
+        return "\n".join(out)
+
     def joint_rows() -> str:
         out = []
         for t in sorted(j, key=lambda x: -x["required_torque_nm"]):
             drv = {"gravity": "重力", "inertia": "惯性", "stance": "单腿支撑",
                    "practical_floor": "工程下限"}[t["requirements_driver"]]
             lo, hi = t["limit_deg"]
+            over = " ❌" if t["exceeds_continuous_rated"] else ""
             out.append(
                 f"| {t['id']:02d} | `{t['joint']}` | {t['distal_mass_kg']:.3f} | "
                 f"{t['max_arm_mm']:.0f} | {t['gravity_torque_nm']:.3f} | "
                 f"{t['inertia_torque_nm']:.3f} | {t['stance_torque_nm']:.3f} | "
                 f"**{t['required_torque_nm']:.3f}** | "
+                f"{pct_str(t['margin_vs_continuous_rated'])}{over} | "
+                f"{pct_str(t['margin_vs_peak'])} | "
                 f"{drv} | {lo:+.0f}~{hi:+.0f} | {t['max_speed_dps']:.0f} |"
             )
         return "\n".join(out)
+
+    def over_limit_block() -> str:
+        bad = [t for t in sorted(j, key=lambda x: -x["required_torque_nm"])
+               if t["exceeds_continuous_rated"]]
+        if not bad:
+            return "**无关节超连续额定**（主判据 0.98 N·m）。\n"
+        lines = [
+            f"**❌ 超连续额定的关节共 {len(bad)} 个**"
+            f"（主判据 {data['torque_criterion']['continuous_rated_torque_nm']:.2f} N·m）：",
+            "",
+            "| 关节 | 需求 (N·m) | 占连续额定 | 占峰值 |",
+            "|---|---|---|---|",
+        ]
+        for t in bad:
+            lines.append(
+                f"| `{t['joint']}` | **{t['required_torque_nm']:.3f}** | "
+                f"{pct_str(t['margin_vs_continuous_rated'])} | "
+                f"{pct_str(t['margin_vs_peak'])} |")
+        lines += [
+            "",
+            "这些关节在连续工况下超载，**必须减重、降低动载（放缓步态）或换更大扭矩舵机**；",
+            "峰值口径只用于判断极限瞬态，不能当作连续设计值。",
+        ]
+        return "\n".join(lines) + "\n"
 
     def cavity_rows() -> str:
         out = []
@@ -415,7 +508,7 @@ def emit_markdown(data: Dict[str, Any],
 |---|---|---|
 | 自由度 | **{r['dof']}**（腿 10 + 臂 8 + 躯干 2 + 头 2） | 与固件 `config.py` 同源 |
 | 包络尺寸 | **{r['envelope_mm']['height_mm']:.0f} × {r['envelope_mm']['width_mm']:.0f} × {r['envelope_mm']['depth_mm']:.0f}** mm（高×宽×厚） | 由关节链几何推导 |
-| 整机质量 | **{r['mass_kg']}** kg（结构 {r['mass_breakdown_kg']['links_total']} + 线束 {r['mass_breakdown_kg']['cables']} + 紧固件 {r['mass_breakdown_kg']['fasteners']}） | 设计预算 |
+| 整机质量 | **{r['mass_kg']}** kg（结构 {r['mass_breakdown_kg']['structure_g']:.0f} + 舵机 {r['mass_breakdown_kg']['servos_g']:.0f} + 电子件与电池 {r['mass_breakdown_kg']['electronics_g']:.0f} + 线束紧固件 {r['mass_breakdown_kg']['harness_fasteners_g']:.0f} g） | 结构为 CAD 实装实算，其余为部件清单 |
 | 赛道要求 | {r['competition_class']} | 中国国际大学生创新大赛陕西赛区 |
 | 运动学模型 | `atri.urdf`（23 link / 22 joint，含惯量） | 可直接加载 PyBullet / Webots |
 
@@ -445,10 +538,19 @@ def emit_markdown(data: Dict[str, Any],
 **"依据"列**告诉你每个数是怎么来的：竖直轴关节（髋 yaw、头 yaw/pitch）
 重力力臂≈0，实际是按惯性或工程下限定的。
 
-| ID | 关节 | 下游质量(kg) | 力臂(mm) | 重力矩 | 惯性矩 | 单腿支撑 | **需求(N·m)** | 依据 | 限位(°) | 最大速度(°/s) |
-|---|---|---|---|---|---|---|---|---|---|---|
+**扭矩判据用两套口径，主判据是官方连续额定：**
+
+| 口径 | 值 | 含义 |
+|---|---|---|
+| **连续额定（主判据）** | **{crit['continuous_rated_torque_nm']:.2f} N·m** | 官方额定负载 10 kg·cm @12V（额定电流 900 mA），**可持续工况**；⚠️ 12V 变体推断值，待实测（7.4V 版额定仅 0.49 N·m） |
+| 峰值参考 | {crit['peak_torque_nm']:.2f} N·m | 堵转 × 50%，只能短时峰值，**比官方额定乐观 50%** |
+| 堵转 | {crit['stall_torque_nm']:.2f} N·m | 30 kg·cm，仅极限瞬态 |
+
+| ID | 关节 | 下游质量(kg) | 力臂(mm) | 重力矩 | 惯性矩 | 单腿支撑 | **需求(N·m)** | 占连续额定 | 占峰值 | 依据 | 限位(°) | 最大速度(°/s) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
 {joint_rows()}
 
+{over_limit_block()}
 **按档位汇总**（选型时按档位找候选即可）：
 
 | 档位 | 路数 | 最大需求(N·m) | 关节 |
@@ -466,6 +568,8 @@ def emit_markdown(data: Dict[str, Any],
 | 30 min 任务消耗 | {pb['consumed_ah']} Ah / {pb['consumed_wh']} Wh |
 | 按 {pb['usable_fraction']*100:.0f}% 可用容量 | 需标称 **{pb['required_nameplate_ah']} Ah / {pb['required_nameplate_wh']} Wh** |
 | 整包预估质量 | **{pb['estimated_battery_mass_kg']} kg** |
+
+> ⚠️ **容量敏感性（功率预算反推）**：{pb['sensitivity_note']}
 
 ### 3.3 可用安装空腔（内部净空，已扣 2.5mm 壁厚）
 
@@ -539,11 +643,7 @@ def emit_markdown(data: Dict[str, Any],
 
 ```markdown
 ## 舵机选型
-### S 档（≤0.7 N·m，21 路）
-| 型号 | 扭矩 | 速度 | 重量 | 尺寸 | 协议 | 回读 | 价格 | 备注 |
-...
-### M 档（≤1.3 N·m，1 路：trunk_roll）
-...
+{tier_example()}
 ## 电控平台
 ...
 ## 兼容性与坑
@@ -579,7 +679,8 @@ def emit_markdown(data: Dict[str, Any],
 
 - 本文件中"**设计值**"均为**基于质量分布与力臂的计算/估算**，
   **不是实测数据**，也未做刚体动力学仿真。
-- 舵机外形与电气参数为**同级别产品典型值**，选定型号后需回填重算。
+- 舵机外形取自模型 `servo_defaults`（45.2×24.7×35.0 mm，厂商标称值）；
+  电气参数为厂商参数表值（DFRobot SER0070 + 飞特规格书），均未实物实测。
 - 几何为占位基元，**不可用于加工**。
 """
     out = OUT_DIR / "设计交接包-硬件选型需求.md"
@@ -643,6 +744,13 @@ def main() -> int:
     total_mass = (declared_mass + ASSUMPTIONS["cable_mass_kg"]
                   + ASSUMPTIONS["fastener_mass_kg"])
 
+    ts = model["servo_defaults"]
+    sv = ts["size_mm"]
+    crit = torque_criteria(model)
+    over_continuous = [t["joint"] for t in torques
+                       if t["exceeds_continuous_rated"]]
+    pb = power_budget(model, torques)
+
     out: Dict[str, Any] = {
         "schema_version": "1.0",
         "generated_by": "design/gen_handoff.py",
@@ -659,18 +767,37 @@ def main() -> int:
                 "links_total": round(declared_mass, 3),
                 "cables": ASSUMPTIONS["cable_mass_kg"],
                 "fasteners": ASSUMPTIONS["fastener_mass_kg"],
+                # 分档来自 robot_model.json 的 mass_budget（结构为 CAD 实装实算）
+                "structure_g": model["mass_budget"]["structure_g"],
+                "servos_g": model["mass_budget"]["servos_g"],
+                "electronics_g": model["mass_budget"]["electronics_g"],
+                "harness_fasteners_g": model["mass_budget"]["harness_fasteners_g"],
             },
             "competition_class": "小人形组（高≤600 宽≤300 厚≤300 mm，≥18 DOF，≥7.4V）",
         },
         "assumptions": ASSUMPTIONS,
         "joints": torques,
+        "torque_criterion": {
+            "primary": "continuous_rated",
+            "description": ("主判据 = 官方连续额定 0.98 N·m（额定负载 10 kg·cm @12V，"
+                            "对应额定电流 900 mA）；peak_torque_nm 1.47 只作短时峰值参考，"
+                            "比官方额定乐观 50%。0.98 属 12V 变体推断值，待实测"
+                            "（仓库唯一的 STS3215 官方规格书为 7.4V 版，额定 0.49 N·m；"
+                            "按 0.49 N·m 踝关节约 333%）。"),
+            **torque_criteria(model),
+            "joints_exceeding_continuous": [
+                t["joint"] for t in torques if t["exceeds_continuous_rated"]],
+            "joints_exceeding_peak": [
+                t["joint"] for t in torques if t["exceeds_peak"]],
+            "source": "design/handoff/STS3215-官方规格书核验.md",
+        },
         "summary_by_tier": {},
         "cavities": [
             cavity(model, "torso_upper"),
             cavity(model, "pelvis"),
             cavity(model, "head"),
         ],
-        "power_budget": power_budget(model, torques),
+        "power_budget": pb,
         "interface_requirements": {
             "servo_bus": {
                 "count": len(model["joints"]),
@@ -709,7 +836,11 @@ def main() -> int:
                 "speaker": {"type": "3W 喇叭 + 功放", "purpose": "TTS 播报"},
             },
             "power": {
-                "battery": "3S 11.1V 锂聚合物，≥2200 mAh",
+                # 容量由 power_budget() 派生，避免与功率预算（≥4.53 Ah）两套口径
+                "battery": (f"3S 11.1V 锂聚合物，≥"
+                            f"{pb['required_nameplate_ah'] * 1000:.0f} mAh"
+                            f"（{pb['required_nameplate_ah']} Ah，"
+                            "按 30 min 任务由 power_budget 派生）"),
                 "regulation": "独立 BEC 给舵机供电，与逻辑电源隔离",
                 "connector": "XT60 主接口",
             },
@@ -717,7 +848,8 @@ def main() -> int:
         "what_is_placeholder": [
             "所有 link 的几何是**基元占位**（长方体/圆柱/球/胶囊），"
             "只表达包络与连接关系，不是可加工零件。",
-            "舵机外形（40×20×40.5 mm）为同级别产品典型值，非实测。",
+            f"舵机外形（{sv[0]:.1f}×{sv[1]:.1f}×{sv[2]:.1f} mm）取自模型 "
+            "servo_defaults，与全机其它文档一致；本身仍为厂商标称值，非实测。",
             "未建模：舵机支架、轴承、走线槽、螺钉柱、拔模与圆角。",
             "未建模：电池与电路板的实际安装位置与固定方式。",
             "力矩需求为**静力估算**，未做动力学仿真。",
@@ -727,6 +859,11 @@ def main() -> int:
             "运动学树（父子关系与关节原点）—— 可直接加载 URDF 验证。",
             "整机包络尺寸与质量预算 —— 由几何推导，与声明值一致。",
             "力矩需求的**推导方法**与量级 —— 基于质量分布与力臂计算。",
+            f"扭矩判据：主判据为官方连续额定 "
+            f"{crit['continuous_rated_torque_nm']:.2f} N·m，峰值参考 "
+            f"{crit['peak_torque_nm']:.2f} N·m（堵转 × 50%）；"
+            f"{len(over_continuous)} 个关节超连续额定，"
+            "已在 torque_criterion 与本文档显式列出。",
         ],
     }
 
@@ -773,6 +910,12 @@ def main() -> int:
         if k in tier_acc:
             v = tier_acc[k]
             print(f"  {k:<3} {v['count']:>2} 路  最大 {v['max_torque_nm']:.2f} N·m")
+    print()
+    print(f"扭矩判据: 连续额定 {crit['continuous_rated_torque_nm']:.2f} N·m（主判据）"
+          f" / 峰值 {crit['peak_torque_nm']:.2f} N·m（堵转×50%）")
+    if over_continuous:
+        print(f"  [超连续额定] {len(over_continuous)} 个关节: "
+              + "、".join(over_continuous))
     print()
     pb = out["power_budget"]
     print(f"功率预算: 舵机平均 {pb['avg_servo_current_a']} A + "

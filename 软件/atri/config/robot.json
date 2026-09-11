@@ -18,6 +18,10 @@
       "period_s": 0.8
     }
   },
+  "perception": {
+    "backend": "mock",
+    "backend_note": "mock=确定性观测（默认）；opencv 或 auto=真实摄像头，OpenCV 不可用时自动降级为 mock 并告警"
+  },
   "brain": {
     "fsm_verbosity": 1
   },

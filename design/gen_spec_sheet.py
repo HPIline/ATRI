@@ -45,13 +45,15 @@ def main(argv: List[str] | None = None) -> int:
         ((j["name"], gen_handoff.joint_torque(m, j)) for j in m["joints"]),
         key=lambda kv: -kv[1]["required_torque_nm"])
     ts = m["servo_defaults"]
-    rated_vendor = ts["rated_torque_nm"]
-    rated_old = 1.0
+    crit = gen_handoff.torque_criteria(m)
+    ankle_torque = next((t for n, t in torques if n == "left_ankle_pitch"), None)
+    rated_cont = crit["continuous_rated_torque_nm"]
+    rated_peak = crit["peak_torque_nm"]
 
     L: List[str] = []
     A = L.append
 
-    A("# A.T.R.I. 新架构参数总表（v2 · 对齐 TonyPi Pro 参考机）")
+    A("# A.T.R.I. 新架构参数总表（v3 · CAD 实装口径）")
     A("")
     A("> **本文件由 `design/gen_spec_sheet.py` 从 `robot_model.json` + `placements.json` 生成，请勿手工编辑。**")
     A(f"> 模型版本 {m.get('version')}　参考机：{ref['name']}（{ref['source']}）")
@@ -81,7 +83,8 @@ def main(argv: List[str] | None = None) -> int:
       f" + 头 {len([j for j in m['joints'] if 'head' in j['name']])}"
       f"（赛题要求 ≥18，且上肢+躯干 ≥10） |")
     A(f"| 舵机 | {ts['model']} × {len(pl['servos'])} | "
-      f"堵转 {ts['stall_torque_nm']:.2f} N·m / 额定口径 {rated_vendor:.2f} N·m / {ts['mass_g']:.0f} g |")
+      f"堵转 {ts['stall_torque_nm']:.2f} N·m / **连续额定 {rated_cont:.2f} N·m（主判据）** / "
+      f"峰值 {rated_peak:.2f} N·m（堵转×50%） / {ts['mass_g']:.0f} g |")
     A(f"| 供电 | 3S 11.1 V（{ts['voltage_nominal_v']} V 标称，9.0–12.6 V） | 赛题要求 ≥7.4 V |")
     A(f"| 主控 | 树莓派 4B（4 GB）+ STM32F405 下位机 | 电子件+电池合计 {budget['electronics_g']:.0f} g，见第 5.2 节 |")
     A("")
@@ -89,7 +92,7 @@ def main(argv: List[str] | None = None) -> int:
     A("")
     A("## 2. 与参考机（TonyPi Pro）的对齐情况")
     A("")
-    A("| 维度 | 参考机 | 本机 v2 | 判定 |")
+    A("| 维度 | 参考机 | 本机 v3 | 判定 |")
     A("|---|---|---|---|")
     A(f"| 身高 | {ref['envelope_mm']['height']:.0f} mm | **{ov['height_mm']:.0f} mm** | ✅ 对齐 |")
     A(f"| 宽度 | {ref['envelope_mm']['width']:.0f} mm | {ov['width_mm']:.0f} mm | ✅ 基本一致 |")
@@ -133,20 +136,27 @@ def main(argv: List[str] | None = None) -> int:
         A("### 3.1 减重路径（**待决策**）")
         A("")
         A("当前口径是 **CAD 实装（未执行任何减重）**；下表的数字来自协作者 "
-          "`项目文档/骨架结构与集成方案.md` §7，采购前必须择一执行。")
+          "`项目文档/骨架结构与集成方案.md` §7，采购前必须择一执行。"
+          "踝关节占判据百分比由 `τ ≈ 0.49 × 整机质量` 复算、向上取整，"
+          "主判据对**连续额定 0.98 N·m**，峰值口径（1.47 N·m）单列作短时参考。")
         A("")
-        A("| 路径 | 做法 | 结构件 (g) | 整机 (kg) | 踝关节占判据 | 代价 |")
-        A("|---|---|---|---|---|---|")
+        A("| 路径 | 做法 | 结构件 (g) | 整机 (kg) | 占连续额定 0.98 | 占峰值 1.47 | 代价 |")
+        A("|---|---|---|---|---|---|---|")
         for r in m["reduction_paths"]:
             sg = r.get("structure_g")
             sg_s = f"{sg[0]}–{sg[1]}" if isinstance(sg, list) else "—"
             tk = r.get("total_kg")
             tk_s = f"{tk[0]}–{tk[1]}" if isinstance(tk, list) else f"{tk}"
-            ap = r.get("ankle_pct")
+            ap, pk = r.get("ankle_pct_continuous"), r.get("ankle_pct_peak")
             ap_s = f"{ap[0]}–{ap[1]}%" if isinstance(ap, list) else f"{ap}%"
-            A(f"| **{r['id']} {r['name']}** | {r['method']} | {sg_s} | {tk_s} | {ap_s} | {r['cost']} |")
+            pk_s = f"{pk[0]}–{pk[1]}%" if isinstance(pk, list) else f"{pk}%"
+            A(f"| **{r['id']} {r['name']}** | {r['method']} | {sg_s} | {tk_s} | {ap_s} | {pk_s} | {r['cost']} |")
         A("")
         A(f"**建议**：{m.get('reduction_recommendation', '')}")
+        A("")
+        A("> ⚠️ **按主判据（连续额定 0.98 N·m）复核：A 路径 125–135%、B 路径 110–120%、"
+          "C 路径 150%，全部 >100%，三条减重路径均未达标** —— 减重后仍须继续减重"
+          "或换更大扭矩舵机；峰值列（1.47 N·m）只作短时参考，不能据此判定达标。")
         A("")
         A(f"> {m.get('reduction_pending', '')}")
         A("")
@@ -208,29 +218,43 @@ def main(argv: List[str] | None = None) -> int:
     A(f"单腿支撑工况：`τ ≈ 0.49 × 整机总质量`（CoP 偏移 25 mm × 动载系数 2.0，见 `gen_handoff.py`）。")
     A(f"整机 {total_mass:.3f} kg → 腿部关节需求 ≈ {0.4905 * total_mass:.2f} N·m。")
     A("")
-    A("| 关节 | 需求 (N·m) | 占『堵转×50%』{:.2f} | 占旧口径『额定 1.0』 | 主导因素 |".format(rated_vendor))
+    A(f"| 关节 | 需求 (N·m) | 占**连续额定** {rated_cont:.2f} | 占峰值 {rated_peak:.2f}（堵转×50%） | 主导因素 |")
     A("|---|---|---|---|---|")
     for name, t in torques[:8]:
         r = t["required_torque_nm"]
-        A(f"| `{name}` | **{r:.3f}** | {r / rated_vendor * 100:.0f}% | {r / rated_old * 100:.0f}% | {t['requirements_driver']} |")
+        flag = " ❌" if t["exceeds_continuous_rated"] else ""
+        A(f"| `{name}` | **{r:.3f}** | "
+          f"{gen_handoff.pct_str(t['margin_vs_continuous_rated'])}{flag} | "
+          f"{gen_handoff.pct_str(t['margin_vs_peak'])} | {t['requirements_driver']} |")
     A("")
     A("**判据口径（重要）**：")
     A("")
-    A(f"- ✅ **采用**：额定可用 ≈ 堵转 × 50% = **{rated_vendor:.2f} N·m**。依据是参考机实测选型习惯 —— "
-      f"{ref['mass_kg']} kg / {ref['dof']['total']} DOF 的量产人形用 "
-      f"{ref['servos']['body']['stall_torque_kgcm']:.0f} kg·cm（1.67 N·m）堵转舵机即可跑跨栏与上下台阶。")
-    A("- ❌ **弃用**：早期『额定 1.0 N·m』—— 该数字**无权威出处**，厂商只公布堵转值；"
-      "仓库此前的『余量耗尽』结论主要由它推出。")
+    A(f"- ✅ **主判据 = 官方连续额定 {rated_cont:.2f} N·m**（额定负载 10 kg·cm，"
+      "对应额定电流 900 mA，可持续工况）。出处：12V/30kg 级兄弟型号 DFRobot SER0070 参数表 "
+      "+ 飞特《产品规格书》STS3235 5-8，见 `design/handoff/STS3215-官方规格书核验.md`。"
+      "⚠️ 属 **12V 变体推断值，待实测**：仓库入库的唯一 STS3215 官方规格书是 7.4V 版，"
+      f"额定仅 0.49 N·m（按此下限踝关节约 "
+      f"{gen_handoff.pct_str(ankle_torque['required_torque_nm'] / 0.49)}）。")
+    A(f"- ⚠️ **峰值参考 = 堵转 × 50% = {rated_peak:.2f} N·m**：取自参考机实测选型习惯"
+      f"（{ref['mass_kg']} kg / {ref['dof']['total']} DOF 量产人形用 "
+      f"{ref['servos']['body']['stall_torque_kgcm']:.0f} kg·cm 堵转舵机）。"
+      "**只能作短时峰值上限，比官方额定乐观 50%，不是连续设计值。**")
+    A("- ℹ️ 早期『额定 1.0 N·m 无出处』的说法**方向正确**（量级对），现按 12V 变体推断值 "
+      "0.98 N·m 采用；但它仍不是本 SKU 的 12V 规格书，故标『待实测』，"
+      "不能据此写成已达标的乐观结论。")
     A("- ⚠️ **仍待实测**：买 1 只 STS3215（12V 版）实测连续扭矩与温升，"
       "这是唯一能同时消除『额定值不确定』和『3S 末端电压降额』两个问题的动作。")
-    worst = torques[0][1]["required_torque_nm"]
-    if worst > rated_vendor:
+    over = [(name, t) for name, t in torques if t["exceeds_continuous_rated"]]
+    if over:
         A("")
-        A(f"- ❌ **当前状态：超标**。最大关节 `{torques[0][0]}` 需 **{worst:.3f} N·m**"
-          f"（占判据 {worst / rated_vendor * 100:.0f}%），腿部踝关节 "
-          f"{torques[1][1]['required_torque_nm']:.3f} N·m。"
-          f"成因是结构件按 CAD 实装口径计 {budget['structure_g']:.0f} g —— "
-          f"**必须执行第 3.1 节的减重路径**（推荐 A+B），否则站不起来。")
+        names = "、".join(f"`{n}` {t['required_torque_nm']:.3f} N·m"
+                          f"（{gen_handoff.pct_str(t['margin_vs_continuous_rated'])}）"
+                          for n, t in over)
+        A(f"- ❌ **当前状态：{len(over)} 个关节超连续额定** —— {names}。"
+          f"成因是结构件按 CAD 实装口径计 {budget['structure_g']:.0f} g："
+          "**必须执行第 3.1 节的减重路径（推荐 A+B）或换更大扭矩舵机**，"
+          "否则这些关节在连续工况下超载。")
+
     A("")
     A("---")
     A("")
@@ -239,7 +263,7 @@ def main(argv: List[str] | None = None) -> int:
     A("| 用途 | 用哪个文件 | 说明 |")
     A("|---|---|---|")
     A("| 刚体动力学（PyBullet / MuJoCo / Webots） | `design/atri.urdf`（交接包内同名副本） | "
-      "23 link / 22 joint，**质量已含舵机与电子件**（合计 2146 g），舵机体积已进 collision |")
+      f"23 link / 22 joint，**质量已含舵机与电子件**（合计 {total_mass * 1000:.0f} g），舵机体积已进 collision |")
     A("| 零件位置与参数（程序读） | `design/placements.json` | 22 舵机 + 10 电子件 + 23 结构件的宿主/坐标/尺寸/质量 |")
     A("| CAD / 装配建模 | 本表第 4、5 节 | 含关节原点与配件坐标，可直接作为装配基准 |")
     A("| 舵机非理想特性 | `design/packages/servo_spec.json` | 死区/间隙/延迟/扭矩饱和；额定口径已更新 |")
@@ -249,7 +273,7 @@ def main(argv: List[str] | None = None) -> int:
     A('import pybullet as p')
     A('p.connect(p.GUI); p.setGravity(0, 0, -9.81)')
     A('robot = p.loadURDF("design/atri.urdf", useFixedBase=False)')
-    A("# 质量核对：sum(link mass) 应等于 2.146 kg（v2 实测口径）")
+    A(f"# 质量核对：sum(link mass) 应等于 {total_mass:.3f} kg（v3 CAD 实装口径）")
     A("```")
     A("")
     A("**两个已知的仿真保真度限制（别当没看见）：**")

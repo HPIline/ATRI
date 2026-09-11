@@ -19,8 +19,10 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.oxml.ns import qn
 
 SCALE = 150                       # px per inch
-REG = "/Users/hpi/Library/Fonts/SourceHanSansSC-Regular-2.otf"
-HVY = "/Users/hpi/Library/Fonts/SourceHanSansSC-Heavy-2.otf"
+# 思源黑体装在用户主目录（macOS），按 $HOME 运行时推导
+_FONT_DIR = Path.home() / "Library" / "Fonts"
+REG = str(_FONT_DIR / "SourceHanSansSC-Regular-2.otf")
+HVY = str(_FONT_DIR / "SourceHanSansSC-Heavy-2.otf")
 
 _font_cache: dict = {}
 
