@@ -185,7 +185,7 @@ for(const b of META.batches){
   gl.bufferData(gl.ARRAY_BUFFER,F32.subarray(b.fOffset,b.fOffset+b.verts*6),gl.STATIC_DRAW);
   const col=gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER,col);
-  gl.bufferData(gl.ARRAY_BUFFER,new Uint8Array(BUF,b.cOffset,b.verts*3),gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER,new Uint8Array(BUF,META.floatCount*4+b.cOffset,b.verts*3),gl.STATIC_DRAW);
   groups.push({meta:b,pos,col,visible:true});
 }
 
@@ -312,8 +312,11 @@ def export_glb(items: Sequence[Tuple[str, cq.Workplane]], path: Path
             c = KIND_COLORS[k]
             asm.add(wp.val(), name=name,
                     color=cq.Color(c[0] / 255, c[1] / 255, c[2] / 255))
-        cq.exporters.export(asm, str(path), exportType="GLTF",
-                            tolerance=0.4, angularTolerance=0.4)
+        # 注意：必须调 exportGLTF 本体；走 cq.exporters.export(..., exportType="GLTF")
+        # 会在 dispatch 上抛 DispatchError（cadquery 2.5.2 的已知路由问题）
+        from cadquery.occ_impl.exporters.assembly import exportGLTF
+        exportGLTF(asm, str(path), binary=True, tolerance=0.4,
+                   angularTolerance=0.4)
         return f"{path.stat().st_size/1e6:.1f} MB"
     except Exception as exc:  # noqa: BLE001
         print(f"  [WARN] GLB 导出跳过（{type(exc).__name__}: {exc}）")
@@ -340,9 +343,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         placements = json.loads((A.DESIGN / "placements.json").read_text(encoding="utf-8"))
         items, log = A.build_assembly(kin, placements)
         bad = [l for l in log if not l.get("ok")]
+        bb0 = None
+        for _, wp in items:
+            b0 = wp.val().BoundingBox()
+            bb0 = b0 if bb0 is None else bb0.add(b0)
         title = "A.T.R.I. 骨架装配预览"
-        subtitle = (f"{len(items)} 个零件 · 22 DOF · "
-                    f"包络 {int(kin.world and 129)}×223×418 mm")
+        subtitle = (f"{len(items)} 个零件 · 22 DOF · 包络 "
+                    f"{bb0.xlen:.0f}×{bb0.ylen:.0f}×{bb0.zlen:.0f} mm")
         if bad:
             print(f"  [WARN] {len(bad)} 个件装配失败")
 

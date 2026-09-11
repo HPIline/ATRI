@@ -30,7 +30,27 @@ VIEWS = {
 def load(path: Path):
     if path.suffix.lower() in (".stp", ".step"):
         return cq.importers.importStep(str(path))
-    return cq.importers.importStl(str(path))
+    return None
+
+
+def stl_mesh(path: Path, scale: float = 1000.0):
+    """直接解析二进制 STL（CadQuery 2.5.2 无内置 STL 导入器）。
+
+    注意：LeRobot 的 STL 以**米**为单位，需 ×1000 变成毫米。
+    """
+    import struct
+
+    import numpy as np
+
+    with open(path, "rb") as f:
+        head = f.read(84)
+        count = struct.unpack("<I", head[80:84])[0]
+        raw = np.frombuffer(f.read(count * 50), dtype=np.uint8).reshape(count, 50)
+    tris = raw[:, 12:48].copy().view("<f4").reshape(count, 3, 3).astype(float)
+    tris *= scale
+    verts = tris.reshape(-1, 3)
+    idx = np.arange(len(verts)).reshape(-1, 3).astype(np.int32)
+    return [(path.stem, verts, idx)]
 
 
 def main(argv):
@@ -46,7 +66,8 @@ def main(argv):
             print(f"✗ 找不到 {p}", file=sys.stderr)
             return 1
         wp = load(p)
-        meshes = R.tessellate([(p.stem, wp)], tol=0.15)
+        meshes = (R.tessellate([(p.stem, wp)], tol=0.15) if wp is not None
+                  else stl_mesh(p))
         if not meshes:
             print(f"✗ {p.name} 三角化失败", file=sys.stderr)
             continue

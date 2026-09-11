@@ -23,10 +23,8 @@ from OCP.BRepAdaptor import BRepAdaptor_Surface
 from OCP.GeomAbs import GeomAbs_SurfaceType
 
 
-def axis_name(v) -> str:
-    comps = [("X", v.X()), ("Y", v.Y()), ("Z", v.Z())]
-    _, val = max(comps, key=lambda c: abs(c[1]))
-    return "+" if val > 0 else "-"
+def axis_letter(n) -> str:
+    return ("X" if abs(n[0]) > 0.9 else "Y" if abs(n[1]) > 0.9 else "Z")
 
 
 def small_holes(solid, r_min=0.5, r_max=2.6):
@@ -47,8 +45,11 @@ def small_holes(solid, r_min=0.5, r_max=2.6):
         p = np.array([loc.X(), loc.Y(), loc.Z()])
         bb = f.BoundingBox()
         along = {"X": (bb.xmin, bb.xmax), "Y": (bb.ymin, bb.ymax),
-                 "Z": (bb.zmin, bb.zmax)}[axis_name(d)]
-        out.append({"r": r, "n": n, "p": p, "lo": along[0], "hi": along[1]})
+                 "Z": (bb.zmin, bb.zmax)}[axis_letter(n)]
+        ctr = ((bb.xmin + bb.xmax) / 2, (bb.ymin + bb.ymax) / 2,
+               (bb.zmin + bb.zmax) / 2)
+        out.append({"r": r, "n": n, "p": p, "lo": along[0], "hi": along[1],
+                    "c": ctr})
     return out
 
 
@@ -68,9 +69,8 @@ def match(a_holes, b_holes, tol=0.35):
             # 轴向相邻（间隔 < 3mm 视为同一螺钉通道）
             gap = max(a["lo"], b["lo"]) - min(a["hi"], b["hi"])
             hits.append({"a_r": 2 * a["r"], "b_r": 2 * b["r"], "lat": lat,
-                         "gap": gap, "axis": axis_name(cq.Vector(*a["n"]).toTuple()
-                                                       and __import__("OCP.gp", fromlist=["gp"]).gp_Dir(*a["n"]).Y() * 0 + 0) if False else
-                         ("X" if abs(a["n"][0]) > 0.9 else "Y" if abs(a["n"][1]) > 0.9 else "Z")})
+                         "gap": gap, "a_pos": a["c"], "b_pos": b["c"],
+                         "axis": axis_letter(a["n"])})
     return hits
 
 
@@ -84,26 +84,41 @@ def main(argv):
 
     shape = cq.importers.importStep(str(path)).val()
     solids = list(shape.Solids())
-    targets = [s for s in solids if abs(s.Volume() - target) < target * 0.02]
+    targets = [s for s in solids if abs(s.Volume() - target) < target * 0.005]
     others = [s for s in solids if s not in targets]
     print(f"# {path.name}: {len(solids)} 实体，其中目标件 {len(targets)} 个"
           f"（体积≈{target:.0f} mm³）")
 
     summary = defaultdict(int)
+    detail = []
     for ti, t in enumerate(targets):
         th = small_holes(t)
+        tb = t.BoundingBox()
+        tctr = ((tb.xmin + tb.xmax) / 2, (tb.ymin + tb.ymax) / 2,
+                (tb.zmin + tb.zmax) / 2)
         for oi, o in enumerate(others):
             oh = small_holes(o)
             if not oh:
                 continue
             for h in match(th, oh, tol):
                 summary[(round(h["a_r"], 1), round(h["b_r"], 1), h["axis"])] += 1
+                detail.append((ti, tctr, o.Volume(), h))
 
     print("\n## 同轴孔对统计（舵机孔 Φ × 配合件孔 Φ × 轴向）\n")
     print("| 舵机孔 Φ | 配合件孔 Φ | 轴向 | 命中次数 |")
     print("|---|---|---|---|")
     for (ar, br, ax), cnt in sorted(summary.items(), key=lambda kv: -kv[1]):
         print(f"| {ar} | {br} | {ax} | {cnt} |")
+
+    if "--detail" in argv:
+        print("\n## 明细（舵机孔 Φ / 配合件孔 Φ / 轴 / 舵机孔位置 / 横向偏移 / 轴向间隔）\n")
+        print("| 舵机# | 舵机中心 | 配合件体积 | 舵机Φ | 件Φ | 轴 | 舵机孔位置 | 横偏 | 间隔 |")
+        print("|---|---|---|---|---|---|---|---|---|")
+        for ti, tctr, vol, h in sorted(detail, key=lambda d: (d[0], d[2])):
+            p = h["a_pos"]
+            print(f"| {ti} | ({tctr[0]:.0f},{tctr[1]:.0f},{tctr[2]:.0f}) | {vol:.0f} | "
+                  f"{h['a_r']:.1f} | {h['b_r']:.1f} | {h['axis']} | "
+                  f"({p[0]:.1f},{p[1]:.1f},{p[2]:.1f}) | {h['lat']:.2f} | {h['gap']:.1f} |")
     return 0
 
 

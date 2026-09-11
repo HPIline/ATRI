@@ -44,7 +44,7 @@ Y_HALF = W_S / 2.0                               # 12.35
 PLATE_T = FDM["wall_mm"]                         # 3.0
 PLATE_Y = GAP / 2.0 + PLATE_T / 2.0              # 14.1：两侧板中心
 SPAN_X = 52.0                                    # 侧板长（含端部包边）
-SPIGOT_D, SPIGOT_H, SPIGOT_BORE = 34.0, 14.0, 24.0
+SPIGOT_D, SPIGOT_H, SPIGOT_BORE = 34.0, 12.0, 26.0
 
 
 # --------------------------------------------------------------------------
@@ -76,12 +76,16 @@ def joint_cage(shaft: str = "+y", parent: str = "+z",
         part = part.union(p)
 
     # --- 底板（舵机坐在上面，4 个 M2.5 从下方拧进舵机底孔）---
-    part = part.union(box(SPAN_X, GAP + 2 * wall, wall,
-                          at=(0, 0, z_floor_bot)))
+    floor = box(SPAN_X, GAP + 2 * wall, wall, at=(0, 0, z_floor_bot))
+    for dx in (-9.0, 9.0):          # 螺钉孔之间挖窗（螺钉位置 ±19/±7.5 不动）
+        floor = floor.cut(box(12.0, GAP - 6.0, wall * 4,
+                              at=(dx, 0, z_floor_bot - wall)))
+    part = part.union(floor)
 
-    # --- 顶板（母端接口的基座 + 抗扭）---
-    part = part.union(box(SPAN_X, GAP + 2 * wall, wall,
-                          at=(0, 0, z_cap_bot)))
+    # --- 顶板（母端接口的基座 + 抗扭）：开中央大窗 ---
+    cap = box(SPAN_X, GAP + 2 * wall, wall, at=(0, 0, z_cap_bot))
+    cap = cap.cut(box(30.0, GAP - 8.0, wall * 4, at=(0, 0, z_cap_bot - wall)))
+    part = part.union(cap)
 
     # --- 母端插接芯棒（Φ34 h9 → Φ40 连杆管内孔）---
     part = part.union(cyl(SPIGOT_D, SPIGOT_H,
@@ -152,11 +156,19 @@ def joint_cage_yaw(parent: str = "+z", shaft: str = "+z",
     plate_t = wall
     span_x, span_y = 56.0, 46.0
 
-    # 输出侧板（开 Ø21 舵盘避空）
+    # 输出侧板（开 Ø21 舵盘避空 + 四角挖窗）
     part = part.union(box(span_x, span_y, plate_t, at=(0, 0, z_out - plate_t)))
     part = part.cut(cyl(21.0, plate_t * 3, at=(0, 0, z_out - plate_t * 2)))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            part = part.cut(box(12.0, 10.0, plate_t * 3,
+                                at=(sx * 21.0, sy * 16.0, z_out - plate_t * 2)))
     # 母端侧板（副轴轴承 + 4×M3 与骨架对接）
     part = part.union(box(span_x, span_y, plate_t, at=(0, 0, z_sec)))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            part = part.cut(box(12.0, 10.0, plate_t * 3,
+                                at=(sx * 21.0, sy * 16.0, z_sec - plate_t)))
     b = bearing(IF["secondary_shaft"]["bearing"])
     part = part.cut(cyl(b["od_mm"] + FDM["bearing_bore_interference_mm"],
                         plate_t * 3, at=(0, 0, z_sec - plate_t)))
@@ -210,6 +222,11 @@ def limb_fork(shaft: str = "+y", parent: str = "+z",
     # --- 臂 A：螺栓锁舵盘（4×M2.5 走 PCD14）---
     arm_a = box(34.0, arm_t, z_top - z_base_bot,
                 at=(0, arm_out + arm_t / 2.0, z_base_bot))
+    _wb = z_base_bot + 2.0
+    _wt = min(_wb + 0.36 * (z_top - z_base_bot), -6.0)   # 窗顶不得越过副轴轴颈（z≈0）
+    if _wt - _wb > 4.0:
+        arm_a = arm_a.cut(box(18.0, arm_t * 4, _wt - _wb,
+                              at=(0, arm_out + arm_t / 2.0, _wb)))
     part = part.union(arm_a)
     part = drill(part, bolt_circle(horn["pcd_mm"], horn["hole_count"]),
                  dia=IF["horn"]["hole_dia_mm"], depth=arm_t * 6,
@@ -219,16 +236,23 @@ def limb_fork(shaft: str = "+y", parent: str = "+z",
 
     # --- 臂 B：Φ5.96 h7 轴颈，插进笼子里的轴承内圈 ---
     arm_b_out = -(Y_HALF + b["width_mm"] + 0.4 + arm_t)
-    part = part.union(box(34.0, arm_t, z_top - z_base_bot,
-                          at=(0, arm_b_out + arm_t / 2.0, z_base_bot)))
+    arm_b = box(34.0, arm_t, z_top - z_base_bot,
+                at=(0, arm_b_out + arm_t / 2.0, z_base_bot))
+    if _wt - _wb > 4.0:
+        arm_b = arm_b.cut(box(18.0, arm_t * 4, _wt - _wb,
+                              at=(0, arm_b_out + arm_t / 2.0, _wb)))
+    part = part.union(arm_b)
     part = part.union(cyl(S["secondary_shaft_dia_mm"] - 0.04,
-                          b["width_mm"] + 2.6,
-                          at=(0, arm_b_out + arm_t - 1.0, 0), axis="Y"))
+                          b["width_mm"] + 4.0,
+                          at=(0, arm_b_out + 1.0, 0), axis="Y"))
 
     # --- 底座：跨过舵机下方，接子端插接芯棒 ---
-    part = part.union(box(38.0, abs(arm_out + arm_t - arm_b_out),
-                          wall, at=(0, (arm_out + arm_t + arm_b_out) / 2.0,
-                                    z_base_bot)))
+    base = box(38.0, abs(arm_out + arm_t - arm_b_out), wall,
+               at=(0, (arm_out + arm_t + arm_b_out) / 2.0, z_base_bot))
+    base = base.cut(box(14.0, 16.0, wall,
+                        at=(0, (arm_out + arm_t + arm_b_out) / 2.0,
+                            z_base_bot)))
+    part = part.union(base)
     if spigot:
         part = part.union(cyl(SPIGOT_D, SPIGOT_H, at=(0, 0, z_base_bot - SPIGOT_H)))
         part = part.cut(cyl(SPIGOT_BORE, SPIGOT_H + 2,
@@ -263,7 +287,7 @@ def limb_tube(length: float = 62.8, lighten: bool = True,
         for sign in (-1, 1):
             win = (cq.Workplane("XZ")
                    .center(sign * od / 2.0, length / 2.0)
-                   .slot2D(length * 0.42, od * 0.26).extrude(od))
+                   .slot2D(length * 0.62, od * 0.30).extrude(od))
             body = body.cut(win)
     for z in (6.0, length - 6.0):
         for i in range(3):
@@ -348,14 +372,22 @@ def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
     part = cq.Workplane("XY")
     body_l, body_w, body_h = 96.0, 76.0, 34.0
 
-    # --- 四立柱（10×10 空心腔由走线孔贯通）---
+    # --- 四立柱（7×7 + Ø4 走线孔贯通）---
     for sx in (-1, 1):
         for sy in (-1, 1):
-            part = part.union(box(10.0, 10.0, body_h,
-                                  at=(sx * (body_l / 2 - 5.0),
-                                      sy * (body_w / 2 - 5.0), -body_h / 2)))
-    # --- 上环 + 下横梁（不封底，留出髋部舵机与走线空间）---
-    part = part.union(box(body_l, body_w, wall, at=(0, 0, body_h / 2 - wall)))
+            post = box(7.0, 7.0, body_h, at=(sx * (body_l / 2 - 4.0),
+                                             sy * (body_w / 2 - 4.0), -body_h / 2))
+            post = post.cut(cyl(4.0, body_h + 6, at=(sx * (body_l / 2 - 4.0),
+                                                     sy * (body_w / 2 - 4.0),
+                                                     -body_h / 2 - 3)))
+            part = part.union(post)
+    # --- 上环改"边框 + 横梁"（整面板 31 g → 框 12 g）---
+    ring = box(body_l, body_w, wall, at=(0, 0, body_h / 2 - wall))
+    ring = ring.cut(box(body_l - 22.0, body_w - 22.0, wall * 4,
+                        at=(0, 0, body_h / 2 - wall * 2)))
+    part = part.union(ring)
+    part = part.union(box(12.0, body_w - 20.0, wall,
+                          at=(0, 0, body_h / 2 - wall)))
     for sy in (-1, 1):
         part = part.union(box(body_l, wall, 10.0, at=(0, sy * (body_w / 2 - 5.0),
                                                        -body_h / 2 + 5.0)))
@@ -363,13 +395,16 @@ def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
                                                   -body_h / 2 + 5.0)))
 
     # --- 上表面：trunk_roll 舵机笼的 Ø34 插接座（轴 X）---
-    part = part.union(box(34.0, 34.0, 8.0, at=(0, 0, body_h / 2)))
+    part = part.union(box(34.0, 34.0, 4.0, at=(0, 0, body_h / 2)))
     part = part.union(cyl(SPIGOT_D, 12.0, at=(0, 0, -6.0), axis="X")
                       .translate((0, 0, 19.6 - body_h / 2 + 4.0)))
 
-    # --- 左右翼：hip_yaw 舵机笼座（轴 Z，向下）---
+    # --- 左右翼：hip_yaw 舵机笼座（两片板 + 筋，不做整块）---
     for sign in (-1, 1):
-        part = part.union(box(46.0, 30.0, 9.0, at=(0, sign * 45.0, -14.0)))
+        for dx in (-17.0, 17.0):
+            part = part.union(box(6.0, 30.0, 12.0,
+                                  at=(dx, sign * 45.0, -15.0)))
+        part = part.union(box(40.0, 30.0, 5.0, at=(0, sign * 45.0, -9.0)))
         part = part.union(cyl(SPIGOT_D, 12.0, at=(0, sign * 45.0, -21.6)))
 
     # --- IMU 座 ---
@@ -395,80 +430,91 @@ def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
 # 零件 6：躯干框架（上半身中枢）
 # --------------------------------------------------------------------------
 def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
-    """躯干：**树莓派 + 电池 + 3 块电控板 + 双肩 + 颈柱**的集成框架。
+    """躯干桁架：**俯仰叉 → 电池仓 → 树莓派 → 颈座**（绝对坐标，无浮动件）。
 
     竖向布局（torso_upper link 系，原点 = trunk_pitch 关节）：
-        z ∈ [−27, +27]   主舱：电池仓在下、电控托盘在上、树莓派悬于中部
-        z ∈ [+27, +78]   胸段 + 颈柱，把 head_yaw 舵机顶到 z = 82.4
-        y = ±75          双肩 pylon（shoulder_pitch 舵机笼座）
+        z ∈ [−16, +16]  trunk_pitch 舵盘叉（子端朝上）
+        z ∈ [+18, +40]  3S 电池（88×34×19，88 边沿 Y）
+        z ∈ [+42, +62]  树莓派 4B（85 边沿 Y，上方留 15 mm 散热）
+        z ∈ [+66, +69]  颈座顶板（4×M3 热熔铜螺母 @PCD26，接 head_yaw 舵机笼）
+        y = ±75         双肩 pylon
 
-    ⚠️ 原模型里躯干顶面（z=+27.5）到头部偏航关节（z=82.4）之间有 **55 mm 结构空白**，
-    这段"脖子"必须由骨架补上，否则头是悬空的——这是 v2 基元模型看不到的问题。
+    **容积是超额订阅的（实测结论）**：俯仰叉 32 + 电池 19 + 树莓派 17 = 68 mm，
+    而到 head_yaw 轴线只有 82.4 mm（还要留给颈座与舵机笼）。
+    因此 STM32/驱动板/XL4015/功放**塞不进躯干**，必须外挂（见
+    `项目文档/骨架结构与集成方案.md` 的集成方案章）。
     """
     part = cq.Workplane("XY")
-    tl, tw, th = 96.0, 86.0, 54.0
-    z_lift = 17.0                     # 主舱底面抬到叉的上方
+    tl, tw = 96.0, 86.0
 
-    # --- 底部：trunk_pitch 舵盘面（自带紧凑叉，子端朝上）---
+    # --- 1. trunk_pitch 舵盘叉（自带，子端朝上）---
     part = part.union(limb_fork(shaft="+y", parent="-z", compact=True,
                                 spigot=False))
 
-    # --- 主舱：4 立柱 + 上环 + 前后横梁 ---
+    # --- 2. 叉 → 电池仓的连接柱（四根，穿在叉臂外侧）---
     for sx in (-1, 1):
         for sy in (-1, 1):
-            part = part.union(box(11.0, 11.0, th, at=(sx * (tl / 2 - 5.5),
-                                                       sy * (tw / 2 - 5.5), z_lift),
-                                  centered_z=True))
-    part = part.union(box(tl, tw, wall, at=(0, 0, z_lift + th / 2 - wall)))
-    for sx in (-1, 1):
-        part = part.union(box(wall, tw, 12.0, at=(sx * (tl / 2 - wall), 0, z_lift),
-                              centered_z=True))
+            part = part.union(box(8.0, 8.0, 12.0, at=(sx * 14.0, sy * 20.0, 8.0)))
 
-    # --- 树莓派托盘（85 边沿 Y）+ 4×M2.5 柱（58×49）---
-    rpi_z = z_lift - 8.0
-    part = part.union(box(64.0, 88.0, 2.6, at=(0, 0, rpi_z - 2.6)))
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            part = part.union(bosses([(sx * 29.0, sy * 24.5)], od=5.5, height=5.0,
-                                     bore_dia=2.2, bore_depth=5.0, z0=rpi_z - 1.0))
-    for dx in (-20.0, 0.0, 20.0):
-        part = part.cut(box(14.0, 20.0, 6.0, at=(dx, 0, rpi_z - 3.0)))
-
-    # --- 电控托盘（z=+14），与立柱搭接 ---
-    part = part.union(box(88.0, 68.0, 2.6, at=(0, 0, z_lift + 14.0)))
-    for dx in (-28.0, 0.0, 28.0):
-        part = part.cut(box(16.0, 16.0, 6.0, at=(dx, 24.0, z_lift + 14.0)))
-
-    # --- 电池框：88×34×19，从 −X 后背插入 ---
-    bat_z = z_lift - 29.0
-    part = part.union(box(40.0, 92.0, 2.6, at=(0, 0, bat_z)))
-    for sx in (-1, 1):
-        part = part.union(box(28.0, 92.0, 2.6, at=(sx * 31.0, 0, bat_z)))
+    # --- 3. 电池仓底板（边框 + 两条横梁，电池坐在框上）---
+    deck = box(tl, tw, 2.6, at=(0, 0, 18.0))
+    deck = deck.cut(box(60.0, 56.0, 8.0, at=(0, 0, 16.0)))
+    part = part.union(deck)
     for sy in (-1, 1):
-        part = part.union(box(40.0, 2.6, 22.0, at=(0, sy * 45.0, bat_z + 12.0)))
-    part = part.union(box(2.6, 92.0, 22.0, at=(19.0, 0, bat_z + 12.0)))
+        part = part.union(box(80.0, 8.0, 2.6, at=(0, sy * 16.0, 18.0)))
+    for sy in (-1, 1):
+        part = part.union(box(38.0, 3.0, 22.0, at=(0, sy * 44.0, 20.6)))
     for dx in (-11.0, 11.0):
-        part = part.cut(box(3.0, 96.0, 3.0, at=(dx, 0, bat_z - 1.0)))
+        part = part.cut(box(3.0, 92.0, 3.0, at=(dx, 0, 17.0)))
 
-    # --- 双肩 pylon（薄壳 + Ø34 笼座，轴 Y）---
-    for sign in (-1, 1):
-        part = part.union(box(40.0, 26.0, 34.0, at=(0, sign * 54.0, z_lift + 11.8),
-                              centered_z=True))
-        part = part.union(cyl(SPIGOT_D, 14.0, at=(0, sign * 66.0, z_lift + 11.8), axis="Y"))
-        part = part.cut(box(22.0, 20.0, 22.0, at=(0, sign * 54.0, z_lift + 11.8),
-                            centered_z=True))
-
-    # --- 胸段 + 颈柱：升到 head_yaw（z = 82.4）---
-    part = part.union(box(70.0, 58.0, 6.0, at=(0, 0, z_lift + th / 2 - 3.0)))
+    # --- 4. 主舱四立柱（8×8 + Ø5 走线孔）---
     for sx in (-1, 1):
         for sy in (-1, 1):
-            part = part.union(box(9.0, 9.0, 52.0, at=(sx * 29.0, sy * 22.0,
-                                                       z_lift + th / 2 + 25.0),
-                                  centered_z=True))
-    part = part.union(box(70.0, 52.0, wall, at=(0, 0, z_lift + th / 2 + 48.0)))
-    part = part.union(cyl(SPIGOT_D, 10.0, at=(0, 0, z_lift + th / 2 + 48.0 + wall)))
+            post = box(8.0, 8.0, 48.0, at=(sx * 44.0, sy * 39.0, 18.0))
+            post = post.cut(cyl(5.0, 54.0, at=(sx * 44.0, sy * 39.0, 16.0)))
+            part = part.union(post)
+
+    # --- 5. 树莓派托盘（外框 + 4×M2.5 柱，85 边沿 Y）---
+    tray = box(tl, tw, 2.6, at=(0, 0, 42.0))
+    tray = tray.cut(box(52.0, 60.0, 8.0, at=(0, 0, 40.0)))
     for sy in (-1, 1):
-        part = part.cut(box(56.0, 16.0, 34.0, at=(0, sy * 20.0, z_lift + th / 2 + 24.0)))
+        tray = tray.cut(box(20.0, 18.0, 8.0, at=(0, sy * 30.0, 40.0)))
+    part = part.union(tray)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            part = part.union(bosses([(sx * 29.0, sy * 24.5)], od=5.5, height=6.0,
+                                     bore_dia=2.2, bore_depth=5.0, z0=40.5))
+
+    # --- 6. 上环（边框 + 横梁）---
+    ring = box(tl, tw, wall, at=(0, 0, 63.0))
+    ring = ring.cut(box(tl - 20.0, tw - 20.0, wall * 4, at=(0, 0, 62.0)))
+    part = part.union(ring)
+
+    # --- 7. 胸段立柱 + 颈座顶板（4×M3 铜螺母 @PCD26）---
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            part = part.union(box(7.0, 7.0, 12.0, at=(sx * 26.0, sy * 20.0, 57.0)))
+    shelf = box(60.0, 44.0, 2.6, at=(0, 0, 60.0))
+    shelf = shelf.cut(box(40.0, 26.0, 8.0, at=(0, 0, 58.0)))
+    part = part.union(shelf)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            part = part.union(box(18.0, 6.0, 3.0, at=(sx * 32.0, sy * 20.0, 60.0)))
+    top = box(64.0, 48.0, 5.0, at=(0, 0, 64.0))
+    for pt in bolt_circle(IF["cage_flange"]["pcd_mm"], 4):
+        top = top.cut(cyl(3.4, 10.0, at=(pt[0], pt[1], 62.0)))
+    top = top.cut(cyl(10.0, 10.0, at=(0, 0, 62.0)))
+    part = part.union(top)
+
+    # --- 8. 双肩 pylon（两片竖板 + 上下筋 + Ø34 笼座，轴 Y）---
+    for sign in (-1, 1):
+        for dx in (-16.0, 16.0):
+            part = part.union(box(4.0, 26.0, 34.0,
+                                  at=(dx, sign * 54.0, 11.8), centered_z=True))
+        for dz in (-13.0, 13.0):
+            part = part.union(box(88.0, 12.0, 4.0,
+                                  at=(0, sign * 54.0, 11.8 + dz)))
+        part = part.union(cyl(SPIGOT_D, 14.0, at=(0, sign * 66.0, 11.8), axis="Y"))
 
     part = safe_fillet(part, FDM["fillet_min_mm"], "|Z")
     return sanitize(part)
@@ -488,8 +534,14 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
     z0 = 22.0                                  # 头壳相对 head_pitch 轴线抬高
 
     # --- 壳身：前脸 + 顶 + 侧壁（后部开口散热走线）---
-    part = part.union(box(hl, hw, wall, at=(0, 0, z0 - hh / 2)))         # 底
-    part = part.union(box(hl, hw, wall, at=(0, 0, z0 + hh / 2 - wall)))  # 顶
+    base = box(hl, hw, wall, at=(0, 0, z0 - hh / 2))                     # 底
+    base = base.cut(box(32.0, 26.0, wall * 1.2,
+                        at=(0, 0, z0 - hh / 2 - 0.2 * wall)))
+    part = part.union(base)
+    top = box(hl, hw, wall, at=(0, 0, z0 + hh / 2 - wall))               # 顶
+    top = top.cut(box(hl - 24.0, hw - 24.0, wall * 1.2,
+                      at=(0, 0, z0 + hh / 2 - 1.2 * wall)))
+    part = part.union(top)
     part = part.union(box(wall, hw, hh, at=(hl / 2 - wall, 0, z0 - hh / 2)))
     for sign in (-1, 1):
         part = part.union(box(hl, wall, hh, at=(0, sign * (hw / 2 - wall / 2),
@@ -528,8 +580,8 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 # --------------------------------------------------------------------------
 # 零件 8：足板（含踝部叉）
 # --------------------------------------------------------------------------
-def foot_plate(length: float = 110.0, width: float = 60.0, sole_t: float = 3.5,
-               rib_h: float = 11.0) -> cq.Workplane:
+def foot_plate(length: float = 110.0, width: float = 60.0, sole_t: float = 3.0,
+               rib_h: float = 9.0) -> cq.Workplane:
     """足底板：踝关节在足底后 1/3，**紧凑俯仰叉 + 薄板 + 放射筋 + 大掏空**。
 
     实心块 181 cm³ ≈ 225 g/只，两只 450 g 直接吃掉整机结构预算的 90%。

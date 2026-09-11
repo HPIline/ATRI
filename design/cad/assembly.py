@@ -254,8 +254,23 @@ def electronics_placeholder(size: Sequence[float]) -> cq.Workplane:
 
 # 电子件的摆放姿态（placements.json 只给位置与尺寸，姿态在这里定）
 ELEC_ROT_DEG = {"compute": 90.0}      # 树莓派 85 mm 边沿 Y 向（躯干内净空 90）
-# 躯干骨架重排（给俯仰叉让位）后，舱内件整体上移，与骨架托盘对齐
-ELEC_DZ_BY_LINK = {"torso_upper": 17.0}
+# 躯干骨架重排（给俯仰叉让位）后，舱内件要落在**各自的那块托盘/仓底**上。
+# 托盘上表面（torso 局部坐标，见 skeleton.torso_frame）：
+# 托盘上表面（torso 局部坐标，见 skeleton.torso_frame 的绝对布局）
+ELEC_DECK_TOP = {
+    "compute": 42.0 + 2.6,                    # 树莓派托盘
+    "battery": 18.0 + 2.6,                    # 电池仓底板
+}
+
+# 容积超额订阅：STM32 / URT-1 / XL4015 / 功放 / 喇叭塞不进躯干（见
+# 项目文档/骨架结构与集成方案.md §3.1），改挂到躯干背面（背挂模块）。
+# 这不是"随便挪一下"：躯干内 俯仰叉 32 + 电池 19 + 树莓派 17 = 68 mm，
+# 而到 head_yaw 轴线只有 82.4 mm，还要留给颈座与偏转舵机笼。
+ELEC_BACKPACK = {
+    "mcu": 0, "servo_driver": 1, "bec": 2, "amp": 3, "speaker": 4,
+}
+BACKPACK_X = -60.0          # 躯干背面（躯干本体 x ∈ [−48, +48]）
+BACKPACK_PITCH = 16.0
 
 
 def build_assembly(kin: Kin, placements: Dict[str, Any],
@@ -326,10 +341,20 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                 fail(f"fork/{jname}", "fork", exc)
 
     # --- 4. 舵机（父 link 的关节原点）---
-    for jname in JOINT_SCHEME:
+    for jname, sc in JOINT_SCHEME.items():
         try:
-            add(f"servo__{jname}", _place(servo_placeholder(),
-                                          kin.joint_world(jname)), "servo")
+            # 定向放在调用点做（不依赖 servo_placeholder 的签名——
+            # 该函数正被另一个会话订正，见 handoff/STS3215-机械接口核验.md）
+            from kit import orient
+            # 轴与母端同向（yaw/肩）时 orient() 退化：用一个垂直方向定"钟表位"
+            par = sc["parent"]
+            if par.replace("+", "").replace("-", "") == \
+               sc["shaft"].replace("+", "").replace("-", ""):
+                par = next(d for d in ("+z", "-z", "+y", "-y", "+x", "-x")
+                           if d.replace("+", "").replace("-", "") !=
+                           sc["shaft"].replace("+", "").replace("-", ""))
+            body = orient(servo_placeholder(), sc["shaft"], par)
+            add(f"servo__{jname}", _place(body, kin.joint_world(jname)), "servo")
         except Exception as exc:  # noqa: BLE001
             fail(f"servo/{jname}", "servo", exc)
 
@@ -340,7 +365,15 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
             continue
         try:
             pos = list(e["position_mm"])
-            pos[2] += ELEC_DZ_BY_LINK.get(link, 0.0)
+            if link == "torso_upper" and e["id"] in ELEC_DECK_TOP:
+                # 底面坐在托盘上表面：中心 z = 盘面 + 自身高/2
+                pos[2] = ELEC_DECK_TOP[e["id"]] + e["size_mm"][2] / 2.0
+            elif link == "torso_upper" and e["id"] in ELEC_BACKPACK:
+                # 背挂：沿 −X 挂在躯干背面，按序号纵向排开
+                k = ELEC_BACKPACK[e["id"]]
+                pos = [BACKPACK_X - e["size_mm"][0] / 2.0,
+                       0.0,
+                       30.0 - k * BACKPACK_PITCH]
             local = mat_mul(mat_trans(*pos),
                             mat_rpy(0.0, 0.0, math.radians(
                                 ELEC_ROT_DEG.get(e["id"], 0.0))))

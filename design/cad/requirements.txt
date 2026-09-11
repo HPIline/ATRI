@@ -1,23 +1,45 @@
-# A.T.R.I. CAD 层依赖
+# A.T.R.I. 设计层依赖（CAD 建模 / 出图 / 厂商文档读取）
 #
 # ⚠️ 与主仓库的"零第三方依赖"原则分开管理：
-#    主包 软件/atri/atri/ 仍然只用标准库；本文件仅供 design/cad/ 使用。
+#    主包 软件/atri/atri/ 仍然只用标准库，本文件仅供 design/ 下的脚本使用。
 #
 # 安装（必须用独立 venv，不要装进主环境）：
 #     cd <repo>
 #     python3 -m venv .venv-cad
 #     .venv-cad/bin/pip install -r design/cad/requirements.txt
+#   国内镜像：在 pip 后加 -i https://mirrors.aliyun.com/pypi/simple/
 #
-# 已验证组合（2026-09-11）：
-#     Python 3.9.6 / macOS arm64
-#     cadquery 2.5.2
-#     cadquery-ocp 7.7.2   ← OpenCASCADE 内核绑定，wheel 约 165 MB
+# 已验证组合（2026-09-11 实机核验，Python 3.9.6 / macOS arm64）：
+#     cadquery 2.5.2 + cadquery-ocp 7.7.2   ← OpenCASCADE 内核，wheel 约 165 MB
+#     numpy 2.0.2 / pillow 11.3.0
+#     pypdf 6.18.0 / pypdfium2 5.13.0       ← 读厂商 PDF 规格书（2026-09-11 新增）
 #
-# 注：cadquery-ocp 是大包，首次安装需数分钟。若网络受限，
-#    可用国内镜像：pip install -i https://mirrors.aliyun.com/pypi/simple/ ...
+# ── 1. CAD 建模内核（必需）──────────────────────────────────────────────
+cadquery==2.5.2
 
-cadquery>=2.5.0,<2.6
+# ── 2. 出图与预览的直接依赖（必需）──────────────────────────────────────
+# numpy：render3d.py / preview.py / check_mate.py / render_vendor.py 直接用
+numpy>=1.24,<3
+# pillow：preview.py 读写 PNG；pypdfium2 的 .to_pil() 也依赖它
+pillow>=10
 
-# 可选：批量导出与格式转换
-# trimesh>=4.0        # 网格后处理
-# numpy-stl>=3.0      # STL 读写与修复
+# ── 3. 读厂商 PDF：官方规格书与外形尺寸图（必需）────────────────────────
+# read_vendor_pdf.py —— pypdfium2 逐页转 PNG（sips 只能转第 1 页），pypdf 抽文字
+pypdf>=6,<7
+pypdfium2>=5,<6
+
+# ── 4. 随 cadquery 自动带入，无需显式声明（列出便于排查）────────────────
+#   cadquery-ocp 7.7.2   OpenCASCADE 内核绑定
+#   casadi       3.8.0   ← cadquery 装配约束求解依赖
+#   nlopt        2.9.1   ← 同上
+#   ezdxf        1.4.2   ← cadquery 的 DXF 导出依赖（本项目未直接调用）
+#   multimethod / path / typish / fonttools / pyparsing / typing_extensions
+
+# ── 5. 可选：当前脚本未引用，需要时再装 ─────────────────────────────────
+# matplotlib>=3.9    # 曲线/统计图（本仓库出图走 render3d.py 自绘，未用）
+# trimesh>=4.0       # 网格后处理
+# numpy-stl>=3.0     # STL 读写与修复（现在用 stdlib struct + numpy 裸读二进制 STL）
+
+# ── 6. 红线 ─────────────────────────────────────────────────────────────
+# 不要把上面任何包装进主环境：主仓库 `python3 -m unittest discover -s tests`
+# 必须能在**零第三方依赖**下跑通（169 项）。
