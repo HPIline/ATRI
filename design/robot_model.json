@@ -19,7 +19,7 @@
     "height_mm": 372.8,
     "width_mm": 190.0,
     "depth_mm": 123.0,
-    "mass_kg": 3.437,
+    "mass_kg": 3.136,
     "note": "v3：结构件按 CAD 实装实算 1790 g（v2 合成预算为 500 g），整机 3.437 kg。**实装包络见 installed_envelope_mm（418 mm 高）**，overall 里的包络是基元/运动学口径。"
   },
   "design_constraints": {
@@ -44,7 +44,7 @@
       "name": "pelvis",
       "label": "骨盆",
       "group": "trunk",
-      "mass_kg": 0.3396,
+      "mass_kg": 0.3129,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
@@ -122,17 +122,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 159.7,
+        "structure": 132.9,
         "servos": 165.0,
         "electronics": 3.0,
-        "harness_fasteners": 11.9
+        "harness_fasteners": 12.0
       }
     },
     {
       "name": "left_hip_yaw_link",
       "label": "左髋偏转关节壳",
       "group": "leg_l",
-      "mass_kg": 0.1049,
+      "mass_kg": 0.0972,
       "geometry": {
         "type": "sphere_shell",
         "outer_r_mm": 18.6,
@@ -166,7 +166,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 46.2,
+        "structure": 38.5,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 3.7
@@ -176,7 +176,7 @@
       "name": "left_hip_roll_link",
       "label": "左髋横滚关节壳",
       "group": "leg_l",
-      "mass_kg": 0.1049,
+      "mass_kg": 0.0972,
       "geometry": {
         "type": "sphere_shell",
         "outer_r_mm": 18.6,
@@ -210,7 +210,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 46.2,
+        "structure": 38.5,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 3.7
@@ -220,7 +220,7 @@
       "name": "left_thigh",
       "label": "左大腿",
       "group": "leg_l",
-      "mass_kg": 0.1634,
+      "mass_kg": 0.1461,
       "geometry": {
         "type": "capsule",
         "radius_mm": 22.5,
@@ -260,17 +260,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 102.7,
+        "structure": 85.5,
         "servos": 55.0,
         "electronics": 0.0,
-        "harness_fasteners": 5.7
+        "harness_fasteners": 5.6
       }
     },
     {
       "name": "left_shank",
       "label": "左小腿",
       "group": "leg_l",
-      "mass_kg": 0.1464,
+      "mass_kg": 0.1318,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
@@ -310,17 +310,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 86.3,
+        "structure": 71.8,
         "servos": 55.0,
         "electronics": 0.0,
-        "harness_fasteners": 5.1
+        "harness_fasteners": 5.0
       }
     },
     {
       "name": "left_foot",
       "label": "左足",
       "group": "leg_l",
-      "mass_kg": 0.1143,
+      "mass_kg": 0.0955,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
@@ -341,17 +341,17 @@
         ]
       },
       "mass_breakdown_g": {
-        "structure": 110.3,
+        "structure": 91.8,
         "servos": 0.0,
         "electronics": 0.0,
-        "harness_fasteners": 4.0
+        "harness_fasteners": 3.7
       }
     },
     {
       "name": "right_hip_yaw_link",
       "label": "右髋偏转关节壳",
       "group": "leg_r",
-      "mass_kg": 0.1049,
+      "mass_kg": 0.0972,
       "geometry": {
         "type": "sphere_shell",
         "outer_r_mm": 18.6,
@@ -385,7 +385,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 46.2,
+        "structure": 38.5,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 3.7
@@ -395,7 +395,7 @@
       "name": "right_hip_roll_link",
       "label": "右髋横滚关节壳",
       "group": "leg_r",
-      "mass_kg": 0.1049,
+      "mass_kg": 0.0972,
       "geometry": {
         "type": "sphere_shell",
         "outer_r_mm": 18.6,
@@ -429,7 +429,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 46.2,
+        "structure": 38.5,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 3.7
@@ -439,7 +439,7 @@
       "name": "right_thigh",
       "label": "右大腿",
       "group": "leg_r",
-      "mass_kg": 0.1634,
+      "mass_kg": 0.1461,
       "geometry": {
         "type": "capsule",
         "radius_mm": 22.5,
@@ -479,17 +479,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 102.7,
+        "structure": 85.5,
         "servos": 55.0,
         "electronics": 0.0,
-        "harness_fasteners": 5.7
+        "harness_fasteners": 5.6
       }
     },
     {
       "name": "right_shank",
       "label": "右小腿",
       "group": "leg_r",
-      "mass_kg": 0.1464,
+      "mass_kg": 0.1318,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
@@ -529,17 +529,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 86.3,
+        "structure": 71.8,
         "servos": 55.0,
         "electronics": 0.0,
-        "harness_fasteners": 5.1
+        "harness_fasteners": 5.0
       }
     },
     {
       "name": "right_foot",
       "label": "右足",
       "group": "leg_r",
-      "mass_kg": 0.1143,
+      "mass_kg": 0.0955,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
@@ -560,17 +560,17 @@
         ]
       },
       "mass_breakdown_g": {
-        "structure": 110.3,
+        "structure": 91.8,
         "servos": 0.0,
         "electronics": 0.0,
-        "harness_fasteners": 4.0
+        "harness_fasteners": 3.7
       }
     },
     {
       "name": "trunk_roll_link",
       "label": "腰部横滚关节",
       "group": "trunk",
-      "mass_kg": 0.09,
+      "mass_kg": 0.0848,
       "geometry": {
         "type": "cylinder",
         "radius_mm": 17.5,
@@ -605,17 +605,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 31.9,
+        "structure": 26.6,
         "servos": 55.0,
         "electronics": 0.0,
-        "harness_fasteners": 3.1
+        "harness_fasteners": 3.2
       }
     },
     {
       "name": "torso_upper",
       "label": "胸腔",
       "group": "trunk",
-      "mass_kg": 0.6955,
+      "mass_kg": 0.6603,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
@@ -693,17 +693,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 216.2,
+        "structure": 180.0,
         "servos": 165.0,
         "electronics": 290.0,
-        "harness_fasteners": 24.3
+        "harness_fasteners": 25.3
       }
     },
     {
       "name": "head_yaw_link",
       "label": "颈部偏转关节",
       "group": "head",
-      "mass_kg": 0.1096,
+      "mass_kg": 0.1012,
       "geometry": {
         "type": "cylinder",
         "radius_mm": 15.0,
@@ -743,17 +743,17 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 50.8,
+        "structure": 42.3,
         "servos": 55.0,
         "electronics": 0.0,
-        "harness_fasteners": 3.8
+        "harness_fasteners": 3.9
       }
     },
     {
       "name": "head",
       "label": "头部",
       "group": "head",
-      "mass_kg": 0.1551,
+      "mass_kg": 0.1336,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
@@ -769,17 +769,17 @@
         ]
       },
       "mass_breakdown_g": {
-        "structure": 126.7,
+        "structure": 105.5,
         "servos": 0.0,
         "electronics": 23.0,
-        "harness_fasteners": 5.4
+        "harness_fasteners": 5.1
       }
     },
     {
       "name": "left_shoulder_pitch_link",
       "label": "左肩俯仰关节壳",
       "group": "arm_l",
-      "mass_kg": 0.1049,
+      "mass_kg": 0.0972,
       "geometry": {
         "type": "sphere_shell",
         "outer_r_mm": 18.6,
@@ -813,7 +813,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 46.2,
+        "structure": 38.5,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 3.7
@@ -823,7 +823,7 @@
       "name": "left_upper_arm",
       "label": "左上臂",
       "group": "arm_l",
-      "mass_kg": 0.1342,
+      "mass_kg": 0.1217,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
@@ -863,7 +863,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 74.5,
+        "structure": 62.0,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 4.7
@@ -873,7 +873,7 @@
       "name": "left_forearm",
       "label": "左前臂",
       "group": "arm_l",
-      "mass_kg": 0.1152,
+      "mass_kg": 0.1058,
       "geometry": {
         "type": "capsule",
         "radius_mm": 17.5,
@@ -913,7 +913,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 56.2,
+        "structure": 46.8,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 4.0
@@ -923,7 +923,7 @@
       "name": "left_gripper",
       "label": "左夹爪",
       "group": "arm_l",
-      "mass_kg": 0.0352,
+      "mass_kg": 0.0294,
       "geometry": {
         "type": "box",
         "size_mm": [
@@ -938,17 +938,17 @@
         ]
       },
       "mass_breakdown_g": {
-        "structure": 34.0,
+        "structure": 28.3,
         "servos": 0.0,
         "electronics": 0.0,
-        "harness_fasteners": 1.2
+        "harness_fasteners": 1.1
       }
     },
     {
       "name": "right_shoulder_pitch_link",
       "label": "右肩俯仰关节壳",
       "group": "arm_r",
-      "mass_kg": 0.1049,
+      "mass_kg": 0.0972,
       "geometry": {
         "type": "sphere_shell",
         "outer_r_mm": 18.6,
@@ -982,7 +982,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 46.2,
+        "structure": 38.5,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 3.7
@@ -992,7 +992,7 @@
       "name": "right_upper_arm",
       "label": "右上臂",
       "group": "arm_r",
-      "mass_kg": 0.1342,
+      "mass_kg": 0.1217,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
@@ -1032,7 +1032,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 74.5,
+        "structure": 62.0,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 4.7
@@ -1042,7 +1042,7 @@
       "name": "right_forearm",
       "label": "右前臂",
       "group": "arm_r",
-      "mass_kg": 0.1152,
+      "mass_kg": 0.1058,
       "geometry": {
         "type": "capsule",
         "radius_mm": 17.5,
@@ -1082,7 +1082,7 @@
         }
       ],
       "mass_breakdown_g": {
-        "structure": 56.2,
+        "structure": 46.8,
         "servos": 55.0,
         "electronics": 0.0,
         "harness_fasteners": 4.0
@@ -1092,7 +1092,7 @@
       "name": "right_gripper",
       "label": "右夹爪",
       "group": "arm_r",
-      "mass_kg": 0.0352,
+      "mass_kg": 0.0294,
       "geometry": {
         "type": "box",
         "size_mm": [
@@ -1107,10 +1107,10 @@
         ]
       },
       "mass_breakdown_g": {
-        "structure": 34.0,
+        "structure": 28.3,
         "servos": 0.0,
         "electronics": 0.0,
-        "harness_fasteners": 1.2
+        "harness_fasteners": 1.1
       }
     }
   ],
@@ -1655,13 +1655,12 @@
       35.0
     ],
     "stall_torque_nm": 2.94,
-    "continuous_rated_torque_nm": 0.98,
-    "continuous_rated_torque_basis": "官方额定负载 10 kg·cm = 0.98 N·m @12V（对应额定电流 900 mA），**可持续工况，选型主判据**。来源：DFRobot SER0070 参数表 + 飞特《产品规格书》STS3235 5-8 双重印证，见 design/handoff/STS3215-官方规格书核验.md。",
-    "peak_torque_nm": 1.47,
-    "peak_torque_basis": "堵转 × 50% = 1.47 N·m：取自参考机实测选型习惯（1.8 kg 机体用 1.67 N·m 堵转舵机行走）。只能作短时峰值上限参考，比官方额定乐观 50%，不得当连续设计值。",
+    "rated_torque_nm": 0.98,
+    "rated_torque_basis": "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书双重印证，见 design/handoff/STS3215-官方规格书核验.md §4.1、总体参数汇总表.md §2.1）。历史口径『堵转 × 50% = 1.47 N·m』偏乐观 50%，降为并列参考（rated_torque_nm_half_stall_deprecated），不再是 rated_torque_nm",
     "mounting": "M2.5/M3 支架夹持；STS3215 体对角线 62.3 mm，无法被现有球壳全包，采用外部支架",
     "no_load_speed_dps": 270.0,
-    "speed_basis": "0.222 s/60°(12V) → 270 °/s。来源【实物包装标签】ST-3215-C018 （见 design/reference/sts3215/）；原 300 无出处，2026-09-11 订正"
+    "speed_basis": "0.222 s/60°(12V) → 270 °/s。来源【实物包装标签】ST-3215-C018（见 design/reference/sts3215/）；0.18 与 300 °/s 均无出处，2026-09-11 订正",
+    "rated_torque_nm_half_stall_deprecated": 1.47
   },
   "manufacturing_defaults": {
     "load_bearing_material": "PETG",
@@ -1706,17 +1705,19 @@
     "deviations": [
       "深度比参考机深约 17 mm：躯干要装 85 mm 的树莓派 4B 与 88 mm 的 3S 电池",
       "比参考机多 2 个躯干关节（赛题『上肢+躯干 ≥10』要求），也多 2 只舵机",
-      "结构件按 CAD 实装实算 1790 g（v2 的 500 g 合成预算已弃用），参考机为 1.5–2 mm 铝板件（≈400 g）；三条减重路径见 reduction_paths"
+      "结构按打印薄壳 500 g 计，参考机为 1.5–2 mm 铝板件（≈400 g）；换工艺可再省约 100 g"
     ]
   },
   "mass_budget": {
-    "structure_g": 1790.0,
+    "structure_g": 1490.0,
     "servos_g": 1210.0,
     "electronics_g": 316.0,
     "harness_fasteners_g": 120.0,
-    "total_g": 3436.6,
-    "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / design/robot_model.json §6–§7",
-    "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。"
+    "total_g": 3136.0,
+    "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 → 2026-09-12 重测 / design/cad/out/report.md（2026-09-12 00:01，自动生成）；历史过程见 项目文档/骨架结构与集成方案.md §6–§7",
+    "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。结构件为实算，整机为纸面推算，重量方案未定案，见 mass_status。",
+    "total_g_from_links": 3136.6,
+    "closure_delta_g": 0.6
   },
   "changelog": [
     {
@@ -1738,24 +1739,35 @@
         "整机质量 3.437 kg",
         "新增 installed_envelope_mm = 418 × 223 × 129 mm（CAD 实装；基元口径仍为 372.8 mm）",
         "新增 reduction_paths：A 拓扑减重 / B 买金属件 / C 减自由度",
-        "来源：6d4b077《骨架零件库与整机装配》、design/robot_model.json §6–§7"
+        "来源：6d4b077《骨架零件库与整机装配》、项目文档/骨架结构与集成方案.md §6–§7"
+      ]
+    },
+    {
+      "from": "3.0",
+      "to": "3.0-refresh",
+      "changes": [
+        "实装包络 418 × 223 × 129 → 407 × 263 × 146 mm（来源 6d4b077 → 2026-09-12 重测 / design/cad/assembly.py --all --no-export + design/cad/audit_assembly.py（2026-09-12，第 5 轮之后））",
+        "结构件实算质量 1790 → 1490 g（81 件）；各 link 按比例重摊",
+        "整机质量 3.136 kg（纸面推算，重量方案未定案）",
+        "舵机口径：额定 0.98 N·m（官方）/ 堵转 2.94 / 空载 270 °/s；1.47 降为并列参考"
       ]
     }
   ],
   "installed_envelope_mm": {
-    "height_mm": 418.0,
-    "width_mm": 223.0,
-    "depth_mm": 129.0,
-    "source": "CAD 实装装配体（6d4b077 / design/robot_model.json §6–§7）",
+    "height_mm": 407.0,
+    "width_mm": 263.0,
+    "depth_mm": 146.0,
+    "source": "CAD 实装装配体（6d4b077 → 2026-09-12 重测 / design/cad/out/report.md（2026-09-12 00:01，自动生成）；历史过程见 项目文档/骨架结构与集成方案.md §6–§7）",
+    "measured_by": "design/cad/assembly.py --all --no-export + design/cad/audit_assembly.py（2026-09-12，第 5 轮之后）",
     "kinematic_envelope_mm": {
       "height_mm": 372.8,
       "width_mm": 190.0,
       "depth_mm": 123.0
     },
     "delta_mm": {
-      "height": 45.2,
-      "width": 33.0,
-      "depth": 6.0
+      "height": 34.2,
+      "width": 73.0,
+      "depth": 23.0
     },
     "why_different": "基元模型的 link 包围盒是占位值，舵机笼与支架的实际突出量没进门；实装包络才是报名材料该用的口径。",
     "competition_limit_mm": [
@@ -1763,7 +1775,8 @@
       300.0,
       300.0
     ],
-    "limit_ok": true
+    "limit_ok": true,
+    "order_note": "高 × 宽 × 深（与 installed_envelope_mm 源文件的 X×Y×Z = 深×宽×高 顺序不同）"
   },
   "reduction_paths": [
     {
@@ -1778,11 +1791,7 @@
         2.5,
         2.7
       ],
-      "ankle_pct_continuous": [
-        125,
-        135
-      ],
-      "ankle_pct_peak": [
+      "ankle_pct": [
         84,
         90
       ],
@@ -1800,12 +1809,8 @@
         2.2,
         2.4
       ],
-      "ankle_pct_continuous": [
-        110,
-        120
-      ],
-      "ankle_pct_peak": [
-        74,
+      "ankle_pct": [
+        73,
         80
       ],
       "cost": "单价上升约 300 元，但省 20+ 小时打印"
@@ -1816,12 +1821,36 @@
       "method": "躯干 2 自由度改 1；或换 40 g 级舵机",
       "structure_g": null,
       "total_kg": 3.0,
-      "ankle_pct_continuous": 150,
-      "ankle_pct_peak": 100,
+      "ankle_pct": 100,
       "cost": "违背赛题『上肢+躯干 ≥10』或牺牲力矩余量"
     }
   ],
-  "reduction_paths_note": "百分比由 τ ≈ 0.49 × 整机质量 复算、向上取整。主判据 ankle_pct_continuous 对连续额定 0.98 N·m（12V 变体推断值，见 design/cad/standards.py）；ankle_pct_peak 仅对峰值 1.47 N·m 作短时参考。",
   "reduction_recommendation": "A + B 组合：大件（骨盆/躯干/头壳）自打印并做拓扑减重，22 个关节模块优先买市售铝合金 U 型架。",
-  "reduction_pending": "采购前必须按 §7 表重算一次质量，再决定舵机型号 —— 本文件采用『CAD 实装』作为当前口径（未执行减重）。"
+  "reduction_pending": "采购前必须按 §7 表重算一次质量，再决定舵机型号 —— 本文件采用『CAD 实装』作为当前口径（未执行减重）。",
+  "mass_status": {
+    "structure_source": "实算",
+    "total_source": "纸面推算",
+    "state": "整机重量方案未定案",
+    "note": "结构件 1490 g / 81 件为 CAD 实算；整机 3136 g 为「结构实算 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120」的纸面推算（≈3.136 kg），**重量方案尚未定案**（减重 / 换工艺 / 减件三选一），定案后须重测回填。",
+    "history": [
+      {
+        "caliber": "v3 虚高值",
+        "structure_g": 1790.0,
+        "total_g": 3435.0,
+        "why": "『舵机 35 与 24.7 用反』时期，见 装配一致性修正记录.md §4.4"
+      },
+      {
+        "caliber": "第 4 轮修正后",
+        "structure_g": 1404.0,
+        "total_g": 3050.0,
+        "why": "装配一致性修正，见 装配一致性修正记录.md §4.4"
+      },
+      {
+        "caliber": "第 5 轮后（当前）",
+        "structure_g": 1490.0,
+        "total_g": 3136.0,
+        "why": "第 5 轮新零件族 +86 g；包络再变，见 装配一致性修正记录.md §8.3"
+      }
+    ]
+  }
 }

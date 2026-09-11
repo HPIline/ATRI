@@ -180,7 +180,9 @@ JOINT_SCHEME: Dict[str, Dict[str, Any]] = {
 # 每个 link 的"长件"（管/大件），放在 link 位姿上
 LINK_BULK: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
     "pelvis": [("pelvis_frame", {})],
-    "torso_upper": [("torso_frame", {}), ("electronics_deck", {}),
+    # ⚠️ electronics_deck 不再装配：加宽后小件直接坐框架层板，插入托盘会与电池抽屉
+    #    挤同一层（实测 9 942 mm³）。零件定义保留，待上层布局定了再决定去留。
+    "torso_upper": [("torso_frame", {}),
                     ("battery_tray", {}), ("pdb_mount", {}),
                     ("backpack_plate", {})],
     "head": [("head_shell", {})],
@@ -282,18 +284,30 @@ ELEC_ROT_DEG = {"compute": 90.0}      # 树莓派 85 mm 边沿 Y 向（躯干内
 # ⚠️ 这些标高**不再在这里写死**：来自 skeleton 的唯一真值来源
 #    （曾因"零件建在 z=0、规则写 42.0+2.6"，导致托盘与电池仓两个打印件自己先撞上）
 ELEC_DECK_TOP = {
-    "compute": sk.TORSO_DECK_LOAD_Z,   # 电控托盘（插入件）的上表面
-    "battery": sk.TORSO_BAY_LOAD_Z,    # 电池仓抽屉（插入件）的上表面
+    "compute": sk.TORSO_DECK_TOP_Z,    # 树莓派**直接坐框架层板**（抬高 3 mm 就会顶到顶环）
+    "battery": sk.TORSO_BAY_LOAD_Z,    # 电池坐在抽屉底板的上表面
 }
 
 # 容积超额订阅：STM32 / URT-1 / XL4015 / 功放 / 喇叭塞不进躯干（见
 # 电子件背挂模块，改挂到躯干背面。
 # 这不是"随便挪一下"：躯干内 俯仰叉 32 + 电池 19 + 树莓派 17 = 68 mm，
 # 而到 head_yaw 轴线只有 82.4 mm，还要留给颈座与偏转舵机笼。
+# 舱内实测（2026-09-11）：下层净高 21.4、上层净高 18.4，7 件里只有两件真塞不下：
+#   bec（XL4015，25 mm 高 > 两层净高）、speaker（Φ28，比下层空带宽 2 mm）
+# 其余 5 件（电池/树莓派/STM32/URT-1/功放）全部回舱内。背挂件**贴背板安装**：
+# 厚度方向朝外（而不是把 65 mm 长边朝外），深度只增加自身厚度。
 ELEC_BACKPACK = {
-    "mcu": 0, "servo_driver": 1, "bec": 2, "amp": 3, "speaker": 4,
+    "bec": 0, "speaker": 1,
 }
-BACKPACK_X = -60.0          # 躯干背面（躯干本体 x ∈ [−48, +48]）
+# 舱内下层两侧空带（电池占 y ±17，加宽后净宽 ±44 → 两条 27 mm 空带）
+ELEC_BAY_SIDE = {
+    "mcu":          (-22.0, 30.0),
+    "servo_driver": (24.0, 30.0),
+    "amp":          (-40.0, -30.0),
+}
+# 背挂件的贴板位置（y 错开，避免 90° 装法下长边互相重叠）
+BACKPACK_YZ = {"bec": (0.0, 26.0), "speaker": (-32.0, 10.0)}
+BACK_X = 48.0               # 躯干背面（躯干本体 x ∈ [−48, +48]）
 BACKPACK_PITCH = 16.0
 
 # 显式声明"就按 placements.json 原始坐标摆、不需要规则"的躯干件（目前为空）。
@@ -477,7 +491,7 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
         #    而规则表用短 key（compute/battery/…），于是 7/7 件全部静默停在原始坐标，
         #    正好落进 trunk_pitch 舵机的空间 → 27 683 mm³ 的"假干涉"。
         if link == "torso_upper" and kind not in ELEC_DECK_TOP \
-                and kind not in ELEC_BACKPACK \
+                and kind not in ELEC_BACKPACK and kind not in ELEC_BAY_SIDE \
                 and e.get("id") not in ELEC_RAW_OK:
             fail(f"elec/{e.get('id')}", "elec",
                  KeyError(f"躯干电子件 {e.get('id')!r} 没有匹配的摆位规则"
@@ -486,18 +500,22 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
             continue
         try:
             pos = list(e["position_mm"])
+            rot_y = 0.0
             if kind in ELEC_DECK_TOP:
                 # 底面坐在托盘上表面：中心 z = 盘面 + 自身高/2
                 pos[2] = ELEC_DECK_TOP[kind] + e["size_mm"][2] / 2.0
+            elif kind in ELEC_BAY_SIDE:
+                # 舱内下层两侧空带（电池旁边），坐在框架层板上
+                ox, oy = ELEC_BAY_SIDE[kind]
+                pos = [ox, oy, sk.TORSO_BAY_TOP_Z + e["size_mm"][2] / 2.0]
             elif kind in ELEC_BACKPACK:
-                # 背挂：沿 −X 挂在躯干背面，按序号纵向排开
-                k = ELEC_BACKPACK[kind]
-                pos = [BACKPACK_X - e["size_mm"][0] / 2.0,
-                       0.0,
-                       30.0 - k * BACKPACK_PITCH]
+                # 背挂（贴背板）：厚度方向朝外 → 深度只增加自身厚度
+                oy, oz = BACKPACK_YZ[kind]
+                pos = [-(BACK_X + e["size_mm"][2] / 2.0), oy, oz]
+                rot_y = 90.0
             local = mat_mul(mat_trans(*pos),
-                            mat_rpy(0.0, 0.0, math.radians(
-                                ELEC_ROT_DEG.get(kind, 0.0))))
+                            mat_rpy(0.0, math.radians(rot_y),
+                                    math.radians(ELEC_ROT_DEG.get(kind, 0.0))))
             add(f"elec__{e['id']}",
                 _place(electronics_placeholder(e["size_mm"]),
                        mat_mul(kin.world[link], local)), "elec")

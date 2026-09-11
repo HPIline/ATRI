@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """STS3215 机械接口核验：从真实 STEP 模型量取接口尺寸。
 
-为什么需要它：飞特官网（feetech.cn / feetechrc.com）在本机网络下**不可达**，
-`standards.py` 里标注为"飞特官方 2D 工程图纸"的那组数据**自相矛盾**
-（总长 51.2 与耳孔距 48.5 推出 0.10 mm 壁厚）。本脚本用第三方真实模型
-做独立复核，并把结论写进 `design/handoff/STS3215-机械接口核验.md`。
+为什么需要它：`standards.py` 里标注为"飞特官方 2D 工程图纸"的那组数据**自相矛盾**
+（总长 51.2 与耳孔距 48.5 推出 0.10 mm 壁厚），需要用真实模型做独立复核，
+结论写进 `design/handoff/STS3215-机械接口核验.md`。
+
+> ⚠️ **官网可达性订正（2026-09-11）**：此前写的"官网 feetech.cn / feetechrc.com 不可达"
+> **不成立** —— 官网 **feetechrc.com 可达**（只是慢，首字节 ≈8 s，`curl --max-time 120` 稳定 200）；
+> 官方规格书 PDF 已入库 `design/cad/vendor/feetech/`。`feetech.cn` 确实不通。
+> 详见 `design/handoff/STS3215-官方规格书核验.md` 第 1 节、`design/cad/vendor/README.md`。
+> 本脚本仍然有用：它量的是**第三方 B-rep 实物模型**，与官方 PDF 互为独立印证。
 
 模型来源：TheRobotStudio/SO-ARM100（Apache-2.0），`STEP/SO100/STS3215_03a.step`
 —— 这是 LeRobot 生态的标准开源机械臂，全球大量用户按它打印支架，

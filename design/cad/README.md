@@ -1,87 +1,153 @@
-# CAD 层
+# CAD 层：真实零件建模
 
-用 OpenCASCADE（CadQuery）出可制造的 B-rep / STEP / STL。运动学与质量的提交口径仍在 `design/robot_model.json`，两套数字不要混引，见仓库根 README。
+## 为什么有这一层
+
+之前 `design/` 下的几何是**基元占位**（长方体/圆柱/球/胶囊），
+用 Python 手算投影和网格。它能验证运动学与包络，**但永远做不出可制造的零件**：
+没有圆角、抽壳、螺钉柱、轴承位、拔模，也没有 STEP。
+
+这一层解决该问题：**接入真正的 CAD 内核（OpenCASCADE）**，
+产出实心 B-rep 实体与 STEP/STL。
 
 ```
 design/
-├── robot_model.json      运动学 / 包络 / 提交口径质量（1790 / 3437 g）
-├── components.json       外部元件参数；电子件必须带稳定 kind
-├── placements.json       22 舵机 + 10 电子件落座（gen_placements.py 生成）
-└── cad/
-    ├── standards.py      舵机 / 轴承 / 紧固件 / FDM 容差
-    ├── kit.py            接口标准 + servo_frame()（舵机姿态唯一真值）
-    ├── skeleton.py       现行零件（笼 / 叉 / 管 / 框架 / 簇臂…）
-    ├── assembly.py       整机装配；按 kind 落座电子件，失败即报错
-    ├── fitcheck.py       干涉判定原语（装配 / 体检 / 钟点共用）
-    ├── fit_stagger.py    髋/肩机体沿轴抽出量（权威表，禁止手写）
-    ├── audit_assembly.py 穿模 / 连通性 / 关节轴对齐
-    ├── interference.py   全机干涉普查（与 fitcheck 分工：普查 vs 原语）
-    ├── build.sh          一键：零件 → 装配 → 体检
-    ├── build_all.py      只出零件 STEP/STL
-    ├── parts.py          只提供 sanitize()，不是构建入口
-    ├── tools/            测量 / 旧入口 / 渲染（产物仍写 cad/out）
-    └── out/              STEP/STL/报告（gitignore，可复现）
+├── robot_model.json      ← 运动学/包络/质量（基元，用于校验与仿真）
+├── components.json       ← 外部元件参数（部件库提供；电子件必须带稳定 kind）
+├── placements.json       ← 22 舵机 + 10 电子件 + 结构件落座（由 gen_placements.py 生成）
+├── cad/                  ← 本层：真实零件与整机装配
+│   ├── standards.py      ← 标准件参数（舵机/轴承/紧固件/FDM 容差）
+│   ├── kit.py            ← 接口标准 + servo_frame()（舵机姿态唯一真值）
+│   ├── skeleton.py       ← 15 种骨架零件（笼/叉/管/框架/托盘…）
+│   ├── assembly.py       ← 整机装配；按 kind 落座电子件，失败即报错
+│   ├── fitcheck.py       ← 干涉判定原语（装配/体检/钟点求解共用）
+│   ├── audit_assembly.py ← 穿模 / 连通性 / 关节轴对齐
+│   ├── build.sh          ← 一键：零件 → 装配 → 体检 → 预览
+│   └── out/              ← STEP/STL/报告（gitignore，可复现）
 ```
 
-## 环境
+## 安装
 
-CadQuery 装在独立 `.venv-cad/`，别污染主包的零依赖约束。
-
-已验证的组合是 Python 3.9.6 / `cadquery==2.5.2` / `cadquery-ocp 7.7.2`，这套不随主包迁 3.14。主包 CI 只跑 3.14；CAD 要迁 3.14，得升到 `cadquery ≥ 2.8`（`cadquery-ocp` 要求 `>=3.11,<3.15`）。
+CadQuery 需要 OpenCASCADE，**必须装在独立环境**（不要污染主仓库的零依赖约束）：
 
 ```bash
 cd <repo>
+
+# ① 先检查是否已存在 —— 环境约 830 MB，重建代价高（要重下 165 MB 的 OCP wheel）
 if .venv-cad/bin/python -c "import cadquery, OCP" 2>/dev/null; then
-  echo "已就绪"
+  echo "已就绪：$(.venv-cad/bin/python -c 'import cadquery; print(cadquery.__version__)')"
 else
+  # ② 只有确认不存在/不可用时才重建
   python3 -m venv .venv-cad
   .venv-cad/bin/pip install -r design/cad/requirements.txt
 fi
 ```
 
-环境必须建在仓库内。`.venv-cad/` 已 gitignore，判断它在不在要看文件系统，不能只看 `git status`。
+已验证可用：Python 3.9.6 / macOS arm64 / `cadquery-ocp 7.7.2` / CadQuery 2.5.2 / `ezdxf 1.4.2`。
 
-## 入口
+> ⚠️ **环境必须建在仓库内（`.venv-cad/`），禁止建在 `/tmp`。**
+> macOS 重启会清空 `/tmp`，系统还会清理 3 天未访问的临时文件。
+> 2026-09-11 凌晨曾把环境建在 `/tmp/cadvenv`，当天下午的新会话找不到它，
+> 误判为「协作者机器上的环境没有 clone 过来」，白下 859 MB。
+>
+> 另注：`.venv-cad/` 已在 `.gitignore` 中，**git 里看不到它**。
+> 判断环境是否存在**必须查文件系统**（`ls .venv-cad/bin/python`），不能只看 `git status`。
+
+## 使用
 
 ```bash
-# 推荐：零件 → 装配 → 体检（改参数反复跑加 --fast）
+# 查看标准件参数状态（哪些还是 unknown / provisional）
+.venv-cad/bin/python design/cad/build.py --standards
+
+# 推荐：零件 → 装配 → 体检（改参数反复跑用 --fast）
 bash design/cad/build.sh --fast
 
-# 髋/肩错轴量（关节原点不动，只平移机体）
-.venv-cad/bin/python design/cad/fit_stagger.py
-
-# 全机干涉普查
-.venv-cad/bin/python design/cad/interference.py --all
-
-# 标准件参数状态
-.venv-cad/bin/python design/cad/tools/build.py --standards
+# 只要零件
+.venv-cad/bin/python design/cad/build_all.py --all
 ```
 
-`build.py --all` 和 `parts.py` 里的 `servo_yoke` 三件套是早期入口，现行零件在 `skeleton.py`；`sanitize()` 仍从 `parts.py` 引用，文件不能删。
+## 现行零件（`skeleton.py`，不是早期的 `parts.py` 三件套）
 
-配合的校验脚本在仓库根的 `design/check_fit.py`，不在 `cad/` 下。
+**18 种 / 81 件（实算 1490 g）**，质量按 PETG 1.27 g/cm³ + 外壁/填充估算。
+权威表每次构建写在 `design/cad/out/report.md`（2026-09-12 00:01 版：81 件 / 1490 g）。
 
-## 髋 / 肩错轴
+| 模块 | 件数 | 作用 |
+|---|---|---|
+| `joint_cage` / `joint_cage_yaw` | 13 + 3 | 夹住舵机 + 副轴第二支点 + Ø34 插接 |
+| `limb_fork` / `limb_tube` / `compact_adapter` | 12 + 8 + 2 | 舵盘侧叉子、Φ40 连杆、短轴距转接 |
+| `cluster_horn_arm` / `cluster_outrigger` | 6 + 8 | 第 5 轮髋/肩簇错轴支架（C 臂 + 外抱架） |
+| `backpack_plate` | 1 | 背挂 5 件电子件的公共座 |
+| `torso_frame` / `pelvis_frame` / `head_shell` / `foot_plate` | 1+1+1+2 | 定制大件 |
+| 托盘 / 夹爪 / 线夹等 | 其余 | 电池仓、电控托盘、夹爪、线夹 |
 
-轴距 19.6 mm 只够「输出轴 + 薄支架」，不够两只沿轴 35 mm 的无耳机体共面。
+**现行 CAD 口径（2026-09-12 本轮实测，第 5 轮之后）**：整机包络 **407 × 263 × 146 mm**（高×宽×深）、
+结构件 **1490 g / 81 件（实算）**、整机 **≈3136 g 为纸面推算（重量方案未定案）**、
+干涉 266 134 mm³ / 215 对（『摆放错误』19 对）。
+踝关节 1.492 N·m：占【官方】额定 0.98 N·m 的 **152%**，占历史判据『堵转×50% = 1.47』的 101%。
+过程记录见 `design/handoff/装配一致性修正记录.md`；口径订正留档见 `design/handoff/过期口径修正记录.md`。
+（历史链：结构 1790 g → 1404 g → 1490 g；整机 3437 g → 3050 g → ≈3136 g；
+包络 418×223×129 → 407×204×129 → 407×263×146。）
 
-关节轴位置不动，机体沿自身输出轴抽出：hip_roll / shoulder_pitch +35 mm，hip_pitch +30 mm（`fit_stagger.py` 写入 `JOINT_SCHEME.stagger`）。新件是 `cluster_horn_arm`（锁上一级舵盘）加 `cluster_outrigger`（副轴第二支点）；承力臂目标 6061-T6，PETG 几何仅占位。
+## 设计约定
 
-Gemini 给的 8–12 mm 是端面净距（盘厚 + 螺钉头 + 臂厚），不是机体 stagger。只错 8–12 mm 清不掉互咬，所以禁止用 8–12 回改 stagger。
+1. **单位 mm**，Z 轴为回转轴，零件以配合面为基准面。
+2. **参数全部来自 `standards.py`**，不硬编码魔数。
+3. **`unknown` 状态的参数会拦截构建** —— 宁可构建失败，
+   也不要产出一个基于臆测尺寸的零件。
+4. 布尔/圆角之后统一走 `sanitize()` 修复几何：
+   OCC 偶发自交会让 `isValid()==False`，下游 CAD 导入会报错。
+5. **端头直径必须等于管外径**才能与管壁径向重叠——
+   否则 `fuse` 无法合并，会留下互不相连的多个实体。
 
-## 质量
+## 质量闭合（重要发现）
 
-这里不再抄总表，只说两层口径各自指向哪。
+用真实 CAD 零件 + 真实元件参数做的整机质量核算：
 
-- 提交口径（URDF / `robot_model.json` / 交接包 / 测试钉死）：结构 1790 g、整机 3437 g。踝 1.630 N·m ≈ 连续额定 0.98 的 167%。
-- CAD 现行几何（未回灌）：装配修正后结构 1404 g、整机 3050 g；错轴新件后再 +86 g → 结构约 1490 g。过程见 `design/handoff/装配一致性修正记录.md`。
+| 项目 | 质量 |
+|---|---|
+> ⚠️ **本章为 v1 历史核算（475 mm 机身）。**
+> v3 提交口径（**历史**）：实装包络 418 mm、结构 1790 g、整机 3437 g —— 后两者是
+> 「舵机 35 与 24.7 用反」时期的**虚高值**（`装配一致性修正记录.md` §4.4）。
+> **现行 CAD 实算（2026-09-12）**：包络 **407 × 263 × 146 mm**、结构 **1490 g / 81 件**、
+> 整机 **≈3136 g 为纸面推算（重量方案未定案）**（`out/report.md` / `新架构参数总表.md`）。
+> URDF 尚未回灌现行数——改重量方案时一并重算。下表保留用于追溯。
 
-扭矩主判据是连续额定 0.98 N·m。用堵转 × 50% = 1.47 算出的「踝 102%」是峰值口径。
+| 打印结构件（14 关节模块 + 8 连杆 + 2 足 + 4 转接） | 553 g（v1，475 mm） |
+| 舵机 22 × STS3215 | 1210 g |
+| 电子件 | 351 g |
+| 线束 + 紧固件 | 150 g |
+| **合计（v1）** | **2264 g** |
+| **v3 口径（历史，虚高）** | **3437 g**（结构 **1790** + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120） |
+| **现行口径（2026-09-12，实算+推算）** | **结构 1490 g / 81 件（实算）**；整机 **≈3136 g（纸面推算，重量方案未定案）** |
 
-减重路径 A/B/C 见 `robot_model.json` 的 `reduction_paths`（按 0.98 主判据，三条均未达标）。
+**v1 结论（已由 v2 取代）：原设计质量预算不可达。** 原因是预算制定时没有计入
+22 颗舵机（1210 g，占整机 56%）和真实结构件质量。
 
-## 约定
+**v3 结论（历史口径）**：按当时的 CAD 实装质量，腿部关节需求 **1.629 N·m**，占「堵转 × 50% = 1.47 N·m」判据的 **111%（超标）**。
+必须执行减重路径（A 拓扑 900–1100 g / B 买金属件 550–700 g / C 减自由度）——见 `design/handoff/新架构参数总表.md` §3.1。
 
-1. 单位 mm；参数来自 `standards.py`，`unknown` 状态拦截构建。
-2. 电子件用 `kind`（compute / battery / mcu / …）匹配，`id`/`name` 只给人看。
-3. `cluster_fit` 阈值全部 `provisional`，不得覆盖已标定的通孔 2.7 / 过盈 −0.03 / 同轴 0.05 / 过孔 8.0。
+**现行结论（2026-09-12）**：整车减到 1490 g 结构后，最大关节 `trunk_roll` 需 **1.899 N·m**、
+踝关节 **1.492 N·m**；判据换成【官方】额定 **0.98 N·m** 后分别是 **194% / 152%**
+（历史『堵转×50% = 1.47』口径下为 129% / 101%）——减重路径 A/B/C 仍未执行，**方向不变且更紧迫**。
+
+> **待办**：`parts.py` 的连杆长度目前用默认值（v2 已改为大腿 62.8 mm），
+> 臂段 47.1/39.3 mm 尚未按实例传入；恢复 CAD 阶段时应改为**从 `robot_model.json` 派生**。
+
+**三条出路**（需讨论决定）：
+1. 结构减重：连杆壁厚 3→2mm、提高减重窗口比例，目标 −150 g
+2. 接受 2.2 kg 级、重算力矩并评估是否换更大舵机
+3. 减少自由度或改用更轻的舵机型号
+
+## 与其它层的关系
+
+```
+components.json (外部元件参数)
+        ↓
+cad/standards.py  ──→  cad/parts.py  ──→  STEP / STL
+        ↑                                      ↓
+robot_model.json (运动学)              SolidWorks 精修 / 3D 打印
+        ↓                                      ↓
+check_fit.py (配合校验)  ←────────────  实测回填
+```
+
+**配合校验（`check_fit.py`）仍然是必要的**：CAD 零件建出来后，
+要用它复核整体装配是否仍然满足包络与质量约束。
