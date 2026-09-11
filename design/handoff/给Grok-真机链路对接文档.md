@@ -84,7 +84,10 @@
   | 63 | Present Temperature | 温度 ℃ |
   | **69/70** | Present Current | 工作电流（L/H） |
 
-- **中位标定**：官方做法是"40 号地址写 128"（以当前位置为零位）。
+- **中位标定**：⚠️ **2026-09-12 订正**——旧文写的"40 号地址写 128"是**错的**：40 号是
+  **扭矩使能**（写 128 只是开扭矩，不改零位）。正确做法是写 **31 号位置偏置** ＝
+  `当前脉冲 − 2048`（先松轴、写完回读校验）。依据 `design/reference/sts3215/PROTOCOL.md`
+  寄存器表（31 = 位置偏置 / 40 = 扭矩使能）。
 - 一帧写完多关节要用 **SYNC WRITE**（`0x83`），不要逐个发（见 2.4 时序）。
 
 ### 2.3 电气与拓扑（来自结构方，已冻结）
@@ -132,7 +135,7 @@ deg   = (pulse − zero_pulse) × 360/4096 × sign
 | `read_telemetry(id)` | 返回 `{pos_deg, load_pct, voltage_v, temp_c, current_a, moving}` |
 | `scan()` | 扫描在线 ID（bring-up 第一步） |
 | `write_limits(id, lo, hi)` | 写 min/max angle 寄存器 |
-| `set_middle(id)` | 中位标定（40 号地址写 128） |
+| `set_middle(id)` | 中位标定（写 **31 号位置偏置** = 当前脉冲 − 2048；⚠️ 旧文「40 号写 128」是错的，40 是扭矩使能） |
 
 ### 3.3 bring-up 流程（已写好，用 Mock 跑通）
 

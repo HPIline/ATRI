@@ -6,6 +6,11 @@ opencv-python>=4.8
 flask>=2.3
 qrcode[pil]>=7.4
 #
+# 真机总线（STS3215）可选依赖：只有接实物舵机时才需要。不装也能 import
+# （bus_sts3215.py 延迟导入 serial，缺库时给中文提示与安装命令）。
+#   pip install -i https://mirrors.aliyun.com/pypi/simple/ pyserial
+pyserial>=3.5
+#
 # Windows 仿真环境（另一台 4060 机器）建议：
 #   pip install pybullet   # 或安装 Webots 后使用其 Python API
 # ---------------------------------------------------------------------------

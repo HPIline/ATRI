@@ -53,7 +53,11 @@ class ServoBus:
         raise NotImplementedError
 
     def set_middle(self, joint_id: int) -> None:
-        """中位标定：以当前位置为零位（飞特：40 号地址写 128）。"""
+        """中位标定：以当前位置为零位（写成 2048）。
+
+        ⚠️ 2026-09-12 订正：飞特的零位寄存器是 **31 号位置偏置**；旧注释写的
+        「40 号地址写 128」有误——40 号是扭矩使能。真机实现见 `bus_sts3215.py`。
+        """
         raise NotImplementedError
 
 

@@ -82,7 +82,12 @@ def middle_calibration(bus: ServoBus, order: Optional[Sequence[str]] = None,
                        interactive: bool = True) -> Dict[str, Any]:
     """中位标定：**人工把关节摆到机械零位后**，脚本把当前位置记为 2048。
 
-    飞特做法：40 号地址写 128（以当前位置为中位）。标定顺序建议：
+    ⚠️ 2026-09-12 订正：旧注释写的「飞特做法：40 号地址写 128」**是错的**——
+    40 号是**扭矩使能**（写 128 只是开扭矩，并不改零位），真正的零位寄存器是
+    **31 号位置偏置**（写入 `当前脉冲 − 2048`）。本函数调 `bus.set_middle()`，
+    真机驱动 `bus_sts3215.py` 已按 31 号实现；依据见
+    `design/reference/sts3215/PROTOCOL.md` 与 `design/handoff/线程报告-真机总线驱动.md`。
+    标定顺序建议：
     先躯干/头 → 再髋 → 膝 → 踝 → 肩 → 肘 → 夹爪（从近端到远端）。
     """
     names = list(order or JOINTS.keys())
