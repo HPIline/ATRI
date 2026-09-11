@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: 软件/atri
+        working-directory: software/atri
 
     steps:
       - uses: actions/checkout@v4

@@ -136,7 +136,7 @@ def main(argv: List[str] | None = None) -> int:
         A("### 3.1 减重路径（**待决策**）")
         A("")
         A("当前口径是 **CAD 实装（未执行任何减重）**；下表的数字来自协作者 "
-          "`资料/调研/项目文档/骨架结构与集成方案.md` §7，采购前必须择一执行。"
+          "`design/robot_model.json` 的 reduction_paths，采购前必须择一执行。"
           "踝关节占判据百分比由 `τ ≈ 0.49 × 整机质量` 复算、向上取整，"
           "主判据对**连续额定 0.98 N·m**，峰值口径（1.47 N·m）单列作短时参考。")
         A("")
@@ -293,7 +293,7 @@ def main(argv: List[str] | None = None) -> int:
     A("python3 design/check_fit.py                  # 配合与质量闭合")
     A("python3 design/gen_spec_sheet.py             # 本表")
     A("python3 design/gen_drawings.py && python3 design/gen_render.py")
-    A("cd 软件/atri && python3 -m unittest discover -s tests")
+    A("cd software/atri && python3 -m unittest discover -s tests")
     A("```")
     A("")
 

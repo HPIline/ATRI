@@ -1,0 +1,3 @@
+# 主包不需要这些。板上或开发机按需安装。
+# OpenCV 走 headless，适合无显示器的 Linux / ARM。
+opencv-python-headless>=4.8

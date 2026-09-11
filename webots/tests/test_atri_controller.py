@@ -25,7 +25,7 @@ from webots_api_stub import (  # noqa: E402
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "软件" / "atri"))
+sys.path.insert(0, str(REPO_ROOT / "software" / "atri"))
 
 from atri.config import JOINTS  # noqa: E402
 

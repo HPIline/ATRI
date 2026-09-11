@@ -58,7 +58,7 @@ except ImportError:  # pragma: no cover - 只有在 Webots 之外直接运行时
 # 仓库根目录 = 本文件向上 3 级（webots/controllers/atri_controller/ -> 仓库根）
 CONTROLLER_DIR = Path(__file__).resolve().parent
 ROOT = CONTROLLER_DIR.parents[2]
-SOFTWARE_ROOT = ROOT / "软件" / "atri"
+SOFTWARE_ROOT = ROOT / "software" / "atri"
 sys.path.insert(0, str(SOFTWARE_ROOT))
 
 from atri.brain import Brain  # noqa: E402
@@ -212,7 +212,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--exit-on-done", action="store_true", help="任务跑完后退出（批量验证用）")
     parser.add_argument("--report", default=None, help="把联调结果写入 JSON 文件")
     parser.add_argument("--log", default=None, help="把控制器控制台输出同时写入文件")
-    parser.add_argument("--task-card-dir", default=None, help="任务卡目录（默认 软件/atri/task_cards）")
+    parser.add_argument("--task-card-dir", default=None, help="任务卡目录（默认 software/atri/task_cards）")
     return parser
 
 

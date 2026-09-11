@@ -137,7 +137,7 @@ def main(argv: List[str] | None = None) -> int:
             f"× {env['x_depth']:.0f} mm（CAD 实装；基元口径仍为 "
             f"{model['overall']['height_mm']:.1f} mm）",
             "新增 reduction_paths：A 拓扑减重 / B 买金属件 / C 减自由度",
-            "来源：6d4b077《骨架零件库与整机装配》、资料/调研/项目文档/骨架结构与集成方案.md §6–§7",
+            "来源：6d4b077《骨架零件库与整机装配》、design/robot_model.json",
         ],
     })
     MODEL_PATH.write_text(json.dumps(model, ensure_ascii=False, indent=2) + "\n",

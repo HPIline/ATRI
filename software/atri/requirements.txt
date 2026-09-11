@@ -1,0 +1,15 @@
+# 主包（software/atri/atri/）零第三方依赖：仅用 Python 3.14+ 标准库即可跑通 demo 与全部测试。
+#
+# 以下为可选功能依赖，缺失时不影响主包导入与测试：
+numpy>=1.24          # design/ 脚本使用；opencv 感知路径的图像帧是 numpy 数组
+opencv-python>=4.8   # cv2：perception/opencv.py（调用点惰性 import，缺失时提示安装）
+qrcode[pil]>=7.4     # qrcode：qrgen.py（调用点惰性 import，缺失时提示安装）
+#
+# Windows 仿真环境（另一台 4060 机器）建议：
+#   pip install pybullet   # 或安装 Webots 后使用其 Python API
+# ---------------------------------------------------------------------------
+# CAD 建模依赖（不属于本包，勿装进主环境）
+#   CadQuery + OpenCASCADE 仅供 design/cad/ 使用，见：
+#       design/cad/requirements.txt
+#   安装方式：python3 -m venv .venv-cad && #             .venv-cad/bin/pip install -r design/cad/requirements.txt
+# ---------------------------------------------------------------------------

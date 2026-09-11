@@ -84,7 +84,7 @@ python3 design/run_sim.py --all --episodes 10 --randomize
 python3 design/run_sim.py --sweep perception --episodes 12
 
 # 4) 测试
-cd 软件/atri && python3 -m unittest discover -s tests
+cd software/atri && python3 -m unittest discover -s tests
 ```
 
 全部脚本**仅依赖 Python 3.14+ 标准库**，无需 numpy / matplotlib。
@@ -126,10 +126,9 @@ python3 design/gen_render.py --pose zero          # 换成零姿态
 | ATRI-DWG-004 | `04_尺寸链图.svg` | 头部链/左腿链逐级累加，总高校核 + 放置校核 | 证明尺寸自洽 |
 | ATRI-DWG-005 | `05_舵机布局图.svg` | 22 路舵机安装位置、按扭矩分档图例、汇总 | 证明"算过怎么装" |
 
-**图的读法**：SVG 是矢量图，双击用浏览器打开即可；也可用 `qlmanage -t -s 2000` 转 PNG 插进 PPT。
+**图的读法**：SVG 是矢量图，浏览器直接打开。转 PNG：`rsvg-convert` 或 `inkscape`；macOS 上才用 `qlmanage -t -s 2000`。
 
-> **关于图号**：编号 **跳过 03**——原计划第 3 张为"爆炸图"（见
-> `资料/调研/项目文档/外观尺寸零件设计Prompt.md` §五），未实现；`gen_drawings.DRAWINGS` 里没有 03，
+> **关于图号**：编号 **跳过 03**——原计划第 3 张为爆炸图，未实现；`gen_drawings.DRAWINGS` 里没有 03，
 > 现有 4 张编号为 01 / 02 / 04 / 05。
 
 **关于这些图的诚实说明**：
@@ -167,7 +166,7 @@ python3 design/gen_render.py --pose zero          # 换成零姿态
 |---|---|---|
 | **L1 几何** | link 基元几何、质量、22 关节（名称/编号/轴向/限位） | `robot_model.json` → `atri.urdf` + `drawings/` |
 | **L2 物理** | 舵机非理想特性、域随机化、感知噪声、场景 | `packages/*.json` |
-| **L3 行为** | 动作库、任务卡（复用 `软件/atri/`） | `action_library/`、`task_cards/` |
+| **L3 行为** | 动作库、任务卡（复用 `software/atri/`） | `action_library/`、`task_cards/` |
 
 **关键原则：L1 是唯一来源。** URDF、图纸、仿真都从它生成，改一处即全局同步。
 

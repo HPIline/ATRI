@@ -10,7 +10,7 @@
 用法：
     python3 design/gen_drawings.py
     python3 design/gen_drawings.py --only joints
-    python3 design/gen_drawings.py --png        # 同时导出 PNG（需 qlmanage）
+    python3 design/gen_drawings.py --png        # 同时导出 PNG（rsvg-convert / inkscape / qlmanage，缺则只留 SVG）
 
 注意
 ----
@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -855,20 +856,58 @@ DRAWINGS = {
 
 
 def export_png(svg: Path) -> Optional[Path]:
-    """用 macOS qlmanage 转 PNG（可选）。"""
-    try:
-        subprocess.run(
-            ["qlmanage", "-t", "-s", "2000", "-o", str(svg.parent), str(svg)],
-            check=True, capture_output=True, timeout=60,
-        )
-        produced = svg.parent / (svg.name + ".png")
-        if produced.exists():
-            final = svg.with_suffix(".png")
-            produced.replace(final)
-            return final
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return None
+    """SVG 转 PNG：rsvg-convert → inkscape → qlmanage；都没有则返回 None。"""
+    dest = svg.with_suffix(".png")
+    if _svg_to_png(svg, dest, size=2000):
+        return dest
     return None
+
+
+def _svg_to_png(svg: Path, dest: Path, size: int, timeout: int = 120) -> bool:
+    rsvg = shutil.which("rsvg-convert")
+    if rsvg:
+        try:
+            subprocess.run(
+                [rsvg, "-w", str(size), "-o", str(dest), str(svg)],
+                check=True, capture_output=True, timeout=timeout,
+            )
+            if dest.is_file() and dest.stat().st_size > 0:
+                return True
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
+            pass
+
+    inkscape = shutil.which("inkscape")
+    if inkscape:
+        cmds = [
+            [inkscape, str(svg), "--export-type=png",
+             f"--export-filename={dest}", f"--export-width={size}"],
+            [inkscape, "-z", str(svg), f"--export-png={dest}",
+             f"--export-width={size}"],
+        ]
+        for cmd in cmds:
+            try:
+                subprocess.run(
+                    cmd, check=True, capture_output=True, timeout=timeout,
+                )
+                if dest.is_file() and dest.stat().st_size > 0:
+                    return True
+            except (subprocess.SubprocessError, FileNotFoundError, OSError):
+                continue
+
+    ql = shutil.which("qlmanage")
+    if ql:
+        try:
+            subprocess.run(
+                [ql, "-t", "-s", str(size), "-o", str(svg.parent), str(svg)],
+                check=True, capture_output=True, timeout=timeout,
+            )
+            produced = svg.parent / (svg.name + ".png")
+            if produced.exists():
+                produced.replace(dest)
+                return dest.is_file() and dest.stat().st_size > 0
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
+            pass
+    return False
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -898,7 +937,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             if png:
                 print(f"   PNG -> {png}")
             else:
-                print("   PNG 转换失败（qlmanage 不可用），SVG 仍可用")
+                print("   未找到 rsvg-convert / inkscape / qlmanage，已保留 SVG")
     return 0
 
 

@@ -1,6 +1,6 @@
-# Webots 仿真（Windows + RTX 4060）
+# Webots 仿真（Linux 优先，Windows 实测记录保留）
 
-本目录是 A.T.R.I. 的 Webots 控制器与仿真世界。控制器复用 `软件/atri` 的
+本目录是 A.T.R.I. 的 Webots 控制器与仿真世界。控制器复用 `software/atri` 的
 `Brain + Cerebellum + TaskCard`，只把 `ServoBus` 换成 Webots 电机，
 并用 `robot.step()` 推进仿真时间——**跑的是和无硬件闭环演示完全同一条链路**
 （`atri.sim.run_task_cards`），不是另写一份。
@@ -35,7 +35,8 @@ webots/
 │   └── atri_22dof.wbt                     # 自包含 22 DOF 世界（可直接打开就跑）
 ├── tools/
 │   ├── generate_atri_world.py             # 世界文件生成脚本（**从 design/robot_model.json 派生**，改模型后重跑）
-│   └── run_webots_batch.ps1               # 无人值守批量联调（推荐用这个）
+│   ├── run_webots_batch.ps1               # 无人值守批量联调（推荐用这个）
+│   └── run_webots_batch.sh                # 同上（Linux）
 ├── tests/
 │   ├── webots_api_stub.py                 # Webots controller 模块的可信替身
 │   └── test_atri_controller.py            # 无 Webots 也能跑的控制器端到端测试
@@ -62,6 +63,10 @@ webots/
 
 ```powershell
 powershell -File webots\tools\run_webots_batch.ps1
+```
+
+```bash
+bash webots/tools/run_webots_batch.sh
 ```
 
 脚本会后台起 Webots、等控制器写出报告、再收掉 Webots，最后打印结论并以
@@ -231,7 +236,7 @@ Nao 留空仍判通过、`--velocity 0`（零行程）必须判失败、软钳�
 
 - Webots 的 Python 解释器版本要与你的命令行 Python 一致（Webots 设置里有
   `Python command` 选项）。本机命令行是 Python 3.12。
-- 控制器通过 `sys.path` 指向 `软件/atri`，不需要 `pip install`。
+- 控制器通过 `sys.path` 指向 `software/atri`，不需要 `pip install`。
 - 执行任务时控制器用 `robot.step()` 推进仿真，不要在 `Cerebellum` 里再调用
   `time.sleep`；`Cerebellum` 已支持注入 `sleeper`。
 - 若某些电机名不存在，控制器会跳过并在控制台提示，不会崩，

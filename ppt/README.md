@@ -1,17 +1,19 @@
 # A.T.R.I. 答辩 PPT 生成工程
 
 本目录是答辩 PPT 的**代码化生产流水线**。PPT 不是手工排的，是用 Python 按设计系统生成的——
-这样 51 页的版式、配色、字号、状态标签才能完全一致，后续改文案也只改一处。
+这样约 24 页的版式、配色、字号、状态标签才能完全一致，后续改文案也只改一处。
 
 ## 文件
 
 | 文件 | 作用 |
 |---|---|
 | `design.py` | **设计系统**：画布栅格、8 色配色、字体、页面构件（页眉/判断句标题/导语/状态标签/卡片/大数字卡/关节节点链） |
-| `build_sample.py` | 3 页视觉样张（封面 P01 / 一页摘要 P02 / 总体技术架构图 P17） |
-| `render.py` | PPTX → PNG 离线渲染器（本机校验用；读真实 pptx 几何 + 真实思源黑体） |
-| `export_pdf.applescript` | PowerPoint 导出 PDF（带等待与重试） |
-| `build.sh` | 一键流水线：生成 → 导出 PDF → 栅格化 |
+| `facts.py` | **数字单一来源**：测试数、质量两层、扭矩、BOM、错轴 |
+| `build_deck.py` | 约 24 页答辩稿（数字只从 `facts.py` 读） |
+| `build_sample.py` | 3 页视觉样张 |
+| `render.py` | PPTX → PNG 离线渲染器（本机校验用） |
+| `export_pdf.applescript` | macOS PowerPoint 导出 PDF |
+| `build.sh` | 一键流水线：生成 → 导出 PDF（Linux: soffice；macOS: PowerPoint）→ 栅格化 |
 | `out/` | 产物：`.pptx` / `.pdf` / `pdf_pNN.png`（PDF 真实渲染）/ `preview/`（自渲染） |
 
 ## 用法
@@ -20,13 +22,13 @@
 cd <repo>   # 仓库根目录
 
 # 一键：生成 + 导出 PDF + 栅格化
-bash ppt/build.sh ppt/build_sample.py "ATRI_答辩PPT-样张"
+bash ppt/build.sh ppt/build_deck.py "ATRI-答辩PPT-v4"
 
-# 只看自渲染（快，不调用 PowerPoint）
-./.venv-ppt/bin/python ppt/render.py "ppt/out/ATRI_答辩PPT-样张.pptx" ppt/out/preview
+# 只看自渲染（快，不调用 PowerPoint / LibreOffice）
+python3 ppt/render.py "ppt/out/ATRI-答辩PPT-v4.pptx" ppt/out/preview
 ```
 
-产物在 `ppt/out/`：`ATRI_答辩PPT-样张.pptx` 与同名 `.pdf`。
+产物在 `ppt/out/`（gitignore，不入库）。
 
 ## 设计系统速查
 

@@ -206,7 +206,7 @@ def R(t, size=14, color=GRAPHITE, heavy=False, bold=False, spc=None, italic=Fals
 
 
 # ═══════════════════════════ 页面构件 ═══════════════════════════
-def page_frame(slide, chapter_no, chapter_name, page_no, total=51, dark=False,
+def page_frame(slide, chapter_no, chapter_name, page_no, total=24, dark=False,
                right_label=None):
     """页眉 + 页脚。right_label 缺省显示「第 N 章」；概要/结尾页可传其他文案。"""
     if right_label is None:

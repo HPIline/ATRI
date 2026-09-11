@@ -27,10 +27,10 @@ from typing import Any, Dict, List, Optional
 
 import sys
 
-# 允许以脚本方式运行（design/ 与 软件/atri 不在同一包内）
+# 允许以脚本方式运行（design/ 与 software/atri 不在同一包内）
 _DESIGN_DIR = Path(__file__).resolve().parent
 _REPO = _DESIGN_DIR.parent
-_ATRI_ROOT = _REPO / "软件" / "atri"
+_ATRI_ROOT = _REPO / "software" / "atri"
 if str(_ATRI_ROOT) not in sys.path:
     sys.path.insert(0, str(_ATRI_ROOT))
 

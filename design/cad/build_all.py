@@ -121,7 +121,7 @@ def write_report(reports: List[Dict[str, Any]]) -> Path:
 
 > ⚠️ **这是本轮最重要的结论**：薄壁打印件的质量 ≈ 材料体积 × 密度，
 > 提高填充率或加厚壁只会更重；**减重只能靠减少材料体积（挖料/改形态/改工艺路线）**。
-> 详细分析与三条出路见 `资料/调研/项目文档/骨架结构与集成方案.md` 第 7 节。
+> 详细分析与三条出路见 `design/robot_model.json` 的 `reduction_paths`。
 
 ## 三、接口标准
 
@@ -147,7 +147,7 @@ def write_report(reports: List[Dict[str, Any]]) -> Path:
 ```
 
 **`unknown`/`provisional` 状态的参数是采购前必须闭环的项**，见
-`资料/调研/项目文档/骨架结构与集成方案.md` 第 8 节的风险表。
+`design/cad/README.md` 与 `design/robot_model.json` 的风险说明。
 """
     path = OUT / "report.md"
     path.write_text(md, encoding="utf-8")

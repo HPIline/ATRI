@@ -668,7 +668,7 @@ def emit_markdown(data: Dict[str, Any],
 
 ## 七、后续轮次
 
-过程提示词已归档到 `资料/过程/gemini轮次/`（不在本交接包目录）。
+过程提示词不在本交接包目录。现行 CAD 入口是 `design/cad/build.sh`。
 现行 CAD 入口是 `design/cad/build.sh`。
 
 ---
