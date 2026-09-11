@@ -592,6 +592,15 @@ def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
     for dx in (-30.0, 30.0):
         part = part.cut(box(16.0, 40.0, 20.0, at=(dx, 0, -4.0), centered_z=True))
 
+    # --- 舵机让位切口（按 kit.servo_frame 实测包络 + 1.5 mm 单边余量，
+    #     取「框架实体 ∩ 舵机包络」的实际重叠区，不碰四根承力立柱）---
+    # kit.box 的 at=(cx, cy, z底面)：x/y 是几何中心、z 是底面。
+    #   trunk_roll（轴 X，长 45.2 沿 Y）：横穿上环/横梁/笼座顶部。
+    part = part.cut(box(38.0, 48.2, 16.8, at=(0.0, -12.4, 5.7)))
+    #   左右 hip_yaw（轴 Z，长 45.2 沿 X）：横穿左右翼座板。
+    for sign in (-1, 1):
+        part = part.cut(box(48.2, 27.7, 22.5, at=(12.4, sign * 45.0, -23.1)))
+
     part = safe_fillet(part, FDM["fillet_struct_mm"], "|Z")
     return sanitize(part)
 
@@ -693,6 +702,12 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
                                   at=(0, sign * 54.0, 11.8 + dz)))
         part = part.union(cyl(SPIGOT_D, 14.0, at=(0, sign * 66.0, 11.8), axis="Y"))
 
+    # --- 舵机让位切口（按 kit.servo_frame 实测包络 + 1.5 mm 单边余量，
+    #     取「框架实体 ∩ 舵机包络」的实际重叠区，不碰四根承力立柱）---
+    #   左右 shoulder_roll（轴 X，长 45.2 沿 Z）：穿双肩 pylon 的 Ø34 笼座圆柱与筋板。
+    for sign in (-1, 1):
+        part = part.cut(box(38.5, 20.4, 30.2, at=(-0.2, sign * 71.3, 0.1)))
+
     part = safe_fillet(part, FDM["fillet_min_mm"], "|Z")
     return sanitize(part)
 
@@ -749,6 +764,13 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
     # --- 底部：head_pitch 连杆叉（舵盘 + 副轴）---
     fork = limb_fork(shaft="+y", parent="+z")
     part = part.union(fork.translate((0, 0, z0 - hh / 2 - 3.0)))
+
+    # --- 舵机让位切口（按 kit.servo_frame 实测包络 + 1.5 mm 单边余量，
+    #     取「框架实体 ∩ 舵机包络」的实际重叠区）---
+    #   head_pitch（轴 Y，长 45.2 沿 X）：穿壳底与底部叉。
+    part = part.cut(box(48.2, 46.1, 18.8, at=(12.4, -0.1, -5.0)))
+    #   head_yaw（轴 Z，长 45.2 沿 X）：在壳底下方穿过。
+    part = part.cut(box(32.2, 27.7, 18.0, at=(-4.4, 0.0, -43.3)))
 
     part = safe_fillet(part, 3.0, "|Z")
     return sanitize(part)
