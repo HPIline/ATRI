@@ -11,6 +11,9 @@
 
 ### 0.1 已核查的图片资产
 
+> ⚠️ 2026-09-11：`ATRI_Project_Presentation.pptx` 已从仓库删除（旧版 11 页材料，数字口径过时）。如需其中 image1 的 LOGO，从 git 历史取：
+> `git show 7485fc3:ATRI_Project_Presentation.pptx > /tmp/old.pptx`
+
 | 图 | 内容 | 可用性 |
 |---|---|---|
 | `ATRI_Project_Presentation.pptx` → image1 | A.T.R.I. LOGO | ⚪ 仅品牌 |
