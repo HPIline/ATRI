@@ -592,7 +592,7 @@ while 迭代 < N 且 未超时:
 **下半 · 工程保障四张卡**
 1. **核心零第三方依赖** —— `atri` 包全部 import 只有 `abc / argparse / dataclasses / enum / json / math / pathlib / subprocess / sys / time / typing`；`cv2` / `qrcode` 为懒加载可选依赖
 2. **169 项单元测试** —— FSM / 任务卡 / 技能 / 感知 / 语音 / 动作库 / 配置 / 设计模型 / 工程图全覆盖
-3. **CI 三版本矩阵** —— GitHub Actions 在 Python 3.9 / 3.11 / 3.12 上跑编译 + 测试 + 无硬件闭环演示
+3. **CI 自动验证** —— GitHub Actions 在 Python 3.14 上跑编译 + 测试 + 无硬件闭环演示
 4. **协作规范** —— 改前 pull、小步 commit、禁 force push、功能分支
 
 **右下 · 真实终端输出**

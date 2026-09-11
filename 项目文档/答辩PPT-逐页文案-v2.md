@@ -591,7 +591,7 @@ if abs(ball_x) > 1.0:
 **下半 · 工程保障四张卡**（全部 ● 已完成，可当场查证）
 1. **零第三方依赖** —— 核心包的全部 import 只有 `abc / argparse / dataclasses / enum / json / math / pathlib / subprocess / sys / time / typing`，装个 Python 就能跑
 2. **51 项单元测试** —— FSM / 任务卡 / 技能 / 感知 / 语音 / 动作库 / 配置 全覆盖
-3. **CI 三版本矩阵** —— GitHub Actions 在 Python 3.9 / 3.11 / 3.12 上跑编译 + 测试 + 无硬件闭环演示
+3. **CI 自动验证** —— GitHub Actions 在 Python 3.14 上跑编译 + 测试 + 无硬件闭环演示
 4. **多人协作规范** —— 改前 pull、小步 commit、禁 force push、功能分支
 
 **右下 · 真实终端输出**

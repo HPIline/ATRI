@@ -250,10 +250,8 @@ def main() -> int:
           f"×{model['overall']['depth_mm']:.1f} mm")
 
     WORLD_PATH.parent.mkdir(parents=True, exist_ok=True)
-    # 用 open(..., newline="\n") 而不是 Path.write_text(newline=...)：
-    # write_text 的 newline 参数是 Python 3.10 才加的，CI 矩阵里有 3.9。
-    with open(WORLD_PATH, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(render_world())
+    # 显式 newline="\n"：Windows 上默认会把 \n 翻成 \r\n，破坏与 CI 的字节比对
+    WORLD_PATH.write_text(render_world(), encoding="utf-8", newline="\n")
     print(f"已生成 {WORLD_PATH}")
     print(f"关节数 {len(names)}: {', '.join(names)}")
     return 0

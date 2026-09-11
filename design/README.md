@@ -87,7 +87,7 @@ python3 design/run_sim.py --sweep perception --episodes 12
 cd 软件/atri && python3 -m unittest discover -s tests
 ```
 
-全部脚本**仅依赖 Python 3.9+ 标准库**，无需 numpy / matplotlib。
+全部脚本**仅依赖 Python 3.14+ 标准库**，无需 numpy / matplotlib。
 
 ---
 
