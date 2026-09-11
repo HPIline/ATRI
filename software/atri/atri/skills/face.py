@@ -1,4 +1,4 @@
-"""人脸识别技能：离线检测 -> 特征比对 -> 本地 TTS 播报。"""
+"""人脸检测技能：离线 Haar 边界框 -> 本地 TTS。不做身份特征比对。"""
 from __future__ import annotations
 
 from typing import Any, Dict, List

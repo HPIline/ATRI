@@ -1,6 +1,6 @@
 {
   "task_id": "T-01",
-  "name": "人脸识别",
+  "name": "人脸检测迎宾",
   "skills": ["face"],
   "params": {
     "face_db": "config/face_db.json",

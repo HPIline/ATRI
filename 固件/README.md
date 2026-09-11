@@ -1,7 +1,7 @@
 # 固件：真机接线与上电步骤（STS3215 总线舵机）
 
 > 适用：A.T.R.I. 22 DOF 桌面人形，飞特 **STS3215**（12 V 版，额定 0.98 N·m）/ 同协议的 STS3235。
-> 上位机驱动：`软件/atri/atri/bus_sts3215.py`（`Sts3215Bus`）。
+> 上位机驱动：`software/atri/atri/bus_sts3215.py`（`Sts3215Bus`）。
 > 协议与寄存器真源：`design/reference/sts3215/PROTOCOL.md`。
 > 本文件只讲"怎么把它接对、点着、验通"，不讲协议细节。
 
@@ -135,25 +135,25 @@ bus.relax_all()                    # 广播 40=0：一帧让全总线松轴
 在系统终端手动跑：
 
 ```bash
-/Users/zhangjingkun/Projects/github/ATRI/软件/atri/.venv/bin/python \
-  -m pip install -i https://mirrors.aliyun.com/pypi/simple/ pyserial
+cd software/atri
+python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple/ pyserial
 ```
 
-验证：`软件/atri/.venv/bin/python -c "import serial; print(serial.VERSION)"`
+验证：`python3 -c "import serial; print(serial.VERSION)"`
 
 ### 5.2 扫描
 
 ```bash
-cd /Users/zhangjingkun/Projects/github/ATRI/软件/atri
+cd software/atri
 
 # ① 看一眼 22 关节总表（不接硬件，先确认 ID/方向/零偏/脉冲限位）
-./.venv/bin/python run_bringup.py --table
+python3 run_bringup.py --table
 
 # ② 用内存 Mock 把整条流程跑一遍（不接硬件）
-./.venv/bin/python run_bringup.py --mock
+python3 run_bringup.py --mock
 
 # ③ 真机扫描（bring-up 第一步）
-./.venv/bin/python run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step scan
+python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step scan
 ```
 
 期望输出（22 只都在线、且与关节表一致）：
@@ -189,13 +189,13 @@ print(bus.describe())      # → 端口/波特率/坏帧计数等
 
 ```bash
 # ① 把每个关节的脉冲限位写进舵机（9/11 号寄存器，EEPROM，需先关扭矩）
-./.venv/bin/python run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step limits
+python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step limits
 
 # ② 中位标定（人工把关节摆到机械零位，脚本记下当前位置）
-./.venv/bin/python run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step middle --interactive
+python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step middle --interactive
 
 # ③ 单关节 ±10° 点动 + 温升/电流记录（空载先做）
-./.venv/bin/python run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step jog --joint head_yaw
+python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step jog --joint head_yaw
 ```
 
 ### 6.1 中位标定到底写哪个寄存器（⚠️ 口径冲突，已核验）
@@ -229,7 +229,7 @@ bus.set_middle(0, addr=bus_module.ADDR_TORQUE_ENABLE)   # 40 号写 128，仅兼
 
 ### 6.3 标定结果回填
 
-`--step middle` 会把 `sign` / `zero_pulse` 写进 `软件/atri/config/calibration.json`，
+`--step middle` 会把 `sign` / `zero_pulse` 写进 `software/atri/config/calibration.json`，
 程序启动时由 `config.load_calibration()` 载入。
 **没有它就会出现"两条腿往相反方向走"**——这是现场最贵的错误之一。
 
