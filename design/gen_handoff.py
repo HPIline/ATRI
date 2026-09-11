@@ -613,20 +613,17 @@ def stage_attachments() -> List[Dict[str, str]]:
     for src_rel, stem, note in ATTACHMENTS:
         src = repo / src_rel
         if src.suffix == "":
-            for ext in (".png", ".svg"):
+            # **确定性优先**：SVG 是入库文件，PNG 被 .gitignore 排除。
+            # 以前"有 PNG 就用 PNG"会让交接包内容随本机状态漂移
+            # （本机有 PNG → 声明 .png；CI 无 PNG → 目录里只有 .svg），
+            # 于是全新 clone / CI 上附件校验必红。现在固定优先 SVG。
+            for ext in (".svg", ".png"):
                 cand = src.with_suffix(ext)
                 if cand.exists():
-                    if ext == ".png":
-                        break
-                    # PNG 不在时，试着本机导出一份（macOS qlmanage），失败就用 SVG
-                    try:
-                        import gen_render
-                        if gen_render.export_png(cand, 2000):
-                            cand = cand.with_suffix(".png")
-                    except Exception:  # noqa: BLE001
-                        pass
+                    src = cand
                     break
-            src = cand
+            else:
+                src = src.with_suffix(".svg")
         if src.exists() and src.is_file():
             dst_name = stem if src.suffix == ".urdf" else stem + src.suffix
             shutil.copy2(src, OUT_DIR / dst_name)

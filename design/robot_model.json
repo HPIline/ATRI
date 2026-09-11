@@ -1657,7 +1657,9 @@
     "stall_torque_nm": 2.94,
     "rated_torque_nm": 1.47,
     "rated_torque_basis": "堵转 × 50%：取自参考机实测选型习惯（1.8 kg 机体用 1.67 N·m 堵转舵机行走）",
-    "mounting": "M2.5/M3 支架夹持；STS3215 体对角线 62.3 mm，无法被现有球壳全包，采用外部支架"
+    "mounting": "M2.5/M3 支架夹持；STS3215 体对角线 62.3 mm，无法被现有球壳全包，采用外部支架",
+    "no_load_speed_dps": 270.0,
+    "speed_basis": "0.222 s/60°(12V) → 270 °/s。来源【实物包装标签】ST-3215-C018 （见 design/reference/sts3215/）；原 300 无出处，2026-09-11 订正"
   },
   "manufacturing_defaults": {
     "load_bearing_material": "PETG",

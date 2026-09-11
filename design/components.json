@@ -22,12 +22,13 @@
       "spec": {
         "rated_torque_nm": 1.47,
         "stall_torque_nm": 2.94,
-        "speed_s_per_60deg": 0.18,
+        "speed_s_per_60deg": 0.222,
         "protocol": "TTL 半双工串行总线 @1Mbps",
         "feedback": "12-bit 磁编码绝对位置、温度、电压、电流/负载",
         "voltage_v": 11.1,
         "price_cny": "85-95",
-        "rated_basis": "堵转 × 50%（参考机选型习惯）；早期『额定 1.0 N·m』无权威出处"
+        "rated_basis": "堵转 × 50%（参考机选型习惯）；早期『额定 1.0 N·m』无权威出处",
+        "speed_basis": "实物包装标签 ST-3215-C018（2026-09-11 订正，原 0.18 无出处）"
       },
       "note": "全机型号归一；v2 起额定值改用有出处判据"
     },

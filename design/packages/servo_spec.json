@@ -4,7 +4,11 @@
   "protocol": "TTL half-duplex serial bus",
   "status": "provisional-typical",
   "mass_g": 55.0,
-  "size_mm": [45.2, 24.7, 35.0],
+  "size_mm": [
+    45.2,
+    24.7,
+    35.0
+  ],
   "reference_machine": {
     "name": "幻尔 TonyPi Pro",
     "servo": "LX-824HV",
@@ -14,17 +18,20 @@
     "dof": 20,
     "note": "量产验证：1.8 kg / 20 DOF 人形用 1.67 N·m 堵转舵机可跑跨栏与上下台阶"
   },
-  "note": "以下为同级别总线舵机的典型公开规格量级，用于让仿真体现非理想特性；实物到手后必须实测回填。v2 起扭矩判据改用『堵转 × 50%』（有出处：参考机 TonyPi Pro 1.8 kg 机体用 1.67 N·m 堵转舵机行走），取代早期无权威出处的『额定 1.0 N·m』。",
+  "note": "以下为同级别总线舵机的典型公开规格量级，用于让仿真体现非理想特性；实物到手后必须实测回填。v2 起扭矩判据改用『堵转 × 50%』（有出处：参考机 TonyPi Pro 1.8 kg 机体用 1.67 N·m 堵转舵机行走），取代早期无权威出处的『额定 1.0 N·m』。　【2026-09-11】空载速度按实物标签订正 300 → 270 °/s。",
   "rated_torque_nm": 1.47,
   "rated_torque_basis": "stall_torque_nm × 0.5 —— 参考机实测选型习惯；**非厂商额定值**",
   "stall_torque_nm": 2.94,
-  "no_load_speed_dps": 300.0,
+  "no_load_speed_dps": 270.0,
   "deadband_deg": 0.5,
   "backlash_deg": 1.0,
   "position_accuracy_deg": 1.0,
   "control_latency_ms": 8.0,
   "update_rate_hz": 50,
-  "voltage_range_v": [9.0, 12.6],
+  "voltage_range_v": [
+    9.0,
+    12.6
+  ],
   "voltage_nominal_v": 11.1,
   "current_limit_a": 2.5,
   "temperature_limit_c": 70,
@@ -46,5 +53,6 @@
     "gear wear",
     "bus packet loss",
     "current ripple"
-  ]
+  ],
+  "speed_basis": "0.222 s/60°(12V) → 270 °/s，来源实物包装标签 ST-3215-C018；原 300 °/s 无出处（2026-09-11 由 CAD 层 standards.py 订正后同步至此）"
 }
