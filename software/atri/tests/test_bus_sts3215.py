@@ -478,6 +478,15 @@ class TestAngleConversion(unittest.TestCase):
         bus.set_angle(0, 0.0)
         self.assertEqual(bus.read_pulse(0), 2048)
 
+    def test_set_angle_nan_does_not_write(self):
+        sim = FakeServoBus()
+        bus, ser = make_bus(sim, verify=False)
+        before = bytes(ser.sent_bytes())
+        with self.assertRaises(ValueError):
+            bus.set_angle(0, float("nan"))
+        after = bytes(ser.sent_bytes())
+        self.assertEqual(after, before)
+
     def test_out_of_range_angle_is_clamped_to_pulse_limits(self):
         """超限角度必须被 pulse_limits 钳住，绝不能把越界脉冲发给舵机。"""
         sim = FakeServoBus()

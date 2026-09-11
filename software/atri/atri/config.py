@@ -124,14 +124,20 @@ del _n, _s
 def deg_to_pulse(name: str, deg: float) -> int:
     """角度（度，软件正方向）→ 舵机绝对位置脉冲（0–4095）。"""
     spec = JOINTS[name]
-    pulse = spec["zero_pulse"] + spec["sign"] * float(deg) * PULSE_PER_DEG
+    value = float(deg)
+    if not math.isfinite(value):
+        raise ValueError(f"关节 {name} 收到非有限角度: {deg!r}")
+    pulse = spec["zero_pulse"] + spec["sign"] * value * PULSE_PER_DEG
     return int(round(max(0.0, min(4095.0, pulse))))
 
 
 def pulse_to_deg(name: str, pulse: float) -> float:
     """舵机绝对位置脉冲 → 角度（度，软件正方向）。"""
     spec = JOINTS[name]
-    return (float(pulse) - spec["zero_pulse"]) / PULSE_PER_DEG * spec["sign"]
+    value = float(pulse)
+    if not math.isfinite(value):
+        raise ValueError(f"关节 {name} 收到非有限脉冲: {pulse!r}")
+    return (value - spec["zero_pulse"]) / PULSE_PER_DEG * spec["sign"]
 
 
 def pulse_limits(name: str, margin_deg: float = LIMIT_MARGIN_DEG) -> tuple:

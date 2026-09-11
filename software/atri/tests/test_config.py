@@ -57,6 +57,12 @@ class TestConfig(unittest.TestCase):
             clamp_angle("head_yaw", 10 ** 400)
         self.assertIn("head_yaw", str(ctx.exception))
 
+    def test_deg_to_pulse_rejects_non_finite(self):
+        from atri.config import deg_to_pulse
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.assertRaises(ValueError):
+                deg_to_pulse("head_yaw", value)
+
     def test_motion_limit_constants(self):
         self.assertEqual(config_module.MAX_STEPS, 20)
         self.assertEqual(config_module.MAX_BARS, 8)

@@ -774,7 +774,7 @@ class Sts3215Bus(ServoBus):
     # ------------------------------------------------------------------
     def _clamp_pulse(self, name: str, deg: float) -> int:
         """角度 → 脉冲，并用 `config.pulse_limits` 钳到机械安全范围内。"""
-        pulse = deg_to_pulse(name, float(deg))
+        pulse = deg_to_pulse(name, deg)
         lo, hi = pulse_limits(name)
         clamped = max(int(lo), min(int(hi), int(pulse)))
         if clamped != int(pulse):
