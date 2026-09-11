@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A.T.R.I. 工程图预览</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #5c6570;
+    --line: #1a1a1a;
+    --thin: #c5c9ce;
+    --fill: #eef2f6;
+    --trunk: #d4572b;
+    --trunk-fill: #fbe3d8;
+    --blue: #0b6bb5;
+    --ok: #1a7f37;
+    --sheet: #ffffff;
+    --bg: #d8dde3;
+    --w: 1684px;
+    --h: 1191px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", sans-serif; }
+  header.bar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 10px 16px; background: #1e2936; color: #fff;
+  }
+  header.bar strong { margin-right: 8px; letter-spacing: .04em; }
+  header.bar button {
+    border: 0; padding: 7px 12px; border-radius: 4px; cursor: pointer;
+    background: #3d4d5e; color: #fff; font: inherit;
+  }
+  header.bar button.on { background: #e8edf2; color: #1a1a1a; font-weight: 700; }
+  header.bar .hint { margin-left: auto; color: #b7c0c9; font-size: 12px; }
+  .stage { padding: 24px; display: flex; justify-content: center; }
+  .sheet {
+    width: var(--w); height: var(--h); background: var(--sheet);
+    box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    position: relative; overflow: hidden;
+    display: none;
+  }
+  .sheet.on { display: block; }
+  .frame {
+    position: absolute; inset: 12px;
+    border: 2px solid var(--ink);
+  }
+  .frame::after {
+    content: ""; position: absolute; inset: 8px; border: 1px solid var(--ink);
+  }
+  h1.title { position: absolute; left: 40px; top: 28px; margin: 0; font-size: 26px; }
+  p.sub { position: absolute; left: 40px; top: 62px; margin: 0; color: var(--muted); font-size: 13px; }
+  .panel {
+    position: absolute; background: #fafbfc; border: 1px solid #cfd4da;
+  }
+  .panel h2 {
+    margin: 0; padding: 10px 14px 6px; font-size: 15px; border-bottom: 1px solid #e4e7eb;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid #eceff2; }
+  th { color: var(--blue); font-weight: 600; }
+  .trunk { color: var(--trunk); font-weight: 700; }
+  .ok { color: var(--ok); font-weight: 700; }
+  .title-block {
+    position: absolute; right: 36px; bottom: 36px; width: 280px;
+    border: 1px solid var(--ink); font-size: 12px; background: #fff;
+  }
+  .title-block div { display: flex; border-top: 1px solid var(--thin); }
+  .title-block div:first-child { border-top: 0; }
+  .title-block span { padding: 5px 8px; }
+  .title-block span:first-child { width: 88px; color: var(--muted); border-right: 1px solid var(--thin); }
+  svg.robot { overflow: visible; }
+  .bone { fill: var(--fill); stroke: var(--ink); stroke-width: 1.6; }
+  .bone.trunk { fill: var(--trunk-fill); stroke: var(--trunk); }
+  .j {
+    fill: #fff; stroke: var(--ink); stroke-width: 1.8;
+  }
+  .j.trunk { stroke: var(--trunk); }
+  .jid { font: 700 11px "Noto Sans CJK SC", sans-serif; fill: var(--ink); text-anchor: middle; }
+  .jid.trunk { fill: var(--trunk); }
+  .cap { font: 12px "Noto Sans CJK SC", sans-serif; fill: var(--muted); }
+  .view-box { fill: none; stroke: #cfd4da; }
+  .ground { stroke: var(--blue); stroke-width: 1.4; }
+  html.shot header.bar { display: none; }
+  html.shot body, html.shot .stage { background: #fff; }
+  html.shot .stage { padding: 0; }
+  html.shot .sheet { box-shadow: none; }
+  @media print {
+    header.bar, .hint { display: none; }
+    body { background: #fff; }
+    .stage { padding: 0; }
+    .sheet { display: none !important; box-shadow: none; }
+    .sheet.on { display: block !important; }
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <strong>A.T.R.I. 工程图</strong>
+  <button data-tab="joints" class="on">01 关节编号</button>
+  <button data-tab="views">02 三视图</button>
+  <button data-tab="chain">04 尺寸链</button>
+  <button data-tab="servo">05 舵机布局</button>
+  <span class="hint">示意图 · 编号与 config.py 同源 · 不是 CAD 出图 · 打印当前页即可</span>
+</header>
+
+<div class="stage">
+
+<!-- ========== 01 关节编号 ========== -->
+<section class="sheet on" id="joints">
+  <div class="frame"></div>
+  <h1 class="title">A.T.R.I. 22 自由度关节编号图</h1>
+  <p class="sub">正视 + 侧视 · 编号 00–21 与 software/atri/atri/config.py 完全同源 · 橙色为躯干 2 DOF（腰部横滚 / 俯仰）</p>
+
+  <svg class="robot" viewBox="0 0 1684 1191" width="1684" height="1191">
+    <!-- 正视：瘦连杆，编号落在关节上 -->
+    <rect class="view-box" x="40" y="96" width="430" height="560"/>
+    <text x="255" y="118" text-anchor="middle" class="cap">正视图</text>
+    <g transform="translate(255,168)">
+      <circle class="bone" cx="0" cy="0" r="16"/>
+      <line x1="0" y1="16" x2="0" y2="36" stroke="#1a1a1a" stroke-width="1.6"/>
+      <rect class="bone trunk" x="-22" y="48" width="44" height="28" rx="10"/>
+      <rect class="bone trunk" x="-26" y="82" width="52" height="32" rx="12"/>
+      <line x1="-52" y1="62" x2="-22" y2="62" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="22" y1="62" x2="52" y2="62" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-52" y1="62" x2="-52" y2="150" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="52" y1="62" x2="52" y2="150" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-18" y1="114" x2="-18" y2="250" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+      <line x1="18" y1="114" x2="18" y2="250" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+      <rect class="bone" x="-36" y="250" width="28" height="10" rx="3"/>
+      <rect class="bone" x="8" y="250" width="28" height="10" rx="3"/>
+      <line class="ground" x1="-70" y1="268" x2="70" y2="268"/>
+      <g id="front-joints"></g>
+    </g>
+
+    <!-- 侧视 -->
+    <rect class="view-box" x="490" y="96" width="360" height="560"/>
+    <text x="670" y="118" text-anchor="middle" class="cap">侧视图</text>
+    <g transform="translate(640,168)">
+      <circle class="bone" cx="0" cy="0" r="16"/>
+      <line x1="0" y1="16" x2="0" y2="36" stroke="#1a1a1a" stroke-width="1.6"/>
+      <rect class="bone trunk" x="-16" y="48" width="32" height="28" rx="10"/>
+      <rect class="bone trunk" x="-18" y="82" width="36" height="32" rx="12"/>
+      <line x1="16" y1="62" x2="70" y2="62" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="70" y1="62" x2="70" y2="140" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="0" y1="114" x2="0" y2="250" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+      <rect class="bone" x="-22" y="250" width="44" height="10" rx="3"/>
+      <line class="ground" x1="-40" y1="268" x2="90" y2="268"/>
+      <g id="side-joints"></g>
+      <g fill="#5c6570" font-size="12">
+        <text x="92" y="66">L/R 肩</text>
+        <text x="92" y="108">L/R 肘</text>
+        <text x="92" y="148">L/R 夹爪</text>
+        <text x="24" y="128">髋</text>
+        <text x="24" y="196">膝</text>
+        <text x="24" y="248">踝</text>
+      </g>
+    </g>
+
+    <text x="490" y="670" font-size="11" fill="#5c6570">侧视左右肢体投影重合。成对关节以灰标签标出；完整限位见底表。</text>
+  </svg>
+
+  <div class="panel" style="left:870px;top:96px;width:760px;height:248px;">
+    <h2>自由度构成（与申报口径一致）</h2>
+    <table>
+      <thead><tr><th>分区</th><th>数量</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>头部 head</td><td>2 DOF</td><td>yaw / pitch</td></tr>
+        <tr><td class="trunk">躯干 trunk</td><td class="trunk">2 DOF</td><td>roll / pitch ← 橙色高亮</td></tr>
+        <tr><td>左腿 / 右腿</td><td>5 + 5</td><td>髋 yaw/roll/pitch + 膝 + 踝</td></tr>
+        <tr><td>左臂 / 右臂</td><td>4 + 4</td><td>肩 pitch/roll + 肘 + 夹爪</td></tr>
+        <tr><td><b>合计</b></td><td><b>22 DOF</b></td><td class="ok">总数 ≥ 18，每腿 ≥ 4，上肢 + 躯干 ≥ 10</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel" style="left:870px;top:360px;width:760px;height:270px;">
+    <h2>包络与舵机口径</h2>
+    <table>
+      <thead><tr><th>层</th><th>数值</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td>现行申报包络</td><td><b>418 × 223 × 129 mm</b></td><td>CAD 实装 / 报名</td></tr>
+        <tr><td>URDF 运动学包络</td><td>372.8 × 190.0 × 123.0 mm</td><td>基元投影，勿与申报混引</td></tr>
+        <tr><td>赛题上限</td><td>600 × 300 × 300 mm</td><td>余量 182 / 77 / 171 mm</td></tr>
+        <tr><td>舵机连续额定</td><td><b>0.98 N·m</b></td><td>主判据；峰值 1.47 仅短时</td></tr>
+        <tr><td>表内 effort</td><td>设计需求力矩</td><td>踝 1.63（167%）、腰 2.09（214%）相对 0.98</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:8px 14px 0;font-size:12px;" class="ok">三项包络均在限值内，可直接用于报名与检录核对。示意图不是零件实测。</p>
+  </div>
+
+  <div class="panel" style="left:40px;top:680px;width:1590px;height:430px;">
+    <h2>关节明细表（编号 / 名称 / 限位 / 轴向 / 设计需求力矩）· 22 行全列出</h2>
+    <div id="joint-table" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px;padding:8px 12px 12px;"></div>
+  </div>
+
+  <div class="title-block">
+    <div><span>项目</span><span>A.T.R.I. 桌面自主人形智能</span></div>
+    <div><span>图名</span><span>22 关节编号图</span></div>
+    <div><span>图号</span><span>ATRI-DWG-001</span></div>
+    <div><span>阶段</span><span>方案设计（HTML 预览）</span></div>
+    <div><span>视向</span><span>正视 + 侧视</span></div>
+    <div><span>标注</span><span>22 关节全标注</span></div>
+  </div>
+</section>
+
+<!-- ========== 02 三视图 ========== -->
+<section class="sheet" id="views">
+  <div class="frame"></div>
+  <h1 class="title">A.T.R.I. 总装三视图（零姿态）</h1>
+  <p class="sub">示意图 · 单位 mm · 现行申报包络 418 × 223 × 129 · URDF 运动学包络 372.8 × 190 × 123 勿混引</p>
+  <svg viewBox="0 0 1684 1191" width="1684" height="1191">
+    <rect class="view-box" x="48" y="100" width="460" height="620"/>
+    <text x="278" y="124" text-anchor="middle" class="cap">正视 · 宽 223 / 高 418</text>
+    <g transform="translate(278,190) scale(1.55)">
+      <use href="#slim-front"/>
+    </g>
+    <rect class="view-box" x="540" y="100" width="460" height="620"/>
+    <text x="770" y="124" text-anchor="middle" class="cap">侧视 · 深 129 / 高 418</text>
+    <g transform="translate(770,190) scale(1.55)">
+      <use href="#slim-side"/>
+    </g>
+    <rect class="view-box" x="48" y="740" width="460" height="360"/>
+    <text x="278" y="764" text-anchor="middle" class="cap">俯视 · 宽 223 / 深 129</text>
+    <g transform="translate(278,900)">
+      <rect class="bone" x="-70" y="-40" width="140" height="80" rx="16"/>
+      <rect class="bone" x="-28" y="-18" width="56" height="36" rx="8" style="fill:#fbe3d8;stroke:#d4572b"/>
+      <circle class="bone" cx="0" cy="-48" r="16"/>
+      <rect class="bone" x="-86" y="-12" width="18" height="28" rx="6"/>
+      <rect class="bone" x="68" y="-12" width="18" height="28" rx="6"/>
+    </g>
+    <g font-size="13" fill="#0b6bb5">
+      <text x="278" y="700" text-anchor="middle">223 mm</text>
+      <text x="48" y="430" transform="rotate(-90 40 430)">418 mm</text>
+      <text x="770" y="700" text-anchor="middle">129 mm</text>
+    </g>
+  </svg>
+  <div class="panel" style="left:1040px;top:100px;width:580px;height:420px;">
+    <h2>与赛题上限对照</h2>
+    <table>
+      <tbody>
+        <tr><td>现行高 / 上限</td><td>418 / 600</td><td class="ok">余量 182</td></tr>
+        <tr><td>现行宽 / 上限</td><td>223 / 300</td><td class="ok">余量 77</td></tr>
+        <tr><td>现行深 / 上限</td><td>129 / 300</td><td class="ok">余量 171</td></tr>
+        <tr><td>URDF 高（勿申报）</td><td>372.8</td><td>运动学基元</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:14px;font-size:13px;color:#5c6570">零姿态示意，不是爆炸图。编号跳过 03：原计划爆炸图未实现。</p>
+  </div>
+  <div class="title-block">
+    <div><span>图号</span><span>ATRI-DWG-002</span></div>
+    <div><span>图名</span><span>总装三视图</span></div>
+  </div>
+</section>
+
+<!-- ========== 04 尺寸链 ========== -->
+<section class="sheet" id="chain">
+  <div class="frame"></div>
+  <h1 class="title">A.T.R.I. 关节链尺寸链（Z 向）</h1>
+  <p class="sub">由 robot_model.json origin_xyz_mm 累加 · 单位 mm · 与 URDF 同源，不是 418 申报包络</p>
+  <div class="panel" style="left:40px;top:100px;width:780px;height:980px;">
+    <h2>头顶链 pelvis → head</h2>
+    <table>
+      <thead><tr><th>关节</th><th>Δz</th><th>累计</th></tr></thead>
+      <tbody>
+        <tr><td>trunk_roll</td><td>+19.6</td><td>+19.6</td></tr>
+        <tr><td>trunk_pitch</td><td>+27.5</td><td>+47.1</td></tr>
+        <tr><td>head_yaw</td><td>+82.4</td><td>+129.5</td></tr>
+        <tr><td>head_pitch</td><td>+27.5</td><td>+157.0</td></tr>
+        <tr><td>head 外形半高</td><td>+21.6</td><td>+178.6</td></tr>
+      </tbody>
+    </table>
+    <h2 style="margin-top:18px">足底链 pelvis → left_foot</h2>
+    <table>
+      <thead><tr><th>关节</th><th>Δz</th><th>累计</th></tr></thead>
+      <tbody>
+        <tr><td>left_hip_yaw</td><td>−19.6</td><td>−19.6</td></tr>
+        <tr><td>left_hip_roll</td><td>−19.6</td><td>−39.2</td></tr>
+        <tr><td>left_hip_pitch</td><td>−19.6</td><td>−58.8</td></tr>
+        <tr><td>left_knee_pitch</td><td>−62.8</td><td>−121.6</td></tr>
+        <tr><td>left_ankle_pitch</td><td>−62.8</td><td>−184.4</td></tr>
+        <tr><td>foot 外形半高</td><td>−9.8</td><td>−194.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel" style="left:850px;top:100px;width:760px;height:420px;">
+    <h2>总高校核</h2>
+    <table>
+      <tbody>
+        <tr><td>头顶相对骨盆</td><td>+178.6</td></tr>
+        <tr><td>足底相对骨盆</td><td>−194.2</td></tr>
+        <tr><td>运动学总高</td><td><b>372.8 mm</b></td></tr>
+        <tr><td>申报包络高</td><td>418 mm（含错轴/外壳，勿把两层加在一起）</td></tr>
+        <tr><td>赛题上限</td><td>600 mm · 余量 182 mm</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:14px;font-size:13px;" class="ok">几何推导与 URDF overall.height_mm=372.8 一致（差 ≤ 1 mm）。</p>
+  </div>
+  <div class="title-block">
+    <div><span>图号</span><span>ATRI-DWG-004</span></div>
+    <div><span>图名</span><span>尺寸链图</span></div>
+  </div>
+</section>
+
+<!-- ========== 05 舵机布局 ========== -->
+<section class="sheet" id="servo">
+  <div class="frame"></div>
+  <h1 class="title">A.T.R.I. 舵机安装布局（22 路总线舵机）</h1>
+  <p class="sub">每个关节一路 STS3215 · 方块大小按设计需求力矩分档 · 连续额定口径 0.98 N·m</p>
+  <svg viewBox="0 0 1684 1191" width="1684" height="1191">
+    <rect class="view-box" x="40" y="96" width="430" height="560"/>
+    <text x="255" y="118" text-anchor="middle" class="cap">正视图</text>
+    <g transform="translate(255,168)" id="servo-front"></g>
+    <rect class="view-box" x="490" y="96" width="360" height="560"/>
+    <text x="670" y="118" text-anchor="middle" class="cap">侧视图</text>
+    <g transform="translate(640,168)" id="servo-side"></g>
+  </svg>
+  <div class="panel" style="left:870px;top:96px;width:760px;height:320px;">
+    <h2>图例（按设计需求力矩分档）</h2>
+    <table>
+      <tbody>
+        <tr><td>大（≥ 3.0）</td><td>4 路</td><td>左右髋 pitch、左右膝</td></tr>
+        <tr><td>中（2.0–3.0）</td><td>8 路</td><td>躯干、髋 yaw/roll、踝</td></tr>
+        <tr><td>小（&lt; 2.0）</td><td>10 路</td><td>头、肩、肘、夹爪</td></tr>
+        <tr><td>橙色</td><td>躯干 2 DOF</td><td>roll / pitch</td></tr>
+        <tr><td>供电 / 总线</td><td>11.1 V · TTL</td><td>非实测</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="title-block">
+    <div><span>图号</span><span>ATRI-DWG-005</span></div>
+    <div><span>图名</span><span>舵机布局图</span></div>
+  </div>
+</section>
+</div>
+
+<!-- reusable mini figures -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="slim-front">
+      <circle class="bone" cx="0" cy="0" r="16"/>
+      <rect class="bone trunk" x="-22" y="48" width="44" height="28" rx="10"/>
+      <rect class="bone trunk" x="-26" y="82" width="52" height="32" rx="12"/>
+      <line x1="-52" y1="62" x2="52" y2="62" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-52" y1="62" x2="-52" y2="150" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="52" y1="62" x2="52" y2="150" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-18" y1="114" x2="-18" y2="250" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+      <line x1="18" y1="114" x2="18" y2="250" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+      <rect class="bone" x="-36" y="250" width="28" height="10" rx="3"/>
+      <rect class="bone" x="8" y="250" width="28" height="10" rx="3"/>
+      <line class="ground" x1="-70" y1="268" x2="70" y2="268"/>
+    </g>
+    <g id="slim-side">
+      <circle class="bone" cx="0" cy="0" r="16"/>
+      <rect class="bone trunk" x="-16" y="48" width="32" height="28" rx="10"/>
+      <rect class="bone trunk" x="-18" y="82" width="36" height="32" rx="12"/>
+      <line x1="16" y1="62" x2="70" y2="62" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="70" y1="62" x2="70" y2="140" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+      <line x1="0" y1="114" x2="0" y2="250" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+      <rect class="bone" x="-22" y="250" width="44" height="10" rx="3"/>
+      <line class="ground" x1="-40" y1="268" x2="90" y2="268"/>
+    </g>
+  </defs>
+</svg>
+
+<script>
+const JOINTS = [
+  {id:0,  name:"head_yaw",            group:"head",  lim:"−90→90",  axis:"Z", effort:1.0},
+  {id:1,  name:"head_pitch",          group:"head",  lim:"−45→45",  axis:"Y", effort:1.0},
+  {id:2,  name:"trunk_roll",          group:"trunk", lim:"−10→10",  axis:"X", effort:2.0},
+  {id:3,  name:"trunk_pitch",         group:"trunk", lim:"−15→15",  axis:"Y", effort:2.0},
+  {id:4,  name:"left_hip_yaw",        group:"leg_l", lim:"−45→45",  axis:"Z", effort:2.5},
+  {id:5,  name:"left_hip_roll",       group:"leg_l", lim:"−25→25",  axis:"X", effort:2.5},
+  {id:6,  name:"left_hip_pitch",      group:"leg_l", lim:"−60→60",  axis:"Y", effort:3.0},
+  {id:7,  name:"left_knee_pitch",     group:"leg_l", lim:"0→90",    axis:"Y", effort:3.0},
+  {id:8,  name:"left_ankle_pitch",    group:"leg_l", lim:"−40→40",  axis:"Y", effort:2.0},
+  {id:9,  name:"right_hip_yaw",       group:"leg_r", lim:"−45→45",  axis:"Z", effort:2.5},
+  {id:10, name:"right_hip_roll",      group:"leg_r", lim:"−25→25",  axis:"X", effort:2.5},
+  {id:11, name:"right_hip_pitch",     group:"leg_r", lim:"−60→60",  axis:"Y", effort:3.0},
+  {id:12, name:"right_knee_pitch",    group:"leg_r", lim:"0→90",    axis:"Y", effort:3.0},
+  {id:13, name:"right_ankle_pitch",   group:"leg_r", lim:"−40→40",  axis:"Y", effort:2.0},
+  {id:14, name:"left_shoulder_pitch", group:"arm_l", lim:"−90→90",  axis:"Y", effort:1.5},
+  {id:15, name:"left_shoulder_roll",  group:"arm_l", lim:"−90→90",  axis:"X", effort:1.5},
+  {id:16, name:"left_elbow_pitch",    group:"arm_l", lim:"−120→0",  axis:"Y", effort:1.0},
+  {id:17, name:"left_gripper",        group:"arm_l", lim:"0→60",    axis:"Y", effort:0.4},
+  {id:18, name:"right_shoulder_pitch",group:"arm_r", lim:"−90→90",  axis:"Y", effort:1.5},
+  {id:19, name:"right_shoulder_roll", group:"arm_r", lim:"−90→90",  axis:"X", effort:1.5},
+  {id:20, name:"right_elbow_pitch",   group:"arm_r", lim:"−120→0",  axis:"Y", effort:1.0},
+  {id:21, name:"right_gripper",       group:"arm_r", lim:"0→60",    axis:"Y", effort:0.4},
+];
+
+function badge(el, id, x, y, trunk) {
+  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  c.setAttribute("class", trunk ? "j trunk" : "j");
+  c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 12);
+  const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  t.setAttribute("class", trunk ? "jid trunk" : "jid");
+  t.setAttribute("x", x); t.setAttribute("y", y + 4);
+  t.textContent = String(id).padStart(2, "0");
+  g.appendChild(c); g.appendChild(t); el.appendChild(g);
+}
+
+const front = {
+  1:[0,0], 0:[0,36],
+  3:[0,62], 2:[0,98],
+  14:[-52,62], 15:[-76,62],
+  18:[52,62], 19:[76,62],
+  16:[-52,110], 20:[52,110],
+  17:[-52,150], 21:[52,150],
+  4:[-18,128], 5:[-40,128], 6:[-18,150],
+  9:[18,128], 10:[40,128], 11:[18,150],
+  7:[-18,196], 12:[18,196],
+  8:[-18,250], 13:[18,250],
+};
+const side = {
+  1:[0,0], 0:[0,36], 3:[0,62], 2:[0,98],
+  14:[48,62], 16:[70,110], 17:[70,140],
+  4:[0,128], 7:[0,196], 8:[0,250],
+};
+
+const fg = document.getElementById("front-joints");
+Object.entries(front).forEach(([id, xy]) => badge(fg, +id, xy[0], xy[1], +id===2||+id===3));
+const sg = document.getElementById("side-joints");
+Object.entries(side).forEach(([id, xy]) => badge(sg, +id, xy[0], xy[1], +id===2||+id===3));
+
+const tb = document.getElementById("joint-table");
+tb.innerHTML = JOINTS.map(j => {
+  const cls = j.group === "trunk" ? "trunk" : "";
+  return `<div class="${cls}" style="display:flex;gap:8px;padding:5px 4px;border-bottom:1px solid #eceff2;font-size:12px;">
+    <b style="width:28px">${String(j.id).padStart(2,"0")}</b>
+    <span style="flex:1">${j.name}</span>
+    <span style="width:72px">${j.lim}</span>
+    <span style="width:18px">${j.axis}</span>
+    <span style="width:36px">${j.effort.toFixed(1)}</span>
+  </div>`;
+}).join("");
+
+function servoDot(parent, id, x, y, effort, trunk) {
+  const r = effort >= 3 ? 16 : effort >= 2 ? 12 : 9;
+  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", r);
+  c.setAttribute("fill", trunk ? "#fbe3d8" : "#eef2f6");
+  c.setAttribute("stroke", trunk ? "#d4572b" : "#1a1a1a");
+  c.setAttribute("stroke-width", "1.6");
+  const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  t.setAttribute("x", x); t.setAttribute("y", y+4);
+  t.setAttribute("text-anchor", "middle");
+  t.setAttribute("font-size", "10"); t.setAttribute("font-weight", "700");
+  t.textContent = String(id).padStart(2,"0");
+  g.appendChild(c); g.appendChild(t); parent.appendChild(g);
+}
+const sf = document.getElementById("servo-front");
+sf.appendChild(document.getElementById("slim-front").cloneNode(true));
+JOINTS.forEach(j => {
+  const xy = front[j.id]; if (!xy) return;
+  servoDot(sf, j.id, xy[0], xy[1], j.effort, j.group==="trunk");
+});
+const ss = document.getElementById("servo-side");
+ss.appendChild(document.getElementById("slim-side").cloneNode(true));
+[1,0,3,2,14,16,17,4,7,8].forEach(id => {
+  const j = JOINTS[id]; const xy = side[id];
+  servoDot(ss, id, xy[0], xy[1], j.effort, j.group==="trunk");
+});
+
+(function boot() {
+  const q = new URLSearchParams(location.search);
+  if (q.has("shot")) document.documentElement.classList.add("shot");
+  const tab = q.get("tab") || location.hash.replace("#","");
+  if (tab && document.getElementById(tab)) {
+    document.querySelectorAll("header.bar button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+    document.querySelectorAll(".sheet").forEach(s => s.classList.toggle("on", s.id === tab));
+  }
+})();
+
+document.querySelectorAll("header.bar button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("header.bar button").forEach(b => b.classList.remove("on"));
+    document.querySelectorAll(".sheet").forEach(s => s.classList.remove("on"));
+    btn.classList.add("on");
+    document.getElementById(btn.dataset.tab).classList.add("on");
+    window.scrollTo(0,0);
+  });
+});
+</script>
+</body>
+</html>

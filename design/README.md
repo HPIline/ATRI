@@ -43,6 +43,7 @@ design/
 │   ├── 04_关节配色图.svg
 │   └── 05_等轴测外观-背面.svg
 ├── drawings/                 # 工程图产物 ★ 可直接用于报名材料
+│   ├── preview.html          # ★ 浏览器预览源（四张图切页）
 │   ├── 01_关节编号图.svg
 │   ├── 02_三视图.svg
 │   ├── 04_尺寸链图.svg       # 编号跳过 03：原计划的"爆炸图"未实现
@@ -72,10 +73,9 @@ python3 design/gen_spec_sheet.py                   # 渲染《新架构参数总
 # 1) 校验设计并生成 URDF
 python3 design/gen_urdf.py --summary --validate --write
 
-# 2) 生成 2D 工程图（4 张）
-python3 design/gen_drawings.py
-python3 design/gen_drawings.py --only joints      # 只出关节编号图
-python3 design/gen_drawings.py --png              # 同时导出 PNG（macOS）
+# 2) 工程图：浏览器打开 HTML 预览（编号/包络/扭矩口径写在页上）
+xdg-open design/drawings/preview.html
+# 旧 SVG 生成器仍可用于测试： python3 design/gen_drawings.py
 
 # 3) 跑仿真
 python3 design/run_sim.py --list
