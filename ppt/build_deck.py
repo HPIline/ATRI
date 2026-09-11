@@ -66,9 +66,9 @@ def p01(prs):
     text(s, X, 4.66, 6.6, 0.30,
          [P([R("22 DOF", 15, ORANGE, heavy=True),
              R("　·　", 11, BLUE_300),
-             R("47.5 cm", 15, ORANGE, heavy=True),
+             R("37.3 cm", 15, ORANGE, heavy=True),
              R("　·　", 11, BLUE_300),
-             R("133 项测试通过", 15, ORANGE, heavy=True)])])
+             R("169 项测试通过", 15, ORANGE, heavy=True)])])
     joint_chain_h(s, X, 5.32, 5.87, n=22, first_color=ORANGE)
     text(s, X, 5.50, 6.3, 0.24,
          [P([R("22 个主动自由度", 9.5, BLUE, heavy=True),
@@ -127,7 +127,7 @@ def p02(prs):
     sec_head(s, C_X, Y_BODY, C_W, "推进到哪一步")
     hline(s, C_X, Y_BODY + 0.30, C_W, color=BLUE_300, width=1.0)
     y = Y_BODY + 0.46
-    for kind, t, d in [("done", "软件栈 + 设计模型", "133 项测试、5/5 闭环、22 关节设计模型与 4 张工程图"),
+    for kind, t, d in [("done", "软件栈 + 设计模型", "169 项测试、5/5 闭环、22 关节设计模型与 4 张工程图"),
                        ("doing", "仿真验证", "闭环控制律已跑出收敛序列与鲁棒性边界；Webots 22 DOF 运动学联调通过"),
                        ("plan", "实物样机", "晋级后启动采购、3D 打印与装配")]:
         bh = 1.15
@@ -294,7 +294,7 @@ def p07(prs):
          [P([R("任务 = 一份 JSON 文件", 12, INK, heavy=True)]),
           P([R("能力 = 一个技能模块", 12, INK, heavy=True)], space_before=8),
           P([R("调度 = 一个状态机", 12, INK, heavy=True)], space_before=8),
-          P([R("底座已在仓库中实现并通过 133 项测试", 9.5, GRAY)], space_before=14)])
+          P([R("底座已在仓库中实现并通过 169 项测试", 9.5, GRAY)], space_before=14)])
     status_bar(s, ["done"])
 
 
@@ -643,21 +643,21 @@ def p18(prs):
     s = add_slide(prs, PAPER)
     page_frame(s, "03", "技术架构与实现", 18)
     page_title(s, "赛题约束基本合规；真正的风险在质量与力矩",
-               lead="尺寸与电气逐条过检；但整机质量超出原设计预算 37%，腿部关节力矩已越过所选舵机的额定值。")
-    accent(s, CONTENT_X, Y_BODY - 0.06, 8.0, "115%", "腿部关节力矩 ／ STS3215 额定值",
+               lead="尺寸与电气逐条过检；整机质量 2146 g，腿部关节力矩占「堵转 × 50%」判据的 71%。")
+    accent(s, CONTENT_X, Y_BODY - 0.06, 8.0, "71%", "腿部关节力矩 ／ 堵转×50% 判据",
            size=20, unit_size=12)
     headers = ["约束项", "大赛要求", "本项目设计", "余量"]
     rows = [
-        ["高度", "≤ 60 cm", "47.5 cm（关节链几何累加）", "+12.5 cm"],
+        ["高度", "≤ 60 cm", "37.3 cm（几何累加；对齐量产参考机）", "+22.7 cm（占上限 62%）"],
         ["体宽", "≤ 30 cm", "19.0 cm", "+11.0 cm"],
         ["深度（自设参考）", "官方未列", "12.3 cm", "—"],
-        ["臂长（单侧）", "≤ 30 cm", "12.25 cm（肩关节→夹爪末端直线距离）", "+17.75 cm"],
+        ["臂长（单侧）", "≤ 30 cm", "9.57 cm（肩关节→夹爪末端直线距离）", "+20.4 cm"],
         ["关节数量", "总数 ≥18 / 每腿 ≥4 / 上肢+躯干 ≥10", "22 = 10 + 8 + 2 + 2", "上肢躯干 10 = 10，无余量"],
         ["传感配置", "IMU + 摄像头 + 麦克风 + 扬声器", "6 轴 IMU + 单目广角 + 环形麦 + 扬声器", "满足"],
         ["供电电压", "锂电池、≥ 7.4 V", "11.1 V 3S", "+3.7 V"],
         ["场地适配", "2400×2400 mm，含 5 个任务区域", "任务卡按区域编号切换技能", "满足"],
-        ["整机质量", "官方未设上限", "2263 g（结构 552 + 舵机 1210 + 电子件 351 + 线束紧固件 150）", "超原设计预算 1650 g 的 37.2%"],
-        ["腿部关节力矩", "官方未设上限", "1.152 N·m（真实总重等比放大 ×1.372）", "占 STS3215 额定 1.0 N·m 的 115%"],
+        ["整机质量", "官方未设上限", "2146 g（结构 500 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120）", "v2 较 v1 减 117 g"],
+        ["腿部关节力矩", "官方未设上限", "1.037 N·m（CoP 25 mm × 动载 2.0）", "占「堵转×50% = 1.47 N·m」的 71%"],
     ]
     table(s, CONTENT_X, Y_BODY + 0.42, CONTENT_W, headers, rows,
           col_w=[1.75, 3.40, 4.10, 2.42], row_h=0.26, head_h=0.26, size=8.5)
@@ -670,7 +670,7 @@ def p18(prs):
              R("，则上肢 + 躯干 = 3×2 + 2 = 8 < 10，直接不合格。我们的设计把夹爪（编号 17/21）计入上肢，此口径需向组委会书面确认。",
                9, GRAPHITE)], space_before=3, line_spacing=1.28),
           P([R("② 力矩余量——", 9, ORANGE, heavy=True),
-             R("按真实总重放大后腿部需要 1.152 N·m，已越过 STS3215 额定 1.0 N·m。三条出路见 P49，结论是「余量已耗尽，必须实测」。",
+             R("腿部关节需要 1.037 N·m，占「堵转 × 50% = 1.47 N·m」判据的 71%（旧口径「额定 1.0 N·m」无权威出处，已弃用）。该判据取自量产参考机的选型习惯，STS3215 真实连续扭矩仍须实测，见 P49。",
                9, GRAPHITE)], space_before=2, line_spacing=1.28)])
     status_bar(s, ["design"])
 
@@ -728,7 +728,7 @@ def p19(prs):
                8.5, BLUE, heavy=True)])])
     text(s, CONTENT_X, 6.18, CONTENT_W, 0.28,
          [P([R("口径：限位与轴向取自 design/robot_model.json（config.py::JOINTS 只有 id/group/limit/rest，无轴向）；"
-               "「设计扭矩」为模型标称值；按真实总重核算后腿部关节需求 1.152 N·m 已越过所选舵机额定 1.0 N·m，" 
+               "「设计扭矩」为模型标称值；腿部关节需求 1.037 N·m，占「堵转 × 50% = 1.47 N·m」判据的 71%，"
                "详见 P18 与 P49。", 8, GRAY)],
             line_spacing=1.25)])
     status_bar(s, ["done"])
@@ -738,13 +738,13 @@ def p20(prs):
     s = add_slide(prs, PAPER)
     page_frame(s, "03", "技术架构与实现", 20)
     page_title(s, "少掉的每一个自由度，都是一个主动的工程取舍",
-               lead="这三条取舍的结果，就是 47.5 cm 这组规格。")
+               lead="这三条取舍的结果，就是 37.3 cm 这组规格。")
     accent(s, CONTENT_X, Y_BODY - 0.06, 6.0, "−2 个关节", "· 踝 1 DOF、无独立腕关节", size=20, unit_size=12)
     cards = [("踝关节只保留 1 个（俯仰）",
               [("收益", "省下重量、成本与结构复杂度"),
                ("代价", "侧向扰动容忍度下降。当前步态生成器里没有髋 roll 参与补偿，横向稳定依赖宽足距与实机整定")]),
              ("末端不设独立腕关节",
-              [("收益", "减少 2 个关节，单侧臂长压到 12.25 cm"),
+              [("收益", "减少 2 个关节，单侧臂长压到 9.57 cm"),
                ("代价", "抓取姿态受限，只能做「正对目标」的抓取"),
                ("目标", "只做桌面轻物抓取（≤100 g）")]),
              ("躯干保留 2 个自由度",
@@ -1065,12 +1065,12 @@ def p29(prs):
     page_frame(s, "03", "技术架构与实现", 29)
     page_title(s, "语音是接口不是依赖；工程质量是可查的",
                lead="下面四项都可以当场执行复现。")
-    accent(s, CONTENT_X, Y_BODY - 0.06, 6.0, "133 项测试", "· 核心 0 第三方依赖",
+    accent(s, CONTENT_X, Y_BODY - 0.06, 6.0, "169 项测试", "· 核心 0 第三方依赖",
            size=22, unit_size=12)
     cards = [("核心零第三方依赖",
               "atri 包全部 import 只有 abc / argparse / dataclasses / enum / json / math / "
               "pathlib / subprocess / sys / time / typing；cv2、qrcode 为懒加载可选依赖。"),
-             ("133 项测试 · 构成拆开说",
+             ("169 项测试 · 构成拆开说",
               "软件行为 51 项 + 设计模型 / 工程图 / 几何断言 82 项（占 61.7%）。"
               "软件行为部分覆盖 FSM / 任务卡 / 技能 / 感知 / 语音 / 动作库 / 配置。"),
              ("CI 三版本矩阵",
@@ -1090,7 +1090,7 @@ def p29(prs):
     yy = Y_BODY + 2.92
     h = code_block(s, CONTENT_X, yy, 6.60, [
         "$ python3 -m unittest discover -s tests",
-        "Ran 133 tests in 0.045s",
+        "Ran 169 tests in 1.6s",
         "OK",
         "",
         "$ python3 run_demo.py --fast",
@@ -1165,7 +1165,7 @@ def p31(prs):
          [P([R("12/12 · 12/12 · 9/12 · 4/12", 13, ORANGE, heavy=True)], align=PP_ALIGN.RIGHT),
           P([R("ideal / nominal / harsh / adversarial", 8, GRAY)],
             align=PP_ALIGN.RIGHT, space_before=2)], anchor=MSO_ANCHOR.MIDDLE)
-    rows = [["133 项测试 + 三版本 CI", "python3 -m unittest discover -s tests　→ Ran 133 tests … OK"],
+    rows = [["169 项测试 + 三版本 CI", "python3 -m unittest discover -s tests　→ Ran 169 tests … OK"],
             ["五项任务无硬件闭环演示", "python3 run_demo.py --fast　→ 闭环演示完成: 5/5 项任务通过"],
             ["22 关节设计模型与 URDF", "design/robot_model.json；python3 design/gen_urdf.py"],
             ["4 张工程图（编号 / 三视图 / 尺寸链 / 舵机布局）", "design/drawings/　图号 001 / 002 / 004 / 005，第 3 张暂缺"],
@@ -1372,7 +1372,7 @@ def p39(prs):
          [P([R("现在就能拿出的证据", 11, GREEN, heavy=True)]),
           P([R("完整清单与命令见 P31", 8.5, GRAY)], space_before=5)])
     for i, (t, v) in enumerate([("视觉伺服鲁棒性边界", "12/12 · 9/12 · 4/12"),
-                                ("设计包测试", "133 项 OK"),
+                                ("设计包测试", "169 项 OK"),
                                 ("五项任务闭环", "5/5")]):
         x = 4.35 + i * 2.68
         text(s, x, yy + 0.22, 2.55, 0.22, [P([R(t, 9, GRAPHITE)])])
@@ -1537,7 +1537,7 @@ def p46(prs):
            "用统一任务描述驱动一台小型双足机器人完成五项赛题任务。"
            "原创性主要在系统架构与工程实现，不在算法。"),
           ("现在到底完成了什么？",
-           "22 关节设计模型与 4 张工程图、22 DOF Webots 世界与控制器、133 项测试、"
+           "22 关节设计模型与 4 张工程图、22 DOF Webots 世界与控制器、169 项测试、"
            "五项任务无硬件闭环 5/5、任务卡与动作库规范。没有实物样机，没有实机实测数据。"),
           ("断网后语音 / 人脸 / 二维码还能用吗？",
            "二维码解码与 TTS 是纯本地路径；人脸检测为本地 Haar，身份比对尚未实现。"
@@ -1574,7 +1574,7 @@ def p47(prs):
     text(s, CONTENT_X + 0.26, Y_BODY + 0.52, 4.00, 0.22,
          [P([R("现在就有结果的四项", 10, GREEN, heavy=True)])])
     for i, (name, val, cmd) in enumerate([
-            ("测试通过率", "133 / 133", "python3 -m unittest discover -s tests"),
+            ("测试通过率", "169 / 169", "python3 -m unittest discover -s tests"),
             ("五项任务软件闭环", "5 / 5", "python3 run_demo.py --fast"),
             ("伺服闭环收敛（20cm）", "7 轮 / 0.85cm", "design/run_sim.py::servo_loop"),
             ("鲁棒性边界（harsh / 对抗）", "9/12 · 4/12",
@@ -1621,7 +1621,7 @@ def p48(prs):
           P([R("连续两次成功", 8.5, GRAPHITE)], space_before=5, line_spacing=1.30)])
     ry = Y_BODY + 1.58
     text(s, CONTENT_X, ry, 5.0, 0.24, [P([R("风险与应对", 11, INK, heavy=True)])])
-    risks = [("整机质量 2263 g，超原设计预算 37.2%；腿部力矩占额定 115%",
+    risks = [("整机质量 2146 g；腿部力矩占「堵转×50%」判据 71%，真实连续扭矩仍待实测",
               "结构减重已在数学上堵死（需砍掉 54% 结构）；换 SM45BL 舵机可行但成本升至 ¥4856；"
               "降动态系数（2.0 → 1.4）零硬件成本、可回到 81% 额定——待核对评分细则是否限速", True),
              ("舵机装不进关节壳（0/8 通过）、电池放不下（105 > 94 mm）",

@@ -1,7 +1,7 @@
 #VRML_SIM R2025a utf8
 
 # 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。
-# A.T.R.I. 22 DOF 桌面人形：躯干 2 + 头 2 + 双臂 8 + 双腿 10。
+# A.T.R.I. 22 DOF 桌面人形：几何与质量派生自 design/robot_model.json。
 # 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。
 
 WorldInfo {
@@ -21,67 +21,67 @@ Viewpoint {
 Robot {
   name "ATRI"
   controller "atri_controller"
-  translation 0 0 0.30
+  translation 0 0 0.1942
   boundingObject Box {
-    size 0.16 0.10 0.08
+    size 0.1 0.08 0.0353
   }
   physics Physics {
     density -1
-    mass 1.0
+    mass 0.2252
   }
   children [
     HingeJoint {
       jointParameters HingeJointParameters {
         axis 1 0 0
-        anchor 0 0 0.04
+        anchor 0 0 0.0196
       }
       device [
         RotationalMotor {
-          name "trunk_pitch"
+          name "trunk_roll"
           maxVelocity 2
         }
         PositionSensor {
-          name "trunk_pitch_sensor"
+          name "trunk_roll_sensor"
         }
       ]
       endPoint Solid {
-        name "trunk_pitch_link"
+        name "trunk_roll_link"
         boundingObject Box {
-          size 0.14 0.09 0.05
+          size 0.035 0.035 0.0236
         }
         physics Physics {
           density -1
-          mass 0.2
+          mass 0.0677
         }
         children [
           HingeJoint {
             jointParameters HingeJointParameters {
               axis 0 1 0
-              anchor 0 0 0.025
+              anchor 0 0 0.0275
             }
             device [
               RotationalMotor {
-                name "trunk_roll"
+                name "trunk_pitch"
                 maxVelocity 2
               }
               PositionSensor {
-                name "trunk_roll_sensor"
+                name "trunk_pitch_sensor"
               }
             ]
             endPoint Solid {
-              name "trunk_roll_link"
+              name "trunk_pitch_link"
               boundingObject Box {
-                size 0.16 0.1 0.1
+                size 0.1 0.09 0.055
               }
               physics Physics {
                 density -1
-                mass 0.45
+                mass 0.5459
               }
               children [
                 HingeJoint {
                   jointParameters HingeJointParameters {
                     axis 0 0 1
-                    anchor 0 0 0.05
+                    anchor 0 0 0.0824
                   }
                   device [
                     RotationalMotor {
@@ -95,17 +95,17 @@ Robot {
                   endPoint Solid {
                     name "head_yaw_link"
                     boundingObject Box {
-                      size 0.05 0.05 0.04
+                      size 0.03 0.03 0.0612
                     }
                     physics Physics {
                       density -1
-                      mass 0.06
+                      mass 0.0733
                     }
                     children [
                       HingeJoint {
                         jointParameters HingeJointParameters {
-                          axis 1 0 0
-                          anchor 0 0 0.02
+                          axis 0 1 0
+                          anchor 0 0 0.0275
                         }
                         device [
                           RotationalMotor {
@@ -119,11 +119,11 @@ Robot {
                         endPoint Solid {
                           name "head_pitch_link"
                           boundingObject Box {
-                            size 0.1 0.09 0.09
+                            size 0.076 0.068 0.0432
                           }
                           physics Physics {
                             density -1
-                            mass 0.18
+                            mass 0.0618
                           }
                         }
                       }
@@ -132,8 +132,8 @@ Robot {
                 }
                 HingeJoint {
                   jointParameters HingeJointParameters {
-                    axis 1 0 0
-                    anchor -0.085 0 0.03
+                    axis 0 1 0
+                    anchor 0 0.075 0.0118
                   }
                   device [
                     RotationalMotor {
@@ -147,17 +147,17 @@ Robot {
                   endPoint Solid {
                     name "left_shoulder_pitch_link"
                     boundingObject Box {
-                      size 0.04 0.04 0.09
+                      size 0.0372 0.0372 0.0372
                     }
                     physics Physics {
                       density -1
-                      mass 0.1
+                      mass 0.0719
                     }
                     children [
                       HingeJoint {
                         jointParameters HingeJointParameters {
-                          axis 0 1 0
-                          anchor 0 0 -0.045
+                          axis 1 0 0
+                          anchor 0 0 0
                         }
                         device [
                           RotationalMotor {
@@ -171,17 +171,17 @@ Robot {
                         endPoint Solid {
                           name "left_shoulder_roll_link"
                           boundingObject Box {
-                            size 0.035 0.035 0.09
+                            size 0.04 0.04 0.0636
                           }
                           physics Physics {
                             density -1
-                            mass 0.08
+                            mass 0.0803
                           }
                           children [
                             HingeJoint {
                               jointParameters HingeJointParameters {
-                                axis 1 0 0
-                                anchor 0 0 -0.045
+                                axis 0 1 0
+                                anchor 0 0 -0.0471
                               }
                               device [
                                 RotationalMotor {
@@ -195,17 +195,17 @@ Robot {
                               endPoint Solid {
                                 name "left_elbow_pitch_link"
                                 boundingObject Box {
-                                  size 0.03 0.03 0.08
+                                  size 0.035 0.035 0.0546
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.07
+                                  mass 0.0749
                                 }
                                 children [
                                   HingeJoint {
                                     jointParameters HingeJointParameters {
-                                      axis 0 0 1
-                                      anchor 0 0 -0.04
+                                      axis 0 1 0
+                                      anchor 0 0 -0.0392
                                     }
                                     device [
                                       RotationalMotor {
@@ -219,11 +219,11 @@ Robot {
                                     endPoint Solid {
                                       name "left_gripper_link"
                                       boundingObject Box {
-                                        size 0.04 0.02 0.05
+                                        size 0.05 0.03 0.0196
                                       }
                                       physics Physics {
                                         density -1
-                                        mass 0.04
+                                        mass 0.0101
                                       }
                                     }
                                   }
@@ -238,8 +238,8 @@ Robot {
                 }
                 HingeJoint {
                   jointParameters HingeJointParameters {
-                    axis 1 0 0
-                    anchor 0.085 0 0.03
+                    axis 0 1 0
+                    anchor 0 -0.075 0.0118
                   }
                   device [
                     RotationalMotor {
@@ -253,17 +253,17 @@ Robot {
                   endPoint Solid {
                     name "right_shoulder_pitch_link"
                     boundingObject Box {
-                      size 0.04 0.04 0.09
+                      size 0.0372 0.0372 0.0372
                     }
                     physics Physics {
                       density -1
-                      mass 0.1
+                      mass 0.0719
                     }
                     children [
                       HingeJoint {
                         jointParameters HingeJointParameters {
-                          axis 0 1 0
-                          anchor 0 0 -0.045
+                          axis 1 0 0
+                          anchor 0 0 0
                         }
                         device [
                           RotationalMotor {
@@ -277,17 +277,17 @@ Robot {
                         endPoint Solid {
                           name "right_shoulder_roll_link"
                           boundingObject Box {
-                            size 0.035 0.035 0.09
+                            size 0.04 0.04 0.0636
                           }
                           physics Physics {
                             density -1
-                            mass 0.08
+                            mass 0.0803
                           }
                           children [
                             HingeJoint {
                               jointParameters HingeJointParameters {
-                                axis 1 0 0
-                                anchor 0 0 -0.045
+                                axis 0 1 0
+                                anchor 0 0 -0.0471
                               }
                               device [
                                 RotationalMotor {
@@ -301,17 +301,17 @@ Robot {
                               endPoint Solid {
                                 name "right_elbow_pitch_link"
                                 boundingObject Box {
-                                  size 0.03 0.03 0.08
+                                  size 0.035 0.035 0.0546
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.07
+                                  mass 0.0749
                                 }
                                 children [
                                   HingeJoint {
                                     jointParameters HingeJointParameters {
-                                      axis 0 0 1
-                                      anchor 0 0 -0.04
+                                      axis 0 1 0
+                                      anchor 0 0 -0.0392
                                     }
                                     device [
                                       RotationalMotor {
@@ -325,11 +325,11 @@ Robot {
                                     endPoint Solid {
                                       name "right_gripper_link"
                                       boundingObject Box {
-                                        size 0.04 0.02 0.05
+                                        size 0.05 0.03 0.0196
                                       }
                                       physics Physics {
                                         density -1
-                                        mass 0.04
+                                        mass 0.0101
                                       }
                                     }
                                   }
@@ -351,7 +351,7 @@ Robot {
     HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 0 1
-        anchor -0.045 0 -0.04
+        anchor 0 0.045 -0.0196
       }
       device [
         RotationalMotor {
@@ -365,17 +365,17 @@ Robot {
       endPoint Solid {
         name "left_hip_yaw_link"
         boundingObject Box {
-          size 0.05 0.05 0.05
+          size 0.0372 0.0372 0.0372
         }
         physics Physics {
           density -1
-          mass 0.12
+          mass 0.0719
         }
         children [
           HingeJoint {
             jointParameters HingeJointParameters {
-              axis 0 1 0
-              anchor 0 0 -0.025
+              axis 1 0 0
+              anchor 0 0 -0.0196
             }
             device [
               RotationalMotor {
@@ -389,17 +389,17 @@ Robot {
             endPoint Solid {
               name "left_hip_roll_link"
               boundingObject Box {
-                size 0.045 0.045 0.05
+                size 0.0372 0.0372 0.0372
               }
               physics Physics {
                 density -1
-                mass 0.12
+                mass 0.0719
               }
               children [
                 HingeJoint {
                   jointParameters HingeJointParameters {
-                    axis 1 0 0
-                    anchor 0 0 -0.025
+                    axis 0 1 0
+                    anchor 0 0 -0.0196
                   }
                   device [
                     RotationalMotor {
@@ -413,17 +413,17 @@ Robot {
                   endPoint Solid {
                     name "left_hip_pitch_link"
                     boundingObject Box {
-                      size 0.045 0.05 0.1
+                      size 0.045 0.045 0.0803
                     }
                     physics Physics {
                       density -1
-                      mass 0.2
+                      mass 0.0887
                     }
                     children [
                       HingeJoint {
                         jointParameters HingeJointParameters {
-                          axis 1 0 0
-                          anchor 0 0 -0.05
+                          axis 0 1 0
+                          anchor 0 0 -0.0628
                         }
                         device [
                           RotationalMotor {
@@ -437,17 +437,17 @@ Robot {
                         endPoint Solid {
                           name "left_knee_pitch_link"
                           boundingObject Box {
-                            size 0.04 0.045 0.1
+                            size 0.04 0.04 0.0769
                           }
                           physics Physics {
                             density -1
-                            mass 0.18
+                            mass 0.0838
                           }
                           children [
                             HingeJoint {
                               jointParameters HingeJointParameters {
-                                axis 1 0 0
-                                anchor 0 0 -0.05
+                                axis 0 1 0
+                                anchor 0 0 -0.0628
                               }
                               device [
                                 RotationalMotor {
@@ -461,11 +461,11 @@ Robot {
                               endPoint Solid {
                                 name "left_ankle_pitch_link"
                                 boundingObject Box {
-                                  size 0.05 0.1 0.025
+                                  size 0.11 0.06 0.0196
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.1
+                                  mass 0.0327
                                 }
                               }
                             }
@@ -484,7 +484,7 @@ Robot {
     HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 0 1
-        anchor 0.045 0 -0.04
+        anchor 0 -0.045 -0.0196
       }
       device [
         RotationalMotor {
@@ -498,17 +498,17 @@ Robot {
       endPoint Solid {
         name "right_hip_yaw_link"
         boundingObject Box {
-          size 0.05 0.05 0.05
+          size 0.0372 0.0372 0.0372
         }
         physics Physics {
           density -1
-          mass 0.12
+          mass 0.0719
         }
         children [
           HingeJoint {
             jointParameters HingeJointParameters {
-              axis 0 1 0
-              anchor 0 0 -0.025
+              axis 1 0 0
+              anchor 0 0 -0.0196
             }
             device [
               RotationalMotor {
@@ -522,17 +522,17 @@ Robot {
             endPoint Solid {
               name "right_hip_roll_link"
               boundingObject Box {
-                size 0.045 0.045 0.05
+                size 0.0372 0.0372 0.0372
               }
               physics Physics {
                 density -1
-                mass 0.12
+                mass 0.0719
               }
               children [
                 HingeJoint {
                   jointParameters HingeJointParameters {
-                    axis 1 0 0
-                    anchor 0 0 -0.025
+                    axis 0 1 0
+                    anchor 0 0 -0.0196
                   }
                   device [
                     RotationalMotor {
@@ -546,17 +546,17 @@ Robot {
                   endPoint Solid {
                     name "right_hip_pitch_link"
                     boundingObject Box {
-                      size 0.045 0.05 0.1
+                      size 0.045 0.045 0.0803
                     }
                     physics Physics {
                       density -1
-                      mass 0.2
+                      mass 0.0887
                     }
                     children [
                       HingeJoint {
                         jointParameters HingeJointParameters {
-                          axis 1 0 0
-                          anchor 0 0 -0.05
+                          axis 0 1 0
+                          anchor 0 0 -0.0628
                         }
                         device [
                           RotationalMotor {
@@ -570,17 +570,17 @@ Robot {
                         endPoint Solid {
                           name "right_knee_pitch_link"
                           boundingObject Box {
-                            size 0.04 0.045 0.1
+                            size 0.04 0.04 0.0769
                           }
                           physics Physics {
                             density -1
-                            mass 0.18
+                            mass 0.0838
                           }
                           children [
                             HingeJoint {
                               jointParameters HingeJointParameters {
-                                axis 1 0 0
-                                anchor 0 0 -0.05
+                                axis 0 1 0
+                                anchor 0 0 -0.0628
                               }
                               device [
                                 RotationalMotor {
@@ -594,11 +594,11 @@ Robot {
                               endPoint Solid {
                                 name "right_ankle_pitch_link"
                                 boundingObject Box {
-                                  size 0.05 0.1 0.025
+                                  size 0.11 0.06 0.0196
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.1
+                                  mass 0.0327
                                 }
                               }
                             }

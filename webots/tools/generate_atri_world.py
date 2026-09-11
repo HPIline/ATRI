@@ -16,10 +16,20 @@
 """
 from __future__ import annotations
 
+import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 WORLD_PATH = Path(__file__).resolve().parents[1] / "worlds" / "atri_22dof.wbt"
+
+# L1 单一事实来源：几何/质量/关节全部从 design/robot_model.json 派生（v2 起）。
+# 以前这里的关节链是**手写常量**，结果长期与模型不一致（腿段 190 mm vs 模型 235 mm、
+# roll/pitch 轴向对调），而 CI 只比"生成器↔产物"，查不出这种漂移。现在改读模型。
+REPO = Path(__file__).resolve().parents[2]
+MODEL_PATH = REPO / "design" / "robot_model.json"
+sys.path.insert(0, str(REPO / "design"))
+import geometry  # noqa: E402  （纯标准库）
 
 # 世界标称版本：与本机验证用的 Webots R2025a 对齐（工程说明要求 R2023b 或更新）
 WORLD_VERSION = "R2025a"
@@ -68,140 +78,51 @@ def joint(
 
 
 # --------------------------------------------------------------------------
-# 头部链：torso -> head_yaw -> head_pitch -> 头
+# 从 L1 模型生成关节树
 # --------------------------------------------------------------------------
-def head_chain() -> Dict[str, Any]:
-    return joint(
-        "head_yaw",
-        axis=(0, 0, 1),
-        anchor=(0, 0, 0.05),
-        size=(0.05, 0.05, 0.04),
-        mass=0.06,
-        children=[
-            joint(
-                "head_pitch",
-                axis=(1, 0, 0),
-                anchor=(0, 0, 0.02),
-                size=(0.10, 0.09, 0.09),
-                mass=0.18,
-            )
-        ],
-    )
+def load_model() -> Dict[str, Any]:
+    return json.loads(MODEL_PATH.read_text(encoding="utf-8"))
 
 
-# --------------------------------------------------------------------------
-# 手臂链：torso -> shoulder_pitch -> shoulder_roll -> elbow_pitch -> gripper
-# --------------------------------------------------------------------------
-def arm_chain(side: str) -> Dict[str, Any]:
-    sign = -1.0 if side == "left" else 1.0
-    shoulder_x = sign * 0.085
-    return joint(
-        f"{side}_shoulder_pitch",
-        axis=(1, 0, 0),
-        anchor=(shoulder_x, 0, 0.03),
-        size=(0.04, 0.04, 0.09),
-        mass=0.10,
-        children=[
-            joint(
-                f"{side}_shoulder_roll",
-                axis=(0, 1, 0),
-                anchor=(0, 0, -0.045),
-                size=(0.035, 0.035, 0.09),
-                mass=0.08,
-                children=[
-                    joint(
-                        f"{side}_elbow_pitch",
-                        axis=(1, 0, 0),
-                        anchor=(0, 0, -0.045),
-                        size=(0.03, 0.03, 0.08),
-                        mass=0.07,
-                        children=[
-                            joint(
-                                f"{side}_gripper",
-                                axis=(0, 0, 1),
-                                anchor=(0, 0, -0.04),
-                                size=(0.04, 0.02, 0.05),
-                                mass=0.04,
-                            )
-                        ],
-                    )
-                ],
-            )
-        ],
-    )
+def _bbox_m(geom: Dict[str, Any]) -> List[float]:
+    return [v / 1000.0 for v in geometry.bounding_box(geom)]
 
 
-# --------------------------------------------------------------------------
-# 腿链：pelvis -> hip_yaw -> hip_roll -> hip_pitch -> knee_pitch -> ankle_pitch
-# --------------------------------------------------------------------------
-def leg_chain(side: str) -> Dict[str, Any]:
-    sign = -1.0 if side == "left" else 1.0
-    hip_x = sign * 0.045
-    return joint(
-        f"{side}_hip_yaw",
-        axis=(0, 0, 1),
-        anchor=(hip_x, 0, -0.04),
-        size=(0.05, 0.05, 0.05),
-        mass=0.12,
-        children=[
-            joint(
-                f"{side}_hip_roll",
-                axis=(0, 1, 0),
-                anchor=(0, 0, -0.025),
-                size=(0.045, 0.045, 0.05),
-                mass=0.12,
-                children=[
-                    joint(
-                        f"{side}_hip_pitch",
-                        axis=(1, 0, 0),
-                        anchor=(0, 0, -0.025),
-                        size=(0.045, 0.05, 0.10),
-                        mass=0.20,
-                        children=[
-                            joint(
-                                f"{side}_knee_pitch",
-                                axis=(1, 0, 0),
-                                anchor=(0, 0, -0.05),
-                                size=(0.04, 0.045, 0.10),
-                                mass=0.18,
-                                children=[
-                                    joint(
-                                        f"{side}_ankle_pitch",
-                                        axis=(1, 0, 0),
-                                        anchor=(0, 0, -0.05),
-                                        size=(0.05, 0.10, 0.025),
-                                        mass=0.10,
-                                    )
-                                ],
-                            )
-                        ],
-                    )
-                ],
-            )
-        ],
-    )
+def robot_body(model: Dict[str, Any] | None = None):
+    """(根 link 质量 kg, 根 link 包围盒 m, 根 link 离地高度 m)。"""
+    model = model or load_model()
+    children_of = {j["child"] for j in model["joints"]}
+    root = next(l for l in model["links"] if l["name"] not in children_of)
+    return (float(root["mass_kg"]), _bbox_m(root["geometry"]),
+            float(model["base_pose_mm"][2]) / 1000.0)
 
 
-def robot_children() -> List[Dict[str, Any]]:
-    """躯干 2 + 头 2 + 双臂 8 + 双腿 10 = 22 DOF。"""
-    trunk = joint(
-        "trunk_pitch",
-        axis=(1, 0, 0),
-        anchor=(0, 0, 0.04),
-        size=(0.14, 0.09, 0.05),
-        mass=0.20,
-        children=[
-            joint(
-                "trunk_roll",
-                axis=(0, 1, 0),
-                anchor=(0, 0, 0.025),
-                size=(0.16, 0.10, 0.10),
-                mass=0.45,
-                children=[head_chain(), arm_chain("left"), arm_chain("right")],
-            )
-        ],
-    )
-    return [trunk, leg_chain("left"), leg_chain("right")]
+def robot_children(model: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
+    """按 L1 模型生成关节树：根 link 的子关节 = 世界的顶层 HingeJoint。
+
+    每个节点带：轴向、锚点（父 link 系，m）、连杆包围盒（m）、**该 link 的真实质量**。
+    v2 起 link 质量已含舵机与电子件，所以这个世界与 URDF 同源。
+    """
+    model = model or load_model()
+    by_parent: Dict[str, List[Dict[str, Any]]] = {}
+    for j in sorted(model["joints"], key=lambda x: x["id"]):
+        by_parent.setdefault(j["parent"], []).append(j)
+    links = {l["name"]: l for l in model["links"]}
+    children_of = {j["child"] for j in model["joints"]}
+    root_name = next(l["name"] for l in model["links"] if l["name"] not in children_of)
+
+    def node(j: Dict[str, Any]) -> Dict[str, Any]:
+        child = links[j["child"]]
+        return joint(
+            j["name"],
+            axis=j["axis"],
+            anchor=[v / 1000.0 for v in j["origin_xyz_mm"]],
+            size=_bbox_m(child["geometry"]),
+            mass=float(child["mass_kg"]),
+            children=[node(k) for k in by_parent.get(j["child"], [])],
+        )
+
+    return [node(j) for j in by_parent.get(root_name, [])]
 
 
 def joint_names() -> List[str]:
@@ -256,11 +177,12 @@ def render_joint(node: Dict[str, Any], indent: int) -> List[str]:
 
 
 def render_world() -> str:
+    _body = robot_body()
     lines = [
         f"#VRML_SIM {WORLD_VERSION} utf8",
         "",
         "# 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。",
-        "# A.T.R.I. 22 DOF 桌面人形：躯干 2 + 头 2 + 双臂 8 + 双腿 10。",
+        "# A.T.R.I. 22 DOF 桌面人形：几何与质量派生自 design/robot_model.json。",
         "# 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。",
         "",
         "WorldInfo {",
@@ -280,13 +202,13 @@ def render_world() -> str:
         "Robot {",
         '  name "ATRI"',
         '  controller "atri_controller"',
-        "  translation 0 0 0.30",
+        f"  translation 0 0 {num(_body[2])}",
         "  boundingObject Box {",
-        "    size 0.16 0.10 0.08",
+        f"    size {vec(_body[1])}",
         "  }",
         "  physics Physics {",
         "    density -1",
-        "    mass 1.0",
+        f"    mass {num(_body[0])}",
         "  }",
         "  children [",
     ]
@@ -301,9 +223,16 @@ def render_world() -> str:
 
 
 def main() -> int:
+    model = load_model()
     names = joint_names()
     assert len(names) == 22, f"关节数应为 22，实际 {len(names)}"
     assert len(set(names)) == 22, "关节名重复"
+    assert set(names) == {j["name"] for j in model["joints"]}, \
+        "世界关节名与 robot_model.json 不一致"
+    print(f"  模型 v{model.get('version')}，整机 "
+          f"{sum(l['mass_kg'] for l in model['links']):.3f} kg，"
+          f"包络 {model['overall']['height_mm']:.1f}×{model['overall']['width_mm']:.1f}"
+          f"×{model['overall']['depth_mm']:.1f} mm")
 
     WORLD_PATH.parent.mkdir(parents=True, exist_ok=True)
     # 用 open(..., newline="\n") 而不是 Path.write_text(newline=...)：

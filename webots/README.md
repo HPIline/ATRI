@@ -30,7 +30,7 @@ webots/
 ├── worlds/
 │   └── atri_22dof.wbt                     # 自包含 22 DOF 世界（可直接打开就跑）
 ├── tools/
-│   ├── generate_atri_world.py             # 世界文件生成脚本（改模型改这里）
+│   ├── generate_atri_world.py             # 世界文件生成脚本（**从 design/robot_model.json 派生**，改模型后重跑）
 │   └── run_webots_batch.ps1               # 无人值守批量联调（推荐用这个）
 ├── tests/
 │   ├── webots_api_stub.py                 # Webots controller 模块的可信替身
@@ -144,13 +144,21 @@ powershell -File webots\tools\run_webots_batch.ps1
 
 ## 世界文件怎么改
 
-`worlds/atri_22dof.wbt` 由脚本生成，**不要手改**，改 `tools/generate_atri_world.py` 后重新生成：
+`worlds/atri_22dof.wbt` 由脚本生成，**不要手改**。
+**v2 起几何/质量/关节全部从 `design/robot_model.json` 派生**（以前是手写常量，
+曾长期与模型不一致：腿段 190 mm vs 模型 235 mm、roll/pitch 轴向对调）；
+现在**改模型 → 重跑生成器**即可：
 
 ```powershell
 python webots/tools/generate_atri_world.py
 ```
 
 CI 会重新生成一次并 `git diff --exit-code`，保证 `.wbt` 和生成脚本不漂。
+生成器另有一条断言：世界里的关节名必须与 `robot_model.json` **逐一对应**，
+所以"世界漏掉/多出关节"这类问题会在生成时就报错。
+
+> 世界里的每个 Solid 质量 = 对应 link 的**真实质量**（含舵机与电子件），
+> 与 `design/atri.urdf` 同源 —— 两边不会再各说各话。
 
 世界是**自包含**的：全部使用 Webots 内置节点（`Robot` / `HingeJoint` /
 `RotationalMotor` / `PositionSensor` / `Solid` / `Box`），**不引用任何 `EXTERNPROTO`**。

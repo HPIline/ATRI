@@ -69,7 +69,7 @@ PRINT_USAGE: Dict[str, Dict[str, Any]] = {
     "pitch_module": {"count": 14, "infill": 0.50,
                      "note": "俯仰关节模块（hip/knee/ankle/shoulder_pitch/elbow/head_pitch/trunk_pitch）"},
     "limb_segment": {"count": 8, "infill": 0.50,
-                     "note": "大腿×2 小腿×2 上臂×2 前臂×2（长度不同，此处按 80mm 计）"},
+                     "note": "大腿×2 小腿×2 上臂×2 前臂×2（v2：62.8/62.8/47.1/39.3 mm，此处按大腿 62.8mm 计）"},
     "foot_plate": {"count": 2, "infill": 0.40, "note": "左右足底"},
     "horn_adapter": {"count": 4, "infill": 0.60, "note": "舵盘转接（仅转角处需要）"},
 }

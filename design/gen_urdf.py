@@ -310,6 +310,19 @@ def reach_mm(model: dict, leaf: str) -> float:
     return math.sqrt(x * x + y * y + z * z)
 
 
+def shoulder_to_gripper_mm(model: dict) -> float:
+    """肩关节轴线 -> 夹爪末端 的直线距离（材料口径的"单侧臂长"）。
+
+    与 :func:`reach_mm` 的区别：那个从**根 link（骨盆）**起算，标签容易被误读成臂长。
+    """
+    tfs = geometry.link_positions(model)
+    links = {l["name"]: l for l in model["links"]}
+    shoulder = geometry.transform_point(tfs["left_shoulder_pitch_link"], (0, 0, 0))
+    grip_h = geometry.bounding_box(links["left_gripper"]["geometry"])[2]
+    tip = geometry.transform_point(tfs["left_gripper"], (0, 0, -grip_h / 2.0))
+    return math.sqrt(sum((tip[i] - shoulder[i]) ** 2 for i in range(3)))
+
+
 def summary(model: dict) -> str:
     out: list[str] = []
     o = model["overall"]
@@ -332,15 +345,19 @@ def summary(model: dict) -> str:
     total_mass = sum(l["mass_kg"] for l in model["links"])
     out.append(f"质量合计      : {total_mass:.3f} kg (声明 {o['mass_kg']:.2f} kg)")
     out.append("")
-    out.append("单侧臂长与腿长（零姿态近似，含末端半高）:")
+    # reach_mm 从**根 link（骨盆）**累加到叶端，不是从肩/髋起算。
+    # 标签必须写清起点，否则会被当成材料口径的"单侧臂长"（v1 就踩过这个坑）。
+    out.append("各叶端到根（骨盆）的距离（零姿态，含末端半高）:")
     for leaf, label in (
-        ("left_gripper", "左臂(肩->夹爪)"),
-        ("left_foot", "左腿(髋->足底)"),
-        ("head", "躯干顶->头顶"),
+        ("left_gripper", "骨盆->夹爪末端"),
+        ("left_foot", "骨盆->足底"),
+        ("head", "骨盆->头顶"),
     ):
         out.append(f"  {label:<16}: {reach_mm(model, leaf):7.1f} mm")
     out.append("")
-    out.append(f"单侧臂长上限  : {c['single_arm_max_length_mm']:.0f} mm")
+    out.append("材料口径「单侧臂长」= 肩关节->夹爪末端（官方未定义测量基准，按此口径自测）:")
+    out.append(f"  {'左臂':<16}: {shoulder_to_gripper_mm(model):7.1f} mm"
+               f"  （上限 {c['single_arm_max_length_mm']:.0f} mm）")
     out.append("")
     out.append("关节清单:")
     for j in sorted(model["joints"], key=lambda x: x["id"]):

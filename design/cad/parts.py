@@ -263,7 +263,7 @@ def horn_adapter(
 # 零件 3：连杆（承力管）
 # --------------------------------------------------------------------------
 def link_tube(
-    length: float = 80.0,
+    length: float = 62.8,
     outer_dia: float = 40.0,
     wall: float = 3.0,
     end_bore_mm: float = 5.0,
@@ -383,7 +383,7 @@ def pitch_module(
 # 零件 5：四肢连杆段
 # --------------------------------------------------------------------------
 def limb_segment(
-    length: float = 80.0,
+    length: float = 62.8,
     outer_dia: float = 40.0,
     wall: float = 3.0,
     end_bore_mm: float = 5.0,
@@ -393,8 +393,9 @@ def limb_segment(
 ) -> cq.Workplane:
     """四肢连杆段：两端带接口的空心承力管。
 
-    长度由 `robot_model.json` 的关节间距决定：
-        大腿 80 / 小腿 80 / 上臂 60 / 前臂 50  (mm)
+    长度由 `robot_model.json` 的关节间距决定（**v2 数值**）：
+        大腿 62.8 / 小腿 62.8 / 上臂 47.1 / 前臂 39.3  (mm)
+    默认值取大腿段；其它段在零件实例化时显式传入（见 design/cad/README.md 的"随模型派生"待办）。
     """
     seg = link_tube(length=length, outer_dia=outer_dia, wall=wall,
                     end_bore_mm=end_bore_mm, end_thickness=end_thickness,
