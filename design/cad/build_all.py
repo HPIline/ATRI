@@ -32,12 +32,12 @@ from standards import FDM, summary as standards_summary
 
 OUT = HERE / "out"
 
-# 质量闭合的其余三档（v2 口径，见 handoff/新架构参数总表.md）
+# 质量闭合的其余三档（v3 口径：结构件用 CAD 实算值，见 handoff/新架构参数总表.md §3）
 SERVO_G = 55.0 * 22
 ELEC_G = 316.0
 HARNESS_G = 120.0
-BUDGET_STRUCT_G = 500.0
-BUDGET_TOTAL_G = 2146.0
+BUDGET_STRUCT_G = 1790.0    # v3：CAD 实装实算（74 件）；v2 的合成预算 500 g 已弃用
+BUDGET_TOTAL_G = 3437.0     # = 1790 + 1210 + 316 + 120
 CRITERION_NM = 1.47          # 堵转 × 50%
 
 

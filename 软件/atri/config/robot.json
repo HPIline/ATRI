@@ -2,13 +2,13 @@
   "name": "A.T.R.I.",
   "dof": 22,
   "size_cm": [
-    37.3,
-    19.0,
-    12.3
+    41.8,
+    22.3,
+    12.9
   ],
-  "size_note": "由 design/robot_model.json 的关节链几何累加得出（v2：高 372.8 mm，身高对齐量产参考机幻尔 TonyPi Pro）。官方上限 60 x 30 x 30 cm，余量充足。",
-  "mass_kg": 2.146,
-  "mass_note": "v2 实物口径：结构 500 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g；等于 URDF 的 sum(link mass)，见 design/handoff/新架构参数总表.md。",
+  "size_note": "v3：CAD **实装**包络 418 × 223 × 129 mm（提交 6d4b077）。基元/运动学口径为 372.8 × 190 × 123 mm。官方上限 60 × 30 × 30 cm。",
+  "mass_kg": 3.437,
+  "mass_note": "v3：结构 1790〔CAD 实算 74 件〕+ 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g；等于 URDF 的 sum(link mass)。减重路径 A/B 目标 2.2–2.7 kg，见新架构参数总表 §3.1。",
   "model_source": "design/robot_model.json",
   "motion": {
     "backend": "scripted",

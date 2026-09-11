@@ -64,8 +64,16 @@ def main(argv: List[str] | None = None) -> int:
     A("")
     A("| 项 | 数值 | 说明 |")
     A("|---|---|---|")
-    A(f"| 身高 × 宽 × 厚 | **{ov['height_mm']:.0f} × {ov['width_mm']:.0f} × {ov['depth_mm']:.0f} mm** | "
-      f"赛题上限 600 × 300 × 300 |")
+    ie = m.get("installed_envelope_mm")
+    if ie:
+        A(f"| 身高 × 宽 × 厚（**实装**） | **{ie['height_mm']:.0f} × {ie['width_mm']:.0f} × "
+          f"{ie['depth_mm']:.0f} mm** | 赛题上限 600 × 300 × 300；"
+          f"来源：{ie['source']} |")
+        A(f"| 身高 × 宽 × 厚（基元/运动学） | {ov['height_mm']:.1f} × {ov['width_mm']:.1f} × "
+          f"{ov['depth_mm']:.1f} mm | 关节链几何累加，不含支架与舵机笼厚度 |")
+    else:
+        A(f"| 身高 × 宽 × 厚 | **{ov['height_mm']:.0f} × {ov['width_mm']:.0f} × "
+          f"{ov['depth_mm']:.0f} mm** | 赛题上限 600 × 300 × 300 |")
     A(f"| 整机质量 | **{total_mass:.3f} kg** | 含 22 舵机 + 电子件 + 电池 + 线束紧固件 |")
     A(f"| 自由度 | **{len(m['joints'])} DOF** | 腿 {len([j for j in m['joints'] if 'hip' in j['name'] or 'knee' in j['name'] or 'ankle' in j['name']])}"
       f" + 臂 {len([j for j in m['joints'] if 'shoulder' in j['name'] or 'elbow' in j['name'] or 'gripper' in j['name']])}"
@@ -119,6 +127,29 @@ def main(argv: List[str] | None = None) -> int:
       "导出的 URDF 总质量 1.80 kg，与实物口径差 300+ g，**喂给刚体引擎的动力学是错的**。"
       "v2 已修正为真实分布，`check_fit.py` 的质量闭合现为 ±0 g。")
     A("")
+    if m.get("reduction_paths"):
+        A(f"> 结构件质量来源：{budget.get('structure_source', '—')}")
+        A("")
+        A("### 3.1 减重路径（**待决策**）")
+        A("")
+        A("当前口径是 **CAD 实装（未执行任何减重）**；下表的数字来自协作者 "
+          "`项目文档/骨架结构与集成方案.md` §7，采购前必须择一执行。")
+        A("")
+        A("| 路径 | 做法 | 结构件 (g) | 整机 (kg) | 踝关节占判据 | 代价 |")
+        A("|---|---|---|---|---|---|")
+        for r in m["reduction_paths"]:
+            sg = r.get("structure_g")
+            sg_s = f"{sg[0]}–{sg[1]}" if isinstance(sg, list) else "—"
+            tk = r.get("total_kg")
+            tk_s = f"{tk[0]}–{tk[1]}" if isinstance(tk, list) else f"{tk}"
+            ap = r.get("ankle_pct")
+            ap_s = f"{ap[0]}–{ap[1]}%" if isinstance(ap, list) else f"{ap}%"
+            A(f"| **{r['id']} {r['name']}** | {r['method']} | {sg_s} | {tk_s} | {ap_s} | {r['cost']} |")
+        A("")
+        A(f"**建议**：{m.get('reduction_recommendation', '')}")
+        A("")
+        A(f"> {m.get('reduction_pending', '')}")
+        A("")
     A("---")
     A("")
     A("## 4. 关节总表（22）")
@@ -192,6 +223,14 @@ def main(argv: List[str] | None = None) -> int:
       "仓库此前的『余量耗尽』结论主要由它推出。")
     A("- ⚠️ **仍待实测**：买 1 只 STS3215（12V 版）实测连续扭矩与温升，"
       "这是唯一能同时消除『额定值不确定』和『3S 末端电压降额』两个问题的动作。")
+    worst = torques[0][1]["required_torque_nm"]
+    if worst > rated_vendor:
+        A("")
+        A(f"- ❌ **当前状态：超标**。最大关节 `{torques[0][0]}` 需 **{worst:.3f} N·m**"
+          f"（占判据 {worst / rated_vendor * 100:.0f}%），腿部踝关节 "
+          f"{torques[1][1]['required_torque_nm']:.3f} N·m。"
+          f"成因是结构件按 CAD 实装口径计 {budget['structure_g']:.0f} g —— "
+          f"**必须执行第 3.1 节的减重路径**（推荐 A+B），否则站不起来。")
     A("")
     A("---")
     A("")

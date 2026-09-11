@@ -98,7 +98,7 @@
     "height_mm": 373.0,
     "width_mm": 187.0,
     "depth_mm": 106.0,
-    "mass_kg": 2.146   // v2：含舵机与电子件
+    "mass_kg": 3.437   // v3：CAD 实装口径，含舵机与电子件
   },
   "coordinate_frame": {
     "origin": "两脚中心连线中点，位于地面",
@@ -145,7 +145,7 @@
 | `fore_arm_l/r` | 30 × 30 × 45 | 0.04 | |
 | `gripper_l/r` | 40 × 25 × 20 | 0.03 | |
 
-**质量合计校验**（v2）：`sum(link mass)` = **2.146 kg** ✅ 与 `robot_model.json` 的 `mass_budget.total_g` 一致（结构 500 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g）
+**质量合计校验**（v3）：`sum(link mass)` = **3.437 kg** ✅ 与 `robot_model.json` 的 `mass_budget.total_g` 一致（结构 500 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g）
 
 **高度校验**：feet 23 + shank 75 + thigh 75 + pelvis 45 + torso_lower 55 + torso_upper 70 + neck 20 + head 60 = **423mm** ⚠️ 超了
 
@@ -223,7 +223,7 @@
 - [ ] URDF 限位 ⊇ `config.py` 限位
 - [ ] 总高/宽/厚 ≤ 官方约束（600/300/300 mm）
 - [ ] 单侧臂长 ≤ 300mm
-- [ ] 质量合计 = 2.146 kg (±5%)
+- [ ] 质量合计 = 3.437 kg (±5%)（减重后目标 2.2–2.7 kg）
 - [ ] 站立姿态质心投影在足底支撑多边形内
 
 ---
@@ -284,7 +284,7 @@ design/
 {
   "schema_version": "1.0",
   "note": "域随机化：训练/仿真时随机扰动这些参数，提升迁移到真机的鲁棒性",
-  "mass_kg":        {"nominal": 2.146, "range": [2.04, 2.25]},   // v2
+  "mass_kg":        {"nominal": 3.437, "range": [3.10, 3.80]},   // v3 CAD 实装
   "com_offset_mm":  {"nominal": [0, 0, 0], "range": 15.0},
   "friction":       {"nominal": 0.6, "range": [0.4, 0.9]},
   "motor_strength": {"nominal": 1.0, "range": [0.85, 1.15]},

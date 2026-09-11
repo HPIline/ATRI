@@ -15,7 +15,7 @@
 |---|---|
 | `design/robot_model.json` | 23 link + 22 joint，含质量、轴向、限位 |
 | 尺寸包络 | **373 × 190 × 123 mm**（v2：由关节链几何推导，身高对齐参考机 TonyPi Pro，非营销数字） |
-| 质量 | **2.146 kg**（v2：结构 500 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g，各 link 累加自洽） |
+| 质量 | **3.437 kg**（v3：结构 **1790 g**〔CAD 实装实算〕+ 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g） |
 | `design/gen_urdf.py` | 纯标准库 URDF 生成器 + 校验 |
 | `design/atri.urdf` | 23 link + 22 joint，含 visual/collision/**inertial** |
 | `design/packages/*.json` | 舵机特性、域随机化、感知噪声、场景集 |

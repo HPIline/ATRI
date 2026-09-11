@@ -1,6 +1,7 @@
 {
-  "schema_version": "2.0",
-  "generated_by": "design/gen_v2_baseline.py",
+  "schema_version": "3.0",
+  "generated_by": "design/gen_placements.py",
+  "model_version": "3.0",
   "units": {
     "length": "mm",
     "mass": "g",
@@ -9,6 +10,50 @@
   },
   "frame_note": "position_mm 是相对『宿主 link 坐标系原点』的偏移；link 坐标系原点落在驱动它的关节轴线上。舵机的位置 = 它驱动的那个关节的原点（即父 link 坐标系里的 joint origin）。全部为**设计位**，实物装配前须按采购件复测。",
   "servos": [
+    {
+      "joint": "head_yaw",
+      "id": 0,
+      "mounted_on_link": "torso_upper",
+      "position_mm": [
+        0.0,
+        0.0,
+        82.4
+      ],
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "head_pitch",
+      "id": 1,
+      "mounted_on_link": "head_yaw_link",
+      "position_mm": [
+        0.0,
+        0.0,
+        27.5
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
     {
       "joint": "trunk_roll",
       "id": 2,
@@ -21,6 +66,28 @@
       "axis": [
         1,
         0,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "trunk_pitch",
+      "id": 3,
+      "mounted_on_link": "trunk_roll_link",
+      "position_mm": [
+        0.0,
+        0.0,
+        27.5
+      ],
+      "axis": [
+        0,
+        1,
         0
       ],
       "size_mm": [
@@ -54,163 +121,9 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
-      "joint": "right_hip_yaw",
-      "id": 9,
-      "mounted_on_link": "pelvis",
-      "position_mm": [
-        0.0,
-        -45.0,
-        -19.6
-      ],
-      "axis": [
-        0,
-        0,
-        1
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "trunk_pitch",
-      "id": 3,
-      "mounted_on_link": "trunk_roll_link",
-      "position_mm": [
-        0.0,
-        0.0,
-        27.5
-      ],
-      "axis": [
-        0,
-        1,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "head_yaw",
-      "id": 0,
-      "mounted_on_link": "torso_upper",
-      "position_mm": [
-        0.0,
-        0.0,
-        82.4
-      ],
-      "axis": [
-        0,
-        0,
-        1
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "left_shoulder_pitch",
-      "id": 14,
-      "mounted_on_link": "torso_upper",
-      "position_mm": [
-        0.0,
-        75.0,
-        11.8
-      ],
-      "axis": [
-        0,
-        1,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "right_shoulder_pitch",
-      "id": 18,
-      "mounted_on_link": "torso_upper",
-      "position_mm": [
-        0.0,
-        -75.0,
-        11.8
-      ],
-      "axis": [
-        0,
-        1,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "head_pitch",
-      "id": 1,
-      "mounted_on_link": "head_yaw_link",
-      "position_mm": [
-        0.0,
-        0.0,
-        27.5
-      ],
-      "axis": [
-        0,
-        1,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
       "joint": "left_hip_roll",
       "id": 5,
       "mounted_on_link": "left_hip_yaw_link",
-      "position_mm": [
-        0.0,
-        0.0,
-        -19.6
-      ],
-      "axis": [
-        1,
-        0,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "right_hip_roll",
-      "id": 10,
-      "mounted_on_link": "right_hip_yaw_link",
       "position_mm": [
         0.0,
         0.0,
@@ -252,53 +165,9 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
-      "joint": "right_hip_pitch",
-      "id": 11,
-      "mounted_on_link": "right_hip_roll_link",
-      "position_mm": [
-        0.0,
-        0.0,
-        -19.6
-      ],
-      "axis": [
-        0,
-        1,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
       "joint": "left_knee_pitch",
       "id": 7,
       "mounted_on_link": "left_thigh",
-      "position_mm": [
-        0.0,
-        0.0,
-        -62.8
-      ],
-      "axis": [
-        0,
-        1,
-        0
-      ],
-      "size_mm": [
-        45.2,
-        24.7,
-        35.0
-      ],
-      "mass_g": 55.0,
-      "model": "飞特 STS3215（12V 版，SER0070 同类）"
-    },
-    {
-      "joint": "right_knee_pitch",
-      "id": 12,
-      "mounted_on_link": "right_thigh",
       "position_mm": [
         0.0,
         0.0,
@@ -340,6 +209,94 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
+      "joint": "right_hip_yaw",
+      "id": 9,
+      "mounted_on_link": "pelvis",
+      "position_mm": [
+        0.0,
+        -45.0,
+        -19.6
+      ],
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "right_hip_roll",
+      "id": 10,
+      "mounted_on_link": "right_hip_yaw_link",
+      "position_mm": [
+        0.0,
+        0.0,
+        -19.6
+      ],
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "right_hip_pitch",
+      "id": 11,
+      "mounted_on_link": "right_hip_roll_link",
+      "position_mm": [
+        0.0,
+        0.0,
+        -19.6
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "right_knee_pitch",
+      "id": 12,
+      "mounted_on_link": "right_thigh",
+      "position_mm": [
+        0.0,
+        0.0,
+        -62.8
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
       "joint": "right_ankle_pitch",
       "id": 13,
       "mounted_on_link": "right_shank",
@@ -362,17 +319,17 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
-      "joint": "left_shoulder_roll",
-      "id": 15,
-      "mounted_on_link": "left_shoulder_pitch_link",
+      "joint": "left_shoulder_pitch",
+      "id": 14,
+      "mounted_on_link": "torso_upper",
       "position_mm": [
         0.0,
-        0.0,
-        0.0
+        75.0,
+        11.8
       ],
       "axis": [
-        1,
         0,
+        1,
         0
       ],
       "size_mm": [
@@ -384,9 +341,9 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
-      "joint": "right_shoulder_roll",
-      "id": 19,
-      "mounted_on_link": "right_shoulder_pitch_link",
+      "joint": "left_shoulder_roll",
+      "id": 15,
+      "mounted_on_link": "left_shoulder_pitch_link",
       "position_mm": [
         0.0,
         0.0,
@@ -428,13 +385,13 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
-      "joint": "right_elbow_pitch",
-      "id": 20,
-      "mounted_on_link": "right_upper_arm",
+      "joint": "left_gripper",
+      "id": 17,
+      "mounted_on_link": "left_forearm",
       "position_mm": [
         0.0,
         0.0,
-        -47.1
+        -39.2
       ],
       "axis": [
         0,
@@ -450,13 +407,57 @@
       "model": "飞特 STS3215（12V 版，SER0070 同类）"
     },
     {
-      "joint": "left_gripper",
-      "id": 17,
-      "mounted_on_link": "left_forearm",
+      "joint": "right_shoulder_pitch",
+      "id": 18,
+      "mounted_on_link": "torso_upper",
+      "position_mm": [
+        0.0,
+        -75.0,
+        11.8
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "right_shoulder_roll",
+      "id": 19,
+      "mounted_on_link": "right_shoulder_pitch_link",
       "position_mm": [
         0.0,
         0.0,
-        -39.2
+        0.0
+      ],
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "size_mm": [
+        45.2,
+        24.7,
+        35.0
+      ],
+      "mass_g": 55.0,
+      "model": "飞特 STS3215（12V 版，SER0070 同类）"
+    },
+    {
+      "joint": "right_elbow_pitch",
+      "id": 20,
+      "mounted_on_link": "right_upper_arm",
+      "position_mm": [
+        0.0,
+        0.0,
+        -47.1
       ],
       "axis": [
         0,
@@ -496,7 +497,7 @@
   ],
   "electronics": [
     {
-      "id": "compute",
+      "id": "Raspberry Pi 4B (4GB)",
       "name": "Raspberry Pi 4B (4GB)",
       "link": "torso_upper",
       "mass_g": 46.0,
@@ -513,7 +514,7 @@
       "note": "需 15 mm 散热高度；v2 躯干内净空 94×84×49，85 边放在 y 向（余量 4 mm）"
     },
     {
-      "id": "mcu",
+      "id": "STM32F405RGT6 核心板",
       "name": "STM32F405RGT6 核心板",
       "link": "torso_upper",
       "mass_g": 12.0,
@@ -526,10 +527,11 @@
         -30.0,
         0.0,
         18.0
-      ]
+      ],
+      "note": ""
     },
     {
-      "id": "servo_driver",
+      "id": "飞特 URT-1 总线驱动板",
       "name": "飞特 URT-1 总线驱动板",
       "link": "torso_upper",
       "mass_g": 15.0,
@@ -542,10 +544,11 @@
         28.0,
         0.0,
         18.0
-      ]
+      ],
+      "note": ""
     },
     {
-      "id": "bec",
+      "id": "XL4015 降压模块",
       "name": "XL4015 降压模块",
       "link": "torso_upper",
       "mass_g": 22.0,
@@ -558,10 +561,11 @@
         0.0,
         -28.0,
         14.0
-      ]
+      ],
+      "note": ""
     },
     {
-      "id": "amp",
+      "id": "PAM8403 功放模块",
       "name": "PAM8403 功放模块",
       "link": "torso_upper",
       "mass_g": 5.0,
@@ -574,10 +578,11 @@
         -40.0,
         34.0,
         20.0
-      ]
+      ],
+      "note": ""
     },
     {
-      "id": "speaker",
+      "id": "4Ω 3W 腔体喇叭 Φ28",
       "name": "4Ω 3W 腔体喇叭 Φ28",
       "link": "torso_upper",
       "mass_g": 25.0,
@@ -590,10 +595,11 @@
         0.0,
         0.0,
         24.0
-      ]
+      ],
+      "note": ""
     },
     {
-      "id": "camera",
+      "id": "UVC 广角相机模组 (OV9732/IMX219)",
       "name": "UVC 广角相机模组 (OV9732/IMX219)",
       "link": "head",
       "mass_g": 15.0,
@@ -610,7 +616,7 @@
       "note": "装在头部前方，随 head_pitch 俯仰"
     },
     {
-      "id": "mic",
+      "id": "USB 免驱拾音模块 (CM6533)",
       "name": "USB 免驱拾音模块 (CM6533)",
       "link": "head",
       "mass_g": 8.0,
@@ -623,10 +629,11 @@
         10.0,
         0.0,
         -14.0
-      ]
+      ],
+      "note": ""
     },
     {
-      "id": "imu",
+      "id": "ICM-42688-P 模块",
       "name": "ICM-42688-P 模块",
       "link": "pelvis",
       "mass_g": 3.0,
@@ -643,7 +650,7 @@
       "note": "装在骨盆（重心附近），避免头部摆动干扰姿态解算"
     },
     {
-      "id": "battery",
+      "id": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
       "name": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
       "link": "torso_upper",
       "mass_g": 165.0,
@@ -675,8 +682,8 @@
         80.0,
         35.3
       ],
-      "structure_mass_g": 44.6,
-      "total_link_mass_g": 225.2
+      "structure_mass_g": 159.7,
+      "total_link_mass_g": 339.6
     },
     {
       "link": "left_hip_yaw_link",
@@ -687,8 +694,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 12.9,
-      "total_link_mass_g": 71.9
+      "structure_mass_g": 46.2,
+      "total_link_mass_g": 104.9
     },
     {
       "link": "left_hip_roll_link",
@@ -699,8 +706,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 12.9,
-      "total_link_mass_g": 71.9
+      "structure_mass_g": 46.2,
+      "total_link_mass_g": 104.9
     },
     {
       "link": "left_thigh",
@@ -711,8 +718,8 @@
         45.0,
         80.3
       ],
-      "structure_mass_g": 28.7,
-      "total_link_mass_g": 88.7
+      "structure_mass_g": 102.7,
+      "total_link_mass_g": 163.4
     },
     {
       "link": "left_shank",
@@ -723,8 +730,8 @@
         40.0,
         76.9
       ],
-      "structure_mass_g": 24.1,
-      "total_link_mass_g": 83.8
+      "structure_mass_g": 86.3,
+      "total_link_mass_g": 146.4
     },
     {
       "link": "left_foot",
@@ -735,8 +742,8 @@
         60.0,
         19.6
       ],
-      "structure_mass_g": 30.8,
-      "total_link_mass_g": 32.7
+      "structure_mass_g": 110.3,
+      "total_link_mass_g": 114.3
     },
     {
       "link": "right_hip_yaw_link",
@@ -747,8 +754,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 12.9,
-      "total_link_mass_g": 71.9
+      "structure_mass_g": 46.2,
+      "total_link_mass_g": 104.9
     },
     {
       "link": "right_hip_roll_link",
@@ -759,8 +766,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 12.9,
-      "total_link_mass_g": 71.9
+      "structure_mass_g": 46.2,
+      "total_link_mass_g": 104.9
     },
     {
       "link": "right_thigh",
@@ -771,8 +778,8 @@
         45.0,
         80.3
       ],
-      "structure_mass_g": 28.7,
-      "total_link_mass_g": 88.7
+      "structure_mass_g": 102.7,
+      "total_link_mass_g": 163.4
     },
     {
       "link": "right_shank",
@@ -783,8 +790,8 @@
         40.0,
         76.9
       ],
-      "structure_mass_g": 24.1,
-      "total_link_mass_g": 83.8
+      "structure_mass_g": 86.3,
+      "total_link_mass_g": 146.4
     },
     {
       "link": "right_foot",
@@ -795,8 +802,8 @@
         60.0,
         19.6
       ],
-      "structure_mass_g": 30.8,
-      "total_link_mass_g": 32.7
+      "structure_mass_g": 110.3,
+      "total_link_mass_g": 114.3
     },
     {
       "link": "trunk_roll_link",
@@ -807,8 +814,8 @@
         35.0,
         23.6
       ],
-      "structure_mass_g": 8.9,
-      "total_link_mass_g": 67.7
+      "structure_mass_g": 31.9,
+      "total_link_mass_g": 90.0
     },
     {
       "link": "torso_upper",
@@ -819,8 +826,8 @@
         90.0,
         55.0
       ],
-      "structure_mass_g": 60.4,
-      "total_link_mass_g": 545.9
+      "structure_mass_g": 216.2,
+      "total_link_mass_g": 695.5
     },
     {
       "link": "head_yaw_link",
@@ -831,8 +838,8 @@
         30.0,
         61.2
       ],
-      "structure_mass_g": 14.2,
-      "total_link_mass_g": 73.3
+      "structure_mass_g": 50.8,
+      "total_link_mass_g": 109.6
     },
     {
       "link": "head",
@@ -843,8 +850,8 @@
         68.0,
         43.2
       ],
-      "structure_mass_g": 35.4,
-      "total_link_mass_g": 61.8
+      "structure_mass_g": 126.7,
+      "total_link_mass_g": 155.1
     },
     {
       "link": "left_shoulder_pitch_link",
@@ -855,8 +862,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 12.9,
-      "total_link_mass_g": 71.9
+      "structure_mass_g": 46.2,
+      "total_link_mass_g": 104.9
     },
     {
       "link": "left_upper_arm",
@@ -867,8 +874,8 @@
         40.0,
         63.6
       ],
-      "structure_mass_g": 20.8,
-      "total_link_mass_g": 80.2
+      "structure_mass_g": 74.5,
+      "total_link_mass_g": 134.2
     },
     {
       "link": "left_forearm",
@@ -879,8 +886,8 @@
         35.0,
         54.6
       ],
-      "structure_mass_g": 15.7,
-      "total_link_mass_g": 74.9
+      "structure_mass_g": 56.2,
+      "total_link_mass_g": 115.2
     },
     {
       "link": "left_gripper",
@@ -891,8 +898,8 @@
         30.0,
         19.6
       ],
-      "structure_mass_g": 9.5,
-      "total_link_mass_g": 10.1
+      "structure_mass_g": 34.0,
+      "total_link_mass_g": 35.2
     },
     {
       "link": "right_shoulder_pitch_link",
@@ -903,8 +910,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 12.9,
-      "total_link_mass_g": 71.9
+      "structure_mass_g": 46.2,
+      "total_link_mass_g": 104.9
     },
     {
       "link": "right_upper_arm",
@@ -915,8 +922,8 @@
         40.0,
         63.6
       ],
-      "structure_mass_g": 20.8,
-      "total_link_mass_g": 80.2
+      "structure_mass_g": 74.5,
+      "total_link_mass_g": 134.2
     },
     {
       "link": "right_forearm",
@@ -927,8 +934,8 @@
         35.0,
         54.6
       ],
-      "structure_mass_g": 15.7,
-      "total_link_mass_g": 74.9
+      "structure_mass_g": 56.2,
+      "total_link_mass_g": 115.2
     },
     {
       "link": "right_gripper",
@@ -939,27 +946,80 @@
         30.0,
         19.6
       ],
-      "structure_mass_g": 9.5,
-      "total_link_mass_g": 10.1
+      "structure_mass_g": 34.0,
+      "total_link_mass_g": 35.2
     }
   ],
   "summary": {
     "links": 23,
     "joints": 22,
     "servos": 22,
-    "envelope_mm": [
+    "envelope_installed_mm": [
+      418.0,
+      223.0,
+      129.0
+    ],
+    "envelope_kinematic_mm": [
       372.8,
       190.0,
       123.0
     ],
-    "total_mass_g": 2146.0,
+    "total_mass_g": 3436.6,
     "mass_budget_g": {
-      "structure_g": 500.0,
+      "structure_g": 1790.0,
       "servos_g": 1210.0,
       "electronics_g": 316.0,
       "harness_fasteners_g": 120.0,
-      "total_g": 2146.0,
-      "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设已置 0，避免重复计入。"
-    }
+      "total_g": 3436.6,
+      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / 项目文档/骨架结构与集成方案.md §6–§7",
+      "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。"
+    },
+    "reduction_paths": [
+      {
+        "id": "A",
+        "name": "拓扑减重",
+        "method": "关节笼/叉挖成桁架、托盘改镂空网格、躯干框架砍掉 1/3 材料",
+        "structure_g": [
+          900,
+          1100
+        ],
+        "total_kg": [
+          2.5,
+          2.7
+        ],
+        "ankle_pct": [
+          84,
+          90
+        ],
+        "cost": "需 2–3 轮迭代 + 强度校核；余量仍薄"
+      },
+      {
+        "id": "B",
+        "name": "买金属件",
+        "method": "关节笼/叉改用市售铝合金 U 型架（3–6 元/件），只自打印框架与托盘",
+        "structure_g": [
+          550,
+          700
+        ],
+        "total_kg": [
+          2.2,
+          2.4
+        ],
+        "ankle_pct": [
+          73,
+          80
+        ],
+        "cost": "单价上升约 300 元，但省 20+ 小时打印"
+      },
+      {
+        "id": "C",
+        "name": "减自由度/换舵机",
+        "method": "躯干 2 自由度改 1；或换 40 g 级舵机",
+        "structure_g": null,
+        "total_kg": 3.0,
+        "ankle_pct": 100,
+        "cost": "违背赛题『上肢+躯干 ≥10』或牺牲力矩余量"
+      }
+    ]
   }
 }
