@@ -8,12 +8,15 @@
 
 ```
 run_demo.py                 # 一键闭环演练入口（顺序执行五项任务卡）
+run_bringup.py              # 真机 bring-up（扫描 / 限位 / 中位 / 点动；可 Mock）
 atri/
   config.py                 # 22 自由度关节命名、限位角与零位定义
   task_card.py              # JSON 任务卡解析、校验与参数绑定
   fsm.py                    # 任务生命周期有限状态机（待机/进入/执行/反馈/终止）
   brain.py                  # 大脑调度核心：技能注册、上下文管理、感知与语音装配
   cerebellum.py             # 小脑控制核心：参数化双足步态生成、动作库回放、安全限位钳制
+  bus_sts3215.py            # STS3215 真机总线（SYNC WRITE；角度换算走 config.deg_to_pulse）
+  bringup.py                # 真机 bring-up 流程（不含串口；总线由 --bus 注入）
   skills/                   # 赛题技能实现（face / qr / carry / kick / dance）
   perception/               # 视觉感知接口（MockPerception / OpenCVPerception）
   voice/                    # 语音交互接口（Mock / Linux 探测 / macOS say）
@@ -44,7 +47,7 @@ python3 -m unittest discover -s tests
 python3 run_demo.py --fast
 ```
 
-当前单元测试套件包含 344 项测试，覆盖状态机流转、技能成败、总线限位安全性、感知容错及任务卡解析。
+当前单元测试套件包含 **427** 项测试（以 `python3 -m unittest discover -s tests` 当场输出为准），覆盖状态机流转、技能成败、总线限位、NaN/Inf 拒绝、感知容错及任务卡解析。
 
 ## 视觉感知模块
 

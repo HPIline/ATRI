@@ -7,11 +7,11 @@
 [![Python 3.14](https://img.shields.io/badge/Python-3.14%20only-blue.svg)](software/atri/)
 [![DOF](https://img.shields.io/badge/DOF-22%20Active-green.svg)](design/atri.urdf)
 [![Offline Tasks](https://img.shields.io/badge/Tasks-5%2F5%20Closed--Loop-brightgreen.svg)](software/atri/run_demo.py)
-[![Tests](https://img.shields.io/badge/Tests-425%2B40%20Pass-success.svg)](software/atri/tests/)
+[![Tests](https://img.shields.io/badge/Tests-427%2B40%20Pass-success.svg)](software/atri/tests/)
 [![License](https://img.shields.io/badge/License-Pending-lightgrey.svg)](#开源声明与许可证-notice--license)
 
 ```
-22 DOF (双腿 10 · 双臂 8 · 躯干 2 · 头部 2)  ·  CAD 实装 407 × 263 × 146 mm  ·  425 主包测试 + 40 仿真测试  ·  5/5 赛题闭环  ·  Python 3.14
+22 DOF (双腿 10 · 双臂 8 · 躯干 2 · 头部 2)  ·  CAD 实装 407 × 263 × 146 mm  ·  427 主包测试 + 40 仿真测试  ·  5/5 赛题闭环  ·  Python 3.14
 ```
 
 A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人形组）及高校具身智能实验教学场景，直面阻碍双足进课堂与赛场的三大痛点：
@@ -38,7 +38,7 @@ A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人
 # 1. 进入软件核心目录
 cd software/atri
 
-# 2. 运行主软件栈单元测试（425 项）
+# 2. 运行主软件栈单元测试（427 项）
 python3 -m unittest discover -s tests
 
 # 3. 运行赛题五项任务无硬件闭环演练（--fast 跳过动作等待，秒级自检）
@@ -55,22 +55,22 @@ python3 -m unittest discover -s webots/tests
 
 本分支是软件先进线，**不向 main 合入，也不从 main 拉取**。CAD / 包络 / 干涉以 main 与 CAD 会话为准；本树里的 design/cad 可能过期，不要在本分支改。
 
-对照对象：`origin/main` @ `60d8611`（2026-09-12）。本分支已把该提交及之前的 CAD / 真机总线 / 口径订正 **全部合入**，不再停留在旧分叉点 `c5491d9`。
+对照对象：`origin/main` @ `60d8611`（分叉时的口径快照）。历史上已把该提交及之前的 CAD / 真机总线并进来过一次；**之后不再从 main 拉、也不向 main 合**。旧名 `audit-fixes` 已删，远程只留 `main` 与 `atri-next`。
 
 数字以 `design/robot_model.json` 与 `software/atri/config/robot.json` 为准。包络顺序一律 **高 × 宽 × 深**（与 `size_cm = [14.6, 26.3, 40.7]` 的深×宽×高不同）。
 
-| 维度 | origin/main @ 60d8611 | 本分支 audit-fixes（合入后） | 说明 |
+| 维度 | origin/main @ 60d8611 | 本分支 atri-next | 说明 |
 |---|---|---|---|
 | **路径** | `软件/atri`、`项目文档/`、`研发日志/` | `software/atri`、`docs/{process,research,contest}` | 合入时把 main 新增的 `bus_sts3215.py` / `bringup.py` / 测试迁到英文路径 |
 | **Python / CI** | 3.9 / 3.11 / 3.12；最新两次 CI **红**（`.wbt` 质量未随 `robot_model.json` 重生成） | **仅 Python 3.14**；世界文件按本分支生成器重刷（保留 minStop/maxStop） | main 的红灯是 23 条 `Physics { mass }` 过期，不是关节拓扑错 |
 | **机械口径** | CAD 实装 **407 × 263 × 146 mm**；结构 **1490 g / 81 件（实算）**；整机 **3136 g（纸面推算，未定案）** | **同一组数字**（从 main 并入） | 旧文案 418×223×129 / 3437 g 是历史虚高或运动学基元，报名用实装包络 |
 | **扭矩主判据** | 官方额定 **0.98 N·m**；踝 1.492 N·m（152%）；`trunk_roll` 1.899 N·m（194%） | 同左 | 1.47 N·m（堵转×50%）只作峰值参考 |
 | **功率 / 电池** | 平均约 **18.92 A**；30 min 需标称 **11.83 Ah / 1.19 kg**；现选 2000 mAh 约 13 min | 同左；测试要求超标必须留下 `model_caveat` | 旧「≥4.53 Ah」是误用堵转当额定时的低估 |
-| **真机总线** | `bus_sts3215.py` + 假串口测试；中位默认写寄存器 **31** | 已并入；安全层（NaN / 未知关节 / `abort_event`）叠在小脑上 | 飞特官方 SDK 一键置中是 **40 号写 128**（固件再写入 31）。未上真机前两条通路都保留，默认仍跟 main |
+| **真机总线** | `bus_sts3215.py` + 假串口测试；中位默认写寄存器 **31** | 已在本线；`deg_to_pulse` / `Sts3215Bus` 拒绝 NaN/Inf，禁止满脉冲下发 | 飞特官方 SDK 一键置中是 **40 号写 128**（固件再写入 31）。未上真机前两条通路都保留 |
 | **CAD 工具** | `pair_inspect.py` / `sweep_check.py` / `tool_access.py` / `reference_fits.py`；干涉约 193 677 mm³，摆放错误 13 对 | 已并入 | 13 对摆放错误要改落座，不是再切间隙；无 CadQuery 目视不在本回合改几何 |
-| **技能 / Webots 契约** | 感知失败仍可能假成功；世界文件无硬限位 | **真成败**；`found` 必须是 `bool`；行程 >1° 才算过；世界带 minStop/maxStop | 这是 audit-fixes 相对 main **仍多出来的**软件纪律 |
+| **技能 / Webots 契约** | 感知失败仍可能假成功；世界文件无硬限位 | **真成败**；`found` 必须是 `bool`；行程 >1° 才算过；世界带 minStop/maxStop | 这是 atri-next 相对 main **多出来的**软件纪律 |
 | **TTS / PPT / NOTICE** | macOS `say` + Mock；过程文档散落中文目录；无 NOTICE | Linux 离线 TTS 链；24 页 `ppt/ATRI-答辩PPT-v4.pptx`；根目录 `NOTICE` | 主项目 LICENSE **仍待定**：NOTICE 只覆盖 SO-ARM100 Apache-2.0 参考件，不构成对 ATRI 原创代码的授权 |
-| **测试规模** | 主包测试 + STS3215 假串口 + bring-up | **425 主包 + 40 Webots**（本机 2026-09-12 实测全绿） | 以 `python3 -m unittest discover` 当场输出为准 |
+| **测试规模** | 主包测试 + STS3215 假串口 + bring-up | **427 主包 + 40 Webots**（本机实测全绿） | 以 `python3 -m unittest discover` 当场输出为准 |
 
 ---
 
@@ -107,6 +107,7 @@ ATRI/
 │   ├── process/工程说明.md          # 仓库演进说明
 │   ├── contest/                    # 省赛操作手册与申报附件
 │   └── research/项目文档/           # 项目综述、技术方案、BOM 与可行性核查
+├── 固件/                           # 接线与寄存器语义（不是已烧录固件）
 ├── ppt/                            # 答辩交付物
 │   └── ATRI-答辩PPT-v4.pptx        # 24 页答辩演示文稿
 └── NOTICE                          # 第三方参考资产（如 SO-ARM100 模型）合规声明
@@ -131,7 +132,7 @@ graph TD
 
 1. **大脑（Cognition & FSM）**：解析标准化 JSON 任务卡，驱动 FSM 生命周期。遵循真实成败契约：感知未找到目标（严格原生布尔 `found` 判定）时立即熔断退出，杜绝虚报成功。
 2. **小脑（Motion & Safety）**：管理 22 自由度拓扑，生成参数化步态或回放关键帧动作。
-3. **总线防御（Bus Safety）**：在 `ServoBus.set_angle` 统一拦截 `NaN` 与 `Inf` 异常浮点，执行物理角度限位钳制，防止舵机越界损坏。
+3. **总线防御（Bus Safety）**：`clamp_angle` 与 `deg_to_pulse` 拒绝 `NaN` / `Inf`。Mock / Webots 走 `ServoBus.set_angle` 模板；真机 `Sts3215Bus` 覆盖 `set_angle`，换算仍走 `deg_to_pulse`，不能把非有限值变成满脉冲。
 
 详细模块设计与 API 参见 [software/atri/README.md](software/atri/README.md)。
 
@@ -177,15 +178,15 @@ graph TD
 
 ## 历史改动与工程演进记录
 
-为保留工程演进脉络并供评审复核，本节归纳了审计分支及 main 分叉后的关键变更：
+为保留工程演进脉络并供评审复核，本节归纳软件线相对 main 的关键变更。当前工作分支是 **`atri-next`**，不合 main。
 
-### 1. 审计分支关键修复 (Audit Fixes)
+### 1. 审计修复（原 `audit-fixes`，已并入 `atri-next`）
 
 - **纠正技能假成功**：修复感知失败仍盲目上报 ok 的漏洞。未检测到目标时立即熔断后续动作（`software/atri/tests/test_brain.py`）。
 - **严格布尔校验**：`found` 字段强制校验原生 `bool` 类型，拒绝 `"False"` 字符串等非布尔真值隐患（`tests/test_perception.py`）。
 - **消除动作重复下发**：修正踢球与舞蹈技能中因状态重复调用导致的底层运动指令重复下发（`tests/test_brain.py`）。
 - **协作式超时机制**：引入 `abort_event` 标志位，长轨迹在帧边界主动检查退出；归零动作 `home()` 仅在主线程退出后执行一次（`software/atri/tests/test_brain.py` 与 `test_fsm.py`）。
-- **总线非数防御**：在 `ServoBus.set_angle` 严格拦截 `NaN` 与 `Inf`，防止非数被错误截断为物理极限造成堵转损坏（`tests/test_cerebellum.py`）。
+- **总线非数防御**：`clamp_angle` 拦截 `NaN` / `Inf`（`tests/test_cerebellum.py`）。真机路径另在 `deg_to_pulse` 拒绝非有限值，避免 `Sts3215Bus` 把 NaN 写成满脉冲（`tests/test_config.py`、`tests/test_bus_sts3215.py`）。
 - **仿真严密三层判据**：Webots 离线测试重构为 22 关节全覆盖、全绑定、真实行程 > 1°，杜绝未绑定也能绿灯的假阳性（`webots/tests/` 40 项通过）。
 - **纠正数据口径**：废除以 1.47 N·m 峰值掩盖过载的口径，明确以 0.98 N·m 额定连续扭矩为主判据。额定订正后 30 min 电池需求升到 **11.83 Ah**（不是 4.53 Ah）。
 
@@ -198,6 +199,13 @@ graph TD
 - **口径订正**：实装包络 **407 × 263 × 146 mm**；结构 **1490 g / 81 件**；整机 3136 g 纸面推算。
 - **STS3215 真机总线** `software/atri/atri/bus_sts3215.py`（SYNC WRITE、遥测、假串口测试）+ `固件/README.md`。
 - **功率测试**改为「缺口必须被记录」，不许用绿测掩盖 11.83 Ah 超标。
+
+### 3. `atri-next` 收口（当前）
+
+- 分支从 `audit-fixes` 改名为 **`atri-next`**；远程旧名已删，tag `audit-fixes-frozen` 指向改名前的 `13b9ab2`。
+- 不对 `main` 开合入 PR（曾开的 #1 / #2 已关、未合）。CAD 由 main / CAD 会话维护，本线不再拉 main。
+- 真机 `deg_to_pulse` / `Sts3215Bus.set_angle` 对 NaN/Inf 抛错且不发帧。
+- T-01 文案改为「人脸检测迎宾」，不做身份比对。
 
 ---
 
