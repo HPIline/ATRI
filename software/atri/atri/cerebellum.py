@@ -29,10 +29,22 @@ def _warn_clamped(name: str, requested: float, applied: float) -> None:
 
 
 class ServoBus:
-    """标准串行总线舵机抽象。无硬件时使用 MockServoBus。"""
+    """标准串行总线舵机抽象。无硬件时使用 MockServoBus。
 
+    ⚠️ **真机实现必须遵守 `atri.config` 的换算口径**（`deg_to_pulse` / `pulse_to_deg` /
+    `pulse_limits`），并实现下面这批"批量写 + 安全 + 遥测"语义；
+    下位机固件（STM32）实现同一套语义，两端共用一份关节表（ID/符号/零偏/限位）。
+    只实现 `set_angle` / `read_angle` 会导致：22 关节逐个发帧超时、
+    标定前就带电锁轴、堵转时拿不到温度与电流。
+    """
+
+    # —— 基础 ——
     def set_angle(self, joint_id: int, deg: float) -> None:
-        """模板方法：统一按关节限位钳制后，交给子类 _write_angle 下发。"""
+        """模板方法：统一按关节限位钳制后，交给子类 _write_angle 下发。
+
+        ``clamp_angle`` 会拒绝未知关节、非数字和 NaN/Inf，避免非有限值下发。
+        真机驱动（如 ``Sts3215Bus``）可整体覆盖本方法。
+        """
         name = JOINT_BY_ID.get(joint_id)
         if name is None:
             raise ValueError(f"未知关节 id: {joint_id!r}")
@@ -45,13 +57,51 @@ class ServoBus:
     def read_angle(self, joint_id: int) -> float:
         raise NotImplementedError
 
+    # —— 批量写：一个控制周期内 22 关节一次发完（20 ms 周期的硬性前提）——
+    def sync_write(self, targets: Dict[int, float]) -> None:
+        """默认退化为逐个写；真机应实现为舵机总线的 SYNC WRITE 指令。"""
+        for jid, deg in targets.items():
+            self.set_angle(jid, deg)
+
+    # —— 安全：上电先松轴，标定/装调完成后再使能 ——
+    def set_torque_enable(self, joint_ids: List[int], enable: bool) -> None:
+        raise NotImplementedError
+
+    def relax_all(self) -> None:
+        self.set_torque_enable(sorted(s["id"] for s in JOINTS.values()), False)
+
+    # —— 遥测：堵转保护与温升实测的数据来源 ——
+    def read_telemetry(self, joint_id: int) -> Dict[str, Any]:
+        """返回 {pos_deg, load_pct, voltage_v, temp_c, current_a, moving}。"""
+        raise NotImplementedError
+
+    # —— bring-up：扫描 / 写限位寄存器 / 中位标定 ——
+    def scan(self) -> List[int]:
+        """总线扫描，返回在线 ID（bring-up 第一个动作）。"""
+        raise NotImplementedError
+
+    def write_limits(self, joint_id: int, pulse_lo: int, pulse_hi: int) -> None:
+        """把 min/max angle 寄存器写成"机械安全范围"（见 pulse_limits）。"""
+        raise NotImplementedError
+
+    def set_middle(self, joint_id: int) -> None:
+        """中位标定：以当前位置为零位（写成 2048）。
+
+        ⚠️ 2026-09-12 订正：飞特的零位寄存器是 **31 号位置偏置**；旧注释写的
+        「40 号地址写 128」有误——40 号是扭矩使能。真机实现见 `bus_sts3215.py`。
+        """
+        raise NotImplementedError
+
 
 class MockServoBus(ServoBus):
-    """内存舵机总线：记录指令并模拟绝对位置回传（限位由基类统一处理）。"""
+    """内存舵机总线：记录指令并模拟绝对位置回传与遥测（限位由基类统一处理）。"""
 
     def __init__(self) -> None:
         self.angles = {spec["id"]: spec["rest_deg"] for spec in JOINTS.values()}
         self.command_log: List[Dict[str, float]] = []
+        self.torque_on = True
+        self.limits: Dict[int, tuple] = {}
+        self.middle_set: List[int] = []
 
     def _write_angle(self, joint_id: int, deg: float) -> None:
         self.angles[joint_id] = deg
@@ -59,6 +109,29 @@ class MockServoBus(ServoBus):
 
     def read_angle(self, joint_id: int) -> float:
         return self.angles[joint_id]
+
+    def set_torque_enable(self, joint_ids: List[int], enable: bool) -> None:
+        self.torque_on = bool(enable)
+
+    def read_telemetry(self, joint_id: int) -> Dict[str, Any]:
+        """按"离中位越远越吃力"造一条合理曲线，供上层逻辑先行联调。"""
+        deg = self.angles[joint_id]
+        load = min(100.0, abs(deg) * 1.5)
+        return {"pos_deg": deg, "load_pct": round(load, 1),
+                "voltage_v": 11.1, "temp_c": round(28.0 + load * 0.15, 1),
+                "current_a": round(0.15 + load * 0.02, 3),
+                "moving": False}
+
+    def scan(self) -> List[int]:
+        return sorted(self.angles)
+
+    def write_limits(self, joint_id: int, pulse_lo: int, pulse_hi: int) -> None:
+        self.limits[joint_id] = (int(pulse_lo), int(pulse_hi))
+
+    def set_middle(self, joint_id: int) -> None:
+        """模拟中位标定：记下 ID，并把内存角度归零。真机写的是寄存器 31。"""
+        self.middle_set.append(joint_id)
+        self.angles[joint_id] = 0.0
 
 
 class Cerebellum:
@@ -81,6 +154,7 @@ class Cerebellum:
 
         信号只在本类的帧循环边界被检查（线程安全）；命中后只提前结束自有轨迹，
         不会抢占正在阻塞的第三方调用，复位动作仍由调用方主线程执行。
+        超时看门狗在 FSM/Brain：到期只置位本事件，不从定时器线程碰舵机。
         """
         self._abort_event = event
 
@@ -88,19 +162,31 @@ class Cerebellum:
         return self._abort_event is not None and self._abort_event.is_set()
 
     def set_pose(self, targets: Dict[str, float]) -> Dict[str, float]:
-        """下发一组关节目标角（按名称），返回实际限位后的角度。"""
+        """下发一组关节目标角（按名称），返回实际限位后的角度。
+
+        走 `sync_write`：真机上是一条 SYNC WRITE 帧写完所有关节，
+        而不是 22 次往返（后者在 20 ms 周期里会顶到总线时间上限）。
+        未知关节名、NaN/Inf 一律抛 ValueError，不静默丢弃。
+        """
         unknown = [name for name in targets if name not in JOINTS]
         if unknown:
             raise ValueError("未知关节: " + ", ".join(repr(name) for name in unknown))
         applied: Dict[str, float] = {}
+        batch: Dict[int, float] = {}
         for name, deg in targets.items():
             clamped = clamp_angle(name, deg)
             requested = float(deg)  # clamp_angle 已确保可转换
             if clamped != requested:
                 _warn_clamped(name, requested, clamped)
-            self.bus.set_angle(JOINTS[name]["id"], clamped)
+            batch[JOINTS[name]["id"]] = clamped
             applied[name] = clamped
+        if batch:
+            self.bus.sync_write(batch)
         return applied
+
+    def relax(self) -> None:
+        """松轴（安全姿态）：装配、搬运、标定前必须调用。"""
+        self.bus.relax_all()
 
     def home(self) -> Dict[str, float]:
         return self.set_pose(rest_pose())
@@ -179,6 +265,7 @@ class Cerebellum:
         knee = f"{side}_knee_pitch"
         ankle = f"{side}_ankle_pitch"
         self.home()
+        # 膝限位是 [0, 90]；负膝角会被钳到 0，踢球必须用正膝角。
         swing = [
             {hip: 18.0, knee: 8.0, ankle: 5.0},
             {hip: 26.0, knee: 18.0, ankle: 10.0},
@@ -254,21 +341,34 @@ class Cerebellum:
         if errors:
             raise ActionLibraryError("动作库校验失败:\n" + "\n".join(errors))
         frames = action["frames"]
+        executed = 0
+        aborted = False
         for i, frame in enumerate(frames):
+            if self._aborted():
+                aborted = True
+                break
             try:
                 joints = {k: float(v) for k, v in frame["joints"].items()}
                 duration_s = float(frame["duration_s"])
             except (TypeError, ValueError, KeyError) as exc:
                 raise ActionLibraryError(f"frames[{i}] 关节角或时长不是数字: {exc}") from exc
             self.set_pose(joints)
+            executed += 1
             self.sleeper(duration_s * dt_scale)
-        return {"action": action.get("action_id"), "frames": len(frames)}
+        result: Dict[str, Any] = {
+            "action": action.get("action_id"),
+            "frames": executed,
+        }
+        if aborted:
+            result["aborted"] = True
+        return result
 
     def execute_motion(self, instruction: str, observation: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """脚本运动调度：根据技能指令选择步态/关键帧动作。
 
         这是当前无 VLA 方案的核心入口。所有动作在 CPU 上本地完成，
         对应小脑层在 STM32 + IMU 上部署的规则控制。
+        未知指令必须抛错，不能假装对齐成功。
         """
         ins = instruction or ""
         if any(k in ins for k in ("踢", "kick")):

@@ -28,7 +28,7 @@ Robot {
   }
   physics Physics {
     density -1
-    mass 0.3396
+    mass 0.3129
   }
   children [
     HingeJoint {
@@ -54,7 +54,7 @@ Robot {
         }
         physics Physics {
           density -1
-          mass 0.09
+          mass 0.0848
         }
         children [
           HingeJoint {
@@ -80,7 +80,7 @@ Robot {
               }
               physics Physics {
                 density -1
-                mass 0.6955
+                mass 0.6603
               }
               children [
                 HingeJoint {
@@ -106,7 +106,7 @@ Robot {
                     }
                     physics Physics {
                       density -1
-                      mass 0.1096
+                      mass 0.1012
                     }
                     children [
                       HingeJoint {
@@ -132,7 +132,7 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.1551
+                            mass 0.1336
                           }
                         }
                       }
@@ -162,7 +162,7 @@ Robot {
                     }
                     physics Physics {
                       density -1
-                      mass 0.1049
+                      mass 0.0972
                     }
                     children [
                       HingeJoint {
@@ -188,7 +188,7 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.1342
+                            mass 0.1217
                           }
                           children [
                             HingeJoint {
@@ -214,7 +214,7 @@ Robot {
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.1152
+                                  mass 0.1058
                                 }
                                 children [
                                   HingeJoint {
@@ -240,7 +240,7 @@ Robot {
                                       }
                                       physics Physics {
                                         density -1
-                                        mass 0.0352
+                                        mass 0.0294
                                       }
                                     }
                                   }
@@ -276,7 +276,7 @@ Robot {
                     }
                     physics Physics {
                       density -1
-                      mass 0.1049
+                      mass 0.0972
                     }
                     children [
                       HingeJoint {
@@ -302,7 +302,7 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.1342
+                            mass 0.1217
                           }
                           children [
                             HingeJoint {
@@ -328,7 +328,7 @@ Robot {
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.1152
+                                  mass 0.1058
                                 }
                                 children [
                                   HingeJoint {
@@ -354,7 +354,7 @@ Robot {
                                       }
                                       physics Physics {
                                         density -1
-                                        mass 0.0352
+                                        mass 0.0294
                                       }
                                     }
                                   }
@@ -396,7 +396,7 @@ Robot {
         }
         physics Physics {
           density -1
-          mass 0.1049
+          mass 0.0972
         }
         children [
           HingeJoint {
@@ -422,7 +422,7 @@ Robot {
               }
               physics Physics {
                 density -1
-                mass 0.1049
+                mass 0.0972
               }
               children [
                 HingeJoint {
@@ -448,7 +448,7 @@ Robot {
                     }
                     physics Physics {
                       density -1
-                      mass 0.1634
+                      mass 0.1461
                     }
                     children [
                       HingeJoint {
@@ -474,7 +474,7 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.1464
+                            mass 0.1318
                           }
                           children [
                             HingeJoint {
@@ -500,7 +500,7 @@ Robot {
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.1143
+                                  mass 0.0955
                                 }
                               }
                             }
@@ -539,7 +539,7 @@ Robot {
         }
         physics Physics {
           density -1
-          mass 0.1049
+          mass 0.0972
         }
         children [
           HingeJoint {
@@ -565,7 +565,7 @@ Robot {
               }
               physics Physics {
                 density -1
-                mass 0.1049
+                mass 0.0972
               }
               children [
                 HingeJoint {
@@ -591,7 +591,7 @@ Robot {
                     }
                     physics Physics {
                       density -1
-                      mass 0.1634
+                      mass 0.1461
                     }
                     children [
                       HingeJoint {
@@ -617,7 +617,7 @@ Robot {
                           }
                           physics Physics {
                             density -1
-                            mass 0.1464
+                            mass 0.1318
                           }
                           children [
                             HingeJoint {
@@ -643,7 +643,7 @@ Robot {
                                 }
                                 physics Physics {
                                   density -1
-                                  mass 0.1143
+                                  mass 0.0955
                                 }
                               }
                             }

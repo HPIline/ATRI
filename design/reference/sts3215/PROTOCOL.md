@@ -133,8 +133,11 @@
 2. [Adam-Software/Feetech-Servo-SDK](https://github.com/Adam-Software/Feetech-Servo-SDK)（官方 SDK 拷贝）→ `scservo_sdk/scservo_def.py` + `scsservo_sdk_example/read_write.py`
 3. [ftservo/FTServo_Python](https://github.com/ftservo/FTServo_Python)（飞特官方 Python 库）
 
-> ⚠️ **飞特官网 `feetech.cn` / `feetechrc.com` 在本机网络下不可达**（连接失败），
-> 因此无法与官方 HTML 版内存表做三方比对。上述两个 GitHub 来源已互相印证。
+> ⚠️ **可达性订正（2026-09-11）**：`feetech.cn` 确实不通，但 **`feetechrc.com` 可达**
+> （慢，首字节 ≈8 s，`curl --max-time 120` 稳定 200）——此前"两个域名都不可达"的结论已作废。
+> 官方规格书 PDF 已入库 `design/cad/vendor/feetech/`（见 `STS3215-官方规格书核验.md` 第 1 节）。
+> 本文的寄存器表仍以上述 GitHub 来源三方互证；官方 HTML 版内存表**尚未抓取比对**，
+> 属待办而非"无法访问"。
 
 ---
 

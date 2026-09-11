@@ -91,6 +91,102 @@ def rest_pose() -> Dict[str, float]:
     return {name: float(spec["rest_deg"]) for name, spec in JOINTS.items()}
 
 
+# ---------------------------------------------------------------------------
+# 真机接口契约：角度 ↔ 舵机脉冲
+#
+# ⚠️ **上位机与下位机唯一的换算口径**，固件必须实现同一套公式：
+#      pulse = zero_pulse + sign × deg × 4096/360
+#      deg   = (pulse − zero_pulse) × 360/4096 × sign
+#   其中：
+#      sign       = +1 / −1，机械装配决定的转向（左右镜像件必然相反）
+#      zero_pulse = 该关节机械零位对应的脉冲（出厂中位 2048，装配标定后修正）
+#   所以**装配完必须回填 sign / zero_pulse**（见 config/calibration.json），
+#   否则会出现"两条腿往相反方向走"这类现场事故。
+# ---------------------------------------------------------------------------
+MID_PULSE = 2048
+PULSE_PER_DEG = 4096.0 / 360.0          # ≈ 11.378 脉冲/度
+LIMIT_MARGIN_DEG = 3.0                  # 舵机限位寄存器相对软件限位再放宽的量
+
+# 走线分支：只用于线束标识与故障定位；**电气上是同一条并联总线**
+BRANCH_OF_GROUP = {
+    "head": "torso_head", "trunk": "torso_head",
+    "leg_l": "leg_l", "leg_r": "leg_r",
+    "arm_l": "arms", "arm_r": "arms",
+}
+
+for _n, _s in JOINTS.items():
+    _s.setdefault("sign", 1)                   # 默认 +1，装配标定后回填
+    _s.setdefault("zero_pulse", MID_PULSE)     # 默认出厂中位
+    _s.setdefault("branch", BRANCH_OF_GROUP[_s["group"]])
+del _n, _s
+
+
+def deg_to_pulse(name: str, deg: float) -> int:
+    """角度（度，软件正方向）→ 舵机绝对位置脉冲（0–4095）。"""
+    spec = JOINTS[name]
+    pulse = spec["zero_pulse"] + spec["sign"] * float(deg) * PULSE_PER_DEG
+    return int(round(max(0.0, min(4095.0, pulse))))
+
+
+def pulse_to_deg(name: str, pulse: float) -> float:
+    """舵机绝对位置脉冲 → 角度（度，软件正方向）。"""
+    spec = JOINTS[name]
+    return (float(pulse) - spec["zero_pulse"]) / PULSE_PER_DEG * spec["sign"]
+
+
+def pulse_limits(name: str, margin_deg: float = LIMIT_MARGIN_DEG) -> tuple:
+    """要写进舵机 min/max angle 寄存器的脉冲范围。
+
+    比**软件限位**再放宽 `margin_deg`（避免软件抖动一下就被舵机自己截断），
+    但仍必须落在**机械硬限位之内**——装配后请核对每只关节的实际可转范围。
+    """
+    lo, hi = JOINTS[name]["limit_deg"]
+    a, b = deg_to_pulse(name, lo - margin_deg), deg_to_pulse(name, hi + margin_deg)
+    return (min(a, b), max(a, b))
+
+
+def joint_table() -> Dict[str, Dict[str, Any]]:
+    """真机调试/固件对齐用的关节总表（ID、分支、方向、零偏、脉冲限位）。"""
+    out: Dict[str, Dict[str, Any]] = {}
+    for name, spec in JOINTS.items():
+        lo, hi = pulse_limits(name)
+        out[name] = {
+            "id": spec["id"], "group": spec["group"], "branch": spec["branch"],
+            "limit_deg": list(spec["limit_deg"]), "rest_deg": spec["rest_deg"],
+            "sign": spec["sign"], "zero_pulse": spec["zero_pulse"],
+            "pulse_range": [lo, hi],
+        }
+    return out
+
+
+CALIBRATION_PATH = (Path(__file__).resolve().parent.parent
+                    / "config" / "calibration.json")
+
+
+def load_calibration(path: str | Path | None = None) -> Dict[str, Any]:
+    """读入装配标定表并**就地覆盖** JOINTS 的 sign / zero_pulse。
+
+    文件不存在时返回 {}（表示仍用出厂默认值）。格式：
+        {"joints": {"head_yaw": {"sign": -1, "zero_pulse": 2043}, ...}}
+    调用者：真机总线构造时、bring-up 工具、系统启动自检。
+    """
+    p = Path(path) if path is not None else CALIBRATION_PATH
+    if not p.exists():
+        return {}
+    data = json.loads(p.read_text(encoding="utf-8"))
+    applied: Dict[str, Any] = {}
+    for name, cal in (data.get("joints") or {}).items():
+        if name not in JOINTS:
+            continue
+        spec = JOINTS[name]
+        if "sign" in cal:
+            spec["sign"] = -1 if int(cal["sign"]) < 0 else 1
+        if "zero_pulse" in cal:
+            spec["zero_pulse"] = int(max(0, min(4095, int(cal["zero_pulse"]))))
+        applied[name] = {"sign": spec["sign"], "zero_pulse": spec["zero_pulse"]}
+    return applied
+
+
 def load_robot_config(path: str | Path | None = None) -> Dict[str, Any]:
     if path is None:
         path = Path(__file__).resolve().parent.parent / "config" / "robot.json"

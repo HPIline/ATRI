@@ -1,9 +1,14 @@
 # STS3215 参考资料（第三方，已核验来源）
 
-> 用途：飞特官网 `feetech.cn` / `feetechrc.com` 在国内网络下**不可达**，
-> 本项目需要 STS3215 的机械接口与通信协议数据。此目录存放**可追溯的第三方来源**，
+> 用途：本项目需要 STS3215 的机械接口与通信协议数据。此目录存放**可追溯的第三方来源**，
 > 作为 `design/cad/standards.py` 的证据基础。
 > 核验结论见 `design/handoff/STS3215-机械接口核验.md`。
+>
+> ⚠️ **官网可达性订正（2026-09-11）**：此前"飞特官网 `feetech.cn` / `feetechrc.com`
+> 在国内网络下不可达"的说法**只对 `feetech.cn` 成立**；**`feetechrc.com` 实际可达**
+> （慢，首字节 ≈8 s，`curl --max-time 120` 稳定 200）。官方规格书 PDF 已入库
+> `design/cad/vendor/feetech/`，见 `design/handoff/STS3215-官方规格书核验.md` 第 1 节。
+> 本目录的第三方来源仍保留：它们与官方 PDF 互为独立印证。
 
 ---
 

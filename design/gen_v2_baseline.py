@@ -71,9 +71,19 @@ SERVO = {
     "voltage_nominal_v": 11.1,
     "voltage_range_v": [9.0, 12.6],
     "stall_torque_nm": 2.94,
-    "continuous_rated_torque_nm": 0.98,   # 官方额定负载 10 kg·cm @12V，主判据
-    "peak_torque_nm": 1.47,               # = 堵转 × 50%，仅短时峰值参考
-    "no_load_speed_dps": 300.0,
+    "rated_torque_nm": 0.98,          # 【官方】额定负载 10 kg·cm @12V（2026-09-11 确认，见下列 basis）
+    "rated_torque_basis": (
+        "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书双重印证，"
+        "见 design/handoff/STS3215-官方规格书核验.md §4.1）。"
+        "历史口径『堵转 × 50% = 1.47 N·m』偏乐观 50%，已降为并列参考（rated_torque_nm_half_stall_deprecated），"
+        "不再是 rated_torque_nm"
+    ),
+    "rated_torque_nm_half_stall_deprecated": 1.47,   # 历史判据：堵转 × 50%，参考机选型习惯，偏乐观 50%
+    "no_load_speed_dps": 270.0,       # 0.222 s/60°（12V，实物包装标签）→ 270 °/s；原 300 无出处
+    "no_load_speed_basis": (
+        "0.222 s/60°(12V) → 270 °/s。来源【实物包装标签】ST-3215-C018"
+        "（见 design/reference/sts3215/）；0.18 与 300 °/s 均无出处，2026-09-11 订正"
+    ),
     "protocol": "TTL 半双工串行总线 @1Mbps",
     "feedback": "位置 / 速度 / 负载 / 电压 / 电流 / 温度（12 位磁编码）",
     "price_cny": "85-95",
@@ -127,8 +137,7 @@ ELECTRONICS: List[Dict[str, Any]] = [
     {"id": "battery", "name": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)", "link": "torso_upper",
      "mass_g": 165.0, "size_mm": [88.0, 34.0, 19.0], "position_mm": [0.0, 0.0, -26.0],
      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；"
-             "按 v3 电源模型 30 min 任务需标称 ≥4.53 Ah，现选 2000 mAh 仅约 13 min，"
-             "**不满足 30 min 指标**，选型时须换更大容量"},
+             "按仓库电源模型 30 min 任务需按现行额定口径复核（v1 标称已废）"},
 ]
 
 REFERENCE_MACHINE = {
@@ -224,9 +233,8 @@ def main(argv: List[str] | None = None) -> int:
               f"整机质量 {model['overall']['mass_kg']} kg")
         return 0
 
-    if not version.startswith("1."):
-        print(f"当前模型版本 {version}，不是 v1；v1→v2 迁移拒绝执行（避免二次缩放）。"
-              "改常量后请先在 git 里回退 robot_model.json。")
+    if version.startswith("2."):
+        print("已是 v2，拒绝重复迁移（避免二次缩放）。改常量后请先在 git 里回退 robot_model.json。")
         return 1
 
     comps = json.loads(COMPONENTS_PATH.read_text(encoding="utf-8"))
@@ -362,10 +370,11 @@ def main(argv: List[str] | None = None) -> int:
         "mass_g": SERVO["mass_g"],
         "size_mm": SERVO["size_mm"],
         "stall_torque_nm": SERVO["stall_torque_nm"],
-        "continuous_rated_torque_nm": SERVO["continuous_rated_torque_nm"],
-        "continuous_rated_torque_basis": "官方额定负载 10 kg·cm = 0.98 N·m @12V（额定电流 900 mA），可持续工况，选型主判据",
-        "peak_torque_nm": SERVO["peak_torque_nm"],
-        "peak_torque_basis": "堵转 × 50%：取自参考机实测选型习惯（1.8 kg 机体用 1.67 N·m 堵转舵机行走），只作短时峰值参考",
+        "rated_torque_nm": SERVO["rated_torque_nm"],
+        "rated_torque_basis": SERVO["rated_torque_basis"],
+        "rated_torque_nm_half_stall_deprecated": SERVO["rated_torque_nm_half_stall_deprecated"],
+        "no_load_speed_dps": SERVO["no_load_speed_dps"],
+        "speed_basis": SERVO["no_load_speed_basis"],
         "mounting": "M2.5/M3 支架夹持；STS3215 体对角线 62.3 mm，无法被现有球壳全包，采用外部支架",
     }
     model["changelog"] = [
@@ -386,7 +395,7 @@ def main(argv: List[str] | None = None) -> int:
     comps["schema_version"] = "2.0"
     comps["note"] = (comps.get("note", "") +
                      "　【v2】结构件与线束质量按参考机对标口径更新；"
-                     "舵机数量与型号不变，扭矩改用有出处的双口径（连续额定 0.98 N·m 主判据 ＋ 堵转 × 50% 峰值参考）。")
+                     "舵机数量与型号不变，但额定扭矩改用有出处的判据（堵转 × 50%）。")
     comps["structure_mass_estimate_g"] = STRUCTURE_TOTAL_G
     comps["structure_mass_note"] = (
         f"v2：按参考机对标后的身高 373 mm 重估，取 v1 CAD 实测 552 g 的身高折算值。"
@@ -398,18 +407,20 @@ def main(argv: List[str] | None = None) -> int:
             c["name"] = SERVO["model"]
             c["mass_g"] = SERVO["mass_g"]
             c["size_mm"] = SERVO["size_mm"]
-            c["spec"]["continuous_rated_torque_nm"] = SERVO["continuous_rated_torque_nm"]
-            c["spec"]["peak_torque_nm"] = SERVO["peak_torque_nm"]
+            c["spec"]["rated_torque_nm"] = SERVO["rated_torque_nm"]
             c["spec"]["stall_torque_nm"] = SERVO["stall_torque_nm"]
             c["spec"]["voltage_v"] = SERVO["voltage_nominal_v"]
-            c["spec"]["rated_basis"] = "连续额定 = 官方额定负载 10 kg·cm = 0.98 N·m @12V，主判据；峰值 = 堵转 × 50% = 1.47 N·m，短时峰值参考"
-            c["note"] = "全机型号归一；v2 起扭矩按连续额定 0.98 / 峰值 1.47 双口径"
+            c["spec"]["rated_basis"] = SERVO["rated_torque_basis"]
+            c["spec"]["rated_torque_nm_half_stall_deprecated"] = SERVO["rated_torque_nm_half_stall_deprecated"]
+            c["spec"]["speed_s_per_60deg"] = round(60.0 / SERVO["no_load_speed_dps"], 3)
+            c["spec"]["speed_basis"] = SERVO["no_load_speed_basis"]
+            c["note"] = ("全机型号归一；额定值取【官方】0.98 N·m（2026-09-11 确认）；"
+                         "历史判据『堵转 × 50% = 1.47 N·m』偏乐观 50%，仅作并列参考")
         if c["role"] == "battery":
             c["name"] = "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)"
             c["mass_g"] = 165.0
             c["size_mm"] = [88.0, 34.0, 19.0]
-            c["note"] = ("容量对齐参考机；按 v3 电源模型 30 min 任务需标称 ≥4.53 Ah，"
-                         "现选 2000 mAh 仅约 13 min，**不满足 30 min 指标**，选型时须换更大容量")
+            c["note"] = "容量对齐参考机；按仓库电源模型 30 min 任务需按现行额定口径复核（v1 标称已废）"
     comps["placements"] = [
         {"component": e["name"], "link": e["link"], "size_mm": e["size_mm"],
          "mass_g": e["mass_g"], "position_mm": e["position_mm"],

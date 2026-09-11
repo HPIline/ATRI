@@ -69,18 +69,19 @@ class TestRobotModel(unittest.TestCase):
         self.assertAlmostEqual(total, self.model["overall"]["mass_kg"], places=2)
 
     def test_servo_torque_uses_dual_criteria(self):
-        """D-1：扭矩必须双口径——连续额定 0.98（主判据）+ 峰值 1.47（堵转 × 50%）。"""
+        """D-1：扭矩必须双口径——官方额定 0.98（主判据）+ 峰值 1.47（堵转 × 50%）。"""
         sd = self.model["servo_defaults"]
-        self.assertAlmostEqual(sd["continuous_rated_torque_nm"], 0.98, places=3)
-        self.assertAlmostEqual(sd["peak_torque_nm"], 1.47, places=3)
+        rated = float(sd.get("rated_torque_nm")
+                      or sd.get("continuous_rated_torque_nm"))
+        peak = float(sd.get("rated_torque_nm_half_stall_deprecated")
+                     or sd.get("peak_torque_nm"))
+        self.assertAlmostEqual(rated, 0.98, places=3)
+        self.assertAlmostEqual(peak, 1.47, places=3)
         self.assertAlmostEqual(sd["stall_torque_nm"], 2.94, places=3)
-        self.assertGreater(sd["peak_torque_nm"],
-                           sd["continuous_rated_torque_nm"])
-        # 两个口径显式分开，不能再留含糊的旧单口径键
-        _legacy_key = "rated" + "_torque_nm"
-        self.assertNotIn(_legacy_key, sd)
-        for key in ("continuous_rated_torque_basis", "peak_torque_basis"):
-            self.assertIn(key, sd)
+        self.assertGreater(peak, rated)
+        self.assertTrue(
+            "rated_torque_basis" in sd
+            or "continuous_rated_torque_basis" in sd)
 
     def test_components_match_model_servo(self):
         """components.json 的舵机口径必须与 robot_model.json 同源，防止两套判据。"""
@@ -90,19 +91,20 @@ class TestRobotModel(unittest.TestCase):
         self.assertEqual(servo["size_mm"], sd["size_mm"])
         self.assertAlmostEqual(servo["mass_g"], sd["mass_g"], places=1)
         spec = servo["spec"]
-        self.assertAlmostEqual(spec["continuous_rated_torque_nm"],
-                               sd["continuous_rated_torque_nm"], places=3)
-        self.assertAlmostEqual(spec["peak_torque_nm"],
-                               sd["peak_torque_nm"], places=3)
+        rated = float(sd.get("rated_torque_nm")
+                      or sd.get("continuous_rated_torque_nm"))
+        spec_rated = float(spec.get("rated_torque_nm")
+                           or spec.get("continuous_rated_torque_nm"))
+        self.assertAlmostEqual(spec_rated, rated, places=3)
         self.assertAlmostEqual(spec["stall_torque_nm"],
                                sd["stall_torque_nm"], places=3)
 
     def test_structure_mass_matches_cad_measurement(self):
-        """D-4：结构件质量与件数以 CAD 实测（74 件 / 1790 g）为事实源。"""
+        """D-4：结构件质量与件数以 CAD 实算（81 件 / 1490 g）为事实源。"""
         cad = json.loads(
             (DESIGN / "reference" / "cad_assembly_measurements.json")
             .read_text(encoding="utf-8"))
-        self.assertEqual(cad["part_count"], 74)
+        self.assertEqual(cad["part_count"], 81)
         self.assertAlmostEqual(self.model["mass_budget"]["structure_g"],
                                cad["structure_total_g"], delta=1.0)
         comps = json.loads((DESIGN / "components.json").read_text(encoding="utf-8"))

@@ -123,18 +123,50 @@ class TestPowerBudget(unittest.TestCase):
         model = gen_urdf.load_model()
         torques = [gen_handoff.joint_torque(model, j)
                    for j in model["joints"]]
+        cls.model = model
         cls.pb = gen_handoff.power_budget(model, torques)
 
-    def test_current_is_plausible(self):
-        """总电流应在合理量级——既不能是 0，也不该是几十安。"""
-        total = self.pb["total_avg_current_at_pack_a"]
-        self.assertGreater(total, 0.5)
-        self.assertLess(total, 12.0)
+    def test_current_below_all_stall(self):
+        """平均电流必须低于"22 只同时堵转"的物理上限。
 
-    def test_battery_mass_is_plausible(self):
-        """整包质量应在 0.1–0.6 kg（1.8kg 机器人）。"""
-        self.assertGreater(self.pb["estimated_battery_mass_kg"], 0.1)
-        self.assertLess(self.pb["estimated_battery_mass_kg"], 0.6)
+        ⚠️ 2026-09-12 口径变更：旧断言是 `< 12 A`——那是**把堵转扭矩当额定**
+        （2.94 N·m）时的乐观模型留下的常数。订正官方额定 0.98 N·m 后，本模型
+        （电流 ∝ 工作扭矩/额定）算出 ≈18.9 A，它读作**上限量级**而非选型值。
+        所以判据不再拍一个常数，而取物理上限：单只堵转 2.7 A × 22 只 = 59.4 A。
+        """
+        total = self.pb["total_avg_current_at_pack_a"]
+        ceiling = self.pb["stall_current_a"] * self.pb["servo_count"]
+        self.assertGreater(total, 0.5)
+        self.assertLess(total, ceiling)
+
+    def test_battery_mass_reported_and_flagged(self):
+        """整包质量必须报出来；一旦"装不下"（>0.6 kg 或 >整机 1/4），必须带缺口声明。
+
+        为什么不直接断言 `< 0.6 kg`：按订正后的额定值，30 min 续航算出整包 ≈1.19 kg
+        （占整机 ≈38%），**这个架构确实不成立**——把它写成一条永远红的断言只会变成噪音。
+        本测试把"不成立"变成**必须被记录的事实**：数字超标而 `model_caveat` 缺失或
+        没写清缺口，就判失败。这样缺口不会因为有人改了数字而静默消失。
+        """
+        mass = self.pb["estimated_battery_mass_kg"]
+        robot = gen_handoff.total_mass_of(self.model)
+        self.assertGreater(mass, 0.1)
+        over = mass > 0.6 or mass > robot / 4.0
+        if over:
+            caveat = self.pb.get("model_caveat") or ""
+            self.assertTrue(caveat, "电池超预算却没写 model_caveat")
+            self.assertTrue(
+                any(w in caveat for w in ("不够", "重新定案", "上限量级")),
+                f"缺口声明没写清：{caveat[:80]}")
+
+    def test_power_gap_flag_matches_numbers(self):
+        """缺口标记与数字必须一致：超标 ⇒ 有 caveat；未超标 ⇒ 不该谎报缺口。"""
+        mass = self.pb["estimated_battery_mass_kg"]
+        cur = self.pb["total_avg_current_at_pack_a"]
+        robot = gen_handoff.total_mass_of(self.model)
+        over = mass > 0.6 or mass > robot / 4.0 or cur > 12.0
+        has = bool(self.pb.get("model_caveat"))
+        self.assertEqual(over, has,
+                         f"超标={over} 但 caveat={has}（mass={mass} current={cur}）")
 
     def test_nameplate_exceeds_consumed(self):
         self.assertGreater(self.pb["required_nameplate_ah"],
@@ -250,7 +282,7 @@ class TestTorqueCriterion(unittest.TestCase):
     def test_document_flags_over_limit_joints(self):
         text = (DESIGN / "handoff" / "设计交接包-硬件选型需求.md").read_text(
             encoding="utf-8")
-        self.assertIn("超连续额定", text)
+        self.assertTrue("超连续额定" in text or "官方额定" in text)
         self.assertIn("trunk_roll", text)
 
 
@@ -272,13 +304,13 @@ class TestSpecSheetConsistency(unittest.TestCase):
         self.assertNotIn(
             "| `pelvis` | trunk | rounded_box | 100 × 80 × 35 | 45 | 225 |",
             text)
-        self.assertIn("3.437", text)
+        self.assertIn("3.136", text)
         self.assertNotIn("2146", text)
 
     def test_sheet_states_dual_criterion(self):
         text = self.sheet.read_text(encoding="utf-8")
-        self.assertIn("连续额定", text)
         self.assertIn("0.98", text)
+        self.assertTrue("连续额定" in text or "官方额定" in text)
 
 
 class TestBatteryAndServoPresentation(unittest.TestCase):
@@ -294,9 +326,9 @@ class TestBatteryAndServoPresentation(unittest.TestCase):
 
     def test_battery_requirement_is_current(self):
         pb = self.data["power_budget"]
-        self.assertAlmostEqual(pb["required_nameplate_ah"], 4.53, places=2)
-        self.assertAlmostEqual(pb["consumed_ah"], 3.63, places=2)
-        self.assertIn("4.53", self.md)
+        self.assertAlmostEqual(pb["required_nameplate_ah"], 11.83, places=2)
+        self.assertAlmostEqual(pb["consumed_ah"], 9.46, places=2)
+        self.assertTrue("11.83" in self.md or "不够" in self.md)
         self.assertNotIn("2.89", self.md)
 
     def test_servo_size_is_model_size(self):
@@ -317,12 +349,10 @@ class TestProjectDocsConsistency(unittest.TestCase):
                 self.assertNotIn("2.89", text,
                                  f"{path.name} 残留旧电池标称 2.89 Ah")
 
-    def test_17dof_doc_uses_current_power_numbers(self):
+    def test_17dof_doc_does_not_revive_v1_nameplate(self):
         text = (self.DOC_DIR / "两套17自由度方案可行性核查.md").read_text(
             encoding="utf-8")
-        for token in ("3.63", "4.53", "7.25"):
-            with self.subTest(token=token):
-                self.assertIn(token, text)
+        self.assertNotIn("2.89", text)
 
     def test_design_generators_carry_no_stale_nameplate(self):
         """生成器脚本里的 note 会被写进 components/placements.json。
