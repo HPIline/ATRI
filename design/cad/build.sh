@@ -3,6 +3,8 @@
 #
 # 用法：bash design/cad/build.sh [--fast]
 #   --fast  跳过渲染/图纸（只出 STEP/STL/质量报告与预览），改参数时反复跑用这个
+#   STRICT=1      体检一旦有『摆放错误』即失败（CI 用）
+#   SKIP_AUDIT=1  已知摆放问题尚未修完时，明确跳过体检失败（会打印警告）
 #
 # 纪律：产物一律重新生成，不手改 out/ 里任何文件。
 set -euo pipefail
@@ -27,6 +29,21 @@ $PY design/cad/build_all.py --all
 
 echo "== 2/5 整机装配：ATRI-assembly.step =="
 $PY design/cad/assembly.py --all
+
+echo "== 2.5/5 装配体检：干涉 / 连通性 / 关节轴对齐 =="
+# 纪律：体检脚本给"性质判定"——『摆放错误』(重合率≥30% 或 ≥5000 mm³) 基本等于
+#       "两个零件被指派到同一块空间"，改尺寸无解，必须改摆放。
+#      STRICT=1 → 有摆放错误即失败；SKIP_AUDIT=1 → 已知问题下继续出图。
+AUDIT_ARGS="--top 12"
+[ "${STRICT:-0}" = "1" ] && AUDIT_ARGS="$AUDIT_ARGS --strict"
+if ! $PY design/cad/audit_assembly.py $AUDIT_ARGS; then
+  if [ "${SKIP_AUDIT:-0}" = "1" ]; then
+    echo "  （SKIP_AUDIT=1：带着已知摆放错误继续）"
+  else
+    echo "  ✗ 体检未通过。处理：修摆放，或用 SKIP_AUDIT=1 明确跳过。"
+    exit 4
+  fi
+fi
 
 if [ "$FAST" -eq 0 ]; then
   echo "== 3/5 渲染图 + 工程图 =="

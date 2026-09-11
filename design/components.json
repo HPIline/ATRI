@@ -208,7 +208,8 @@
         0.0,
         -12.0
       ],
-      "note": "需 15 mm 散热高度；v2 躯干内净空 94×84×49，85 边放在 y 向（余量 4 mm）"
+      "note": "需 15 mm 散热高度；v2 躯干内净空 94×84×49，85 边放在 y 向（余量 4 mm）",
+      "kind": "compute"
     },
     {
       "component": "STM32F405RGT6 核心板",
@@ -224,7 +225,8 @@
         0.0,
         18.0
       ],
-      "note": ""
+      "note": "",
+      "kind": "mcu"
     },
     {
       "component": "飞特 URT-1 总线驱动板",
@@ -240,7 +242,8 @@
         0.0,
         18.0
       ],
-      "note": ""
+      "note": "",
+      "kind": "servo_driver"
     },
     {
       "component": "XL4015 降压模块",
@@ -256,7 +259,8 @@
         -28.0,
         14.0
       ],
-      "note": ""
+      "note": "",
+      "kind": "bec"
     },
     {
       "component": "PAM8403 功放模块",
@@ -272,7 +276,8 @@
         34.0,
         20.0
       ],
-      "note": ""
+      "note": "",
+      "kind": "amp"
     },
     {
       "component": "4Ω 3W 腔体喇叭 Φ28",
@@ -288,7 +293,8 @@
         0.0,
         24.0
       ],
-      "note": ""
+      "note": "",
+      "kind": "speaker"
     },
     {
       "component": "UVC 广角相机模组 (OV9732/IMX219)",
@@ -300,11 +306,13 @@
       ],
       "mass_g": 15.0,
       "position_mm": [
-        18.0,
+        38.0,
         0.0,
-        6.0
+        13.5
       ],
-      "note": "装在头部前方，随 head_pitch 俯仰"
+      "note": "装在头部前方，随 head_pitch 俯仰；第 5 轮沿 +X 再送出 20 mm，避开 head_pitch 舵机",
+      "kind": "camera",
+      "convention_note": "position_mm 按**几何中心**；本件原值按底面写，已补半身位以保持实物位置不变"
     },
     {
       "component": "USB 免驱拾音模块 (CM6533)",
@@ -318,9 +326,11 @@
       "position_mm": [
         10.0,
         0.0,
-        -14.0
+        -10.0
       ],
-      "note": ""
+      "note": "",
+      "kind": "mic",
+      "convention_note": "position_mm 按**几何中心**；本件原值按底面写，已补半身位以保持实物位置不变"
     },
     {
       "component": "ICM-42688-P 模块",
@@ -334,9 +344,11 @@
       "position_mm": [
         0.0,
         0.0,
-        8.0
+        9.5
       ],
-      "note": "装在骨盆（重心附近），避免头部摆动干扰姿态解算"
+      "note": "装在骨盆（重心附近），避免头部摆动干扰姿态解算",
+      "kind": "imu",
+      "convention_note": "position_mm 按**几何中心**；本件原值按底面写，已补半身位以保持实物位置不变"
     },
     {
       "component": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
@@ -352,7 +364,8 @@
         0.0,
         -26.0
       ],
-      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；按 v3 电源模型 30 min 任务需标称 ≥4.53 Ah，现选 2000 mAh 仅约 13 min，**不满足 30 min 指标**，选型时须换更大容量"
+      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；按 v3 电源模型 30 min 任务需标称 ≥4.53 Ah，现选 2000 mAh 仅约 13 min，**不满足 30 min 指标**，选型时须换更大容量",
+      "kind": "battery"
     }
   ],
   "reference_alignment": {

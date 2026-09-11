@@ -1,142 +1,86 @@
-# CAD 层：真实零件建模
+# CAD 层
 
-## 为什么有这一层
-
-之前 `design/` 下的几何是**基元占位**（长方体/圆柱/球/胶囊），
-用 Python 手算投影和网格。它能验证运动学与包络，**但永远做不出可制造的零件**：
-没有圆角、抽壳、螺钉柱、轴承位、拔模，也没有 STEP。
-
-这一层解决该问题：**接入真正的 CAD 内核（OpenCASCADE）**，
-产出实心 B-rep 实体与 STEP/STL。
+用 OpenCASCADE（CadQuery）出可制造的 B-rep / STEP / STL。运动学与质量的提交口径仍在 `design/robot_model.json`，两套数字不要混引，见仓库根 README。
 
 ```
 design/
-├── robot_model.json      ← 运动学/包络/质量（基元，用于校验与仿真）
-├── components.json       ← 外部元件参数（部件库提供）
-├── cad/                  ← 本层：真实零件
-│   ├── standards.py      ← 标准件参数（舵机/轴承/紧固件/FDM 容差）
-│   ├── parts.py          ← 参数化零件建模
-│   ├── build.py          ← 构建入口，导出 STEP/STL
-│   └── out/
-│       ├── step/         ← 可进 SolidWorks / 任何 CAD
-│       ├── stl/          ← 可 3D 打印
-│       └── report.md     ← 可制造性报告
+├── robot_model.json      运动学 / 包络 / 提交口径质量（1790 / 3437 g）
+├── components.json       外部元件参数；电子件必须带稳定 kind
+├── placements.json       22 舵机 + 10 电子件落座（gen_placements.py 生成）
+└── cad/
+    ├── standards.py      舵机 / 轴承 / 紧固件 / FDM 容差
+    ├── kit.py            接口标准 + servo_frame()（舵机姿态唯一真值）
+    ├── skeleton.py       现行零件（笼 / 叉 / 管 / 框架 / 簇臂…）
+    ├── assembly.py       整机装配；按 kind 落座电子件，失败即报错
+    ├── fitcheck.py       干涉判定原语（装配 / 体检 / 钟点共用）
+    ├── fit_stagger.py    髋/肩机体沿轴抽出量（权威表，禁止手写）
+    ├── audit_assembly.py 穿模 / 连通性 / 关节轴对齐
+    ├── interference.py   全机干涉普查（与 fitcheck 分工：普查 vs 原语）
+    ├── build.sh          一键：零件 → 装配 → 体检
+    ├── build_all.py      只出零件 STEP/STL
+    ├── parts.py          只提供 sanitize()，不是构建入口
+    └── out/              STEP/STL/报告（gitignore，可复现）
 ```
 
-## 安装
+## 环境
 
-CadQuery 需要 OpenCASCADE，**必须装在独立环境**（不要污染主仓库的零依赖约束）：
+CadQuery 装在独立 `.venv-cad/`，别污染主包的零依赖约束。
+
+已验证的组合是 Python 3.9.6 / `cadquery==2.5.2` / `cadquery-ocp 7.7.2`，这套不随主包迁 3.14。主包 CI 只跑 3.14；CAD 要迁 3.14，得升到 `cadquery ≥ 2.8`（`cadquery-ocp` 要求 `>=3.11,<3.15`）。
 
 ```bash
 cd <repo>
-
-# ① 先检查是否已存在 —— 环境约 830 MB，重建代价高（要重下 165 MB 的 OCP wheel）
 if .venv-cad/bin/python -c "import cadquery, OCP" 2>/dev/null; then
-  echo "已就绪：$(.venv-cad/bin/python -c 'import cadquery; print(cadquery.__version__)')"
+  echo "已就绪"
 else
-  # ② 只有确认不存在/不可用时才重建
   python3 -m venv .venv-cad
   .venv-cad/bin/pip install -r design/cad/requirements.txt
 fi
 ```
 
-已验证可用：Python 3.9.6 / macOS arm64 / `cadquery-ocp 7.7.2` / CadQuery 2.5.2 / `ezdxf 1.4.2`。
+环境必须建在仓库内。`.venv-cad/` 已 gitignore，判断它在不在要看文件系统，不能只看 `git status`。
 
-> ⚠️ **环境必须建在仓库内（`.venv-cad/`），禁止建在 `/tmp`。**
-> macOS 重启会清空 `/tmp`，系统还会清理 3 天未访问的临时文件。
-> 2026-09-11 凌晨曾把环境建在 `/tmp/cadvenv`，当天下午的新会话找不到它，
-> 误判为「协作者机器上的环境没有 clone 过来」，白下 859 MB。
->
-> 另注：`.venv-cad/` 已在 `.gitignore` 中，**git 里看不到它**。
-> 判断环境是否存在**必须查文件系统**（`ls .venv-cad/bin/python`），不能只看 `git status`。
-
-## 使用
+## 入口
 
 ```bash
-# 查看标准件参数状态（哪些还是 unknown）
+# 推荐：零件 → 装配 → 体检（改参数反复跑加 --fast）
+bash design/cad/build.sh --fast
+
+# 髋/肩错轴量（关节原点不动，只平移机体）
+.venv-cad/bin/python design/cad/fit_stagger.py
+
+# 全机干涉普查
+.venv-cad/bin/python design/cad/interference.py --all
+
+# 标准件参数状态
 .venv-cad/bin/python design/cad/build.py --standards
-
-# 构建全部零件
-.venv-cad/bin/python design/cad/build.py --all
-
-# 构建单个
-.venv-cad/bin/python design/cad/build.py --part servo_yoke
 ```
 
-## 已实现的零件
+`build.py --all` 和 `parts.py` 里的 `servo_yoke` 三件套是早期入口，现行零件在 `skeleton.py`；`sanitize()` 仍从 `parts.py` 引用，文件不能删。
 
-| 零件 | 说明 | 当前质量(实心) |
-|---|---|---|
-| `servo_yoke` | 舵机 U 型支架：夹持舵机 + 副轴轴承位 | 17.8 g |
-| `horn_adapter` | 25T 舵盘 → 4×M2.5 法兰转接件 | 3.1 g |
-| `link_tube` | 两端封头带轴孔的空心承力连杆 | 47.8 g |
+配合的校验脚本在仓库根的 `design/check_fit.py`，不在 `cad/` 下。
 
-> 实心质量按 PLA 1.24 g/cm³ 计，**未计填充率**；实际打印按 30–50% 填充
-> 约为该值的 40–60%。
+## 髋 / 肩错轴
 
-## 设计约定
+轴距 19.6 mm 只够「输出轴 + 薄支架」，不够两只沿轴 35 mm 的无耳机体共面。
 
-1. **单位 mm**，Z 轴为回转轴，零件以配合面为基准面。
-2. **参数全部来自 `standards.py`**，不硬编码魔数。
-3. **`unknown` 状态的参数会拦截构建** —— 宁可构建失败，
-   也不要产出一个基于臆测尺寸的零件。
-4. 布尔/圆角之后统一走 `sanitize()` 修复几何：
-   OCC 偶发自交会让 `isValid()==False`，下游 CAD 导入会报错。
-5. **端头直径必须等于管外径**才能与管壁径向重叠——
-   否则 `fuse` 无法合并，会留下互不相连的多个实体。
+关节轴位置不动，机体沿自身输出轴抽出：hip_roll / shoulder_pitch +35 mm，hip_pitch +30 mm（`fit_stagger.py` 写入 `JOINT_SCHEME.stagger`）。新件是 `cluster_horn_arm`（锁上一级舵盘）加 `cluster_outrigger`（副轴第二支点）；承力臂目标 6061-T6，PETG 几何仅占位。
 
-## 质量闭合（重要发现）
+Gemini 给的 8–12 mm 是端面净距（盘厚 + 螺钉头 + 臂厚），不是机体 stagger。只错 8–12 mm 清不掉互咬，所以禁止用 8–12 回改 stagger。
 
-用真实 CAD 零件 + 真实元件参数做的整机质量核算：
+## 质量
 
-| 项目 | 质量 |
-|---|---|
-> ⚠️ **本章为 v1 历史核算（475 mm 机身）。v3（2026-09-11）已改用 CAD 实装口径：
-> 实装包络 418 mm、结构件 1790 g、整机 3437 g，权威数字见 `design/handoff/新架构参数总表.md`。下表保留用于追溯。**
+这里不再抄总表，只说两层口径各自指向哪。
 
-| 打印结构件（14 关节模块 + 8 连杆 + 2 足 + 4 转接） | 553 g（v1，475 mm） |
-| 舵机 22 × STS3215 | 1210 g |
-| 电子件 | 351 g |
-| 线束 + 紧固件 | 150 g |
-| **合计（v1）** | **2264 g** |
-| **v3 口径（当前）** | **3437 g**（结构 **1790**〔CAD 实装实算〕+ 舵机 1210 + 电子件与电池 316 + 线束紧固件 120） |
+- 提交口径（URDF / `robot_model.json` / 交接包 / 测试钉死）：结构 1790 g、整机 3437 g。踝 1.630 N·m ≈ 连续额定 0.98 的 167%。
+- CAD 现行几何（未回灌）：装配修正后结构 1404 g、整机 3050 g；错轴新件后再 +86 g → 结构约 1490 g。过程见 `design/handoff/装配一致性修正记录.md`。
 
-**v1 结论（已由 v2 取代）：原设计质量预算不可达。** 原因是预算制定时没有计入
-22 颗舵机（1210 g，占整机 56%）和真实结构件质量。
+扭矩主判据是连续额定 0.98 N·m。用堵转 × 50% = 1.47 算出的「踝 102%」是峰值口径。
 
-**v3 结论（两个模型并存，出处不同，勿混引）**：
+减重路径 A/B/C 见 `robot_model.json` 的 `reduction_paths`（按 0.98 主判据，三条均未达标）。
 
-- **`build_all.py` 自身质量闭合模型**（`closure()`：τ ≈ 0.49 × 整机质量）：
-  本文件实算整机 **3436 g**（1790 + 1210 + 316 + 120）→ τ = **1.684 N·m**，
-  占**连续额定 0.98 N·m** 的 **172%**、占峰值 1.47 N·m（堵转 × 50%）的 **115%**。
-  两个百分数即 `build_all.py` 的 `ankle_continuous_pct` / `ankle_peak_pct` 输出。
-- **`gen_handoff.py` 单腿支撑模型**（全身质量 × CoP 偏移 × 动载系数，逐关节按力臂算）：
-  踝关节需求 **1.630 N·m**，占**连续额定 0.98 N·m**（主判据）的 **167%（超标）**、
-  占峰值 1.47 N·m 的 **111%**。**这两个数不出自 `build_all.py`**——
-  它是 `gen_handoff.py` 的输出（见 `design/handoff/hardware_requirements.json`）。
+## 约定
 
-两个模型口径不同（总质量估算 vs 逐关节力臂），但结论一致：均超连续额定。
-必须执行减重路径（A 拓扑 900–1100 g / B 买金属件 550–700 g / C 减自由度）——见 `design/handoff/新架构参数总表.md` §3.1。
-
-> **待办**：`parts.py` 的连杆长度目前用默认值（v2 已改为大腿 62.8 mm），
-> 臂段 47.1/39.3 mm 尚未按实例传入；恢复 CAD 阶段时应改为**从 `robot_model.json` 派生**。
-
-**三条出路**（需讨论决定）：
-1. 结构减重：连杆壁厚 3→2mm、提高减重窗口比例，目标 −150 g
-2. 接受 2.2 kg 级、重算力矩并评估是否换更大舵机
-3. 减少自由度或改用更轻的舵机型号
-
-## 与其它层的关系
-
-```
-components.json (外部元件参数)
-        ↓
-cad/standards.py  ──→  cad/parts.py  ──→  STEP / STL
-        ↑                                      ↓
-robot_model.json (运动学)              SolidWorks 精修 / 3D 打印
-        ↓                                      ↓
-check_fit.py (配合校验)  ←────────────  实测回填
-```
-
-**配合校验（`check_fit.py`）仍然是必要的**：CAD 零件建出来后，
-要用它复核整体装配是否仍然满足包络与质量约束。
+1. 单位 mm；参数来自 `standards.py`，`unknown` 状态拦截构建。
+2. 电子件用 `kind`（compute / battery / mcu / …）匹配，`id`/`name` 只给人看。
+3. `cluster_fit` 阈值全部 `provisional`，不得覆盖已标定的通孔 2.7 / 过盈 −0.03 / 同轴 0.05 / 过孔 8.0。

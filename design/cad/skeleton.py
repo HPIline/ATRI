@@ -5,8 +5,9 @@
 1. **骨架不是盒子**：所有大件都是"框 + 筋 + 减重窗"，不是闭合薄壳。
    闭合薄壳按 3 mm 壁算，一个 100×90×55 的躯干壳就是 137 g，
    而 v2 给整机结构的预算是 **500 g / 23 个 link** —— 壳体方案必然超支。
-2. **模块化**：22 个自由度只用 4 类结构件覆盖
-   （关节笼 `joint_cage` + 连杆叉 `limb_fork` + 连杆管 `limb_tube` + 紧凑转接块 `compact_adapter`）。
+2. **模块化**：膝/踝/肘仍是笼+叉+管；髋/肩 19.6 mm 簇改走
+   `cluster_horn_arm` + `cluster_outrigger`（不对称 C 臂，机体沿轴抽出）。
+   `compact_adapter` 只留给颈/腰 27.5 mm 短链。
 3. **接口固定**：所有连接面尺寸取自 `kit.IF`，零件里不出现魔数。
 4. **能买不打印**：主轴舵盘、踝/膝 U 型传动架按 `ASSEMBLY.buy_metal_not_print` 走商品件。
 
@@ -58,6 +59,24 @@ PLATE_T = FDM["wall_mm"]                     # 3.0
 PLATE_Y = GAP / 2.0 + PLATE_T / 2.0          # 19.25：两侧板中心
 SPAN_X = (X_MAX - X_MIN) + 8.0               # 53.2：侧板长（含端部包边）
 SPIGOT_D, SPIGOT_H, SPIGOT_BORE = 34.0, 12.0, 26.0
+
+# --------------------------------------------------------------------------
+# 躯干内部层高 —— **唯一真值来源**
+#   三处必须一致，过去各写一份，导致"两个打印件自己先撞上"（9 942 mm³，重合率 53%）：
+#     ① torso_frame 的内建层板
+#     ② battery_tray / electronics_deck 这两个独立零件的自身标高
+#     ③ assembly 里电子件的落座标高（ELEC_DECK_TOP）
+# --------------------------------------------------------------------------
+TORSO_PLATE_T = 2.6
+TORSO_BAY_FLOOR_Z = 18.0          # 电池仓层板底面（下层）
+TORSO_DECK_FLOOR_Z = 42.0         # 电控层层板底面（上层）
+TORSO_BAY_TOP_Z = TORSO_BAY_FLOOR_Z + TORSO_PLATE_T     # 20.6：层板上表面
+TORSO_DECK_TOP_Z = TORSO_DECK_FLOOR_Z + TORSO_PLATE_T   # 44.6：层板上表面
+# 插入件（电池仓抽屉 / 电控托盘）自己还有一层 3 mm 底板 —— 承放电子件的是**它们**的上表面。
+# 只算框架层板会低 3 mm，实测导致电池顶进托盘（11 937 mm³）。
+INSERT_PLATE_T = 3.0
+TORSO_BAY_LOAD_Z = TORSO_BAY_TOP_Z + INSERT_PLATE_T     # 23.6：电池坐在这个面上
+TORSO_DECK_LOAD_Z = TORSO_DECK_TOP_Z + INSERT_PLATE_T   # 47.6：树莓派坐在这个面上
 
 
 # --------------------------------------------------------------------------
@@ -383,6 +402,129 @@ def compact_adapter(in_shaft: str = "+z", out_shaft: str = "+x",
 
 
 # --------------------------------------------------------------------------
+# 零件 4b：髋/肩错轴族（第 5 轮）
+#   轴距 19.6 mm 只给「输出轴 + 薄臂」住；机体沿自身轴甩到外侧。
+#   compact_adapter 仍留给颈/腰 27.5 mm 短链，禁止在这里改回去。
+# --------------------------------------------------------------------------
+def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
+                     drop: float = 19.6, stagger: float = 0.0,
+                     parent_stagger: float = 0.0,
+                     wall: float = PLATE_T) -> cq.Workplane:
+    """单侧臂：锁上一级金属舵盘（I2），把下一级轴线拉到 `drop`。
+
+    标准姿态下：上一级输出沿 +Z，下一级输出沿 +Y，下一级原点在 (0,0,-drop)。
+    `parent_stagger`：上一级机体沿自身轴（本地 +Z）的偏置，法兰跟着舵盘走。
+    `stagger`：下一级机体沿 +Y 的偏置。两者都来自 fit_stagger.py。
+    臂走 −X 侧，躲开轴距核心；弯矩走支架，不走舵机壳体。
+
+    承力目标：6061-T6 2–3 mm 激光/CNC（Gemini S4，provisional）。
+    现几何按 PETG `wall` 占位，改铝板厚前不要用铝密度去乘本实体体积。
+    """
+    horn = servo_horn_interface(SERVO_NAME)
+    horn_t = wall + 1.0
+    z_flange = parent_stagger
+    z_bot = -max(drop, 12.0) - 8.0
+    z_height = (z_flange + horn_t) - z_bot
+    # 子级机体 x ∈ [x_min, x_max] = [-35, +10.2]，立柱必须在其外侧
+    x_spine = X_MIN - 6.0                 # −41：机身 −X 端面再留 6 mm
+    y_spine = -10.0                       # 躲开子级沿 +Y 甩出的机体
+
+    part = cq.Workplane("XY")
+    # 舵盘法兰（I2）——跟父舵机 stagger 走
+    part = part.union(box(24.0, 24.0, horn_t, at=(0, 0, z_flange - horn_t)))
+    part = drill(part, bolt_circle(horn["pcd_mm"], horn["hole_count"]),
+                 dia=IF["horn"]["hole_dia_mm"], depth=horn_t * 3,
+                 z0=z_flange - horn_t * 2)
+    part = part.cut(cyl(16.0, horn_t * 3, at=(0, 0, z_flange - horn_t * 1.5)))
+
+    # 外侧立柱（C 形的背）
+    part = part.union(box(wall, 22.0, z_height,
+                          at=(x_spine, y_spine, z_bot)))
+    # 上桥：法兰 → 立柱（z ≈ 父舵盘，y 走外侧，不穿子级机体）
+    part = part.union(box(abs(x_spine) + 8.0, wall, wall,
+                          at=(x_spine / 2.0, y_spine, z_flange - wall)))
+    # 下桥：立柱 → 子级原点（只托轴）
+    part = part.union(box(abs(x_spine) + 8.0, wall, wall,
+                          at=(x_spine / 2.0, y_spine, -drop - wall / 2.0)))
+
+    # drop≈0 时立板与法兰几乎共面，圆角会把实体打成 Compound
+    if drop >= 8.0:
+        part = safe_fillet(part, FDM["fillet_min_mm"], "|Y")
+    parent_dir = {"+z": "-z", "-z": "+z"}.get(in_shaft, in_shaft)
+    part = orient(part, out_shaft, parent_dir)
+    return sanitize(part)
+
+
+def cluster_outrigger(shaft: str = "+y", parent: str = "+z",
+                      stagger: float = 0.0,
+                      wall: float = PLATE_T) -> cq.Workplane:
+    """外侧抱箍：在轴距外侧夹住错开后的舵机两端面 4×M2.5，副轴侧保留 MF106ZZ。
+
+    关节原点仍在 (0,0,0)；机体中心沿 +Y 移了 `stagger`。
+    两块端板跟着 stagger 走，轴距核心不再被 35 mm 机体占据。
+    """
+    y_c = stagger                         # 机体沿轴中心
+    y_out = y_c + Y_HALF                  # 输出端面（机壳，不含凸台）
+    y_sec = y_c - Y_HALF                  # 副轴端面
+    z_floor_bot = Z_BOT - wall
+    z_cap_top = Z_TOP + wall
+
+    part = cq.Workplane("XY")
+    # 输出侧端板（+Y）：4×M2.5 对穿，中心让开 Φ20 凸台
+    p_out = box(SPAN_X, wall, z_cap_top - z_floor_bot,
+                at=(0, y_out + wall / 2.0, z_floor_bot))
+    p_out = p_out.cut(cyl(26.0, wall * 4,
+                          at=(0, y_out - wall, 0), axis="Y"))
+    part = part.union(p_out)
+
+    # 副轴侧端板（−Y）：MF106ZZ 压入
+    p_sec = box(SPAN_X, wall, z_cap_top - z_floor_bot,
+                at=(0, y_sec - wall / 2.0, z_floor_bot))
+    b = bearing(IF["secondary_shaft"]["bearing"])
+    bore = b["od_mm"] + FDM["bearing_bore_interference_mm"]
+    p_sec = p_sec.cut(cyl(bore, wall * 4,
+                          at=(0, y_sec - wall * 2, 0), axis="Y"))
+    if {"flange_od_mm", "flange_width_mm"} <= set(b):
+        # 法兰沉台在副轴板外侧（与 joint_cage 同源，S6#07 径向搭边）
+        p_sec = p_sec.cut(cyl(b["flange_od_mm"] + FDM["clearance_snug_mm"],
+                              b["flange_width_mm"] + 0.2,
+                              at=(0, y_sec - wall, 0), axis="Y")
+                          .translate((0, -0.1, 0)))
+    part = part.union(p_sec)
+
+    # 底板把两块端板连成一体（走在机体 −Z 外侧，不进轴距核心）
+    y_mid = (y_out + y_sec) / 2.0
+    part = part.union(box(SPAN_X, abs(y_out - y_sec) + wall, wall,
+                          at=(0, y_mid, z_floor_bot)))
+
+    # 端面 4×M2.5，孔阵中心 = 机体轴心（随 stagger 平移）
+    pitch = SF["mount_pitch"]
+    part = drill(part, [(sx * pitch[0] / 2.0, sy * pitch[1] / 2.0)
+                        for sx in (-1, 1) for sy in (-1, 1)],
+                 dia=fastener("M2.5")["clearance_hole_mm"],
+                 depth=abs(y_out - y_sec) + 2 * wall + 2.0,
+                 z0=min(y_out, y_sec) - wall - 1.0, axis="Y")
+
+    part = safe_fillet(part, FDM["fillet_min_mm"], "|Y")
+    part = orient(part, shaft, parent)
+    return sanitize(part)
+
+
+def backpack_plate(wall: float = 3.0) -> cq.Workplane:
+    """背挂板：5 件电子件的公共座（选项 A，接受整机深度 ~198 mm）。
+
+    板面在躯干局部 x = −60，z 从约 −10 到 +90，与 assembly.ELEC_BACKPACK 对齐。
+    """
+    part = cq.Workplane("XY")
+    # 板在电子件 +X 面（x=−60）与躯干（x≥−48）之间，电子件坐在板的 −X 面
+    part = part.union(box(3.0, 72.0, 140.0, at=(-58.5, 0.0, -50.0)))
+    for sy in (-1, 1):
+        for sz in (-40.0, 80.0):
+            part = part.union(box(8.0, 8.0, 6.0, at=(-53.0, sy * 28.0, sz)))
+    return sanitize(part)
+
+
+# --------------------------------------------------------------------------
 # 零件 5：骨盆框架（下半身中枢）
 # --------------------------------------------------------------------------
 def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
@@ -485,11 +627,13 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
             part = part.union(box(8.0, 8.0, 12.0, at=(sx * 14.0, sy * 20.0, 8.0)))
 
     # --- 3. 电池仓底板（边框 + 两条横梁，电池坐在框上）---
-    deck = box(tl, tw, 2.6, at=(0, 0, 18.0))
-    deck = deck.cut(box(60.0, 56.0, 8.0, at=(0, 0, 16.0)))
+    deck = box(tl, tw, TORSO_PLATE_T, at=(0, 0, TORSO_BAY_FLOOR_Z))
+    deck = deck.cut(box(60.0, 56.0, 8.0,
+                        at=(0, 0, TORSO_BAY_FLOOR_Z - 2.0)))
     part = part.union(deck)
     for sy in (-1, 1):
-        part = part.union(box(80.0, 8.0, 2.6, at=(0, sy * 16.0, 18.0)))
+        part = part.union(box(80.0, 8.0, TORSO_PLATE_T,
+                              at=(0, sy * 16.0, TORSO_BAY_FLOOR_Z)))
     for sy in (-1, 1):
         part = part.union(box(38.0, 3.0, 22.0, at=(0, sy * 44.0, 20.6)))
     for dx in (-11.0, 11.0):
@@ -503,10 +647,12 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
             part = part.union(post)
 
     # --- 5. 树莓派托盘（外框 + 4×M2.5 柱，85 边沿 Y）---
-    tray = box(tl, tw, 2.6, at=(0, 0, 42.0))
-    tray = tray.cut(box(52.0, 60.0, 8.0, at=(0, 0, 40.0)))
+    tray = box(tl, tw, TORSO_PLATE_T, at=(0, 0, TORSO_DECK_FLOOR_Z))
+    tray = tray.cut(box(52.0, 60.0, 8.0,
+                        at=(0, 0, TORSO_DECK_FLOOR_Z - 2.0)))
     for sy in (-1, 1):
-        tray = tray.cut(box(20.0, 18.0, 8.0, at=(0, sy * 30.0, 40.0)))
+        tray = tray.cut(box(20.0, 18.0, 8.0,
+                            at=(0, sy * 30.0, TORSO_DECK_FLOOR_Z - 2.0)))
     part = part.union(tray)
     for sx in (-1, 1):
         for sy in (-1, 1):
@@ -700,6 +846,8 @@ def battery_tray() -> cq.Workplane:
     for dx in (-20.0, 20.0):
         part = part.cut(box(3.0, 40.0, 3.0, at=(dx, 0, 1.5)))
     part = part.cut(cyl(8.0, 6.0, at=(42.0, 0, 3.0), axis="X"))
+    # 站在电池仓层板上表面（唯一真值来源，见 TORSO_BAY_TOP_Z）
+    part = part.translate((0.0, 0.0, TORSO_BAY_TOP_Z))
     return sanitize(part)
 
 
@@ -716,6 +864,8 @@ def electronics_deck() -> cq.Workplane:
                                          bore_depth=5.0, z0=2.0))
     for dx in (-24.0, 0.0, 24.0):
         part = part.cut(box(14.0, 14.0, 6.0, at=(dx, 24.0, 0)))
+    # 站在电控层层板上表面（唯一真值来源，见 TORSO_DECK_TOP_Z）
+    part = part.translate((0.0, 0.0, TORSO_DECK_TOP_Z))
     return sanitize(part)
 
 
@@ -766,9 +916,24 @@ SKELETON_PARTS: Dict[str, Dict[str, Any]] = {
         "used_by": "四肢主承力段",
     },
     "compact_adapter": {
-        "builder": compact_adapter, "count": 8, "material": "PETG", "infill": 0.60,
-        "desc": "紧凑转接块（19.6/27.5 mm 短链节，一体 L 形）",
-        "used_by": "hip_yaw/hip_roll/shoulder_pitch/trunk_roll/head 短链节",
+        "builder": compact_adapter, "count": 2, "material": "PETG", "infill": 0.60,
+        "desc": "紧凑转接块（仅颈/腰 27.5 mm 短链）",
+        "used_by": "head_yaw_link / trunk_roll_link",
+    },
+    "cluster_horn_arm": {
+        "builder": cluster_horn_arm, "count": 6, "material": "PETG", "infill": 0.55,
+        "intended_material": "6061-T6",
+        "desc": "髋/肩错轴单侧臂（锁上一级舵盘，轴距 19.6 mm；承力目标 6061-T6）",
+        "used_by": "hip_yaw→roll、hip_roll→pitch、shoulder_pitch→roll",
+    },
+    "cluster_outrigger": {
+        "builder": cluster_outrigger, "count": 8, "material": "PETG", "infill": 0.55,
+        "desc": "髋/肩外侧抱箍（端面 4×M2.5 + 副轴 MF106ZZ）",
+        "used_by": "hip_roll/pitch ×2、shoulder_pitch/roll ×2",
+    },
+    "backpack_plate": {
+        "builder": backpack_plate, "count": 1, "material": "PETG", "infill": 0.35,
+        "desc": "背挂板（STM32 / URT-1 / XL4015 / 功放 / 喇叭）",
     },
     "pelvis_frame": {
         "builder": pelvis_frame, "count": 1, "material": "PETG", "infill": 0.45,
