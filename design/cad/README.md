@@ -29,11 +29,26 @@ CadQuery 需要 OpenCASCADE，**必须装在独立环境**（不要污染主仓�
 
 ```bash
 cd <repo>
-python3 -m venv .venv-cad
-.venv-cad/bin/pip install cadquery
+
+# ① 先检查是否已存在 —— 环境约 830 MB，重建代价高（要重下 165 MB 的 OCP wheel）
+if .venv-cad/bin/python -c "import cadquery, OCP" 2>/dev/null; then
+  echo "已就绪：$(.venv-cad/bin/python -c 'import cadquery; print(cadquery.__version__)')"
+else
+  # ② 只有确认不存在/不可用时才重建
+  python3 -m venv .venv-cad
+  .venv-cad/bin/pip install -r design/cad/requirements.txt
+fi
 ```
 
-已验证可用：Python 3.9.6 / macOS arm64 / `cadquery-ocp 7.7.2` / CadQuery 2.5.2。
+已验证可用：Python 3.9.6 / macOS arm64 / `cadquery-ocp 7.7.2` / CadQuery 2.5.2 / `ezdxf 1.4.2`。
+
+> ⚠️ **环境必须建在仓库内（`.venv-cad/`），禁止建在 `/tmp`。**
+> macOS 重启会清空 `/tmp`，系统还会清理 3 天未访问的临时文件。
+> 2026-09-11 凌晨曾把环境建在 `/tmp/cadvenv`，当天下午的新会话找不到它，
+> 误判为「协作者机器上的环境没有 clone 过来」，白下 859 MB。
+>
+> 另注：`.venv-cad/` 已在 `.gitignore` 中，**git 里看不到它**。
+> 判断环境是否存在**必须查文件系统**（`ls .venv-cad/bin/python`），不能只看 `git status`。
 
 ## 使用
 

@@ -175,13 +175,18 @@ SERVOS: Dict[str, Dict[str, Any]] = {
         "mass_g": 55.0,
         "rated_torque_nm": 1.0,
         "stall_torque_nm": 3.0,
-        "speed_s_per_60deg": 0.18,
+        "speed_s_per_60deg": 0.222,             # 订正：原 0.18 偏乐观 19%
+        "speed_note": (
+            "来源【实物包装标签】`SPEED: 0.222sec/60degree(12V)`（ST-3215-C018）。"
+            "原值 0.18 无出处，已修正。同一标签给出 "
+            "`TORQUE: 30kg.cm(12V)` = 2.94 N·m，与 stall_torque_nm 一致。"
+        ),
         "voltage_v": 12.0,
 
         # —— 机械接口（建模必需）——
         "horn_spline": "25T",
         "horn_spline_od_mm": 5.90,
-        "horn_pcd_mm": 14.0,            # 已由实物测绘确认为 Φ14（非 Φ16）
+        "horn_pcd_mm": 14.0,            # Φ14（非 Φ16）；2026-09-11 第二来源复核确认
         "horn_hole_count": 4,           # 90° 均布
         "horn_hole_thread": "M2.5",
         "horn_hole_depth_mm": 2.5,      # 螺纹直接攻在铝合金舵盘上
@@ -190,24 +195,54 @@ SERVOS: Dict[str, Dict[str, Any]] = {
         "horn_screw": "M3x6",           # 内六角盘头，锁入主轴齿轮中心
         "horn_verify": "verified",
         "horn_note": (
-            "✅ 节圆 Φ14 已由实物测绘确认。"
+            "✅ 节圆 Φ14 已于 2026-09-11 由**第二个独立来源**复核确认："
+            "第三方 B-rep 模型实测舵盘端 4 孔为 9.9 × 9.9 方阵，对角 = 14.00 mm "
+            "（复现：design/cad/measure_servo.py）。"
+            "同测：舵盘盘径 Φ20.0、中心螺孔 Φ2.5 深 3.9 —— 与本条参数一致。"
             "25T 齿顶宽约 0.2mm < 0.4mm 喷嘴最小可靠特征 0.35mm，"
             "**FDM 无法打印，必须采购金属舵盘**。"
             "跨品牌 25T 不通用（飞特与辉盛齿深差 0.15mm），必须买飞特专用/兼容件。"
         ),
 
-        # —— 机身安装耳（原阻塞项，已由图纸核验补齐）——
-        "body_total_length_mm": 51.2,       # 含两侧安装耳
-        "ear_extend_mm": 3.0,               # 单侧耳伸出量
-        "ear_hole_pitch_length_mm": 48.5,   # 耳孔沿长度方向中心距
-        "ear_hole_pitch_width_mm": 10.0,    # 耳孔沿宽度方向中心距
-        "body_mount_hole_thread": "M2.5",
-        "body_mount_hole_type": "through",  # Φ2.5 通孔
+        # —— 机身安装接口（2026-09-11 核验订正）——
+        # ⚠️ 订正记录：此处原有 body_total_length_mm=51.2 / ear_extend_mm=3.0 /
+        #    ear_hole_pitch_length_mm=48.5 / ear_hole_pitch_width_mm=10.0 四个字段，
+        #    描述"两侧安装耳"。核验证明**该特征不存在**，已整体删除：
+        #      ① 实物包装标签 `SIZE: A: 45.22mm`，机身长度就是这个数，没有 51.2 的余地；
+        #      ② STEP 模型 X 包络 45.419，X/Y 方向无任何超出机身的特征；
+        #      ③ 旧数据自身不自洽 —— (51.2−48.5)/2 − 1.25 = 0.10 mm 壁厚，注塑件不可能。
+        #    证据与复现见 design/handoff/STS3215-机械接口核验.md
+        #
+        # 真实接口：两端面各有 Φ20 圆盘 + 4×Φ2.5 孔，方形 9.9×9.9（= 节圆 Φ14）
+        "body_mount_disc_od_mm": 20.0,
+        "body_mount_disc_thickness_mm": [2.1, 2.5],  # [−Z 端, +Z 端]；实测
+        "body_mount_pcd_mm": 14.0,          # 与舵盘同规格（Φ14）
+        "body_mount_pattern_pitch_mm": 9.9, # 方阵边长；9.9 × √2 = 14.00
+        "body_mount_hole_count": 4,         # 90° 均布
         "body_mount_hole_dia_mm": 2.5,
-        "body_mount_verify": "drawing",
+        "body_mount_hole_thread": "M2.5",
+        "body_mount_thread_note": (
+            "⚠️ 螺纹规格存疑：模型是 Φ2.5 圆孔，无法表达螺纹；"
+            "而 SO-ARM100 配套支架对应孔为 Φ2.0 通孔（配 M2 螺钉）。"
+            "待实物确认是 M2.5 螺纹孔还是 M2/M3 底孔。"
+        ),
+        "body_mount_hole_type": "through",  # 贯穿 Φ20 端面盘（厚 2.1 / 2.5）
+        "body_mount_faces": "两端面各一组（+Z 盘厚 2.5，−Z 盘厚 2.1）",
+        "body_mount_axis_xy_mm": [12.5, 0.0],
+        "body_mount_axis_note": (
+            "⚠️ 该坐标相对**第三方模型自身坐标系**，与实物标称 A/B/C 基准面的对应关系"
+            "尚未完全确认 → 偏心量的**符号与端点归属**暂不得用于建模。"
+            "【部分吻合】实测轴心沿机身长度方向偏心：距模型 +X 面 10.21 mm、"
+            "距 −X 面 35.21 mm，与已有 shaft_depth_from_face_mm = 11.0 相差约 0.8 mm；"
+            "宽度方向实测居中（Y=0），与 shaft_offset_from_side_mm = 12.35 ≈ 半宽 12.41 一致。"
+            "→ 长度方向的坐标对应关系**基本成立**。买 1 只实测 3 个数即可完全闭合。"
+        ),
+        "body_mount_verify": "provisional",
         "body_mount_note": (
-            "来自飞特官方 2D 工程图纸。⚠️ 自洽性存疑：总长 51.2 与孔距 48.5 "
-            "推导出孔边到耳外缘仅 0.10 mm，过薄。二者需实物复测确认其一。"
+            "【2026-09-11 核验订正】原标『飞特官方 2D 工程图纸』的安装耳数据已删除。"
+            "现行数据来自第三方 B-rep 模型（SO-ARM100，Apache-2.0）+ 实物包装标签照，"
+            "**既非官方图纸、亦非我方实测** → 故为 provisional。"
+            "复现：.venv-cad/bin/python design/cad/measure_servo.py"
         ),
 
         # —— 输出轴与副轴 ——
@@ -216,6 +251,13 @@ SERVOS: Dict[str, Dict[str, Any]] = {
         "shaft_depth_from_face_mm": 11.0,   # 主轴中心相对主端面纵深
         "secondary_shaft_dia_mm": 6.0,      # 副轴 Φ6 h7 (5.96~5.98)
         "secondary_shaft_protrusion_mm": 3.0,
+        "secondary_shaft_protrusion_note": (
+            "⚠️ **冲突未决**：2026-09-11 实测第三方模型，−Z 端仅有一个 Φ6.0、"
+            "高 0.6 mm 的凸台（z −18.3→−17.7），与本值 3.0 相差 5 倍。"
+            "两种可能：①该凸台是定位台而非副轴；②模型省略了副轴。"
+            "0.6 mm 不足以支撑轴承，故**暂不改值**——语义未定前替换数字风险更大。"
+            "待实物复测（卡尺量副轴轴径与伸出长度）。"
+        ),
         "secondary_shaft_coaxial_tol_mm": 0.05,
         "secondary_shaft_end_thread": "M2.5",
         "secondary_shaft_thread_depth_mm": 4.0,
@@ -224,11 +266,20 @@ SERVOS: Dict[str, Dict[str, Any]] = {
         "bottom_hole_pitch_mm": [38.0, 15.0],
         "bottom_hole_depth_mm": 4.0,
         "bottom_hole_verify": "provisional",
-        "bottom_hole_note": "批次间可能有差异",
+        "bottom_hole_note": (
+            "批次间可能有差异。⚠️ 2026-09-11 第三方模型实测**未见** 38.0×15.0 孔阵；"
+            "模型在底部端面给出的是与舵盘同规格的 Φ20 + 4×Φ2.5 @ Φ14（见 body_mount_*）。"
+            "二者可能是不同批次/不同版本，待实物确认。"
+        ),
 
         "cable_exit": "side",
-        "verify": "drawing",
-        "source": "飞特官方 2D 工程图纸 + 部件库实测核定",
+        "verify": "provisional",
+        "source": (
+            "【2026-09-11 订正】原标『飞特官方 2D 工程图纸』—— 该图纸未入库、无法复核，"
+            "且据此推导的安装耳数据已被证伪（见 body_mount_note），故整体降级为 provisional。"
+            "现行来源：实物包装标签照（尺寸/扭矩/速度）+ 第三方 B-rep 模型（接口几何）"
+            "+ 部件库实测核定（舵盘、轴承）。"
+        ),
     },
 }
 
