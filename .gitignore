@@ -45,13 +45,11 @@ design/handoff/*.png
 # CadQuery 独立环境与 CAD 产出（体积大，可复现）
 .venv-cad/
 design/cad/out/
-# ── 答辩 PPT 生产流水线（ppt/） ─────────────────────────────
-# 虚拟环境
-.venv-ppt/
 
-# 答辩 PPT 产物可复现，不入库（旧 51 页定稿已移出）
+# ── 答辩 PPT 生产流水线（ppt/） ─────────────────────────────
+.venv-ppt/
 ppt/out/
 
-# AI 生成的大图（4 张，约 19MB）：当前构建器未引用，留在本地
-# 若将来要用，删掉下面这行再 git add 即可
-ppt/assets/*.png
+# 忽略整个 ppt/ 生成流水线与脚本，仅保留成品 PPTX
+ppt/*
+!ppt/ATRI-答辩PPT-v4.pptx

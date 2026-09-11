@@ -1,9 +1,0 @@
-Keep the robot design, materials, colours, proportions and the light gray studio background of the source image EXACTLY unchanged. Do not redesign the head, the shell panels, the navy blue accent stripes or the dark graphite joints.
-
-Change ONLY the pose: the robot is now captured mid-kick, balancing on its left leg with the right leg swung forward, the right foot just touching a small orange ball about 5 cm in diameter resting on the floor. Arms swing naturally for balance.
-
-Keep the head exactly as in the source image: a rounded white head with a dot-matrix speaker grille and one single round camera lens. There are NO eyes and NO visor and NO face.
-
-Same soft even studio lighting from above and slightly front, same light neutral gray seamless background, soft contact shadow under the support foot. Engineering product-catalogue aesthetic, photorealistic, sharp focus on the robot.
-
-NO neon glow, NO lens flare, NO dark background, NO purple or cyan lighting, NO text, NO logo, NO watermark, NO cartoon face, NO eyes, NO visor, NO extra limbs, NO extra fingers, NO floating parts, NO motion blur streaks, NO disconnected components. Anatomically plausible mechanical structure with every joint physically connected.
