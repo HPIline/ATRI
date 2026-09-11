@@ -70,7 +70,7 @@ ATRI/
 │   ├── contest/                    # 省赛操作手册与申报附件
 │   └── research/项目文档/           # 项目综述、技术方案、BOM 与可行性核查
 ├── ppt/                            # 答辩交付物
-│   └── ATRI-答辩PPT-v4.pptx        # 51 页答辩演示文稿
+│   └── ATRI-答辩PPT-v4.pptx        # 24 页答辩演示文稿
 └── NOTICE                          # 第三方参考资产（如 SO-ARM100 模型）合规声明
 ```
 
