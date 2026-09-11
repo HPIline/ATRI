@@ -8,7 +8,7 @@
     "angle": "deg",
     "axis": "URDF 约定（+z 向上）"
   },
-  "frame_note": "position_mm 是相对『宿主 link 坐标系原点』的偏移；link 坐标系原点落在驱动它的关节轴线上。舵机的位置 = 它驱动的那个关节的原点（即父 link 坐标系里的 joint origin）。全部为**设计位**，实物装配前须按采购件复测。",
+  "frame_note": "position_mm 是相对『宿主 link 坐标系原点』的偏移，按**几何中心**；link 坐标系原点落在驱动它的关节轴线上。`kind` 是**稳定机器索引**（compute/battery/mcu/…），`id`/`name` 只是给人看的显示名——程序一律按 `kind` 匹配，历史上按显示名匹配导致电子件摆位规则整批静默失效。舵机的位置 = 它驱动的那个关节的原点（即父 link 坐标系里的 joint origin）。全部为**设计位**，实物装配前须按采购件复测。",
   "servos": [
     {
       "joint": "head_yaw",
@@ -498,6 +498,7 @@
   "electronics": [
     {
       "id": "Raspberry Pi 4B (4GB)",
+      "kind": "compute",
       "name": "Raspberry Pi 4B (4GB)",
       "link": "torso_upper",
       "mass_g": 46.0,
@@ -515,6 +516,7 @@
     },
     {
       "id": "STM32F405RGT6 核心板",
+      "kind": "mcu",
       "name": "STM32F405RGT6 核心板",
       "link": "torso_upper",
       "mass_g": 12.0,
@@ -532,6 +534,7 @@
     },
     {
       "id": "飞特 URT-1 总线驱动板",
+      "kind": "servo_driver",
       "name": "飞特 URT-1 总线驱动板",
       "link": "torso_upper",
       "mass_g": 15.0,
@@ -549,6 +552,7 @@
     },
     {
       "id": "XL4015 降压模块",
+      "kind": "bec",
       "name": "XL4015 降压模块",
       "link": "torso_upper",
       "mass_g": 22.0,
@@ -566,6 +570,7 @@
     },
     {
       "id": "PAM8403 功放模块",
+      "kind": "amp",
       "name": "PAM8403 功放模块",
       "link": "torso_upper",
       "mass_g": 5.0,
@@ -583,6 +588,7 @@
     },
     {
       "id": "4Ω 3W 腔体喇叭 Φ28",
+      "kind": "speaker",
       "name": "4Ω 3W 腔体喇叭 Φ28",
       "link": "torso_upper",
       "mass_g": 25.0,
@@ -600,6 +606,7 @@
     },
     {
       "id": "UVC 广角相机模组 (OV9732/IMX219)",
+      "kind": "camera",
       "name": "UVC 广角相机模组 (OV9732/IMX219)",
       "link": "head",
       "mass_g": 15.0,
@@ -611,12 +618,13 @@
       "position_mm": [
         18.0,
         0.0,
-        6.0
+        13.5
       ],
       "note": "装在头部前方，随 head_pitch 俯仰"
     },
     {
       "id": "USB 免驱拾音模块 (CM6533)",
+      "kind": "mic",
       "name": "USB 免驱拾音模块 (CM6533)",
       "link": "head",
       "mass_g": 8.0,
@@ -628,12 +636,13 @@
       "position_mm": [
         10.0,
         0.0,
-        -14.0
+        -10.0
       ],
       "note": ""
     },
     {
       "id": "ICM-42688-P 模块",
+      "kind": "imu",
       "name": "ICM-42688-P 模块",
       "link": "pelvis",
       "mass_g": 3.0,
@@ -645,12 +654,13 @@
       "position_mm": [
         0.0,
         0.0,
-        8.0
+        9.5
       ],
       "note": "装在骨盆（重心附近），避免头部摆动干扰姿态解算"
     },
     {
       "id": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
+      "kind": "battery",
       "name": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
       "link": "torso_upper",
       "mass_g": 165.0,

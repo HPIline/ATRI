@@ -29,6 +29,7 @@ sys.path.insert(0, str(HERE))
 import cadquery as cq
 
 import skeleton as sk
+from fitcheck import overlap_report
 from kit import MATERIALS, apply_trsf, box, cyl, printed_mass, servo_frame
 from parts import sanitize
 from standards import SERVOS, servo
@@ -151,22 +152,22 @@ OPP = {"+x": "-x", "-x": "+x", "+y": "-y", "-y": "+y", "+z": "-z", "-z": "+z"}
 #   cage   母端笼的实现：ortho=独立关节笼 / yaw=偏转笼 / adapter=集成在紧凑转接块里
 #   fork   子端叉的实现：fork=独立连杆叉 / adapter=转接块自带舵盘面 / part=大件自带
 JOINT_SCHEME: Dict[str, Dict[str, str]] = {
-    "head_yaw":          {"shaft": "+z", "parent": "+z", "cage": "yaw",     "fork": "adapter"},
+    "head_yaw":          {"shaft": "+z", "parent": "+z", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
     "head_pitch":        {"shaft": "+y", "parent": "-z", "cage": "adapter", "fork": "part"},
     "trunk_roll":        {"shaft": "+x", "parent": "-z", "cage": "ortho",   "fork": "adapter"},
     "trunk_pitch":       {"shaft": "+y", "parent": "-z", "cage": "adapter", "fork": "part"},
-    "left_hip_yaw":      {"shaft": "-z", "parent": "+z", "cage": "yaw",     "fork": "adapter"},
-    "right_hip_yaw":     {"shaft": "-z", "parent": "+z", "cage": "yaw",     "fork": "adapter"},
+    "left_hip_yaw":      {"shaft": "-z", "parent": "+z", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
+    "right_hip_yaw":     {"shaft": "-z", "parent": "+z", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
     "left_hip_roll":     {"shaft": "-x", "parent": "+z", "cage": "adapter", "fork": "adapter"},
-    "right_hip_roll":    {"shaft": "-x", "parent": "+z", "cage": "adapter", "fork": "adapter"},
-    "left_hip_pitch":    {"shaft": "+y", "parent": "+z", "cage": "adapter", "fork": "fork"},
+    "right_hip_roll":    {"shaft": "-x", "parent": "+z", "cage": "adapter", "fork": "adapter", "clock": "flip"},
+    "left_hip_pitch":    {"shaft": "+y", "parent": "+z", "cage": "adapter", "fork": "fork", "clock": "flip"},
     "right_hip_pitch":   {"shaft": "-y", "parent": "+z", "cage": "adapter", "fork": "fork"},
     "left_knee_pitch":   {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
     "right_knee_pitch":  {"shaft": "-y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
     "left_ankle_pitch":  {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "part"},
     "right_ankle_pitch": {"shaft": "-y", "parent": "+z", "cage": "ortho",   "fork": "part"},
-    "left_shoulder_pitch":  {"shaft": "+y", "parent": "-y", "cage": "yaw",     "fork": "adapter"},
-    "right_shoulder_pitch": {"shaft": "-y", "parent": "+y", "cage": "yaw",     "fork": "adapter"},
+    "left_shoulder_pitch":  {"shaft": "+y", "parent": "-y", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
+    "right_shoulder_pitch": {"shaft": "-y", "parent": "+y", "cage": "yaw",     "fork": "adapter", "clock": "flip"},
     "left_shoulder_roll":   {"shaft": "-x", "parent": "+y", "cage": "adapter", "fork": "fork"},
     "right_shoulder_roll":  {"shaft": "+x", "parent": "-y", "cage": "adapter", "fork": "fork"},
     "left_elbow_pitch":  {"shaft": "+y", "parent": "+z", "cage": "ortho",   "fork": "fork"},
@@ -250,7 +251,14 @@ def servo_placeholder(name: str = SERVO_NAME) -> cq.Workplane:
 
 
 def electronics_placeholder(size: Sequence[float]) -> cq.Workplane:
-    return box(size[0], size[1], size[2])
+    """电子件占位体。
+
+    ⚠️ **以几何中心为基准**——必须与调用方语义一致：`build_assembly` 按
+    `pos[2] = 层板上表面 + 自身高/2` 落座，`placements.json` 的 `position_mm`
+    也按"中心"理解。原来这里是"底面在原点"（`box` 默认），每件都高了半个身位，
+    电池顶部因此穿进电控层托盘（9 215 mm³，重合率 49%）。
+    """
+    return box(size[0], size[1], size[2], at=(0.0, 0.0, -size[2] / 2.0))
 
 
 # 电子件的摆放姿态（placements.json 只给位置与尺寸，姿态在这里定）
@@ -258,9 +266,11 @@ ELEC_ROT_DEG = {"compute": 90.0}      # 树莓派 85 mm 边沿 Y 向（躯干内
 # 躯干骨架重排（给俯仰叉让位）后，舱内件要落在**各自的那块托盘/仓底**上。
 # 托盘上表面（torso 局部坐标，见 skeleton.torso_frame）：
 # 托盘上表面（torso 局部坐标，见 skeleton.torso_frame 的绝对布局）
+# ⚠️ 这些标高**不再在这里写死**：来自 skeleton 的唯一真值来源
+#    （曾因"零件建在 z=0、规则写 42.0+2.6"，导致托盘与电池仓两个打印件自己先撞上）
 ELEC_DECK_TOP = {
-    "compute": 42.0 + 2.6,                    # 树莓派托盘
-    "battery": 18.0 + 2.6,                    # 电池仓底板
+    "compute": sk.TORSO_DECK_LOAD_Z,   # 电控托盘（插入件）的上表面
+    "battery": sk.TORSO_BAY_LOAD_Z,    # 电池仓抽屉（插入件）的上表面
 }
 
 # 容积超额订阅：STM32 / URT-1 / XL4015 / 功放 / 喇叭塞不进躯干（见
@@ -272,6 +282,43 @@ ELEC_BACKPACK = {
 }
 BACKPACK_X = -60.0          # 躯干背面（躯干本体 x ∈ [−48, +48]）
 BACKPACK_PITCH = 16.0
+
+# 显式声明"就按 placements.json 原始坐标摆、不需要规则"的躯干件（目前为空）。
+# 加进来等于签字确认"原始坐标是对的"，避免用沉默掩盖失配。
+ELEC_RAW_OK: set = set()
+
+# 稳定 key 解析：显示名 → 短 kind。
+# ⚠️ 这条映射是为了兼容"placements.json 的 id 被写成显示名"的历史数据
+#    （生成器 design/gen_v2_baseline.py 里本来是短 id，二者脱节过一次）。
+ELEC_KIND_HINTS = {
+    "compute": ("raspberry", "树莓派"),
+    "battery": ("锂聚合物", "battery", "3s"),
+    "mcu": ("stm32",),
+    "servo_driver": ("urt-1", "总线驱动"),
+    "bec": ("xl4015",),
+    "amp": ("pam8403",),
+    "speaker": ("喇叭",),
+    "camera": ("相机",),
+    "mic": ("拾音",),
+    "imu": ("icm-42688",),
+}
+
+
+def elec_kind(entry: Dict[str, Any]) -> str:
+    """把 placements.json 的一条电子件解析成稳定 kind。
+
+    优先级：显式 `kind` → `id` → `name` 里的关键词。
+    解析不出来返回空串——调用方必须把它当成**错误**，不能静默跳过。
+    """
+    for field in ("kind", "id"):
+        v = str(entry.get(field, "")).strip()
+        if v in ELEC_KIND_HINTS:
+            return v
+    hay = f"{entry.get('id', '')} {entry.get('name', '')}".lower()
+    for kind, words in ELEC_KIND_HINTS.items():
+        if any(w in hay for w in words):
+            return kind
+    return ""
 
 
 def build_assembly(kin: Kin, placements: Dict[str, Any],
@@ -354,6 +401,11 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                 par = next(d for d in ("+z", "-z", "+y", "-y", "+x", "-x")
                            if d.replace("+", "").replace("-", "") !=
                            sc["shaft"].replace("+", "").replace("-", ""))
+            # 钟点位翻转：舵机两个端面的 4×Φ2.5 是方形（4 重对称），
+            # 所以绕自身轴转 180° 不影响拧螺钉，却能把机身 45.2 的长边调头、
+            # 避开相邻舵机。取值由 design/cad/fit_clocking.py 求解后写在此表。
+            if sc.get("clock") == "flip":
+                par = OPP[par]
             body = orient(servo_placeholder(), sc["shaft"], par)
             add(f"servo__{jname}", _place(body, kin.joint_world(jname)), "servo")
         except Exception as exc:  # noqa: BLE001
@@ -364,20 +416,33 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
         link = e["link"]
         if link not in kin.world:
             continue
+        kind = elec_kind(e)          # 稳定 key：不再依赖"id 里必须写短名"
+        # ⚠️ 躯干件必须命中一条摆位规则，否则**直接报错**。
+        #    历史 bug：placements.json 的 id 被写成显示名（"Raspberry Pi 4B (4GB)"），
+        #    而规则表用短 key（compute/battery/…），于是 7/7 件全部静默停在原始坐标，
+        #    正好落进 trunk_pitch 舵机的空间 → 27 683 mm³ 的"假干涉"。
+        if link == "torso_upper" and kind not in ELEC_DECK_TOP \
+                and kind not in ELEC_BACKPACK \
+                and e.get("id") not in ELEC_RAW_OK:
+            fail(f"elec/{e.get('id')}", "elec",
+                 KeyError(f"躯干电子件 {e.get('id')!r} 没有匹配的摆位规则"
+                          f"（解析出 kind={kind!r}）：请补 ELEC_DECK_TOP / "
+                          f"ELEC_BACKPACK，或显式加入 ELEC_RAW_OK"))
+            continue
         try:
             pos = list(e["position_mm"])
-            if link == "torso_upper" and e["id"] in ELEC_DECK_TOP:
+            if kind in ELEC_DECK_TOP:
                 # 底面坐在托盘上表面：中心 z = 盘面 + 自身高/2
-                pos[2] = ELEC_DECK_TOP[e["id"]] + e["size_mm"][2] / 2.0
-            elif link == "torso_upper" and e["id"] in ELEC_BACKPACK:
+                pos[2] = ELEC_DECK_TOP[kind] + e["size_mm"][2] / 2.0
+            elif kind in ELEC_BACKPACK:
                 # 背挂：沿 −X 挂在躯干背面，按序号纵向排开
-                k = ELEC_BACKPACK[e["id"]]
+                k = ELEC_BACKPACK[kind]
                 pos = [BACKPACK_X - e["size_mm"][0] / 2.0,
                        0.0,
                        30.0 - k * BACKPACK_PITCH]
             local = mat_mul(mat_trans(*pos),
                             mat_rpy(0.0, 0.0, math.radians(
-                                ELEC_ROT_DEG.get(e["id"], 0.0))))
+                                ELEC_ROT_DEG.get(kind, 0.0))))
             add(f"elec__{e['id']}",
                 _place(electronics_placeholder(e["size_mm"]),
                        mat_mul(kin.world[link], local)), "elec")
@@ -391,6 +456,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="A.T.R.I. 整机装配")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--no-export", action="store_true")
+    ap.add_argument("--no-fit-check", action="store_true",
+                    help="跳过装配后的干涉校验（只为快速出图时用）")
+    ap.add_argument("--strict", action="store_true",
+                    help="出现『摆放错误』级干涉时以非 0 退出（CI 用）")
+    ap.add_argument("--fit-threshold", type=float, default=5000.0,
+                    help="判定『摆放错误』的相交体积阈值 mm³（默认 5000）")
     args = ap.parse_args(argv)
 
     kin = Kin(DESIGN / "atri.urdf")
@@ -410,6 +481,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     if bb:
         print(f"整机包络 {bb.xlen:.0f} × {bb.ylen:.0f} × {bb.zlen:.0f} mm")
 
+    # ---- 装配后立即校验：把"摆错"从事后体检提前到构建时 ----
+    n_bad = 0
+    if not args.no_fit_check and items:
+        hits = overlap_report(items, threshold=1.0)
+        bad_place = [h for h in hits if h["verdict"] == "❌ 摆放错误"]
+        n_bad = len(bad_place)
+        print(f"\n装配校验：干涉 {len(hits)} 对，其中"
+              f"『摆放错误』{n_bad} 对（阈值 {args.fit_threshold:.0f} mm³）")
+        for h in bad_place[:10]:
+            print(f"  ❌ `{h['a']}` ↔ `{h['b']}`：{h['vol']:.0f} mm³"
+                  f"（重合率 {h['frac'] * 100:.0f}%）")
+        if n_bad > 10:
+            print(f"  …（其余 {n_bad - 10} 对见 audit_assembly.py）")
+
     if not args.no_export and items:
         (OUT / "step").mkdir(parents=True, exist_ok=True)
         path = OUT / "step" / "ATRI-assembly.step"
@@ -420,7 +505,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         cq.exporters.export(cq.Workplane("XY").newObject([comp]), str(stl),
                             tolerance=0.4, angularTolerance=0.4)
         print(f"已导出 {stl}（{stl.stat().st_size/1e6:.1f} MB）")
-    return 1 if bad else 0
+    if bad or (args.strict and n_bad):
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

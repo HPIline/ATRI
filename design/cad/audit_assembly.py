@@ -9,6 +9,7 @@
     .venv-cad/bin/python design/cad/audit_assembly.py            # 全机
     .venv-cad/bin/python design/cad/audit_assembly.py --tol 0.5  # 改接触判据
     .venv-cad/bin/python design/cad/audit_assembly.py --iso      # 只看孤件（最快的体检）
+    .venv-cad/bin/python design/cad/audit_assembly.py --strict   # 有摆放错误则退出码 1（CI）
 """
 from __future__ import annotations
 
@@ -23,40 +24,10 @@ REPO = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 
 import cadquery as cq
-from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
-from OCP.BRepExtrema import BRepExtrema_DistShapeShape
-from OCP.BRepGProp import BRepGProp
-from OCP.GProp import GProp_GProps
 
 import assembly as A
-
-
-def common_volume(a: cq.Workplane, b: cq.Workplane) -> float:
-    """两实体的相交体积（mm³）。"""
-    op = BRepAlgoAPI_Common(a.val().wrapped, b.val().wrapped)
-    op.Build()
-    if not op.IsDone():
-        return 0.0
-    props = GProp_GProps()
-    BRepGProp.VolumeProperties_s(op.Shape(), props)
-    return abs(props.Mass())
-
-
-def distance(a: cq.Workplane, b: cq.Workplane) -> float:
-    """两实体的最小距离（mm）。"""
-    d = BRepExtrema_DistShapeShape(a.val().wrapped, b.val().wrapped)
-    d.Perform()
-    return d.Value() if d.IsDone() else 1e9
-
-
-def bbox_of(wp: cq.Workplane):
-    return wp.val().BoundingBox()
-
-
-def boxes_overlap(b1, b2, pad: float = 0.0) -> bool:
-    return not (b1.xmax + pad < b2.xmin or b2.xmax + pad < b1.xmin or
-                b1.ymax + pad < b2.ymin or b2.ymax + pad < b1.ymin or
-                b1.zmax + pad < b2.zmin or b2.zmax + pad < b1.zmin)
+from fitcheck import (bbox_of, boxes_overlap, common_volume, distance,
+                      verdict)
 
 
 def kind_of(name: str) -> str:
@@ -71,6 +42,7 @@ def main(argv: Sequence[str]) -> int:
     if "--tol" in argv:
         tol = float(argv[list(argv).index("--tol") + 1])
     iso_only = "--iso" in argv
+    strict = "--strict" in argv
     top_n = 25
     if "--top" in argv:
         top_n = int(argv[list(argv).index("--top") + 1])
@@ -126,12 +98,6 @@ def main(argv: Sequence[str]) -> int:
                     inter.append((names[i], names[j], v, v / smaller, smaller))
     inter.sort(key=lambda t: -t[2])
 
-    def verdict(frac: float, v: float) -> str:
-        if frac >= 0.30 or v >= 5000.0:
-            return "❌ 摆放错误"
-        if frac >= 0.05 or v >= 500.0:
-            return "⚠️ 让位不足"
-        return "· 局部干涉"
 
     # ---- ② 未衔接：最小距离图 + 连通分量 ----
     adj: Dict[str, List[str]] = defaultdict(list)
@@ -170,15 +136,15 @@ def main(argv: Sequence[str]) -> int:
     # ---- 报告 ----
     print(f"\n## 穿模（相交体积 > 1 mm³，共 {len(inter)} 对）\n")
     if inter:
-        n_bad = sum(1 for _, _, v, f, _ in inter if verdict(f, v) == "❌ 摆放错误")
-        n_fit = sum(1 for _, _, v, f, _ in inter if verdict(f, v) == "⚠️ 让位不足")
+        n_bad = sum(1 for _, _, v, f, _ in inter if verdict(v, f) == "❌ 摆放错误")
+        n_fit = sum(1 for _, _, v, f, _ in inter if verdict(v, f) == "⚠️ 让位不足")
         n_min = len(inter) - n_bad - n_fit
         print(f"**性质判定**：摆放错误 **{n_bad}** 对 ｜ 让位不足 **{n_fit}** 对 ｜ "
               f"局部干涉 {n_min} 对\n")
         print("| # | 件 A | 件 B | 相交 mm³ | 重合率 | 判定 |")
         print("|---|---|---|---|---|---|")
         for k, (a, b, v, f, _sm) in enumerate(inter[:top_n], 1):
-            print(f"| {k} | `{a}` | `{b}` | {v:.0f} | {f * 100:.0f}% | {verdict(f, v)} |")
+            print(f"| {k} | `{a}` | `{b}` | {v:.0f} | {f * 100:.0f}% | {verdict(v, f)} |")
         tot = sum(v for _, _, v, _f, _s in inter)
         print(f"\n合计相交体积 **{tot:.0f} mm³**；"
               f"按零件统计前 8（含各自自身体积占比）：")
@@ -219,6 +185,12 @@ def main(argv: Sequence[str]) -> int:
             print(f"  - `{n}`  包络 {b.xlen:.0f}×{b.ylen:.0f}×{b.zlen:.0f}  "
                   f"中心 ({((b.xmin+b.xmax)/2):.0f}, {((b.ymin+b.ymax)/2):.0f}, "
                   f"{((b.zmin+b.zmax)/2):.0f})")
+    # --strict：有"摆放错误"级干涉就以非 0 退出（CI / build.sh 用）
+    n_place_err = sum(1 for h in inter if h[3] >= 0.30 or h[2] >= 5000.0) \
+        if not iso_only else 0
+    if strict and n_place_err:
+        print(f"\n[strict] 存在 {n_place_err} 对『摆放错误』级干涉 → 退出码 1")
+        return 1
     return 0
 
 

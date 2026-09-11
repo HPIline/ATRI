@@ -59,6 +59,24 @@ PLATE_Y = GAP / 2.0 + PLATE_T / 2.0          # 19.25：两侧板中心
 SPAN_X = (X_MAX - X_MIN) + 8.0               # 53.2：侧板长（含端部包边）
 SPIGOT_D, SPIGOT_H, SPIGOT_BORE = 34.0, 12.0, 26.0
 
+# --------------------------------------------------------------------------
+# 躯干内部层高 —— **唯一真值来源**
+#   三处必须一致，过去各写一份，导致"两个打印件自己先撞上"（9 942 mm³，重合率 53%）：
+#     ① torso_frame 的内建层板
+#     ② battery_tray / electronics_deck 这两个独立零件的自身标高
+#     ③ assembly 里电子件的落座标高（ELEC_DECK_TOP）
+# --------------------------------------------------------------------------
+TORSO_PLATE_T = 2.6
+TORSO_BAY_FLOOR_Z = 18.0          # 电池仓层板底面（下层）
+TORSO_DECK_FLOOR_Z = 42.0         # 电控层层板底面（上层）
+TORSO_BAY_TOP_Z = TORSO_BAY_FLOOR_Z + TORSO_PLATE_T     # 20.6：层板上表面
+TORSO_DECK_TOP_Z = TORSO_DECK_FLOOR_Z + TORSO_PLATE_T   # 44.6：层板上表面
+# 插入件（电池仓抽屉 / 电控托盘）自己还有一层 3 mm 底板 —— 承放电子件的是**它们**的上表面。
+# 只算框架层板会低 3 mm，实测导致电池顶进托盘（11 937 mm³）。
+INSERT_PLATE_T = 3.0
+TORSO_BAY_LOAD_Z = TORSO_BAY_TOP_Z + INSERT_PLATE_T     # 23.6：电池坐在这个面上
+TORSO_DECK_LOAD_Z = TORSO_DECK_TOP_Z + INSERT_PLATE_T   # 47.6：树莓派坐在这个面上
+
 
 # --------------------------------------------------------------------------
 # 零件 1：关节笼（母端）—— 夹住舵机机体，坐在上一级结构上
@@ -485,11 +503,13 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
             part = part.union(box(8.0, 8.0, 12.0, at=(sx * 14.0, sy * 20.0, 8.0)))
 
     # --- 3. 电池仓底板（边框 + 两条横梁，电池坐在框上）---
-    deck = box(tl, tw, 2.6, at=(0, 0, 18.0))
-    deck = deck.cut(box(60.0, 56.0, 8.0, at=(0, 0, 16.0)))
+    deck = box(tl, tw, TORSO_PLATE_T, at=(0, 0, TORSO_BAY_FLOOR_Z))
+    deck = deck.cut(box(60.0, 56.0, 8.0,
+                        at=(0, 0, TORSO_BAY_FLOOR_Z - 2.0)))
     part = part.union(deck)
     for sy in (-1, 1):
-        part = part.union(box(80.0, 8.0, 2.6, at=(0, sy * 16.0, 18.0)))
+        part = part.union(box(80.0, 8.0, TORSO_PLATE_T,
+                              at=(0, sy * 16.0, TORSO_BAY_FLOOR_Z)))
     for sy in (-1, 1):
         part = part.union(box(38.0, 3.0, 22.0, at=(0, sy * 44.0, 20.6)))
     for dx in (-11.0, 11.0):
@@ -503,10 +523,12 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
             part = part.union(post)
 
     # --- 5. 树莓派托盘（外框 + 4×M2.5 柱，85 边沿 Y）---
-    tray = box(tl, tw, 2.6, at=(0, 0, 42.0))
-    tray = tray.cut(box(52.0, 60.0, 8.0, at=(0, 0, 40.0)))
+    tray = box(tl, tw, TORSO_PLATE_T, at=(0, 0, TORSO_DECK_FLOOR_Z))
+    tray = tray.cut(box(52.0, 60.0, 8.0,
+                        at=(0, 0, TORSO_DECK_FLOOR_Z - 2.0)))
     for sy in (-1, 1):
-        tray = tray.cut(box(20.0, 18.0, 8.0, at=(0, sy * 30.0, 40.0)))
+        tray = tray.cut(box(20.0, 18.0, 8.0,
+                            at=(0, sy * 30.0, TORSO_DECK_FLOOR_Z - 2.0)))
     part = part.union(tray)
     for sx in (-1, 1):
         for sy in (-1, 1):
@@ -700,6 +722,8 @@ def battery_tray() -> cq.Workplane:
     for dx in (-20.0, 20.0):
         part = part.cut(box(3.0, 40.0, 3.0, at=(dx, 0, 1.5)))
     part = part.cut(cyl(8.0, 6.0, at=(42.0, 0, 3.0), axis="X"))
+    # 站在电池仓层板上表面（唯一真值来源，见 TORSO_BAY_TOP_Z）
+    part = part.translate((0.0, 0.0, TORSO_BAY_TOP_Z))
     return sanitize(part)
 
 
@@ -716,6 +740,8 @@ def electronics_deck() -> cq.Workplane:
                                          bore_depth=5.0, z0=2.0))
     for dx in (-24.0, 0.0, 24.0):
         part = part.cut(box(14.0, 14.0, 6.0, at=(dx, 24.0, 0)))
+    # 站在电控层层板上表面（唯一真值来源，见 TORSO_DECK_TOP_Z）
+    part = part.translate((0.0, 0.0, TORSO_DECK_TOP_Z))
     return sanitize(part)
 
 

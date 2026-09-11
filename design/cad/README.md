@@ -12,15 +12,17 @@
 ```
 design/
 ├── robot_model.json      ← 运动学/包络/质量（基元，用于校验与仿真）
-├── components.json       ← 外部元件参数（部件库提供）
-├── cad/                  ← 本层：真实零件
+├── components.json       ← 外部元件参数（部件库提供；电子件必须带稳定 kind）
+├── placements.json       ← 22 舵机 + 10 电子件 + 结构件落座（由 gen_placements.py 生成）
+├── cad/                  ← 本层：真实零件与整机装配
 │   ├── standards.py      ← 标准件参数（舵机/轴承/紧固件/FDM 容差）
-│   ├── parts.py          ← 参数化零件建模
-│   ├── build.py          ← 构建入口，导出 STEP/STL
-│   └── out/
-│       ├── step/         ← 可进 SolidWorks / 任何 CAD
-│       ├── stl/          ← 可 3D 打印
-│       └── report.md     ← 可制造性报告
+│   ├── kit.py            ← 接口标准 + servo_frame()（舵机姿态唯一真值）
+│   ├── skeleton.py       ← 15 种骨架零件（笼/叉/管/框架/托盘…）
+│   ├── assembly.py       ← 整机装配；按 kind 落座电子件，失败即报错
+│   ├── fitcheck.py       ← 干涉判定原语（装配/体检/钟点求解共用）
+│   ├── audit_assembly.py ← 穿模 / 连通性 / 关节轴对齐
+│   ├── build.sh          ← 一键：零件 → 装配 → 体检 → 预览
+│   └── out/              ← STEP/STL/报告（gitignore，可复现）
 ```
 
 ## 安装
@@ -53,26 +55,28 @@ fi
 ## 使用
 
 ```bash
-# 查看标准件参数状态（哪些还是 unknown）
+# 查看标准件参数状态（哪些还是 unknown / provisional）
 .venv-cad/bin/python design/cad/build.py --standards
 
-# 构建全部零件
-.venv-cad/bin/python design/cad/build.py --all
+# 推荐：零件 → 装配 → 体检（改参数反复跑用 --fast）
+bash design/cad/build.sh --fast
 
-# 构建单个
-.venv-cad/bin/python design/cad/build.py --part servo_yoke
+# 只要零件
+.venv-cad/bin/python design/cad/build_all.py --all
 ```
 
-## 已实现的零件
+## 现行零件（`skeleton.py`，不是早期的 `parts.py` 三件套）
 
-| 零件 | 说明 | 当前质量(实心) |
+15 种 / 72 件，质量按 PETG 1.27 g/cm³ + 外壁/填充估算。权威表每次构建写在 `design/cad/out/report.md`。
+
+| 模块 | 件数 | 作用 |
 |---|---|---|
-| `servo_yoke` | 舵机 U 型支架：夹持舵机 + 副轴轴承位 | 17.8 g |
-| `horn_adapter` | 25T 舵盘 → 4×M2.5 法兰转接件 | 3.1 g |
-| `link_tube` | 两端封头带轴孔的空心承力连杆 | 47.8 g |
+| `joint_cage` / `joint_cage_yaw` | 13 + 3 | 夹住舵机 + 副轴第二支点 + Ø34 插接 |
+| `limb_fork` / `limb_tube` / `compact_adapter` | 12 + 8 + 8 | 舵盘侧叉子、Φ40 连杆、短轴距转接 |
+| `torso_frame` / `pelvis_frame` / `head_shell` / `foot_plate` | 1+1+1+2 | 定制大件 |
+| 托盘 / 夹爪 / 线夹等 | 其余 | 电池仓、电控托盘、夹爪、线夹 |
 
-> 实心质量按 PLA 1.24 g/cm³ 计，**未计填充率**；实际打印按 30–50% 填充
-> 约为该值的 40–60%。
+**现行 CAD 质量口径（装配一致性修正后）**：结构 **1404 g**、整机 **3050 g**、踝关节 1.49 N·m（占堵转×50% 判据 102%）。过程记录见 `design/handoff/装配一致性修正记录.md`。
 
 ## 设计约定
 
@@ -91,8 +95,10 @@ fi
 
 | 项目 | 质量 |
 |---|---|
-> ⚠️ **本章为 v1 历史核算（475 mm 机身）。v3（2026-09-11）已改用 CAD 实装口径：
-> 实装包络 418 mm、结构件 1790 g、整机 3437 g，权威数字见 `design/handoff/新架构参数总表.md`。下表保留用于追溯。**
+> ⚠️ **本章为 v1 历史核算（475 mm 机身）。**
+> v3 提交口径：实装包络 418 mm、结构 1790 g、整机 3437 g（`新架构参数总表.md`）。
+> **装配一致性修正后的现行 CAD 实算**：结构 1404 g、整机 3050 g（`装配一致性修正记录.md` §4.4 / `out/report.md`）。
+> URDF 尚未回灌现行数——改重量方案时一并重算。下表保留用于追溯。
 
 | 打印结构件（14 关节模块 + 8 连杆 + 2 足 + 4 转接） | 553 g（v1，475 mm） |
 | 舵机 22 × STS3215 | 1210 g |

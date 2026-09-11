@@ -49,7 +49,8 @@ def main() -> int:
         })
 
     electronics = [
-        {"id": p.get("component", ""), "name": p["component"], "link": p["link"],
+        {"id": p.get("component", ""), "kind": p.get("kind", ""),
+         "name": p["component"], "link": p["link"],
          "mass_g": p.get("mass_g"), "size_mm": p.get("size_mm"),
          "position_mm": p.get("position_mm"), "note": p.get("note", "")}
         for p in c.get("placements", [])
@@ -74,7 +75,10 @@ def main() -> int:
         "model_version": m.get("version"),
         "units": {"length": "mm", "mass": "g", "angle": "deg", "axis": "URDF 约定（+z 向上）"},
         "frame_note": (
-            "position_mm 是相对『宿主 link 坐标系原点』的偏移；link 坐标系原点落在驱动它的关节轴线上。"
+            "position_mm 是相对『宿主 link 坐标系原点』的偏移，按**几何中心**；"
+            "link 坐标系原点落在驱动它的关节轴线上。"
+            "`kind` 是**稳定机器索引**（compute/battery/mcu/…），`id`/`name` 只是给人看的显示名——"
+            "程序一律按 `kind` 匹配，历史上按显示名匹配导致电子件摆位规则整批静默失效。"
             "舵机的位置 = 它驱动的那个关节的原点（即父 link 坐标系里的 joint origin）。"
             "全部为**设计位**，实物装配前须按采购件复测。"
         ),
