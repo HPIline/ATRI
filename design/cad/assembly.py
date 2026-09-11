@@ -38,6 +38,18 @@ OUT = HERE / "out"
 DESIGN = REPO / "design"
 SERVO_NAME = "STS3215"
 
+# 展示姿态（度）。机械零位右夹爪穿进 hip_yaw；预览把臂抬到身前。
+# 不加 shoulder_roll（外展会超宽）。校核脚本继续用全 0。
+DISPLAY_POSE_DEG = {
+    "left_shoulder_pitch": -40.0,
+    "right_shoulder_pitch": -40.0,
+    "left_elbow_pitch": -55.0,
+    "right_elbow_pitch": -55.0,
+    "left_gripper": 20.0,
+    "right_gripper": 20.0,
+    "head_pitch": 8.0,
+}
+
 # --------------------------------------------------------------------------
 # 矩阵工具（4×4，行主序；纯 Python，避免为装配引入 numpy 依赖）
 # --------------------------------------------------------------------------
@@ -57,6 +69,21 @@ def mat_trans(x: float, y: float, z: float) -> Mat:
     m = mat_identity()
     m[0][3], m[1][3], m[2][3] = x, y, z
     return m
+
+
+def mat_axis_angle(axis: Sequence[float], theta: float) -> Mat:
+    """绕任意轴旋转（Rodrigues）。theta 为弧度。"""
+    x, y, z = axis
+    n = math.sqrt(x * x + y * y + z * z) or 1.0
+    x, y, z = x / n, y / n, z / n
+    c, s = math.cos(theta), math.sin(theta)
+    C = 1.0 - c
+    return [
+        [x * x * C + c, x * y * C - z * s, x * z * C + y * s, 0.0],
+        [y * x * C + z * s, y * y * C + c, y * z * C - x * s, 0.0],
+        [z * x * C - y * s, z * y * C + x * s, z * z * C + c, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]
 
 
 def mat_rpy(r: float, p: float, yw: float) -> Mat:
@@ -87,7 +114,9 @@ def rot3(m: Mat) -> List[List[float]]:
 # URDF 运动学
 # --------------------------------------------------------------------------
 class Kin:
-    def __init__(self, urdf: Path):
+    def __init__(self, urdf: Path, pose_deg: Optional[Dict[str, float]] = None):
+        """pose_deg：关节角（度）。默认全 0，与 URDF 零位一致。预览可传入展示姿态。"""
+        self.pose_deg: Dict[str, float] = dict(pose_deg or {})
         root = ET.parse(urdf).getroot()
         self.joints: Dict[str, Dict[str, Any]] = {}
         self.parent_of: Dict[str, str] = {}
@@ -118,9 +147,13 @@ class Kin:
     def _fk(self, link: str, m: Mat) -> None:
         self.world[link] = m
         for child in self.children[link]:
-            j = self.joints[self.parent_of[child]]
-            self._fk(child, mat_mul(m, mat_mul(mat_trans(*j["xyz"]),
-                                               mat_rpy(*j["rpy"]))))
+            jname = self.parent_of[child]
+            j = self.joints[jname]
+            origin = mat_mul(mat_trans(*j["xyz"]), mat_rpy(*j["rpy"]))
+            theta = math.radians(self.pose_deg.get(jname, 0.0))
+            if abs(theta) > 1e-12:
+                origin = mat_mul(origin, mat_axis_angle(j["axis"], theta))
+            self._fk(child, mat_mul(m, origin))
 
     def joint_world(self, joint: str) -> Mat:
         """关节坐标系的世界位姿（= 父 link 位姿 × 关节 origin）。"""

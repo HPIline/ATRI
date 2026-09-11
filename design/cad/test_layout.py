@@ -154,6 +154,29 @@ class LayoutGates(unittest.TestCase):
         self.assertLessEqual(mic.xmax, xmax + 0.05)
         self.assertLessEqual(xmax - min(b.xmin for b in boxes), 147.0)
 
+    def test_display_pose_hands_leave_hips(self):
+        """展示姿态：手在身前，不穿髋；不外展超宽。"""
+        kin = A.Kin(A.DESIGN / "atri.urdf", pose_deg=A.DISPLAY_POSE_DEG)
+        lg = kin.world["left_gripper"]
+        rg = kin.world["right_gripper"]
+        self.assertGreater(lg[0][3], 40.0, "左手应抬到 +X")
+        self.assertGreater(rg[0][3], 40.0, "右手应抬到 +X")
+        self.assertGreater(lg[2][3], 0.0, "左手应离开髋高度")
+        # 限位
+        limits = {
+            "left_shoulder_pitch": (-90, 90),
+            "right_shoulder_pitch": (-90, 90),
+            "left_elbow_pitch": (-120, 0),
+            "right_elbow_pitch": (-120, 0),
+            "left_gripper": (0, 60),
+            "right_gripper": (0, 60),
+            "head_pitch": (-45, 45),
+        }
+        for j, q in A.DISPLAY_POSE_DEG.items():
+            lo, hi = limits[j]
+            self.assertGreaterEqual(q, lo, j)
+            self.assertLessEqual(q, hi, j)
+
     def test_pelvis_has_torso_riser(self):
         """U 臂要收到胸框后柱附近（y≈±48），不能只停在 y=±60 当挡板。"""
         bb = pelvis_frame().val().BoundingBox()

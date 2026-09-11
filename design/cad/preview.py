@@ -58,6 +58,8 @@ KIND_LABEL = {
     "elec": "电子件（占位）",
 }
 
+PREVIEW_POSE_DEG = A.DISPLAY_POSE_DEG
+
 
 # --------------------------------------------------------------------------
 # 几何：按"类别"打包成批次（HTML 里可按类别显隐）
@@ -329,6 +331,8 @@ def export_glb(items: Sequence[Tuple[str, cq.Workplane]], path: Path
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="生成交互式 3D 预览")
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--zero", action="store_true",
+                    help="用机械零位（默认是展示姿态，手臂抬到身前避免穿髋）")
     ap.add_argument("--part", type=str, default=None, help="只看单个零件")
     ap.add_argument("--tol", type=float, default=1.2, help="网格容差 mm")
     args = ap.parse_args(argv)
@@ -340,7 +344,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         title = f"ATRI · {args.part}"
         subtitle = "单件预览"
     else:
-        kin = A.Kin(A.DESIGN / "atri.urdf")
+        pose = {} if args.zero else PREVIEW_POSE_DEG
+        kin = A.Kin(A.DESIGN / "atri.urdf", pose_deg=pose)
         placements = json.loads((A.DESIGN / "placements.json").read_text(encoding="utf-8"))
         items, log = A.build_assembly(kin, placements)
         bad = [l for l in log if not l.get("ok")]
@@ -349,7 +354,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             b0 = wp.val().BoundingBox()
             bb0 = b0 if bb0 is None else bb0.add(b0)
         title = "A.T.R.I. 骨架装配预览"
-        subtitle = (f"{len(items)} 个零件 · 22 DOF · 包络 "
+        subtitle = (f"{len(items)} 个零件 · 22 DOF · 展示姿态 · 包络 "
                     f"{bb0.xlen:.0f}×{bb0.ylen:.0f}×{bb0.zlen:.0f} mm")
         if bad:
             print(f"  [WARN] {len(bad)} 个件装配失败")
