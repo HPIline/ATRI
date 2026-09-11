@@ -1,0 +1,172 @@
+"""装配体检：穿模（实体相交体积）+ 未衔接（连通分量 / 孤件）。
+
+为什么需要它：
+    交互预览里"看起来穿模"是不可复现的主观判断。本脚本把两件事变成数字——
+    ① 每对零件的**相交体积**（>阈值为穿模）；
+    ② 零件间的**最小距离图**，连通分量 > 1 说明有零件没接上（未衔接）。
+
+用法：
+    .venv-cad/bin/python design/cad/audit_assembly.py            # 全机
+    .venv-cad/bin/python design/cad/audit_assembly.py --tol 0.5  # 改接触判据
+    .venv-cad/bin/python design/cad/audit_assembly.py --iso      # 只看孤件（最快的体检）
+"""
+from __future__ import annotations
+
+import json
+import sys
+from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Sequence, Tuple
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parent.parent
+sys.path.insert(0, str(HERE))
+
+import cadquery as cq
+from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
+from OCP.BRepExtrema import BRepExtrema_DistShapeShape
+from OCP.BRepGProp import BRepGProp
+from OCP.GProp import GProp_GProps
+
+import assembly as A
+
+
+def common_volume(a: cq.Workplane, b: cq.Workplane) -> float:
+    """两实体的相交体积（mm³）。"""
+    op = BRepAlgoAPI_Common(a.val().wrapped, b.val().wrapped)
+    op.Build()
+    if not op.IsDone():
+        return 0.0
+    props = GProp_GProps()
+    BRepGProp.VolumeProperties_s(op.Shape(), props)
+    return abs(props.Mass())
+
+
+def distance(a: cq.Workplane, b: cq.Workplane) -> float:
+    """两实体的最小距离（mm）。"""
+    d = BRepExtrema_DistShapeShape(a.val().wrapped, b.val().wrapped)
+    d.Perform()
+    return d.Value() if d.IsDone() else 1e9
+
+
+def bbox_of(wp: cq.Workplane):
+    return wp.val().BoundingBox()
+
+
+def boxes_overlap(b1, b2, pad: float = 0.0) -> bool:
+    return not (b1.xmax + pad < b2.xmin or b2.xmax + pad < b1.xmin or
+                b1.ymax + pad < b2.ymin or b2.ymax + pad < b1.ymin or
+                b1.zmax + pad < b2.zmin or b2.zmax + pad < b1.zmin)
+
+
+def kind_of(name: str) -> str:
+    head = name.split("__")[0]
+    if head in ("servo",):
+        return "servo"
+    return name.split("__")[0]
+
+
+def main(argv: Sequence[str]) -> int:
+    tol = 0.6
+    if "--tol" in argv:
+        tol = float(argv[list(argv).index("--tol") + 1])
+    iso_only = "--iso" in argv
+    top_n = 25
+    if "--top" in argv:
+        top_n = int(argv[list(argv).index("--top") + 1])
+
+    kin = A.Kin(A.DESIGN / "atri.urdf")
+    placements = json.loads((A.DESIGN / "placements.json").read_text(encoding="utf-8"))
+    items, log = A.build_assembly(kin, placements)
+    bad = [l for l in log if not l.get("ok")]
+    print(f"装配件 {len(items)} 个（失败 {len(bad)}）")
+    for b in bad:
+        print(f"  [ERR] {b['name']}: {b.get('err')}")
+
+    names = [n for n, _ in items]
+    shapes = [w for _, w in items]
+    boxes = [bbox_of(w) for w in shapes]
+
+    # ---- ① 穿模：包围盒相交 → 精确求交体积 ----
+    inter: List[Tuple[str, str, float]] = []
+    if not iso_only:
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                if not boxes_overlap(boxes[i], boxes[j]):
+                    continue
+                v = common_volume(shapes[i], shapes[j])
+                if v > 1.0:
+                    inter.append((names[i], names[j], v))
+    inter.sort(key=lambda t: -t[2])
+
+    # ---- ② 未衔接：最小距离图 + 连通分量 ----
+    adj: Dict[str, List[str]] = defaultdict(list)
+    pairs = 0
+    for i in range(len(items)):
+        for j in range(i + 1, len(items)):
+            if not boxes_overlap(boxes[i], boxes[j], pad=tol + 1.0):
+                continue
+            pairs += 1
+            if distance(shapes[i], shapes[j]) <= tol:
+                adj[names[i]].append(names[j])
+                adj[names[j]].append(names[i])
+
+    seen, comps = set(), []
+    for n in names:
+        if n in seen:
+            continue
+        stack, comp = [n], []
+        seen.add(n)
+        while stack:
+            cur = stack.pop()
+            comp.append(cur)
+            for nb in adj[cur]:
+                if nb not in seen:
+                    seen.add(nb)
+                    stack.append(nb)
+        comps.append(sorted(comp))
+    comps.sort(key=len, reverse=True)
+
+    # ---- ③ 孤件：与任何零件的距离都 > tol ----
+    iso = []
+    for i, n in enumerate(names):
+        if not adj[n]:
+            iso.append(n)
+
+    # ---- 报告 ----
+    print(f"\n## 穿模（相交体积 > 1 mm³，共 {len(inter)} 对）\n")
+    if inter:
+        print("| # | 件 A | 件 B | 相交体积 mm³ |")
+        print("|---|---|---|---|")
+        for k, (a, b, v) in enumerate(inter[:top_n], 1):
+            print(f"| {k} | `{a}` | `{b}` | {v:.0f} |")
+        tot = sum(v for _, _, v in inter)
+        print(f"\n合计相交体积 **{tot:.0f} mm³**；"
+              f"按零件统计前 8：")
+        per: Dict[str, float] = defaultdict(float)
+        for a, b, v in inter:
+            per[a] += v
+            per[b] += v
+        for n, v in sorted(per.items(), key=lambda kv: -kv[1])[:8]:
+            print(f"  - `{n}`：{v:.0f} mm³")
+    else:
+        print("（无）")
+
+    print(f"\n## 未衔接（接触判据 ≤ {tol} mm）\n")
+    print(f"距离计算 {pairs} 对；**连通分量 {len(comps)} 个**")
+    for k, c in enumerate(comps[:6], 1):
+        head = ", ".join(f"`{x}`" for x in c[:6])
+        more = f" …（共 {len(c)} 件）" if len(c) > 6 else ""
+        print(f"  {k}. {head}{more}")
+    if iso:
+        print(f"\n**孤件 {len(iso)} 个**（与所有零件距离 > {tol} mm）：")
+        for n in iso:
+            b = bbox_of(dict(items)[n])
+            print(f"  - `{n}`  包络 {b.xlen:.0f}×{b.ylen:.0f}×{b.zlen:.0f}  "
+                  f"中心 ({((b.xmin+b.xmax)/2):.0f}, {((b.ymin+b.ymax)/2):.0f}, "
+                  f"{((b.zmin+b.zmax)/2):.0f})")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))
