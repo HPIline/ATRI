@@ -53,7 +53,7 @@ python3 -m unittest discover -s webots/tests
 
 ## 本分支定位（atri-next，不合 main）
 
-本分支是软件先进线，**不向 main 合入，也不从 main 拉取**。CAD / 包络 / 干涉以 main 与 CAD 会话为准；本树里的 design/cad 可能过期，不要在本分支改。
+本分支是软件先进线，**不向 main 合入，也不从 main 拉取**。2026-09-12 第 6 轮在本分支改了 CAD 布置（U 形骨盆 / 头壳让位 / 肘爪 / 足后跟），口径以本树 `design/cad` 为准。
 
 对照对象：`origin/main` @ `60d8611`（分叉时的口径快照）。历史上已把该提交及之前的 CAD / 真机总线并进来过一次；**之后不再从 main 拉、也不向 main 合**。旧名 `audit-fixes` 已删，远程只留 `main` 与 `atri-next`。
 
@@ -63,11 +63,11 @@ python3 -m unittest discover -s webots/tests
 |---|---|---|---|
 | **路径** | `软件/atri`、`项目文档/`、`研发日志/` | `software/atri`、`docs/{process,research,contest}` | 合入时把 main 新增的 `bus_sts3215.py` / `bringup.py` / 测试迁到英文路径 |
 | **Python / CI** | 3.9 / 3.11 / 3.12；最新两次 CI **红**（`.wbt` 质量未随 `robot_model.json` 重生成） | **仅 Python 3.14**；世界文件按本分支生成器重刷（保留 minStop/maxStop） | main 的红灯是 23 条 `Physics { mass }` 过期，不是关节拓扑错 |
-| **机械口径** | CAD 实装 **407 × 263 × 146 mm**；结构 **1490 g / 81 件（实算）**；整机 **3136 g（纸面推算，未定案）** | **同一组数字**（从 main 并入） | 旧文案 418×223×129 / 3437 g 是历史虚高或运动学基元，报名用实装包络 |
+| **机械口径** | CAD 实装 **407 × 263 × 146 mm**；结构 **1490 g / 81 件（实算）**；整机 **3136 g（纸面推算，未定案）** | **407 × 263 × 149 mm**（第 6 轮拾音前伸，宽未涨） | 赛框 600×300×300；宽门禁 270。旧文案 418×223×129 是历史虚高 |
 | **扭矩主判据** | 官方额定 **0.98 N·m**；踝 1.492 N·m（152%）；`trunk_roll` 1.899 N·m（194%） | 同左 | 1.47 N·m（堵转×50%）只作峰值参考 |
 | **功率 / 电池** | 平均约 **18.92 A**；30 min 需标称 **11.83 Ah / 1.19 kg**；现选 2000 mAh 约 13 min | 同左；测试要求超标必须留下 `model_caveat` | 旧「≥4.53 Ah」是误用堵转当额定时的低估 |
 | **真机总线** | `bus_sts3215.py` + 假串口测试；中位默认写寄存器 **31** | 已在本线；`deg_to_pulse` / `Sts3215Bus` 拒绝 NaN/Inf，禁止满脉冲下发 | 飞特官方 SDK 一键置中是 **40 号写 128**（固件再写入 31）。未上真机前两条通路都保留 |
-| **CAD 工具** | `pair_inspect.py` / `sweep_check.py` / `tool_access.py` / `reference_fits.py`；干涉约 193 677 mm³，摆放错误 13 对 | 已并入 | 13 对摆放错误要改落座，不是再切间隙；无 CadQuery 目视不在本回合改几何 |
+| **CAD 工具** | `pair_inspect.py` / `sweep_check.py` / `tool_access.py` / `reference_fits.py` | 第 6 轮布置：U 形骨盆、头壳让位、肘叉紧凑、足后跟 48 mm；门禁 `design/cad/test_layout.py` | 剩余 ❌ 见 `design/handoff/装配一致性修正记录.md` 第 6 轮；禁止把 pair_inspect 切盒贴进零件 |
 | **技能 / Webots 契约** | 感知失败仍可能假成功；世界文件无硬限位 | **真成败**；`found` 必须是 `bool`；行程 >1° 才算过；世界带 minStop/maxStop | 这是 atri-next 相对 main **多出来的**软件纪律 |
 | **TTS / PPT / NOTICE** | macOS `say` + Mock；过程文档散落中文目录；无 NOTICE | Linux 离线 TTS 链；24 页 `ppt/ATRI-答辩PPT-v4.pptx`；根目录 `NOTICE` | 主项目 LICENSE **仍待定**：NOTICE 只覆盖 SO-ARM100 Apache-2.0 参考件，不构成对 ATRI 原创代码的授权 |
 | **测试规模** | 主包测试 + STS3215 假串口 + bring-up | **427 主包 + 40 Webots**（本机实测全绿） | 以 `python3 -m unittest discover` 当场输出为准 |

@@ -445,9 +445,13 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                 fail(f"outrigger/{jname}", "cluster", cop)
         if sc["fork"] == "fork":
             try:
+                # 肘叉用紧凑型：前臂只有 39.2 mm，标准叉芯棒会顶进夹爪舵机。
+                compact = "elbow" in jname
                 add(f"fork__{jname}",
                     _place(sk.build("limb_fork", shaft=sc["shaft"],
-                                    parent=sc["parent"]), m), "fork")
+                                    parent=sc["parent"],
+                                    compact=compact,
+                                    spigot=not compact), m), "fork")
             except Exception as exc:  # noqa: BLE001
                 fail(f"fork/{jname}", "fork", exc)
 
