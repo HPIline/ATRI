@@ -243,13 +243,14 @@ ADAPTERS: Dict[str, Dict[str, Any]] = {
 # stagger 取被托住的那只舵机（fit_stagger.py 的数，禁止在这里另写一套）。
 CLUSTER_ARMS: Dict[str, Dict[str, Any]] = {
     "left_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6,
-                          "stagger_of": "left_hip_roll"},
+                          "stagger_of": "left_hip_roll", "flange_on_horn": True},
     "right_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6,
-                           "stagger_of": "right_hip_roll"},
+                           "stagger_of": "right_hip_roll", "y_sign": -1.0,
+                           "flange_on_horn": True},
     "left_hip_roll_link": {"in_shaft": "-x", "out_shaft": "+y", "drop": 19.6,
-                           "stagger_of": "left_hip_pitch"},
+                           "stagger_of": "left_hip_pitch", "spine_clear": 14.0},
     "right_hip_roll_link": {"in_shaft": "-x", "out_shaft": "-y", "drop": 19.6,
-                            "stagger_of": "right_hip_pitch"},
+                            "stagger_of": "right_hip_pitch", "spine_clear": 14.0},
     "left_shoulder_pitch_link": {"in_shaft": "+y", "out_shaft": "-x", "drop": 0.0,
                                  "stagger_of": "left_shoulder_roll"},
     "right_shoulder_pitch_link": {"in_shaft": "-y", "out_shaft": "+x", "drop": 0.0,
@@ -342,7 +343,8 @@ ELEC_BAY_SIDE = {
 }
 # 背挂件的贴板位置（y 错开，避免 90° 装法下长边互相重叠）
 BACKPACK_YZ = {"bec": (0.0, 26.0), "speaker": (-32.0, 10.0)}
-BACK_X = 48.0               # 躯干背面（躯干本体 x ∈ [−48, +48]）
+# 背板 3 mm 在 x=−58.5（外表面 x=−60）。贴板外侧，留 0.5 mm 气隙，不穿进板。
+BACK_X = 60.5
 BACKPACK_PITCH = 16.0
 
 # 显式声明"就按 placements.json 原始坐标摆、不需要规则"的躯干件（目前为空）。
@@ -435,7 +437,10 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                                 out_shaft=cfg["out_shaft"],
                                 drop=cfg["drop"],
                                 stagger=stagger,
-                                parent_stagger=parent_stagger),
+                                parent_stagger=parent_stagger,
+                                y_sign=float(cfg.get("y_sign", 1.0)),
+                                flange_on_horn=bool(cfg.get("flange_on_horn", False)),
+                                spine_clear=float(cfg.get("spine_clear", 6.0))),
                        kin.world[link]),
                 "cluster_arm")
         except Exception as cop:  # noqa: BLE001

@@ -9,6 +9,7 @@
     - 骨盆打印质量不得高于改前
     - 机械零位夹爪不得穿髋 yaw
     - 橡胶垫是全机最低点，踝笼/舵机不得低于垫
+    - 簇臂不得穿父舵机/髋笼/夹爪舵机；XL4015 不得穿背板
 
 用法：
     .venv-cad/bin/python design/cad/test_layout.py
@@ -32,8 +33,8 @@ from skeleton import foot_plate, head_shell, pelvis_frame  # noqa: E402
 HEAD_ZMAX_LIMIT_MM = 207.0
 ENVELOPE_WIDTH_MAX_MM = 270.0
 ENVELOPE_HEIGHT_MAX_MM = 420.0
-# 第 7 轮：拾音并进相机罩，深度回到 ≤147（改后曾到 149）。
-ENVELOPE_DEPTH_MAX_MM = 147.0
+# 第 7 轮前脸 ≤147；第 9 轮背挂贴板外侧，xmin 到约 −85，整机深 ~159。
+ENVELOPE_DEPTH_MAX_MM = 165.0
 HIP_YAW_Y_MIN_MM = 45.0
 # 改前 pelvis_frame 打印质量（PETG infill 0.45）——实现时先跑本文件记下，再锁。
 PELVIS_MASS_MAX_G = 130.0
@@ -58,6 +59,15 @@ ZERO_GRIPPER_HIP_PAIRS = [
     ("right_gripper__gripper_jaw", "cage__right_hip_yaw"),
     ("left_gripper__gripper_jaw", "servo__left_hip_yaw"),
     ("left_gripper__gripper_jaw", "cage__left_hip_yaw"),
+]
+
+# 第 9 轮：簇臂按舵盘面构造、背挂贴板外侧。禁止 AABB 切盒。
+ROUND9_PAIRS = [
+    ("torso_upper__backpack_plate", "elec__XL4015 降压模块"),
+    ("left_hip_yaw_link__cluster_horn_arm", "servo__left_hip_yaw"),
+    ("right_hip_yaw_link__cluster_horn_arm", "servo__right_hip_yaw"),
+    ("right_hip_yaw_link__cluster_horn_arm", "servo__right_gripper"),
+    ("right_hip_roll_link__cluster_horn_arm", "cage__right_hip_yaw"),
 ]
 
 
@@ -178,7 +188,18 @@ class LayoutGates(unittest.TestCase):
         boxes = [bbox_of(w) for w in self.shapes.values()]
         xmax = max(b.xmax for b in boxes)
         self.assertLessEqual(mic.xmax, xmax + 0.05)
-        self.assertLessEqual(xmax - min(b.xmin for b in boxes), 147.0)
+        self.assertLessEqual(xmax - min(b.xmin for b in boxes), ENVELOPE_DEPTH_MAX_MM)
+
+    def test_round9_cluster_and_backpack_clear(self):
+        """簇臂不得穿进父舵机/笼或右夹爪舵机；XL4015 不得穿背板。"""
+        bad = []
+        for a, b in ROUND9_PAIRS:
+            self.assertIn(a, self.shapes, a)
+            self.assertIn(b, self.shapes, b)
+            vol, frac, verd = self._pair_verdict(a, b)
+            if verd in ("❌ 摆放错误", "⚠️ 让位不足"):
+                bad.append(f"{a} ∩ {b} = {vol:.0f} mm³ ({frac*100:.0f}%) {verd}")
+        self.assertFalse(bad, "第 9 轮目标对仍穿模:\n  " + "\n  ".join(bad))
 
     def test_zero_pose_gripper_clears_hip(self):
         """机械零位：夹爪零件不得与髋 yaw 达到摆放错误或让位不足。"""

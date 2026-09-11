@@ -409,6 +409,9 @@ def compact_adapter(in_shaft: str = "+z", out_shaft: str = "+x",
 def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
                      drop: float = 19.6, stagger: float = 0.0,
                      parent_stagger: float = 0.0,
+                     y_sign: float = 1.0,
+                     flange_on_horn: bool = False,
+                     spine_clear: float = 6.0,
                      wall: float = PLATE_T) -> cq.Workplane:
     """单侧臂：锁上一级金属舵盘（I2），把下一级轴线拉到 `drop`。
 
@@ -422,12 +425,17 @@ def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
     """
     horn = servo_horn_interface(SERVO_NAME)
     horn_t = wall + 1.0
-    z_flange = parent_stagger
+    # 髋 yaw 臂法兰贴舵盘外表面；肩/roll 仍用 parent_stagger（全局减 HORN 会打到 shoulder_roll）。
+    z_flange = parent_stagger - (HORN_FACE if flange_on_horn else 0.0)
     z_bot = -max(drop, 12.0) - 8.0
     z_height = (z_flange + horn_t) - z_bot
-    # 子级机体 x ∈ [x_min, x_max] = [-35, +10.2]，立柱必须在其外侧
-    x_spine = X_MIN - 6.0                 # −41：机身 −X 端面再留 6 mm
-    y_spine = -10.0                       # 躲开子级沿 +Y 甩出的机体
+    if z_height < 8.0:
+        z_bot = z_flange + horn_t - 12.0
+        z_height = 12.0
+    # 子级机体 x ∈ [x_min, x_max] = [-35, +10.2]，立柱必须在其外侧。
+    # 髋 roll 臂 spine_clear=14，躲开 yaw 笼。
+    x_spine = X_MIN - spine_clear
+    y_spine = -10.0 * y_sign              # 右髋 yaw 臂 y_sign=-1，立柱朝内不打夹爪舵机
 
     part = cq.Workplane("XY")
     # 舵盘法兰（I2）——跟父舵机 stagger 走
