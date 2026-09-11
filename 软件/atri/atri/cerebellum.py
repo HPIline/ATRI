@@ -9,21 +9,63 @@ from .config import JOINTS, clamp_angle, rest_pose
 
 
 class ServoBus:
-    """标准串行总线舵机抽象。无硬件时使用 MockServoBus。"""
+    """标准串行总线舵机抽象。无硬件时使用 MockServoBus。
 
+    ⚠️ **真机实现必须遵守 `atri.config` 的换算口径**（`deg_to_pulse` / `pulse_to_deg` /
+    `pulse_limits`），并实现下面这批"批量写 + 安全 + 遥测"语义；
+    下位机固件（STM32）实现同一套语义，两端共用一份关节表（ID/符号/零偏/限位）。
+    只实现 `set_angle` / `read_angle` 会导致：22 关节逐个发帧超时、
+    标定前就带电锁轴、堵转时拿不到温度与电流。
+    """
+
+    # —— 基础 ——
     def set_angle(self, joint_id: int, deg: float) -> None:
         raise NotImplementedError
 
     def read_angle(self, joint_id: int) -> float:
         raise NotImplementedError
 
+    # —— 批量写：一个控制周期内 22 关节一次发完（20 ms 周期的硬性前提）——
+    def sync_write(self, targets: Dict[int, float]) -> None:
+        """默认退化为逐个写；真机应实现为舵机总线的 SYNC WRITE 指令。"""
+        for jid, deg in targets.items():
+            self.set_angle(jid, deg)
+
+    # —— 安全：上电先松轴，标定/装调完成后再使能 ——
+    def set_torque_enable(self, joint_ids: List[int], enable: bool) -> None:
+        raise NotImplementedError
+
+    def relax_all(self) -> None:
+        self.set_torque_enable(sorted(s["id"] for s in JOINTS.values()), False)
+
+    # —— 遥测：堵转保护与温升实测的数据来源 ——
+    def read_telemetry(self, joint_id: int) -> Dict[str, Any]:
+        """返回 {pos_deg, load_pct, voltage_v, temp_c, current_a, moving}。"""
+        raise NotImplementedError
+
+    # —— bring-up：扫描 / 写限位寄存器 / 中位标定 ——
+    def scan(self) -> List[int]:
+        """总线扫描，返回在线 ID（bring-up 第一个动作）。"""
+        raise NotImplementedError
+
+    def write_limits(self, joint_id: int, pulse_lo: int, pulse_hi: int) -> None:
+        """把 min/max angle 寄存器写成"机械安全范围"（见 pulse_limits）。"""
+        raise NotImplementedError
+
+    def set_middle(self, joint_id: int) -> None:
+        """中位标定：以当前位置为零位（飞特：40 号地址写 128）。"""
+        raise NotImplementedError
+
 
 class MockServoBus(ServoBus):
-    """内存舵机总线：记录指令并做限位，模拟绝对位置回传。"""
+    """内存舵机总线：记录指令并做限位，模拟绝对位置回传与遥测。"""
 
     def __init__(self) -> None:
         self.angles = {spec["id"]: spec["rest_deg"] for spec in JOINTS.values()}
         self.command_log: List[Dict[str, float]] = []
+        self.torque_on = True
+        self.limits: Dict[int, tuple] = {}
+        self.middle_set: List[int] = []
 
     def set_angle(self, joint_id: int, deg: float) -> None:
         name = [n for n, s in JOINTS.items() if s["id"] == joint_id][0]
@@ -33,6 +75,28 @@ class MockServoBus(ServoBus):
 
     def read_angle(self, joint_id: int) -> float:
         return self.angles[joint_id]
+
+    def set_torque_enable(self, joint_ids: List[int], enable: bool) -> None:
+        self.torque_on = bool(enable)
+
+    def read_telemetry(self, joint_id: int) -> Dict[str, Any]:
+        """按"离中位越远越吃力"造一条合理曲线，供上层逻辑先行联调。"""
+        deg = self.angles[joint_id]
+        load = min(100.0, abs(deg) * 1.5)
+        return {"pos_deg": deg, "load_pct": round(load, 1),
+                "voltage_v": 11.1, "temp_c": round(28.0 + load * 0.15, 1),
+                "current_a": round(0.15 + load * 0.02, 3),
+                "moving": False}
+
+    def scan(self) -> List[int]:
+        return sorted(self.angles)
+
+    def write_limits(self, joint_id: int, pulse_lo: int, pulse_hi: int) -> None:
+        self.limits[joint_id] = (int(pulse_lo), int(pulse_hi))
+
+    def set_middle(self, joint_id: int) -> None:
+        self.middle_set.append(joint_id)
+        self.angles[joint_id] = 0.0
 
 
 class Cerebellum:
@@ -49,15 +113,26 @@ class Cerebellum:
         self.sleeper = sleeper or time.sleep
 
     def set_pose(self, targets: Dict[str, float]) -> Dict[str, float]:
-        """下发一组关节目标角（按名称），返回实际限位后的角度。"""
+        """下发一组关节目标角（按名称），返回实际限位后的角度。
+
+        走 `sync_write`：真机上是一条 SYNC WRITE 帧写完所有关节，
+        而不是 22 次往返（后者在 20 ms 周期里会顶到总线时间上限）。
+        """
         applied: Dict[str, float] = {}
+        batch: Dict[int, float] = {}
         for name, deg in targets.items():
             if name not in JOINTS:
                 continue
             deg = clamp_angle(name, deg)
-            self.bus.set_angle(JOINTS[name]["id"], deg)
+            batch[JOINTS[name]["id"]] = deg
             applied[name] = deg
+        if batch:
+            self.bus.sync_write(batch)
         return applied
+
+    def relax(self) -> None:
+        """松轴（安全姿态）：装配、搬运、标定前必须调用。"""
+        self.bus.relax_all()
 
     def home(self) -> Dict[str, float]:
         return self.set_pose(rest_pose())

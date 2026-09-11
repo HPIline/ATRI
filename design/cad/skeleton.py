@@ -615,7 +615,10 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
     `项目文档/骨架结构与集成方案.md` 的集成方案章）。
     """
     part = cq.Workplane("XY")
-    tl, tw = 96.0, 86.0
+    # ⚠️ 2026-09-11 加宽：净距 80×70 装不下长边 88 的电池与 85 的树莓派（实测）。
+    #    整机宽度由手臂决定（y=±75），躯干加宽**不改整机包络**；代价只是这一件重约 20 g。
+    tl, tw = 108.0, 104.0
+    post_x, post_y = tl / 2 - 4.0, tw / 2 - 4.0     # 立柱中心（8×8 → 内表面 ±(半宽−8)）
 
     # --- 1. trunk_pitch 舵盘叉（自带，子端朝上）---
     part = part.union(limb_fork(shaft="+y", parent="-z", compact=True,
@@ -635,15 +638,15 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
         part = part.union(box(80.0, 8.0, TORSO_PLATE_T,
                               at=(0, sy * 16.0, TORSO_BAY_FLOOR_Z)))
     for sy in (-1, 1):
-        part = part.union(box(38.0, 3.0, 22.0, at=(0, sy * 44.0, 20.6)))
+        part = part.union(box(38.0, 3.0, 22.0, at=(0, sy * (tw / 2 + 1.0), 20.6)))
     for dx in (-11.0, 11.0):
         part = part.cut(box(3.0, 92.0, 3.0, at=(dx, 0, 17.0)))
 
     # --- 4. 主舱四立柱（8×8 + Ø5 走线孔）---
     for sx in (-1, 1):
         for sy in (-1, 1):
-            post = box(8.0, 8.0, 48.0, at=(sx * 44.0, sy * 39.0, 18.0))
-            post = post.cut(cyl(5.0, 54.0, at=(sx * 44.0, sy * 39.0, 16.0)))
+            post = box(8.0, 8.0, 48.0, at=(sx * post_x, sy * post_y, 18.0))
+            post = post.cut(cyl(5.0, 54.0, at=(sx * post_x, sy * post_y, 16.0)))
             part = part.union(post)
 
     # --- 5. 树莓派托盘（外框 + 4×M2.5 柱，85 边沿 Y）---
@@ -864,13 +867,19 @@ def electronics_deck() -> cq.Workplane:
                                          bore_depth=5.0, z0=2.0))
     for dx in (-24.0, 0.0, 24.0):
         part = part.cut(box(14.0, 14.0, 6.0, at=(dx, 24.0, 0)))
-    # 站在电控层层板上表面（唯一真值来源，见 TORSO_DECK_TOP_Z）
-    part = part.translate((0.0, 0.0, TORSO_DECK_TOP_Z))
+    # 站在**电池仓层板**上表面（唯一真值来源）。
+    # ⚠️ 2026-09-11 从上层改到下层：上层净高 18.4 mm，树莓派(17)坐它上面会顶到顶环(63)；
+    #    改到下层后，上层让给树莓派直接坐框架层板，本托盘在下层托 STM32/URT-1/功放。
+    part = part.translate((0.0, 0.0, TORSO_BAY_TOP_Z))
     return sanitize(part)
 
 
 def pdb_mount() -> cq.Workplane:
-    """分线板座：4 路菊花链的物理根节点（standards.WIRING）。"""
+    """分线板座：4 路菊花链的物理根节点（standards.WIRING）。
+
+    ⚠️ 2026-09-11：原来建在 link 原点 → 与 trunk_pitch 舵机 71% 重合（2 925 mm³）。
+    现在挪到下舱**副轴侧空带**（电池占 y ±17，净宽 ±44），坐在框架层板上。
+    """
     part = cq.Workplane("XY")
     part = part.union(box(46.0, 30.0, 3.0, at=(0, 0, 0)))
     for pt in [(-18.0, -11.0), (18.0, -11.0), (-18.0, 11.0), (18.0, 11.0)]:
@@ -878,6 +887,8 @@ def pdb_mount() -> cq.Workplane:
                                  bore_depth=4.0, z0=3.0))
     for dx in (-12.0, 0.0, 12.0):
         part = part.cut(box(6.0, 8.0, 6.0, at=(dx, 15.0, 0)))
+    # 坐进下舱副轴侧空带（y = −30，净宽 ±44；46 mm 长边沿 X）
+    part = part.translate((20.0, -30.0, TORSO_BAY_TOP_Z))
     return sanitize(part)
 
 
