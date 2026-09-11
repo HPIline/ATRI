@@ -3,7 +3,7 @@
 T1 的经验：光看"Φ2.5 × 4 @ 9.9 方形"这样的数字，无法判断它是舵盘孔、
 机身固定孔还是模具特征；出一张图，3 秒就能判定。
 
-    .venv-cad/bin/python design/cad/render_vendor.py \
+    .venv-cad/bin/python design/cad/tools/render_vendor.py \
         design/cad/vendor/so-arm100/STS3215_03a.step
 输出：design/cad/out/vendor_render/<零件名>_<视角>.png（out/ 已 gitignore）
 """
@@ -14,7 +14,9 @@ from pathlib import Path
 
 import cadquery as cq
 
-sys.path.insert(0, str(Path(__file__).parent))
+CAD = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CAD))
+sys.path.insert(0, str(CAD / "tools"))
 import render3d as R  # noqa: E402
 
 VIEWS = {

@@ -3,7 +3,7 @@
 用途：在厂商整机装配体里定位舵机实例与螺钉实例，
 再判断**螺钉穿进了哪个孔**——这是接口语义的最终裁判。
 
-    .venv-cad/bin/python design/cad/probe_assembly.py <step> [--min-volume 100]
+    .venv-cad/bin/python design/cad/tools/probe_assembly.py <step> [--min-volume 100]
 """
 from __future__ import annotations
 

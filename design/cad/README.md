@@ -19,6 +19,7 @@ design/
     ├── build.sh          一键：零件 → 装配 → 体检
     ├── build_all.py      只出零件 STEP/STL
     ├── parts.py          只提供 sanitize()，不是构建入口
+    ├── tools/            测量 / 旧入口 / 渲染（产物仍写 cad/out）
     └── out/              STEP/STL/报告（gitignore，可复现）
 ```
 
@@ -53,7 +54,7 @@ bash design/cad/build.sh --fast
 .venv-cad/bin/python design/cad/interference.py --all
 
 # 标准件参数状态
-.venv-cad/bin/python design/cad/build.py --standards
+.venv-cad/bin/python design/cad/tools/build.py --standards
 ```
 
 `build.py --all` 和 `parts.py` 里的 `servo_yoke` 三件套是早期入口，现行零件在 `skeleton.py`；`sanitize()` 仍从 `parts.py` 引用，文件不能删。

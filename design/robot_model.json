@@ -1715,7 +1715,7 @@
     "electronics_g": 316.0,
     "harness_fasteners_g": 120.0,
     "total_g": 3436.6,
-    "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / 项目文档/骨架结构与集成方案.md §6–§7",
+    "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / 资料/调研/项目文档/骨架结构与集成方案.md §6–§7",
     "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。"
   },
   "changelog": [
@@ -1738,7 +1738,7 @@
         "整机质量 3.437 kg",
         "新增 installed_envelope_mm = 418 × 223 × 129 mm（CAD 实装；基元口径仍为 372.8 mm）",
         "新增 reduction_paths：A 拓扑减重 / B 买金属件 / C 减自由度",
-        "来源：6d4b077《骨架零件库与整机装配》、项目文档/骨架结构与集成方案.md §6–§7"
+        "来源：6d4b077《骨架零件库与整机装配》、资料/调研/项目文档/骨架结构与集成方案.md §6–§7"
       ]
     }
   ],
@@ -1746,7 +1746,7 @@
     "height_mm": 418.0,
     "width_mm": 223.0,
     "depth_mm": 129.0,
-    "source": "CAD 实装装配体（6d4b077 / 项目文档/骨架结构与集成方案.md §6–§7）",
+    "source": "CAD 实装装配体（6d4b077 / 资料/调研/项目文档/骨架结构与集成方案.md §6–§7）",
     "kinematic_envelope_mm": {
       "height_mm": 372.8,
       "width_mm": 190.0,

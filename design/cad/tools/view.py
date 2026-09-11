@@ -8,12 +8,12 @@ vtkCommonTransforms, not compatible with vtkmodules.vtkCommonCore"）。
 
 用法：
     # 交互窗口（本机 GUI）
-    .venv-cad/bin/python design/cad/view.py --assembly
-    .venv-cad/bin/python design/cad/view.py --part limb_fork --edges
-    .venv-cad/bin/python design/cad/view.py --parts joint_cage limb_fork
+    .venv-cad/bin/python design/cad/tools/view.py --assembly
+    .venv-cad/bin/python design/cad/tools/view.py --part limb_fork --edges
+    .venv-cad/bin/python design/cad/tools/view.py --parts joint_cage limb_fork
 
     # 无头截图（不需要 GUI，可用于自检/CI/出图）
-    .venv-cad/bin/python design/cad/view.py --assembly --screenshot out/view/整机.png
+    .venv-cad/bin/python design/cad/tools/view.py --assembly --screenshot out/view/整机.png
 
 窗口里的操作（VTK trackball）：
     左键拖拽 = 旋转　中键/Shift+左键 = 平移　滚轮 = 缩放
@@ -27,9 +27,11 @@ import sys
 from pathlib import Path
 from typing import Any, List, Optional, Sequence, Tuple
 
-HERE = Path(__file__).resolve().parent
+CAD = Path(__file__).resolve().parent.parent  # design/cad/
+HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
 REPO = HERE.parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(CAD))
+sys.path.insert(0, str(CAD / "tools"))
 
 import cadquery as cq
 

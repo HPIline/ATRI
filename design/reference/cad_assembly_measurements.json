@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "source_commit": "6d4b077",
-  "source_doc": "项目文档/骨架结构与集成方案.md §6–§7",
+  "source_doc": "资料/调研/项目文档/骨架结构与集成方案.md §6–§7",
   "source_author": "Junko-233",
   "generated_from": "design/cad/assembly.py + build_all.py 的真实 CAD 体积 × PETG 1.27 g/cm³",
   "note": "CAD 实装测量结果。与基元模型（robot_model.json 的 primitives）的差异是真实的：基元模型里 link 包围盒是占位值，舵机笼与支架的突出量没进门。",

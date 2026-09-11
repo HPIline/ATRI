@@ -5,8 +5,8 @@
 还是螺钉柱吃掉的？本脚本用同一套建模代码逐特征单独成体、量体积、折算质量。
 
 用法：
-    .venv-cad/bin/python design/cad/diagnose_mass.py
-    .venv-cad/bin/python design/cad/diagnose_mass.py --part joint_cage
+    .venv-cad/bin/python design/cad/tools/diagnose_mass.py
+    .venv-cad/bin/python design/cad/tools/diagnose_mass.py --part joint_cage
 """
 from __future__ import annotations
 
@@ -15,8 +15,10 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+CAD = Path(__file__).resolve().parent.parent  # design/cad/
+HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
+sys.path.insert(0, str(CAD))
+sys.path.insert(0, str(CAD / "tools"))
 
 import cadquery as cq
 

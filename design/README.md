@@ -129,7 +129,7 @@ python3 design/gen_render.py --pose zero          # 换成零姿态
 **图的读法**：SVG 是矢量图，双击用浏览器打开即可；也可用 `qlmanage -t -s 2000` 转 PNG 插进 PPT。
 
 > **关于图号**：编号 **跳过 03**——原计划第 3 张为"爆炸图"（见
-> `项目文档/外观尺寸零件设计Prompt.md` §五），未实现；`gen_drawings.DRAWINGS` 里没有 03，
+> `资料/调研/项目文档/外观尺寸零件设计Prompt.md` §五），未实现；`gen_drawings.DRAWINGS` 里没有 03，
 > 现有 4 张编号为 01 / 02 / 04 / 05。
 
 **关于这些图的诚实说明**：

@@ -47,7 +47,7 @@ STS3215 SPECIFICATION
 
 > ⚠️ 注意：**标签上没有任何"安装耳"尺寸**，实物照片中机身也是**光板长方体**。
 
-### 几何实测（`design/cad/measure_servo.py` 可复现）
+### 几何实测（`design/cad/tools/measure_servo.py` 可复现）
 
 | 项 | 实测值 |
 |---|---|

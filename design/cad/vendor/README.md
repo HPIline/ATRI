@@ -1,7 +1,7 @@
 # 厂商 / 第三方参考件（vendor）
 
 > 这里放**外部世界的一手几何与文档**，是 `standards.py` 中接口数据的证据基础。
-> 配套工具：`design/cad/measure_vendor.py`、`probe_assembly.py`、`check_mate.py`、
+> 配套工具：`design/cad/tools/measure_vendor.py`、`probe_assembly.py`、`check_mate.py`、
 > `render_vendor.py`、`read_vendor_pdf.py`（都走 `.venv-cad`）。
 
 ---
@@ -65,21 +65,21 @@ curl -sL --max-time 120 -o design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf 
 cd <repo>   # 仓库根目录（本 README 位于 design/cad/vendor/）；以下路径均相对仓库根
 
 # 接口几何（包络 / 圆柱面按轴分组 / 孔与轴判别）
-.venv-cad/bin/python design/cad/measure_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
+.venv-cad/bin/python design/cad/tools/measure_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
 
 # 整机里"谁是谁"（按体积分组，找舵机实例与螺钉）
-.venv-cad/bin/python design/cad/probe_assembly.py \
+.venv-cad/bin/python design/cad/tools/probe_assembly.py \
   design/cad/vendor/so-arm100/SO100_Follower_Assembly.step --min-volume 20
 
 # 孔位语义反查（同轴孔对）
-.venv-cad/bin/python design/cad/check_mate.py \
+.venv-cad/bin/python design/cad/tools/check_mate.py \
   design/cad/vendor/so-arm100/SO100_Follower_Assembly.step --target-volume 36217 --tol 0.4 --detail
 
 # 目视核验（多视角 PNG，输出到 design/cad/out/vendor_render/，out/ 已 gitignore）
-.venv-cad/bin/python design/cad/render_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
+.venv-cad/bin/python design/cad/tools/render_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
 
 # 官方 PDF 逐页转图 + 抽文字
-.venv-cad/bin/python design/cad/read_vendor_pdf.py \
+.venv-cad/bin/python design/cad/tools/read_vendor_pdf.py \
   design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf --scale 2.2
 ```
 

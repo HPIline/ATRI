@@ -3,7 +3,7 @@
 用途：厂商 PDF 往往只有第 1 页能被 `sips` 转图；本脚本用 pypdfium2 渲染全部页面，
 再用 pypdf 抽文字，便于**逐页目视核验官方图纸数值**。
 
-    .venv-cad/bin/python design/cad/read_vendor_pdf.py <file.pdf> [--out DIR] [--scale 2.0]
+    .venv-cad/bin/python design/cad/tools/read_vendor_pdf.py <file.pdf> [--out DIR] [--scale 2.0]
 """
 from __future__ import annotations
 

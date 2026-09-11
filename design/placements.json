@@ -981,7 +981,7 @@
       "electronics_g": 316.0,
       "harness_fasteners_g": 120.0,
       "total_g": 3436.6,
-      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / 项目文档/骨架结构与集成方案.md §6–§7",
+      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / 资料/调研/项目文档/骨架结构与集成方案.md §6–§7",
       "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。"
     },
     "reduction_paths": [

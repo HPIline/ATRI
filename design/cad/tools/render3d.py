@@ -10,7 +10,7 @@
 这是真正的工程制图输出（可见线 + 虚线），不是渲染。
 
 用法：
-    .venv-cad/bin/python design/cad/render3d.py --all
+    .venv-cad/bin/python design/cad/tools/render3d.py --all
 产出：
     out/renders/06_CAD等轴测.{svg,png}
     out/renders/07_CAD正视.{svg,png}
@@ -30,9 +30,11 @@ import zlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-HERE = Path(__file__).resolve().parent
+CAD = Path(__file__).resolve().parent.parent  # design/cad/
+HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
 REPO = HERE.parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(CAD))
+sys.path.insert(0, str(CAD / "tools"))
 
 import cadquery as cq
 import numpy as np

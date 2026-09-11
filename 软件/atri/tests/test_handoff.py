@@ -308,7 +308,7 @@ class TestBatteryAndServoPresentation(unittest.TestCase):
 class TestProjectDocsConsistency(unittest.TestCase):
     """项目文档不得残留旧电源口径（标称 2.89 Ah）；17DOF 核查必须用现行数字。"""
 
-    DOC_DIR = REPO / "项目文档"
+    DOC_DIR = REPO / "资料" / "调研" / "项目文档"
 
     def test_no_stale_battery_nameplate(self):
         for path in sorted(self.DOC_DIR.glob("*.md")):

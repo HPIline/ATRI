@@ -4,9 +4,9 @@
 用法（需要 CadQuery，建议独立 venv）：
     python3 -m venv .venv-cad
     .venv-cad/bin/pip install cadquery
-    .venv-cad/bin/python design/cad/build.py --all
-    .venv-cad/bin/python design/cad/build.py --part servo_yoke
-    .venv-cad/bin/python design/cad/build.py --standards   # 只看参数状态
+    .venv-cad/bin/python design/cad/tools/build.py --all
+    .venv-cad/bin/python design/cad/tools/build.py --part servo_yoke
+    .venv-cad/bin/python design/cad/tools/build.py --standards   # 只看参数状态
 
 产出：
     design/cad/out/step/<part>.step   可进 SolidWorks / 任何 CAD
@@ -21,8 +21,10 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+CAD = Path(__file__).resolve().parent.parent  # design/cad/
+HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
+sys.path.insert(0, str(CAD))
+sys.path.insert(0, str(CAD / "tools"))
 
 OUT = HERE / "out"
 
@@ -152,7 +154,7 @@ def write_report(reports: List[Dict[str, Any]], standards_text: str) -> Path:
     )
     md = f"""# CAD 零件构建报告
 
-> 自动生成：`design/cad/build.py`。内核为 **OpenCASCADE**（经 CadQuery），
+> 自动生成：`design/cad/tools/build.py`。内核为 **OpenCASCADE**（经 CadQuery），
 > 产出为 **B-rep 实体**，非网格基元。
 
 ## 零件清单

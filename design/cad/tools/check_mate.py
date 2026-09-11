@@ -8,7 +8,7 @@ T1 的核心工具。做法：
 孔对一旦成立，就能回答语义问题，例如：
   "支架上的 Φ2.0 孔与舵机 Φ1.5 底孔同轴" ⇒ 支架是用 M2 自攻拧进舵机侧孔的。
 
-    .venv-cad/bin/python design/cad/check_mate.py <assembly.step> \
+    .venv-cad/bin/python design/cad/tools/check_mate.py <assembly.step> \
         --target-volume 36217 [--tol 0.35] [--gap-tol 3.0]
 """
 from __future__ import annotations

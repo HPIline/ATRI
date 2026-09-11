@@ -47,7 +47,7 @@ fi
 
 if [ "$FAST" -eq 0 ]; then
   echo "== 3/5 渲染图 + 工程图 =="
-  $PY design/cad/render3d.py --all
+  $PY design/cad/tools/render3d.py --all
 else
   echo "== 3/5 渲染图（--fast 跳过）=="
 fi
@@ -56,7 +56,7 @@ echo "== 4/5 交互预览：自包含 HTML + GLB =="
 $PY design/cad/preview.py --all
 
 echo "== 5/5 离屏自检出图（VTK，无 GUI）=="
-$PY design/cad/view.py --assembly --edges \
+$PY design/cad/tools/view.py --assembly --edges \
   --screenshot design/cad/out/view/ATRI-整机等轴测.png
 
 echo

@@ -11,8 +11,8 @@
 其舵机接口几何经过实物验证。
 
 用法：
-    .venv-cad/bin/python design/cad/measure_servo.py
-    .venv-cad/bin/python design/cad/measure_servo.py --json   # 机器可读输出
+    .venv-cad/bin/python design/cad/tools/measure_servo.py
+    .venv-cad/bin/python design/cad/tools/measure_servo.py --json   # 机器可读输出
 
 产出（stdout）：包络、端面盘圆心、孔位阵列、特征清单。
 """
@@ -24,7 +24,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
 
-HERE = Path(__file__).resolve().parent
+CAD = Path(__file__).resolve().parent.parent  # design/cad/
+HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
 REPO = HERE.parent.parent
 STEP = REPO / "design" / "reference" / "sts3215" / "STS3215_03a.step"
 

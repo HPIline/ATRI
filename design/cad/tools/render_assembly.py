@@ -2,8 +2,8 @@
 
 配合 `audit_assembly.py` 使用：体检脚本给数字，本脚本给"人眼一眼能看出问题"的图。
 
-    .venv-cad/bin/python design/cad/render_assembly.py            # 默认 4 视角
-    .venv-cad/bin/python design/cad/render_assembly.py --views iso,side
+    .venv-cad/bin/python design/cad/tools/render_assembly.py            # 默认 4 视角
+    .venv-cad/bin/python design/cad/tools/render_assembly.py --views iso,side
 输出：design/cad/out/preview/assembly_<view>.png（out/ 已 gitignore）
 """
 from __future__ import annotations
@@ -13,8 +13,10 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+CAD = Path(__file__).resolve().parent.parent  # design/cad/
+HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
+sys.path.insert(0, str(CAD))
+sys.path.insert(0, str(CAD / "tools"))
 
 import assembly as A
 import render3d as R

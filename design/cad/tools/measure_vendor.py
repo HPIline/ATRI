@@ -3,7 +3,7 @@
 用途：把厂商/开源项目提供的 STEP 里的**几何事实**提取出来，
 用于核验"凭世界知识给的参数"是否与真实零件一致。
 
-    .venv-cad/bin/python design/cad/measure_vendor.py \
+    .venv-cad/bin/python design/cad/tools/measure_vendor.py \
         design/cad/vendor/so-arm100/STS3215_03a.step
 
 输出：包络、体积、按（轴方向 + 半径）分组的圆柱面清单、按法向分组的平面清单。

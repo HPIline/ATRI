@@ -256,7 +256,7 @@ SERVOS: Dict[str, Dict[str, Any]] = {
         "horn_note": (
             "✅ 节圆 Φ14 已于 2026-09-11 由**第二个独立来源**复核确认："
             "第三方 B-rep 模型实测舵盘端 4 孔为 9.9 × 9.9 方阵，对角 = 14.00 mm "
-            "（复现：design/cad/measure_servo.py）。"
+            "（复现：design/cad/tools/measure_servo.py）。"
             "同测：舵盘盘径 Φ20.0、中心螺孔 Φ2.5 深 3.9 —— 与本条参数一致。"
             "25T 齿顶宽约 0.2mm < 0.4mm 喷嘴最小可靠特征 0.35mm，"
             "**FDM 无法打印，必须采购金属舵盘**。"
@@ -301,7 +301,7 @@ SERVOS: Dict[str, Dict[str, Any]] = {
             "【2026-09-11 核验订正】原标『飞特官方 2D 工程图纸』的安装耳数据已删除。"
             "现行数据来自第三方 B-rep 模型（SO-ARM100，Apache-2.0）+ 实物包装标签照，"
             "**既非官方图纸、亦非我方实测** → 故为 provisional。"
-            "复现：.venv-cad/bin/python design/cad/measure_servo.py"
+            "复现：.venv-cad/bin/python design/cad/tools/measure_servo.py"
         ),
 
         # —— 输出轴与副轴 ——
@@ -353,13 +353,13 @@ SERVOS: Dict[str, Dict[str, Any]] = {
             "9.9 × 9.9（即 Φ14 节圆方阵，与输出端面同规格）。"
             "官方图纸标注了该端面圆盘与孔位，但**未标螺纹规格**。"
             "SO-ARM100 的打印件以 Φ2.0/Φ3.2 通孔与之同轴装配"
-            "（复现：design/cad/check_mate.py）→ 证实这组孔是**对外安装接口**。"
+            "（复现：design/cad/tools/check_mate.py）→ 证实这组孔是**对外安装接口**。"
             "⚠️ 螺纹规格待实物确认（M2.5 螺纹孔 or M2/M3 底孔）。"
         ),
 
         # —— 对外安装接口的实证（第三方装配体反查）——
         "body_mount_evidence": (
-            "design/cad/check_mate.py 在 SO-ARM100 整机装配体里做同轴孔对匹配："
+            "design/cad/tools/check_mate.py 在 SO-ARM100 整机装配体里做同轴孔对匹配："
             "打印件上的孔与舵机 Φ14 节圆 4 孔同轴命中 16 次（横向偏差 0.00，轴向间隔 −0.0）"
             "→ 工业开源项目就是拿这 4 个孔当安装面用的，语义确证。"
         ),
