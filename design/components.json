@@ -5,8 +5,8 @@
   "cavity_wall_mm": 2.5,
   "cable_mass_g": 80.0,
   "fastener_mass_g": 40.0,
-  "structure_mass_estimate_g": 1790.0,
-  "structure_mass_note": "v3：按协作者 CAD 实装实算 1790 g（74 个件，真实体积 × PETG 1.27 g/cm³）。v2 的 500 g 是合成预算，已弃用。三条减重路径见 robot_model.json 的 reduction_paths。",
+  "structure_mass_estimate_g": 1490.0,
+  "structure_mass_note": "v3：按协作者 CAD 实装实算 1490 g（81 个件，真实体积 × PETG 1.27 g/cm³）。v2 的 500 g 是合成预算，已弃用。三条减重路径见 robot_model.json 的 reduction_paths。",
   "components": [
     {
       "role": "servo_s",
@@ -20,17 +20,18 @@
         35.0
       ],
       "spec": {
-        "rated_torque_nm": 1.47,
+        "rated_torque_nm": 0.98,
         "stall_torque_nm": 2.94,
         "speed_s_per_60deg": 0.222,
         "protocol": "TTL 半双工串行总线 @1Mbps",
         "feedback": "12-bit 磁编码绝对位置、温度、电压、电流/负载",
         "voltage_v": 11.1,
         "price_cny": "85-95",
-        "rated_basis": "堵转 × 50%（参考机选型习惯）；早期『额定 1.0 N·m』无权威出处",
-        "speed_basis": "实物包装标签 ST-3215-C018（2026-09-11 订正，原 0.18 无出处）"
+        "rated_basis": "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书，2026-09-11 确认）；历史『堵转 × 50% = 1.47 N·m』偏乐观 50%，降为并列参考；早期『额定 1.0 N·m 无权威出处』的说法已撤销",
+        "speed_basis": "0.222 s/60°(12V) → 270 °/s。来源【实物包装标签】ST-3215-C018（见 design/reference/sts3215/）；0.18 与 300 °/s 均无出处，2026-09-11 订正",
+        "rated_torque_nm_half_stall_deprecated": 1.47
       },
-      "note": "全机型号归一；v2 起额定值改用有出处判据"
+      "note": "全机型号归一；额定取【官方】0.98 N·m（2026-09-11 确认），历史『堵转 × 50% = 1.47』仅作并列参考"
     },
     {
       "role": "compute",

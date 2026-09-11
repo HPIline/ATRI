@@ -71,8 +71,19 @@ SERVO = {
     "voltage_nominal_v": 11.1,
     "voltage_range_v": [9.0, 12.6],
     "stall_torque_nm": 2.94,
-    "rated_torque_nm": 1.47,          # = 堵转 × 50%，判据来自参考机实测选型习惯
-    "no_load_speed_dps": 300.0,
+    "rated_torque_nm": 0.98,          # 【官方】额定负载 10 kg·cm @12V（2026-09-11 确认，见下列 basis）
+    "rated_torque_basis": (
+        "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书双重印证，"
+        "见 design/handoff/STS3215-官方规格书核验.md §4.1）。"
+        "历史口径『堵转 × 50% = 1.47 N·m』偏乐观 50%，已降为并列参考（rated_torque_nm_half_stall_deprecated），"
+        "不再是 rated_torque_nm"
+    ),
+    "rated_torque_nm_half_stall_deprecated": 1.47,   # 历史判据：堵转 × 50%，参考机选型习惯，偏乐观 50%
+    "no_load_speed_dps": 270.0,       # 0.222 s/60°（12V，实物包装标签）→ 270 °/s；原 300 无出处
+    "no_load_speed_basis": (
+        "0.222 s/60°(12V) → 270 °/s。来源【实物包装标签】ST-3215-C018"
+        "（见 design/reference/sts3215/）；0.18 与 300 °/s 均无出处，2026-09-11 订正"
+    ),
     "protocol": "TTL 半双工串行总线 @1Mbps",
     "feedback": "位置 / 速度 / 负载 / 电压 / 电流 / 温度（12 位磁编码）",
     "price_cny": "85-95",
@@ -360,7 +371,10 @@ def main(argv: List[str] | None = None) -> int:
         "size_mm": SERVO["size_mm"],
         "stall_torque_nm": SERVO["stall_torque_nm"],
         "rated_torque_nm": SERVO["rated_torque_nm"],
-        "rated_torque_basis": "堵转 × 50%：取自参考机实测选型习惯（1.8 kg 机体用 1.67 N·m 堵转舵机行走）",
+        "rated_torque_basis": SERVO["rated_torque_basis"],
+        "rated_torque_nm_half_stall_deprecated": SERVO["rated_torque_nm_half_stall_deprecated"],
+        "no_load_speed_dps": SERVO["no_load_speed_dps"],
+        "speed_basis": SERVO["no_load_speed_basis"],
         "mounting": "M2.5/M3 支架夹持；STS3215 体对角线 62.3 mm，无法被现有球壳全包，采用外部支架",
     }
     model["changelog"] = [
@@ -396,8 +410,12 @@ def main(argv: List[str] | None = None) -> int:
             c["spec"]["rated_torque_nm"] = SERVO["rated_torque_nm"]
             c["spec"]["stall_torque_nm"] = SERVO["stall_torque_nm"]
             c["spec"]["voltage_v"] = SERVO["voltage_nominal_v"]
-            c["spec"]["rated_basis"] = "堵转 × 50%（参考机选型习惯）；早期『额定 1.0 N·m』无权威出处"
-            c["note"] = "全机型号归一；v2 起额定值改用有出处判据"
+            c["spec"]["rated_basis"] = SERVO["rated_torque_basis"]
+            c["spec"]["rated_torque_nm_half_stall_deprecated"] = SERVO["rated_torque_nm_half_stall_deprecated"]
+            c["spec"]["speed_s_per_60deg"] = round(60.0 / SERVO["no_load_speed_dps"], 3)
+            c["spec"]["speed_basis"] = SERVO["no_load_speed_basis"]
+            c["note"] = ("全机型号归一；额定值取【官方】0.98 N·m（2026-09-11 确认）；"
+                         "历史判据『堵转 × 50% = 1.47 N·m』偏乐观 50%，仅作并列参考")
         if c["role"] == "battery":
             c["name"] = "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)"
             c["mass_g"] = 165.0

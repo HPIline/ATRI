@@ -272,7 +272,12 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
     不能给"总堵转电流"乘占空比——那会把电流高估数倍。
     """
     operating_fraction = 0.35   # 行走时平均输出占"最大静力保持"的比例
-    rated_torque = 2.94         # N·m，STS3215 级额定扭矩
+    # 【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书双重印证，
+    # 见 design/handoff/STS3215-官方规格书核验.md §4.1、总体参数汇总表.md §2.1）。
+    # ⚠️ 2.94 N·m 是**堵转**扭矩，不是额定：旧版把堵转当额定，会让这个以
+    #    「工作扭矩 / 额定」算电流占比的模型把电流低估约 3 倍。
+    rated_torque = 0.98         # N·m，【官方】额定负载（≠ 堵转 2.94）
+    stall_torque = 2.94         # N·m，【官方】堵转（单独保留，勿与额定混用）
     stall_current = 2.7         # A，同级别堵转电流
 
     per_joint = []
@@ -307,6 +312,8 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
         "current_model": "电流 ∝ 输出扭矩（线性近似）",
         "operating_fraction": operating_fraction,
         "rated_torque_nm": rated_torque,
+        "rated_torque_source": "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书）",
+        "stall_torque_nm": stall_torque,
         "stall_current_a": stall_current,
         "avg_servo_current_a": round(total_current, 2),
         "logic_rail_v": 5.0,
@@ -321,8 +328,14 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
         "required_nameplate_wh": round(nameplate_wh, 1),
         "estimated_battery_mass_kg": round(mass_kg, 2),
         "per_joint_current": per_joint,
-        "note": ("工作占比 0.35 与额定参数为同级别舵机的典型值，非实测；"
-                 "选定舵机后必须按数据手册回填重算。"),
+        "note": ("工作占比 0.35 为工程估值、非实测；额定扭矩与堵转电流已按【官方】口径取"
+                 "（额定 0.98 / 堵转 2.94 N·m、堵转 2.7 A，见 STS3215-官方规格书核验.md）。"
+                 "选定舵机后仍须按数据手册回填重算。"),
+        "model_caveat": ("⚠️ 订正额定值（2.94 → 0.98 N·m）后本预算变严约 3 倍：『电流 ∝ 扭矩』"
+                         "线性近似在接近额定/堵转时偏保守（真实舵机电流在低扭矩段偏低、"
+                         "近堵转陡升），所以这里的电流与电池容量应读作**上限量级**，"
+                         "不是可用选型值。按此口径 3S 2000 mAh 已明显不够——"
+                         "电源架构（降额/限流/机构减载）需与重量方案一起重新定案。"),
     }
 
 
@@ -339,6 +352,9 @@ def emit_markdown(data: Dict[str, Any],
     j = data["joints"]
     pb = data["power_budget"]
     asm = data["assumptions"]
+    mb = r.get("mass_budget_g", {})
+    pc = mb.get("part_count", "—")
+    ie = r.get("installed_envelope_mm", r["envelope_mm"])
 
     def tier_rows() -> str:
         order = ["XL", "L", "M", "S"]
@@ -414,8 +430,9 @@ def emit_markdown(data: Dict[str, Any],
 | 项目 | 数值 | 来源 |
 |---|---|---|
 | 自由度 | **{r['dof']}**（腿 10 + 臂 8 + 躯干 2 + 头 2） | 与固件 `config.py` 同源 |
-| 包络尺寸 | **{r['envelope_mm']['height_mm']:.0f} × {r['envelope_mm']['width_mm']:.0f} × {r['envelope_mm']['depth_mm']:.0f}** mm（高×宽×厚） | 由关节链几何推导 |
-| 整机质量 | **{r['mass_kg']}** kg（结构 {r['mass_breakdown_kg']['links_total']} + 线束 {r['mass_breakdown_kg']['cables']} + 紧固件 {r['mass_breakdown_kg']['fasteners']}） | 设计预算 |
+| 包络尺寸 | **{r['envelope_mm']['height_mm']:.0f} × {r['envelope_mm']['width_mm']:.0f} × {r['envelope_mm']['depth_mm']:.0f}** mm（高×宽×厚） | 由关节链几何推导（【设计】基元口径；【实测】CAD 实装见下） |
+| 包络（CAD 实装，实测） | **{ie['height_mm']:.0f} × {ie['width_mm']:.0f} × {ie['depth_mm']:.0f}** mm（高×宽×厚） | `design/cad/assembly.py --all --no-export`（2026-09-12）；赛题上限 600×300×300 |
+| 整机质量 | **{r['mass_kg']}** kg（**结构件实算 {mb['structure']:.0f} g** / {pc} 件 + 舵机 {mb['servos']:.0f} + 电子件与电池 {mb['electronics']:.0f} + 线束紧固件 {mb['harness_fasteners']:.0f}）—— **整机为纸面推算，重量方案未定案** | 结构实算（CAD）/ 整机推算 |
 | 赛道要求 | {r['competition_class']} | 中国国际大学生创新大赛陕西赛区 |
 | 运动学模型 | `atri.urdf`（23 link / 22 joint，含惯量） | 可直接加载 PyBullet / Webots |
 
@@ -466,6 +483,9 @@ def emit_markdown(data: Dict[str, Any],
 | 30 min 任务消耗 | {pb['consumed_ah']} Ah / {pb['consumed_wh']} Wh |
 | 按 {pb['usable_fraction']*100:.0f}% 可用容量 | 需标称 **{pb['required_nameplate_ah']} Ah / {pb['required_nameplate_wh']} Wh** |
 | 整包预估质量 | **{pb['estimated_battery_mass_kg']} kg** |
+
+> ⚠️ **口径订正（2026-09-12）**：额定扭矩按【官方】**0.98 N·m**（此前误用堵转 2.94），
+> 本预算因此变严约 3 倍。{pb.get('model_caveat', '')}
 
 ### 3.3 可用安装空腔（内部净空，已扣 2.5mm 壁厚）
 
@@ -642,6 +662,11 @@ def main() -> int:
     declared_mass = sum(l["mass_kg"] for l in model["links"])
     total_mass = (declared_mass + ASSUMPTIONS["cable_mass_kg"]
                   + ASSUMPTIONS["fastener_mass_kg"])
+    # 头条整机质量用 robot_model 的权威口径（= out/report.md 合计 3136 g），
+    # link 累加值（3136.6）另存 links_total，避免与总表/README 差 1 g 对不上。
+    mb = model.get("mass_budget", {})
+    headline_mass_g = float(mb.get("total_g", round(total_mass * 1000, 1)))
+    part_count = model.get("installed_parts_count") or 81
 
     out: Dict[str, Any] = {
         "schema_version": "1.0",
@@ -654,7 +679,18 @@ def main() -> int:
             "name": model["name"],
             "dof": len(model["joints"]),
             "envelope_mm": model["overall"],
-            "mass_kg": round(total_mass, 3),
+            "installed_envelope_mm": model.get("installed_envelope_mm", {}),
+            "mass_status": model.get("mass_status", {}),
+            "mass_kg": round(headline_mass_g / 1000.0, 3),
+            "mass_budget_g": {
+                "structure": mb.get("structure_g"),
+                "servos": mb.get("servos_g"),
+                "electronics": mb.get("electronics_g"),
+                "harness_fasteners": mb.get("harness_fasteners_g"),
+                "total": headline_mass_g,
+                "part_count": part_count,
+                "status": "结构件实算；整机纸面推算，重量方案未定案",
+            },
             "mass_breakdown_kg": {
                 "links_total": round(declared_mass, 3),
                 "cables": ASSUMPTIONS["cable_mass_kg"],
@@ -753,10 +789,14 @@ def main() -> int:
     print("=" * 70)
     print("硬件选型需求（由设计模型推导）")
     print("=" * 70)
-    print(f"整机质量 {total_mass:.3f} kg   DOF {len(model['joints'])}")
+    print(f"整机质量 {headline_mass_g / 1000.0:.3f} kg（推算，重量方案未定案）   DOF {len(model['joints'])}")
+    ie = model.get("installed_envelope_mm", {})
+    if ie:
+        print(f"实装包络 {ie['height_mm']:.0f} × {ie['width_mm']:.0f} × {ie['depth_mm']:.0f} mm"
+              f"（高×宽×深，实测）")
     print(f"包络 {model['overall']['height_mm']:.0f} × "
           f"{model['overall']['width_mm']:.0f} × "
-          f"{model['overall']['depth_mm']:.0f} mm")
+          f"{model['overall']['depth_mm']:.0f} mm（基元/运动学口径）")
     print()
     print("关节力矩需求（重力保持 × 安全系数 1.8）:")
     print(f"  {'ID':>3} {'关节':<22} {'重力矩':>7} {'惯性矩':>7} {'支撑':>7} "

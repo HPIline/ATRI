@@ -40,13 +40,18 @@ def main(argv: List[str] | None = None) -> int:
     ov = m["overall"]
     budget = m["mass_budget"]
     servo_by_joint = {s["joint"]: s for s in pl["servos"]}
-    total_mass = sum(l["mass_kg"] for l in m["links"])
+    total_mass = sum(l["mass_kg"] for l in m["links"])   # = sum(link mass)，与 budget 头条值可能差 <1 g
+    total_headline_kg = budget["total_g"] / 1000.0       # 权威整机口径（out/report.md 合计）
     torques = sorted(
         ((j["name"], gen_handoff.joint_torque(m, j)) for j in m["joints"]),
         key=lambda kv: -kv[1]["required_torque_nm"])
     ts = m["servo_defaults"]
+    # 【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书双重印证）。
+    # 历史判据『堵转 × 50% = 1.47 N·m』比官方额定乐观 50%，降为并列参考列，不再作唯一判据。
     rated_vendor = ts["rated_torque_nm"]
-    rated_old = 1.0
+    rated_half_stall = (ts.get("rated_torque_nm_half_stall_deprecated")
+                        or ts.get("rated_torque_half_stall_nm")
+                        or round(ts["stall_torque_nm"] * 0.5, 2))
 
     L: List[str] = []
     A = L.append
@@ -74,14 +79,21 @@ def main(argv: List[str] | None = None) -> int:
     else:
         A(f"| 身高 × 宽 × 厚 | **{ov['height_mm']:.0f} × {ov['width_mm']:.0f} × "
           f"{ov['depth_mm']:.0f} mm** | 赛题上限 600 × 300 × 300 |")
-    A(f"| 整机质量 | **{total_mass:.3f} kg** | 含 22 舵机 + 电子件 + 电池 + 线束紧固件 |")
+    A(f"| 整机质量 | **{budget['total_g'] / 1000.0:.3f} kg（推算，重量方案未定案）** | 结构件 "
+      f"{budget['structure_g']:.0f} g 为 CAD **实算**，整机为纸面推算（+舵机+电子件+线束紧固件）；"
+      f"等重量方案定案后回填 |")
+    mass_status = m.get("mass_status", {})
+    if mass_status:
+        A(f"| 质量口径状态 | **{mass_status.get('state', '待定案')}** | "
+          f"{mass_status.get('note', '')} |")
     A(f"| 自由度 | **{len(m['joints'])} DOF** | 腿 {len([j for j in m['joints'] if 'hip' in j['name'] or 'knee' in j['name'] or 'ankle' in j['name']])}"
       f" + 臂 {len([j for j in m['joints'] if 'shoulder' in j['name'] or 'elbow' in j['name'] or 'gripper' in j['name']])}"
       f" + 躯干 {len([j for j in m['joints'] if 'trunk' in j['name']])}"
       f" + 头 {len([j for j in m['joints'] if 'head' in j['name']])}"
       f"（赛题要求 ≥18，且上肢+躯干 ≥10） |")
     A(f"| 舵机 | {ts['model']} × {len(pl['servos'])} | "
-      f"堵转 {ts['stall_torque_nm']:.2f} N·m / 额定口径 {rated_vendor:.2f} N·m / {ts['mass_g']:.0f} g |")
+      f"堵转 {ts['stall_torque_nm']:.2f} N·m / **额定（官方）{rated_vendor:.2f} N·m** / "
+      f"历史判据『堵转×50%』{rated_half_stall:.2f} N·m / {ts['mass_g']:.0f} g |")
     A(f"| 供电 | 3S 11.1 V（{ts['voltage_nominal_v']} V 标称，9.0–12.6 V） | 赛题要求 ≥7.4 V |")
     A(f"| 主控 | 树莓派 4B（4 GB）+ STM32F405 下位机 | 电子件+电池合计 {budget['electronics_g']:.0f} g，见第 5.2 节 |")
     A("")
@@ -97,7 +109,7 @@ def main(argv: List[str] | None = None) -> int:
     A(f"| 自由度 | {ref['dof']['total']} | **{len(m['joints'])}** | 多 2 个躯干关节（赛题『上肢+躯干 ≥10』要求） |")
     A(f"| 每腿 / 每臂 / 头 | {ref['dof']['per_leg']} / {ref['dof']['per_arm']} / {ref['dof']['head']} | "
       f"5 / 4 / 2 | ✅ 一致（每臂 4 含末端 1） |")
-    A(f"| 质量 | {ref['mass_kg']} kg | **{total_mass:.3f} kg** | 多 2 只舵机 + 树莓派方案（参考机为 CM4 类）|")
+    A(f"| 质量 | {ref['mass_kg']} kg | **{total_headline_kg:.3f} kg（推算，重量方案未定案）** | 多 2 只舵机 + 树莓派方案（参考机为 CM4 类）|")
     A(f"| 舵机电压 | 身体 {ref['servos']['body']['voltage_v']} V 高压总线（头部为 "
       f"{ref['servos']['head']['voltage_v']} 微型舵机）| 11.1 V 全总线 | ✅ 同高压总线路线，且更统一 |")
     A(f"| 结构材料 | {ref['material']} | 打印 PETG（结构预算 {budget['structure_g']:.0f} g）| ⚠️ 参考机铝板件更轻，见第 6 节 |")
@@ -114,14 +126,17 @@ def main(argv: List[str] | None = None) -> int:
     A("| 档 | 质量 (g) | 占比 | 说明 |")
     A("|---|---|---|---|")
     for label, key, note in (
-        ("结构件", "structure_g", "关节壳 / 连杆 / 足板，面密度法分配"),
+        ("结构件（**实算**）", "structure_g", "关节壳 / 连杆 / 足板；CAD 真实体积 × PETG 密度"),
         ("舵机", "servos_g", f"{len(pl['servos'])} × {ts['mass_g']:.0f} g"),
         ("电子件+电池", "electronics_g", "含 3S 11.1 V 2000 mAh 电池"),
         ("线束+紧固件", "harness_fasteners_g", "按质量比例摊派到各 link"),
     ):
         v = budget[key]
         A(f"| {label} | {v:.0f} | {v / budget['total_g'] * 100:.1f}% | {note} |")
-    A(f"| **合计** | **{budget['total_g']:.0f}** | 100% | = URDF 的 sum(link mass) |")
+    A(f"| **合计（推算，重量方案未定案）** | **{budget['total_g']:.0f}** | 100% | "
+      f"= URDF 的 sum(link mass)；结构件那一档是实算，整机这一档是纸面推算 |")
+    A("")
+    A(f"> ⚠️ **质量口径状态**：{m.get('mass_status', {}).get('note', '整机重量方案未定案')}")
     A("")
     A("> v1 的问题：link 质量是『结构占位预算』（合计 1650 g），既不含舵机也不含电子件 → "
       "导出的 URDF 总质量 1.80 kg，与实物口径差 300+ g，**喂给刚体引擎的动力学是错的**。"
@@ -206,31 +221,36 @@ def main(argv: List[str] | None = None) -> int:
     A("## 6. 力矩包络与判据")
     A("")
     A(f"单腿支撑工况：`τ ≈ 0.49 × 整机总质量`（CoP 偏移 25 mm × 动载系数 2.0，见 `gen_handoff.py`）。")
-    A(f"整机 {total_mass:.3f} kg → 腿部关节需求 ≈ {0.4905 * total_mass:.2f} N·m。")
+    A(f"整机 {total_headline_kg:.3f} kg（结构实算 1490 g / 整机为纸面推算，重量方案未定案） → 腿部关节需求 ≈ {0.4905 * total_headline_kg:.2f} N·m。")
     A("")
-    A("| 关节 | 需求 (N·m) | 占『堵转×50%』{:.2f} | 占旧口径『额定 1.0』 | 主导因素 |".format(rated_vendor))
+    A("| 关节 | 需求 (N·m) | 占**官方额定** {:.2f} | 占历史判据『堵转×50%』{:.2f} | 主导因素 |".format(
+        rated_vendor, rated_half_stall))
     A("|---|---|---|---|---|")
     for name, t in torques[:8]:
         r = t["required_torque_nm"]
-        A(f"| `{name}` | **{r:.3f}** | {r / rated_vendor * 100:.0f}% | {r / rated_old * 100:.0f}% | {t['requirements_driver']} |")
+        A(f"| `{name}` | **{r:.3f}** | {r / rated_vendor * 100:.0f}% | "
+          f"{r / rated_half_stall * 100:.0f}% | {t['requirements_driver']} |")
     A("")
     A("**判据口径（重要）**：")
     A("")
-    A(f"- ✅ **采用**：额定可用 ≈ 堵转 × 50% = **{rated_vendor:.2f} N·m**。依据是参考机实测选型习惯 —— "
-      f"{ref['mass_kg']} kg / {ref['dof']['total']} DOF 的量产人形用 "
-      f"{ref['servos']['body']['stall_torque_kgcm']:.0f} kg·cm（1.67 N·m）堵转舵机即可跑跨栏与上下台阶。")
-    A("- ❌ **弃用**：早期『额定 1.0 N·m』—— 该数字**无权威出处**，厂商只公布堵转值；"
-      "仓库此前的『余量耗尽』结论主要由它推出。")
+    A(f"- ✅ **采用【官方】额定负载 10 kg·cm = {rated_vendor:.2f} N·m @12V**。出处：DFRobot SER0070 + "
+      "飞特 STS3235 规格书双重印证（见 `STS3215-官方规格书核验.md` §4.1、`总体参数汇总表.md` §2.1）。")
+    A(f"- ⚠️ **并列参考（偏乐观 50%，不再作唯一判据）**：『堵转 × 50% = {rated_half_stall:.2f} N·m』"
+      f"——依据是参考机实测选型习惯（{ref['mass_kg']} kg / {ref['dof']['total']} DOF 的量产人形用 "
+      f"{ref['servos']['body']['stall_torque_kgcm']:.0f} kg·cm 堵转舵机即可跑跨栏与上下台阶）；"
+      f"它比官方额定 {rated_vendor:.2f} 乐观 {rated_half_stall / rated_vendor - 1:.0%}。")
+    A("- ✅ **已撤销的旧说**：早期『额定 1.0 N·m 无权威出处、已弃用』现在不成立 —— "
+      f"官方额定 {rated_vendor:.2f} N·m 已有出处；真正无出处的是 0.18 s/60° 与 300 °/s 那类速度值。")
     A("- ⚠️ **仍待实测**：买 1 只 STS3215（12V 版）实测连续扭矩与温升，"
       "这是唯一能同时消除『额定值不确定』和『3S 末端电压降额』两个问题的动作。")
     worst = torques[0][1]["required_torque_nm"]
     if worst > rated_vendor:
         A("")
-        A(f"- ❌ **当前状态：超标**。最大关节 `{torques[0][0]}` 需 **{worst:.3f} N·m**"
-          f"（占判据 {worst / rated_vendor * 100:.0f}%），腿部踝关节 "
+        A(f"- ❌ **当前状态：超标（按官方额定 0.98 N·m）**。最大关节 `{torques[0][0]}` 需 "
+          f"**{worst:.3f} N·m**（占官方额定 {worst / rated_vendor * 100:.0f}%），腿部踝关节 "
           f"{torques[1][1]['required_torque_nm']:.3f} N·m。"
-          f"成因是结构件按 CAD 实装口径计 {budget['structure_g']:.0f} g —— "
-          f"**必须执行第 3.1 节的减重路径**（推荐 A+B），否则站不起来。")
+          f"成因是结构件按 CAD 实算口径计 {budget['structure_g']:.0f} g（整机质量仍为纸面推算，"
+          f"重量方案未定案）—— **必须执行第 3.1 节的减重路径**（推荐 A+B），否则站不起来。")
     A("")
     A("---")
     A("")
