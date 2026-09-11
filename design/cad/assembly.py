@@ -229,8 +229,8 @@ LINK_BULK: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
     "right_forearm": [("limb_tube", {"length": 39.2, "z0": -39.2})],
     "left_foot": [("foot_plate", {})],
     "right_foot": [("foot_plate", {"mirror": True})],
-    "left_gripper": [("gripper_jaw", {})],
-    "right_gripper": [("gripper_jaw", {})],
+    "left_gripper": [("gripper_jaw", {"shaft": "+y", "parent": "+z"})],
+    "right_gripper": [("gripper_jaw", {"shaft": "-y", "parent": "+z"})],
 }
 
 # 紧凑转接块：只留给颈/腰短链（轴距 27.5，不走错轴）

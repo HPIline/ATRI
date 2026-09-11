@@ -801,20 +801,24 @@ def gripper_body(wall: float = PLATE_T) -> cq.Workplane:
     return sanitize(part)
 
 
-def gripper_jaw() -> cq.Workplane:
-    """夹爪动指：锁在金属舵盘**外表面**，不占舵机机体。"""
+def gripper_jaw(shaft: str = "+y", parent: str = "+z") -> cq.Workplane:
+    """夹爪动指：锁在金属舵盘**外表面**，并 orient 到关节轴。
+
+    不走 orient 时零件局部 +Y 永远朝世界 +Y：左手（y=+75）朝外，
+    右手（y=−75）朝内，指根穿进 right_hip_yaw。
+    """
     horn = servo_horn_interface(SERVO_NAME)
     t = 5.0
     y_inner = HORN_FACE
     part = cq.Workplane("XY")
-    # 薄盘贴舵盘；指尖朝 −Z（桌面方向），避免零位伸进髋簇
+    # 薄盘贴舵盘；指尖朝 −Z（桌面方向），体积做在髋簇之外
     part = part.union(box(22.0, t, 16.0, at=(0.0, y_inner + t / 2.0, -8.0)))
     part = drill(part, bolt_circle(horn["pcd_mm"], horn["hole_count"]),
                  dia=IF["horn"]["hole_dia_mm"], depth=t * 4,
                  z0=-(t * 2), axis="Y")
     part = part.cut(cyl(10.0, t * 4, at=(0.0, y_inner - t, 0.0), axis="Y"))
-    # 指身沿 −Z，把体积做在髋簇之外，重合率才掉到摆放错误阈值以下
     part = part.union(box(12.0, t, 48.0, at=(0.0, y_inner + t / 2.0, -32.0)))
+    part = orient(part, shaft, parent)
     return sanitize(part)
 
 

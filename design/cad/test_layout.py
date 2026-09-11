@@ -50,6 +50,14 @@ PHASE1_PAIRS = [
     ("servo__trunk_roll", "elec__ICM-42688-P 模块"),
 ]
 
+# 机械零位：夹爪不得伸进髋 yaw（不靠 DISPLAY_POSE 躲）。
+ZERO_GRIPPER_HIP_PAIRS = [
+    ("right_gripper__gripper_jaw", "servo__right_hip_yaw"),
+    ("right_gripper__gripper_jaw", "cage__right_hip_yaw"),
+    ("left_gripper__gripper_jaw", "servo__left_hip_yaw"),
+    ("left_gripper__gripper_jaw", "cage__left_hip_yaw"),
+]
+
 
 def _assembly():
     kin = A.Kin(A.DESIGN / "atri.urdf")
@@ -153,6 +161,17 @@ class LayoutGates(unittest.TestCase):
         xmax = max(b.xmax for b in boxes)
         self.assertLessEqual(mic.xmax, xmax + 0.05)
         self.assertLessEqual(xmax - min(b.xmin for b in boxes), 147.0)
+
+    def test_zero_pose_gripper_clears_hip(self):
+        """机械零位：夹爪零件不得与髋 yaw 达到摆放错误或让位不足。"""
+        bad = []
+        for a, b in ZERO_GRIPPER_HIP_PAIRS:
+            self.assertIn(a, self.shapes, a)
+            self.assertIn(b, self.shapes, b)
+            vol, frac, verd = self._pair_verdict(a, b)
+            if verd in ("❌ 摆放错误", "⚠️ 让位不足"):
+                bad.append(f"{a} ∩ {b} = {vol:.0f} mm³ ({frac*100:.0f}%) {verd}")
+        self.assertFalse(bad, "零位夹爪仍穿髋:\n  " + "\n  ".join(bad))
 
     def test_display_pose_hands_leave_hips(self):
         """展示姿态：手在身前，不穿髋；不外展超宽。"""
