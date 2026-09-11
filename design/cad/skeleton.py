@@ -536,25 +536,31 @@ def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
     """
     part = cq.Workplane("XY")
 
-    part = part.union(box(14.0, 128.0, 14.0, at=(-36.0, 0.0, -18.0)))
+    # 后桥略瘦，省下的料接到胸框后柱（y=±48）
+    part = part.union(box(12.0, 120.0, 12.0, at=(-36.0, 0.0, -18.0)))
     for sign in (-1, 1):
-        part = part.union(box(56.0, 8.0, 14.0, at=(-12.0, sign * 60.0, -18.0)))
-        post = box(10.0, 8.0, 40.0, at=(-36.0, sign * 60.0, -18.0))
-        post = post.cut(cyl(4.0, 44.0, at=(-36.0, sign * 60.0, -20.0)))
+        # 髋外侧纵梁仍在 y=±60，只走低位，让开 yaw 机体
+        part = part.union(box(56.0, 8.0, 12.0, at=(-12.0, sign * 60.0, -18.0)))
+        # 立柱收到 y=±48，零位对齐 torso 后柱（torso 系 x=−50, y=±48）
+        post = box(10.0, 8.0, 40.0, at=(-36.0, sign * 48.0, -18.0))
+        post = post.cut(cyl(4.0, 44.0, at=(-36.0, sign * 48.0, -20.0)))
         part = part.union(post)
-        part = part.union(box(40.0, 8.0, 6.0, at=(-16.0, sign * 36.0, 14.0)))
-        part = part.union(box(8.0, 28.0, 6.0, at=(-36.0, sign * 48.0, 14.0)))
+        part = part.union(box(40.0, 8.0, 6.0, at=(-16.0, sign * 48.0, 14.0)))
+        part = part.union(box(8.0, 8.0, 6.0, at=(-36.0, sign * 48.0, 14.0)))
+        # 低位横筋：60 → 48，U 臂收到胸框
+        part = part.union(box(8.0, 14.0, 12.0, at=(-12.0, sign * 54.0, -18.0)))
 
     flange = box(40.0, 40.0, 4.0, at=(0.0, 0.0, 16.0))
     flange = flange.cut(cyl(14.0, 8.0, at=(0.0, 0.0, 14.0)))
     part = part.union(flange)
     for sign in (-1, 1):
-        part = part.union(box(8.0, 20.0, 4.0, at=(-16.0, sign * 24.0, 16.0)))
+        # 法兰 y±20 接到 U 上梁 y=±48，必须相交否则 sanitize 会丢掉 U
+        part = part.union(box(8.0, 32.0, 4.0, at=(-16.0, sign * 32.0, 16.0)))
 
-    part = part.union(box(22.0, 18.0, 2.5, at=(-36.0, 0.0, -4.0)))
+    part = part.union(box(22.0, 18.0, 2.5, at=(-36.0, 0.0, -7.0)))
     for pt in bolt_circle(16.0, 4):
         part = part.union(bosses([(pt[0] - 36.0, pt[1])], od=4.5, height=5.0,
-                                 bore_dia=1.6, bore_depth=6.0, z0=-4.0))
+                                 bore_dia=1.6, bore_depth=6.0, z0=-7.0))
 
     part = safe_fillet(part, FDM["fillet_struct_mm"], "|Z")
     return sanitize(part)
@@ -612,6 +618,9 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
             post = box(8.0, 8.0, 48.0, at=(sx * post_x, sy * post_y, 18.0))
             post = post.cut(cyl(5.0, 54.0, at=(sx * post_x, sy * post_y, 16.0)))
             part = part.union(post)
+    # 后立柱向下接到俯仰叉，零位与骨盆 U 后柱连成一条
+    for sy in (-1, 1):
+        part = part.union(box(8.0, 8.0, 18.5, at=(-post_x, sy * post_y, -0.3)))
 
     # --- 5. 树莓派托盘（外框 + 4×M2.5 柱，85 边沿 Y）---
     tray = box(tl, tw, TORSO_PLATE_T, at=(0, 0, TORSO_DECK_FLOOR_Z))
@@ -687,24 +696,21 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
                         at=(0, 0, z0 - hh / 2 - 0.2 * wall)))
     part = part.union(base)
     top = box(hl, hw, wall, at=(0, 0, z0 + hh / 2 - wall))               # 顶
-    top = top.cut(box(hl - 24.0, hw - 24.0, wall * 1.2,
-                      at=(0, 0, z0 + hh / 2 - 1.2 * wall)))
+    top = top.cut(cyl(16.0, wall * 2.0, at=(0, 0, z0 + hh / 2 - wall * 1.2)))
     part = part.union(top)
     part = part.union(box(wall, hw, hh, at=(hl / 2 - wall, 0, z0 - hh / 2)))
     for sign in (-1, 1):
         part = part.union(box(hl, wall, hh, at=(0, sign * (hw / 2 - wall / 2),
                                                 z0 - hh / 2)))
 
-    # --- 摄像头座：前脸 Ø38 模组，镜头 Ø18 外露 ---
-    part = part.union(box(6.0, 44.0, 44.0, at=(hl / 2 - 3.0, 0, z0 + 6.0),
+    # --- 摄像头座 + 拾音：一块前脸罩，拾音收在镜头下沿，不另探出 ---
+    part = part.union(box(6.0, 44.0, 60.0, at=(hl / 2 - 3.0, 0, z0 - 2.0),
                           centered_z=True))
     part = part.cut(cyl(18.5, 14.0, at=(hl / 2 - 6.0, 0, z0 + 6.0), axis="X"))
     part = part.cut(box(20.0, 40.0, 17.0, at=(hl / 2 - 12.0, 0, z0 + 6.0),
                         centered_z=True))
-
-    # --- 麦克风座：挂在前脸相机下方，不进 pitch/yaw 舵机体积 ---
-    part = part.union(box(8.0, 18.0, 10.0, at=(hl / 2 - 6.0, 0.0, z0 - 10.0)))
-    part = part.cut(box(4.0, 14.0, 8.0, at=(hl / 2 - 4.0, 0.0, z0 - 10.0)))
+    # 拾音腔在罩内下沿，不增加 xmax
+    part = part.cut(box(4.0, 16.0, 8.0, at=(hl / 2 - 4.0, 0.0, z0 - 8.0)))
 
     # --- 扬声器孔（侧面阵列）---
     for sign in (-1, 1):
@@ -735,49 +741,49 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 # --------------------------------------------------------------------------
 # 零件 8：足板（含踝部叉）
 # --------------------------------------------------------------------------
-def foot_plate(length: float = 124.0, width: float = 60.0, sole_t: float = 3.0,
-               rib_h: float = 6.0) -> cq.Workplane:
-    """足底板：踝轴仍在 x=0，后跟加长到 48 mm，2 纵梁 + 1 横梁，四角橡胶垫。
+def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
+               rib_h: float = 6.0, mirror: bool = False) -> cq.Workplane:
+    """足底板：踝轴 x=0，后跟 48 mm，前掌 74 mm（整机深 ≤147）。左右脚同一零件。
 
-    静立后向原来只有 ~37 mm（约 11°），背包把重心再往后拉。增长全加在后跟。
-    底板不打穿；筋在板上面承弯；垫在板下面贴硅胶（φ8×2）。
-    前掌 3 mm 倒角，摆动相离地（robot_model.json 已写「前端略上翘」）。
+    纵梁贴踝叉臂（y=±Y_HALF），不浮在板面中间。橡胶垫只在底板之下。
     """
     part = cq.Workplane("XY")
     heel = 48.0
     x_rear = -heel
     x_front = length - heel
     x_mid = (x_rear + x_front) / 2.0
+    y_rib = Y_HALF + 1.5
 
     part = part.union(box(length, width, sole_t, at=(x_mid, 0.0, -sole_t)))
 
-    # 2 纵梁 + 前后横梁（踝舵机在 x=0，横梁避开）
+    # 纵梁接到叉臂；踝区断开，前后各一段
     for sign in (-1, 1):
-        part = part.union(box(length - 8.0, 5.0, rib_h,
-                              at=(x_mid, sign * 16.0, 0.0)))
-    part = part.union(box(7.0, width - 10.0, rib_h, at=(-22.0, 0.0, 0.0)))
-    part = part.union(box(7.0, width - 10.0, rib_h, at=(24.0, 0.0, 0.0)))
-    # 板和梁让开踝舵机包络，再装叉（叉与舵盘配合是故意的）
-    # 左右踝 clock 相反，舵机长度方向中心在 ±12.4
-    part = part.cut(box(50.0, 40.0, 20.0, at=(-12.4, 0.0, 0.0)))
-    part = part.cut(box(50.0, 40.0, 20.0, at=(12.4, 0.0, 0.0)))
+        part = part.union(box(heel - 10.0, 5.0, rib_h,
+                              at=(x_rear + (heel - 10.0) / 2.0 + 4.0,
+                                  sign * y_rib, -0.4)))
+        part = part.union(box(x_front - 18.0, 5.0, rib_h,
+                              at=((x_front + 18.0) / 2.0, sign * y_rib, -0.4)))
+    part = part.union(box(6.0, width - 10.0, rib_h, at=(-28.0, 0.0, -0.4)))
+    part = part.union(box(6.0, width - 10.0, rib_h, at=(22.0, 0.0, -0.4)))
 
     fork = limb_fork(shaft="+y", parent="+z", compact=True, spigot=False)
     part = part.union(fork)
     part = part.cut(box(80.0, 80.0, 20.0, at=(0.0, 0.0, -sole_t - 20.0)))
+    # 清掉叉底座在鞋面上的台阶，只留叉臂
+    part = part.cut(box(36.0, 20.0, 8.0, at=(0.0, 0.0, -0.2)))
 
-    # 前掌底部倒角：不改变踝轴，只让摆动相鞋尖先离地
-    part = part.cut(box(18.0, width + 2.0, 1.6,
-                        at=(x_front - 8.0, 0.0, -sole_t - 0.2)))
-
-    # 四角橡胶垫凸台（贴硅胶的定位，不打穿 3 mm 底板）
-    pad_h = 2.0
-    inset = 8.0
-    for sx, sy in ((x_rear + inset, 22.0), (x_rear + inset, -22.0),
-                   (x_front - inset, 22.0), (x_front - inset, -22.0)):
-        part = part.union(cyl(8.0, pad_h, at=(sx, sy, -sole_t - pad_h)))
+    part = part.cut(box(16.0, width + 2.0, 1.4,
+                        at=(x_front - 7.0, 0.0, -sole_t - 0.2)))
 
     part = safe_fillet(part, 1.5, "|Z")
+    # 垫在圆角之后加，避免 |Z| fillet 把前掌垫剪开
+    pad_h = 2.0
+    inset = 9.0
+    for sx, sy in ((x_rear + inset, 20.0), (x_rear + inset, -20.0),
+                   (x_front - inset, 20.0), (x_front - inset, -20.0)):
+        part = part.union(cyl(8.0, pad_h + 0.6, at=(sx, sy, -sole_t - pad_h)))
+    if mirror:
+        part = part.mirror("XZ")
     return sanitize(part)
 
 

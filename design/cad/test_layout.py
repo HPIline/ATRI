@@ -30,7 +30,8 @@ from skeleton import foot_plate, head_shell, pelvis_frame  # noqa: E402
 HEAD_ZMAX_LIMIT_MM = 207.0
 ENVELOPE_WIDTH_MAX_MM = 270.0
 ENVELOPE_HEIGHT_MAX_MM = 420.0
-ENVELOPE_DEPTH_MAX_MM = 180.0
+# 第 7 轮：拾音并进相机罩，深度回到 ≤147（改后曾到 149）。
+ENVELOPE_DEPTH_MAX_MM = 147.0
 HIP_YAW_Y_MIN_MM = 45.0
 # 改前 pelvis_frame 打印质量（PETG infill 0.45）——实现时先跑本文件记下，再锁。
 PELVIS_MASS_MAX_G = 130.0
@@ -124,6 +125,47 @@ class LayoutGates(unittest.TestCase):
         self.assertGreaterEqual(bb.zmin, -8.0, "垫太厚会抬整机")
         m = printed_mass(wp, material="PETG", infill=0.45)
         self.assertLessEqual(m["mass_printed_g"], 42.0, m)
+
+    def test_feet_are_left_right_mirrors(self):
+        """左右脚同一零件镜像，包络应对称。"""
+        self.assertIn("left_foot__foot_plate", self.shapes)
+        self.assertIn("right_foot__foot_plate", self.shapes)
+        L = bbox_of(self.shapes["left_foot__foot_plate"])
+        R = bbox_of(self.shapes["right_foot__foot_plate"])
+        self.assertAlmostEqual(L.xmin, R.xmin, delta=1.5)
+        self.assertAlmostEqual(L.xmax, R.xmax, delta=1.5)
+        self.assertAlmostEqual(L.zmin, R.zmin, delta=1.5)
+        self.assertAlmostEqual(L.ymin + R.ymax, 0.0, delta=2.5)
+        self.assertAlmostEqual(L.ymax + R.ymin, 0.0, delta=2.5)
+
+    def test_head_mic_inside_visor(self):
+        """拾音不得探出头壳前脸（hl/2=38），避免再把深度顶到 149。"""
+        bb = head_shell().val().BoundingBox()
+        self.assertLessEqual(bb.xmax, 39.5, f"head_shell xmax {bb.xmax:.1f}")
+        mic = None
+        for name, w in self.shapes.items():
+            if "拾音" in name:
+                mic = bbox_of(w)
+                break
+        self.assertIsNotNone(mic, "找不到拾音模块")
+        # 整机 xmax 由头前脸/相机决定，拾音不得再当最前点
+        boxes = [bbox_of(w) for w in self.shapes.values()]
+        xmax = max(b.xmax for b in boxes)
+        self.assertLessEqual(mic.xmax, xmax + 0.05)
+        self.assertLessEqual(xmax - min(b.xmin for b in boxes), 147.0)
+
+    def test_pelvis_has_torso_riser(self):
+        """U 臂要收到胸框后柱附近（y≈±48），不能只停在 y=±60 当挡板。"""
+        bb = pelvis_frame().val().BoundingBox()
+        self.assertGreaterEqual(bb.ymax, 47.0, "U 外缘仍要让开 hip_yaw")
+        # 在 z>8 的上段，宽度应收向胸框（ymax 局部上段 ≤ 56）
+        import cadquery as cq
+        upper = pelvis_frame().intersect(
+            cq.Workplane("XY").box(200, 200, 20, centered=(True, True, False)).translate((0, 0, 10))
+        )
+        ub = upper.val().BoundingBox()
+        self.assertLessEqual(ub.ymax, 56.0, f"上段仍张开 ymax={ub.ymax:.1f}")
+        self.assertGreaterEqual(ub.ymax, 44.0, "上段要接到胸框后柱")
 
 
 if __name__ == "__main__":

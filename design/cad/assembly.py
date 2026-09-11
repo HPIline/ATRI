@@ -195,7 +195,7 @@ LINK_BULK: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
     "left_forearm": [("limb_tube", {"length": 39.2, "z0": -39.2})],
     "right_forearm": [("limb_tube", {"length": 39.2, "z0": -39.2})],
     "left_foot": [("foot_plate", {})],
-    "right_foot": [("foot_plate", {})],
+    "right_foot": [("foot_plate", {"mirror": True})],
     "left_gripper": [("gripper_jaw", {})],
     "right_gripper": [("gripper_jaw", {})],
 }
@@ -278,6 +278,8 @@ def electronics_placeholder(size: Sequence[float]) -> cq.Workplane:
 
 # 电子件的摆放姿态（placements.json 只给位置与尺寸，姿态在这里定）
 ELEC_ROT_DEG = {"compute": 90.0}      # 树莓派 85 mm 边沿 Y 向（躯干内净空 90）
+# 头壳前脸 visor x≈32–38。占位体 8×25×8，厚度沿 X，收在罩内下沿。
+ELEC_HEAD = {"mic": (35.0, 0.0, -12.0)}
 # 躯干骨架重排（给俯仰叉让位）后，舱内件要落在**各自的那块托盘/仓底**上。
 # 托盘上表面（torso 局部坐标，见 skeleton.torso_frame）：
 # 托盘上表面（torso 局部坐标，见 skeleton.torso_frame 的绝对布局）
@@ -505,6 +507,8 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
         try:
             pos = list(e["position_mm"])
             rot_y = 0.0
+            if link == "head" and kind in ELEC_HEAD:
+                pos = list(ELEC_HEAD[kind])
             if kind in ELEC_DECK_TOP:
                 # 底面坐在托盘上表面：中心 z = 盘面 + 自身高/2
                 pos[2] = ELEC_DECK_TOP[kind] + e["size_mm"][2] / 2.0
