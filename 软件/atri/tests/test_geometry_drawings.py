@@ -213,7 +213,23 @@ class TestKinematics(unittest.TestCase):
 
     def test_head_is_topmost(self):
         env = gen_urdf.measured_envelope(self.model)
-        self.assertAlmostEqual(env["max_z_mm"], 475.0, delta=1.0)
+        # v2 起身高是可标定参数（现对齐参考机 373 mm），不再硬编码 475 mm：
+        # 改为断言"包络顶端 == 模型声明的身高"与"不超赛题上限"。
+        self.assertAlmostEqual(env["max_z_mm"],
+                               self.model["overall"]["height_mm"], delta=1.0)
+        self.assertLessEqual(env["max_z_mm"], 600.0)
+
+    def test_link_masses_include_servos_and_electronics(self):
+        """v2 回归：link 质量必须含舵机与电子件，否则 URDF 的动力学是错的。"""
+        m = self.model
+        budget = m["mass_budget"]
+        total = sum(l["mass_kg"] for l in m["links"]) * 1000.0
+        self.assertAlmostEqual(total, budget["total_g"], delta=1.0)
+        self.assertGreaterEqual(budget["servos_g"], 1000.0)
+        for l in m["links"]:
+            bd = l.get("mass_breakdown_g", {})
+            self.assertIn("servos", bd)
+            self.assertIn("structure", bd)
 
     def test_pose_changes_link_position(self):
         """给定非零关节角，末端位置必须变化（证明确实在算运动学）。"""
@@ -283,9 +299,16 @@ class TestUrdfGeometryExport(unittest.TestCase):
                     if l.get("name") == "left_thigh")
         cyl = link.find("visual/geometry/cylinder")
         self.assertIsNotNone(cyl)
-        # 模型：r=22.5、capsule length=45 -> URDF 长度 = 45 + 2*22.5 = 90mm
-        self.assertAlmostEqual(float(cyl.get("length")), 0.090, places=6)
-        self.assertAlmostEqual(float(cyl.get("radius")), 0.0225, places=6)
+        model_link = next(l for l in self.model["links"]
+                          if l["name"] == "left_thigh")
+        g = model_link["geometry"]
+        # capsule → cylinder：URDF 长度 = length + 2r（两端球头），半径 = r
+        # 期望值取自模型（v2 起尺寸可重标定），不再硬编码 90 mm / 22.5 mm
+        self.assertAlmostEqual(float(cyl.get("length")),
+                               (g["length_mm"] + 2.0 * g["radius_mm"]) / 1000.0,
+                               places=6)
+        self.assertAlmostEqual(float(cyl.get("radius")),
+                               g["radius_mm"] / 1000.0, places=6)
 
     def test_visual_origin_is_exported(self):
         """带 origin_mm 的 link，其 visual/collision/inertial 都要写出偏移。"""
@@ -322,7 +345,12 @@ class TestUrdfGeometryExport(unittest.TestCase):
                     if l.get("name") == "left_hip_yaw_link")
         sph = link.find("visual/geometry/sphere")
         self.assertIsNotNone(sph)
-        self.assertAlmostEqual(float(sph.get("radius")), 0.020, places=6)
+        model_link = next(l for l in self.model["links"]
+                          if l["name"] == "left_hip_yaw_link")
+        # 期望值取自模型（v2 起尺寸可重标定），不再硬编码 0.020
+        self.assertAlmostEqual(float(sph.get("radius")),
+                               model_link["geometry"]["outer_r_mm"] / 1000.0,
+                               places=6)
 
     def test_urdf_still_well_formed_and_complete(self):
         self.assertEqual(len(self.root.findall("link")), 23)

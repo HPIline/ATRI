@@ -2,7 +2,7 @@
   "schema_version": "1.2",
   "name": "ATRI",
   "model_status": "design-provisional",
-  "description": "A.T.R.I. 小人形组 22 DOF 设计模型。尺寸用于仿真与工程评审，实物制造前需按采购件复测。",
+  "description": "A.T.R.I. 小人形组 22 DOF 设计模型 v2（尺寸对齐 TonyPi Pro 参考机，质量改为真实分布）。v2 的 link 质量 = 结构壳 + 装在其上的舵机 + 装在其内的电子件 + 分摊线束，因此 sum(link mass) == 实物口径总重，URDF 可直接用于刚体动力学仿真。",
   "units": "mm",
   "coordinate_frame": {
     "origin": "骨盆 link 几何中心",
@@ -13,14 +13,14 @@
   "base_pose_mm": [
     0.0,
     0.0,
-    247.5
+    194.2
   ],
   "overall": {
-    "height_mm": 475.0,
+    "height_mm": 372.8,
     "width_mm": 190.0,
     "depth_mm": 123.0,
-    "mass_kg": 1.65,
-    "note": "零姿态静态包络，由关节链几何累加得出：足底 z=-247.5 mm 到头顶 z=+227.5 mm（相对骨盆中心），合计 475 mm；放置后足底离地 0 mm。宽度由肩部包络决定（190 mm）。深度由足部前伸决定：踝关节位于足底后 1/3 处，足尖前伸至 +73 mm，躯干后缘 -50 mm，合计 123 mm。"
+    "mass_kg": 2.146,
+    "note": "v2 包络；身高由 v1 的 475.0 mm 缩到 372.8 mm（z ×0.785）对齐参考机 373 mm；宽/深保持（x/y ×1.0）—— 树莓派 4B 的 85 mm 边与 3S 电池的 88 mm 边决定躯干净空下限。"
   },
   "design_constraints": {
     "competition_max_height_mm": 600.0,
@@ -44,111 +44,291 @@
       "name": "pelvis",
       "label": "骨盆",
       "group": "trunk",
-      "mass_kg": 0.13,
+      "mass_kg": 0.22516,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
           100.0,
           80.0,
-          45.0
+          35.3
         ],
-        "fillet_mm": 6.0,
+        "fillet_mm": 5.6,
         "color": [
           0.22,
           0.25,
           0.31
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 trunk_roll",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        },
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            45.0,
+            -19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_hip_yaw",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        },
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            -45.0,
+            -19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_hip_yaw",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 44.6,
+        "servos": 165.0,
+        "electronics": 3.0,
+        "harness_fasteners": 12.6
       }
     },
     {
       "name": "left_hip_yaw_link",
       "label": "左髋偏转关节壳",
       "group": "leg_l",
-      "mass_kg": 0.04,
+      "mass_kg": 0.07191,
       "geometry": {
         "type": "sphere_shell",
-        "outer_r_mm": 20.0,
-        "inner_r_mm": 17.0,
+        "outer_r_mm": 18.6,
+        "inner_r_mm": 15.8,
         "color": [
           0.32,
           0.36,
           0.44
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_hip_roll",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 12.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.0
       }
     },
     {
       "name": "left_hip_roll_link",
       "label": "左髋横滚关节壳",
       "group": "leg_l",
-      "mass_kg": 0.04,
+      "mass_kg": 0.07191,
       "geometry": {
         "type": "sphere_shell",
-        "outer_r_mm": 20.0,
-        "inner_r_mm": 17.0,
+        "outer_r_mm": 18.6,
+        "inner_r_mm": 15.8,
         "color": [
           0.32,
           0.36,
           0.44
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_hip_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 12.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.0
       }
     },
     {
       "name": "left_thigh",
       "label": "左大腿",
       "group": "leg_l",
-      "mass_kg": 0.08,
+      "mass_kg": 0.08869,
       "geometry": {
         "type": "capsule",
         "radius_mm": 22.5,
-        "length_mm": 45.0,
+        "length_mm": 35.3,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -40.0
+          -31.4
         ],
         "color": [
           0.88,
           0.9,
           0.93
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -62.8
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_knee_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 28.7,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 5.0
       }
     },
     {
       "name": "left_shank",
       "label": "左小腿",
       "group": "leg_l",
-      "mass_kg": 0.07,
+      "mass_kg": 0.08375,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
-        "length_mm": 47.0,
+        "length_mm": 36.9,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -40.0
+          -31.4
         ],
         "color": [
           0.8,
           0.83,
           0.88
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -62.8
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_ankle_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 24.1,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.7
       }
     },
     {
       "name": "left_foot",
       "label": "左足",
       "group": "leg_l",
-      "mass_kg": 0.085,
+      "mass_kg": 0.03267,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
           110.0,
           60.0,
-          25.0
+          19.6
         ],
-        "fillet_mm": 8.0,
+        "fillet_mm": 7.4,
         "color": [
           0.17,
           0.2,
@@ -159,97 +339,215 @@
           0.0,
           0.0
         ]
+      },
+      "mass_breakdown_g": {
+        "structure": 30.8,
+        "servos": 0.0,
+        "electronics": 0.0,
+        "harness_fasteners": 1.8
       }
     },
     {
       "name": "right_hip_yaw_link",
       "label": "右髋偏转关节壳",
       "group": "leg_r",
-      "mass_kg": 0.04,
+      "mass_kg": 0.07191,
       "geometry": {
         "type": "sphere_shell",
-        "outer_r_mm": 20.0,
-        "inner_r_mm": 17.0,
+        "outer_r_mm": 18.6,
+        "inner_r_mm": 15.8,
         "color": [
           0.32,
           0.36,
           0.44
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_hip_roll",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 12.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.0
       }
     },
     {
       "name": "right_hip_roll_link",
       "label": "右髋横滚关节壳",
       "group": "leg_r",
-      "mass_kg": 0.04,
+      "mass_kg": 0.07191,
       "geometry": {
         "type": "sphere_shell",
-        "outer_r_mm": 20.0,
-        "inner_r_mm": 17.0,
+        "outer_r_mm": 18.6,
+        "inner_r_mm": 15.8,
         "color": [
           0.32,
           0.36,
           0.44
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -19.6
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_hip_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 12.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.0
       }
     },
     {
       "name": "right_thigh",
       "label": "右大腿",
       "group": "leg_r",
-      "mass_kg": 0.08,
+      "mass_kg": 0.08869,
       "geometry": {
         "type": "capsule",
         "radius_mm": 22.5,
-        "length_mm": 45.0,
+        "length_mm": 35.3,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -40.0
+          -31.4
         ],
         "color": [
           0.88,
           0.9,
           0.93
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -62.8
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_knee_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 28.7,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 5.0
       }
     },
     {
       "name": "right_shank",
       "label": "右小腿",
       "group": "leg_r",
-      "mass_kg": 0.07,
+      "mass_kg": 0.08375,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
-        "length_mm": 47.0,
+        "length_mm": 36.9,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -40.0
+          -31.4
         ],
         "color": [
           0.8,
           0.83,
           0.88
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -62.8
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_ankle_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 24.1,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.7
       }
     },
     {
       "name": "right_foot",
       "label": "右足",
       "group": "leg_r",
-      "mass_kg": 0.085,
+      "mass_kg": 0.03267,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
           110.0,
           60.0,
-          25.0
+          19.6
         ],
-        "fillet_mm": 8.0,
+        "fillet_mm": 7.4,
         "color": [
           0.17,
           0.2,
@@ -260,243 +558,559 @@
           0.0,
           0.0
         ]
+      },
+      "mass_breakdown_g": {
+        "structure": 30.8,
+        "servos": 0.0,
+        "electronics": 0.0,
+        "harness_fasteners": 1.8
       }
     },
     {
       "name": "trunk_roll_link",
       "label": "腰部横滚关节",
       "group": "trunk",
-      "mass_kg": 0.04,
+      "mass_kg": 0.06772,
       "geometry": {
         "type": "cylinder",
         "radius_mm": 17.5,
-        "height_mm": 30.0,
+        "height_mm": 23.6,
         "axis": "z",
         "color": [
           0.3,
           0.34,
           0.42
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            27.5
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 trunk_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 8.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 3.8
       }
     },
     {
       "name": "torso_upper",
       "label": "胸腔",
       "group": "trunk",
-      "mass_kg": 0.3,
+      "mass_kg": 0.54592,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
           100.0,
           90.0,
-          70.0
+          55.0
         ],
-        "fillet_mm": 8.0,
+        "fillet_mm": 7.4,
         "color": [
           0.91,
           0.93,
           0.96
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            82.4
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 head_yaw",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        },
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            75.0,
+            11.8
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_shoulder_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        },
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            -75.0,
+            11.8
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_shoulder_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 60.4,
+        "servos": 165.0,
+        "electronics": 290.0,
+        "harness_fasteners": 30.5
       }
     },
     {
       "name": "head_yaw_link",
       "label": "颈部偏转关节",
       "group": "head",
-      "mass_kg": 0.03,
+      "mass_kg": 0.07329,
       "geometry": {
         "type": "cylinder",
         "radius_mm": 15.0,
-        "height_mm": 78.0,
+        "height_mm": 61.2,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -31.25
+          -24.5
         ],
         "color": [
           0.28,
           0.32,
           0.39
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            27.5
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 head_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 14.2,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.1
       }
     },
     {
       "name": "head",
       "label": "头部",
       "group": "head",
-      "mass_kg": 0.12,
+      "mass_kg": 0.06182,
       "geometry": {
         "type": "rounded_box",
         "size_mm": [
           76.0,
           68.0,
-          55.0
+          43.2
         ],
-        "fillet_mm": 12.0,
+        "fillet_mm": 11.1,
         "color": [
           0.94,
           0.95,
           0.97
         ]
+      },
+      "mass_breakdown_g": {
+        "structure": 35.4,
+        "servos": 0.0,
+        "electronics": 23.0,
+        "harness_fasteners": 3.5
       }
     },
     {
       "name": "left_shoulder_pitch_link",
       "label": "左肩俯仰关节壳",
       "group": "arm_l",
-      "mass_kg": 0.04,
+      "mass_kg": 0.07191,
       "geometry": {
         "type": "sphere_shell",
-        "outer_r_mm": 20.0,
-        "inner_r_mm": 17.0,
+        "outer_r_mm": 18.6,
+        "inner_r_mm": 15.8,
         "color": [
           0.32,
           0.36,
           0.44
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_shoulder_roll",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 12.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.0
       }
     },
     {
       "name": "left_upper_arm",
       "label": "左上臂",
       "group": "arm_l",
-      "mass_kg": 0.075,
+      "mass_kg": 0.08025,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
-        "length_mm": 30.0,
+        "length_mm": 23.6,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          30.0
+          23.6
         ],
         "color": [
           0.88,
           0.9,
           0.93
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -47.1
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_elbow_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 20.8,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.5
       }
     },
     {
       "name": "left_forearm",
       "label": "左前臂",
       "group": "arm_l",
-      "mass_kg": 0.055,
+      "mass_kg": 0.07486,
       "geometry": {
         "type": "capsule",
         "radius_mm": 17.5,
-        "length_mm": 25.0,
+        "length_mm": 19.6,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -25.0
+          -19.6
         ],
         "color": [
           0.8,
           0.83,
           0.88
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -39.2
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 left_gripper",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 15.7,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.2
       }
     },
     {
       "name": "left_gripper",
       "label": "左夹爪",
       "group": "arm_l",
-      "mass_kg": 0.03,
+      "mass_kg": 0.01009,
       "geometry": {
         "type": "box",
         "size_mm": [
           50.0,
           30.0,
-          25.0
+          19.6
         ],
         "color": [
           0.19,
           0.22,
           0.27
         ]
+      },
+      "mass_breakdown_g": {
+        "structure": 9.5,
+        "servos": 0.0,
+        "electronics": 0.0,
+        "harness_fasteners": 0.6
       }
     },
     {
       "name": "right_shoulder_pitch_link",
       "label": "右肩俯仰关节壳",
       "group": "arm_r",
-      "mass_kg": 0.04,
+      "mass_kg": 0.07191,
       "geometry": {
         "type": "sphere_shell",
-        "outer_r_mm": 20.0,
-        "inner_r_mm": 17.0,
+        "outer_r_mm": 18.6,
+        "inner_r_mm": 15.8,
         "color": [
           0.32,
           0.36,
           0.44
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_shoulder_roll",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 12.9,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.0
       }
     },
     {
       "name": "right_upper_arm",
       "label": "右上臂",
       "group": "arm_r",
-      "mass_kg": 0.075,
+      "mass_kg": 0.08025,
       "geometry": {
         "type": "capsule",
         "radius_mm": 20.0,
-        "length_mm": 30.0,
+        "length_mm": 23.6,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          30.0
+          23.6
         ],
         "color": [
           0.88,
           0.9,
           0.93
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -47.1
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_elbow_pitch",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 20.8,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.5
       }
     },
     {
       "name": "right_forearm",
       "label": "右前臂",
       "group": "arm_r",
-      "mass_kg": 0.055,
+      "mass_kg": 0.07486,
       "geometry": {
         "type": "capsule",
         "radius_mm": 17.5,
-        "length_mm": 25.0,
+        "length_mm": 19.6,
         "axis": "z",
         "origin_mm": [
           0.0,
           0.0,
-          -25.0
+          -19.6
         ],
         "color": [
           0.8,
           0.83,
           0.88
         ]
+      },
+      "extra_geometry": [
+        {
+          "type": "box",
+          "size_mm": [
+            45.2,
+            24.7,
+            35.0
+          ],
+          "origin_mm": [
+            0.0,
+            0.0,
+            -39.2
+          ],
+          "label": "舵机 飞特 STS3215 — 驱动 right_gripper",
+          "color": [
+            0.25,
+            0.27,
+            0.32
+          ],
+          "note": "长边沿 x 轴摆放（设计暂定），详细设计时按支架实际朝向复核"
+        }
+      ],
+      "mass_breakdown_g": {
+        "structure": 15.7,
+        "servos": 55.0,
+        "electronics": 0.0,
+        "harness_fasteners": 4.2
       }
     },
     {
       "name": "right_gripper",
       "label": "右夹爪",
       "group": "arm_r",
-      "mass_kg": 0.03,
+      "mass_kg": 0.01009,
       "geometry": {
         "type": "box",
         "size_mm": [
           50.0,
           30.0,
-          25.0
+          19.6
         ],
         "color": [
           0.19,
           0.22,
           0.27
         ]
+      },
+      "mass_breakdown_g": {
+        "structure": 9.5,
+        "servos": 0.0,
+        "electronics": 0.0,
+        "harness_fasteners": 0.6
       }
     }
   ],
@@ -513,9 +1127,9 @@
         1
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        105
+        0.0,
+        0.0,
+        82.4
       ],
       "limit_deg": [
         -90,
@@ -537,9 +1151,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        35
+        0.0,
+        0.0,
+        27.5
       ],
       "limit_deg": [
         -45,
@@ -561,9 +1175,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        25
+        0.0,
+        0.0,
+        19.6
       ],
       "limit_deg": [
         -10,
@@ -585,9 +1199,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        35
+        0.0,
+        0.0,
+        27.5
       ],
       "limit_deg": [
         -15,
@@ -609,9 +1223,9 @@
         1
       ],
       "origin_xyz_mm": [
-        0,
-        45,
-        -25
+        0.0,
+        45.0,
+        -19.6
       ],
       "limit_deg": [
         -45,
@@ -633,9 +1247,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -25
+        0.0,
+        0.0,
+        -19.6
       ],
       "limit_deg": [
         -25,
@@ -657,9 +1271,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -25
+        0.0,
+        0.0,
+        -19.6
       ],
       "limit_deg": [
         -60,
@@ -681,9 +1295,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -80
+        0.0,
+        0.0,
+        -62.8
       ],
       "limit_deg": [
         0,
@@ -705,9 +1319,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -80
+        0.0,
+        0.0,
+        -62.8
       ],
       "limit_deg": [
         -40,
@@ -729,9 +1343,9 @@
         1
       ],
       "origin_xyz_mm": [
-        0,
-        -45,
-        -25
+        0.0,
+        -45.0,
+        -19.6
       ],
       "limit_deg": [
         -45,
@@ -753,9 +1367,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -25
+        0.0,
+        0.0,
+        -19.6
       ],
       "limit_deg": [
         -25,
@@ -777,9 +1391,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -25
+        0.0,
+        0.0,
+        -19.6
       ],
       "limit_deg": [
         -60,
@@ -801,9 +1415,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -80
+        0.0,
+        0.0,
+        -62.8
       ],
       "limit_deg": [
         0,
@@ -825,9 +1439,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -80
+        0.0,
+        0.0,
+        -62.8
       ],
       "limit_deg": [
         -40,
@@ -849,9 +1463,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        75,
-        15
+        0.0,
+        75.0,
+        11.8
       ],
       "limit_deg": [
         -90,
@@ -873,9 +1487,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        0
+        0.0,
+        0.0,
+        0.0
       ],
       "limit_deg": [
         -90,
@@ -897,9 +1511,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -60
+        0.0,
+        0.0,
+        -47.1
       ],
       "limit_deg": [
         -120,
@@ -921,9 +1535,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -50
+        0.0,
+        0.0,
+        -39.2
       ],
       "limit_deg": [
         0,
@@ -945,9 +1559,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        -75,
-        15
+        0.0,
+        -75.0,
+        11.8
       ],
       "limit_deg": [
         -90,
@@ -969,9 +1583,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        0
+        0.0,
+        0.0,
+        0.0
       ],
       "limit_deg": [
         -90,
@@ -993,9 +1607,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -60
+        0.0,
+        0.0,
+        -47.1
       ],
       "limit_deg": [
         -120,
@@ -1017,9 +1631,9 @@
         0
       ],
       "origin_xyz_mm": [
-        0,
-        0,
-        -50
+        0.0,
+        0.0,
+        -39.2
       ],
       "limit_deg": [
         0,
@@ -1031,11 +1645,19 @@
     }
   ],
   "servo_defaults": {
-    "model": "Feetech STS3215-class (provisional)",
-    "protocol": "TTL half-duplex serial bus",
+    "model": "飞特 STS3215（12V 版，SER0070 同类）",
+    "protocol": "TTL 半双工串行总线 @1Mbps",
     "voltage_nominal_v": 11.1,
-    "mounting": "M2.5/M3 bracket; verify against purchased actuator",
-    "status": "engineering placeholder, not a purchase specification"
+    "mass_g": 55.0,
+    "size_mm": [
+      45.2,
+      24.7,
+      35.0
+    ],
+    "stall_torque_nm": 2.94,
+    "rated_torque_nm": 1.47,
+    "rated_torque_basis": "堵转 × 50%：取自参考机实测选型习惯（1.8 kg 机体用 1.67 N·m 堵转舵机行走）",
+    "mounting": "M2.5/M3 支架夹持；STS3215 体对角线 62.3 mm，无法被现有球壳全包，采用外部支架"
   },
   "manufacturing_defaults": {
     "load_bearing_material": "PETG",
@@ -1053,5 +1675,55 @@
     "origin_mm 表示实体相对关节坐标系的偏移，等价于 URDF 的 visual/collision origin。",
     "足部几何前移 18mm：踝关节位于足底后 1/3 处，符合双足构造常见做法，同时使踝关节具有真实的重力力臂。"
   ],
-  "palette_note": "配色：白色外壳（头/胸/四肢）+ 深蓝灰关节壳 + 深色足底与夹爪，用于渲染与图纸的视觉区分，非最终外观涂装方案。"
+  "palette_note": "配色：白色外壳（头/胸/四肢）+ 深蓝灰关节壳 + 深色足底与夹爪，用于渲染与图纸的视觉区分，非最终外观涂装方案。",
+  "version": "2.0",
+  "reference_baseline": {
+    "machine": "幻尔 TonyPi Pro",
+    "source": "https://www.hiwonder.com.cn/product-detail/TonyPi-Pro-2025.html",
+    "scale_applied": {
+      "x": 1.0,
+      "y": 1.0,
+      "z": 0.785
+    },
+    "aligned": {
+      "height_mm": [
+        373.0,
+        372.8
+      ],
+      "width_mm": [
+        187.0,
+        190.0
+      ],
+      "depth_mm": [
+        106.0,
+        123.0
+      ]
+    },
+    "deviations": [
+      "深度比参考机深约 17 mm：躯干要装 85 mm 的树莓派 4B 与 88 mm 的 3S 电池",
+      "比参考机多 2 个躯干关节（赛题『上肢+躯干 ≥10』要求），也多 2 只舵机",
+      "结构按打印薄壳 500 g 计，参考机为 1.5–2 mm 铝板件（≈400 g）；换工艺可再省约 100 g"
+    ]
+  },
+  "mass_budget": {
+    "structure_g": 500.0,
+    "servos_g": 1210.0,
+    "electronics_g": 316.0,
+    "harness_fasteners_g": 120.0,
+    "total_g": 2146.0,
+    "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设已置 0，避免重复计入。"
+  },
+  "changelog": [
+    {
+      "from": "1.0",
+      "to": "2.0",
+      "changes": [
+        "身高 475.0 → 372.8 mm（z ×0.785，对齐参考机 373 mm）",
+        "link 质量：结构占位预算 → 真实分布（结构 + 舵机 + 电子件 + 线束）",
+        "整机质量占位 1.650 → 2.146 kg（实物口径，含舵机与电子件）",
+        "新增 placements.json：22 舵机 + 10 电子件 + 23 结构件的宿主/坐标/尺寸/质量",
+        "新增 reference/tonypi_pro_baseline.json：参考机公开参数与可迁移结论"
+      ]
+    }
+  ]
 }

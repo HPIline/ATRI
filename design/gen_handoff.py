@@ -36,10 +36,11 @@ ASSUMPTIONS = {
     ),
     "servo_efficiency": 0.75,
     "note_servo_efficiency": "舵机从电功率到机械功率的效率，含减速箱损耗。",
-    "cable_mass_kg": 0.09,
-    "note_cable_mass_kg": "线束与扎带质量，未分配到具体 link，单独计入总重。",
-    "fastener_mass_kg": 0.06,
-    "note_fastener_mass_kg": "M2.5/M3 螺钉与螺母总质量估算。",
+    "cable_mass_kg": 0.0,
+    "note_cable_mass_kg": ("v2 起线束质量已按比例摊入各 link（见 design/placements.json 的 "
+                           "harness_fasteners），此处置 0，避免与 link 质量重复计入。"),
+    "fastener_mass_kg": 0.0,
+    "note_fastener_mass_kg": ("v2 起紧固件质量已按比例摊入各 link，此处置 0，避免重复计入。"),
     "battery_energy_density_wh_per_kg": 110.0,
     "note_battery_energy_density_wh_per_kg": ("按**整包**计（电芯+外壳+线材+接头）约 110 Wh/kg；"
                      "电芯单体约 180 Wh/kg，不能直接拿来估整包重量。"),
@@ -332,7 +333,8 @@ def power_budget(model: Dict[str, Any], torques: List[Dict[str, Any]],
 # --------------------------------------------------------------------------
 # 生成交接文档（Markdown）
 # --------------------------------------------------------------------------
-def emit_markdown(data: Dict[str, Any]) -> Path:
+def emit_markdown(data: Dict[str, Any],
+                  attachment_rows: str = "") -> Path:
     r = data["robot"]
     j = data["joints"]
     pb = data["power_budget"]
@@ -560,12 +562,7 @@ def emit_markdown(data: Dict[str, Any]) -> Path:
 | 文件 | 内容 | 用途 |
 |---|---|---|
 | `hardware_requirements.json` | 本文档的机器可读版，含每个关节的力矩推导明细 | 程序化消费 |
-| `atri.urdf` | 23 link / 22 joint 完整运动学 + 惯量 | 加载 PyBullet / Webots |
-| `render_iso.png` | 等轴测外观渲染 | 直观了解构型 |
-| `render_front.png` | 正视外观渲染 | 左右对称关系 |
-| `render_joints.png` | 22 关节编号图（工程图） | 关节编号对应关系 |
-| `render_groups.png` | 部位配色渲染 | 讲解自由度分布 |
-| `fit_report.md` | 元件配合与质量校验结果 | 上一轮白皮书的复核结论 |
+{attachment_rows}| `fit_report.md` | 元件配合与质量校验结果 | 上一轮白皮书的复核结论 |
 
 ---
 
@@ -593,36 +590,47 @@ def emit_markdown(data: Dict[str, Any]) -> Path:
 # --------------------------------------------------------------------------
 # 附件打包：把主文档需要的附件集中到 handoff/，文件名用 ASCII 便于上传
 # --------------------------------------------------------------------------
+# (源文件去掉扩展名, 目标文件名主干, 说明)
+# 优先用 PNG（本机可导出时），否则回退到**已入库的 SVG** —— 否则在全新 clone / CI 上
+# 附件永远缺失（PNG 被 .gitignore 排除），测试 test_all_declared_attachments_exist 必红。
 ATTACHMENTS = [
-    ("design/atri.urdf", "atri.urdf"),
-    ("design/renders/01_等轴测外观.png", "render_iso.png"),
-    ("design/renders/02_正视外观.png", "render_front.png"),
-    ("design/renders/04_关节配色图.png", "render_groups.png"),
-    ("design/drawings/01_关节编号图.png", "render_joints.png"),
+    ("design/atri.urdf", "atri.urdf", "23 link / 22 joint 完整运动学 + 惯量"),
+    ("design/renders/01_等轴测外观", "render_iso", "等轴测外观渲染"),
+    ("design/renders/02_正视外观", "render_front", "正视外观渲染"),
+    ("design/renders/04_关节配色图", "render_groups", "部位配色渲染"),
+    ("design/drawings/01_关节编号图", "render_joints", "22 关节编号图（工程图）"),
 ]
 
 
-def stage_attachments() -> List[str]:
-    """把附件复制/导出到 handoff/。缺失的跳过并报告（不静默失败）。"""
+def stage_attachments() -> List[Dict[str, str]]:
+    """把附件复制/导出到 handoff/，返回 [{name, note}]（name 为实际落盘名）。
+
+    分辨顺序：源文件本身（atri.urdf）→ 同名 .png（本机导出）→ 同名 .svg（已入库，CI 可用）。
+    """
     import shutil
-    staged: List[str] = []
+    staged: List[Dict[str, str]] = []
     repo = HERE.parent
-    for src_rel, dst_name in ATTACHMENTS:
+    for src_rel, stem, note in ATTACHMENTS:
         src = repo / src_rel
-        dst = OUT_DIR / dst_name
-        if not src.exists():
-            # 若 PNG 尚未导出，尝试用 qlmanage 从 SVG 生成
-            svg = src.with_suffix(".svg")
-            if svg.exists():
-                try:
-                    import gen_render
-                    if gen_render.export_png(svg, 2000):
-                        src = svg.with_suffix(".png")
-                except Exception:  # noqa: BLE001
-                    pass
+        if src.suffix == "":
+            for ext in (".png", ".svg"):
+                cand = src.with_suffix(ext)
+                if cand.exists():
+                    if ext == ".png":
+                        break
+                    # PNG 不在时，试着本机导出一份（macOS qlmanage），失败就用 SVG
+                    try:
+                        import gen_render
+                        if gen_render.export_png(cand, 2000):
+                            cand = cand.with_suffix(".png")
+                    except Exception:  # noqa: BLE001
+                        pass
+                    break
+            src = cand
         if src.exists() and src.is_file():
-            shutil.copy2(src, dst)
-            staged.append(dst_name)
+            dst_name = stem if src.suffix == ".urdf" else stem + src.suffix
+            shutil.copy2(src, OUT_DIR / dst_name)
+            staged.append({"name": dst_name, "note": note})
         else:
             print(f"  [附件缺失] {src_rel}（跳过）")
     return staged
@@ -786,14 +794,14 @@ def main() -> int:
               f"{c['inner_mm'][2]:.0f} mm  ≈ {c['inner_volume_cm3']} cm³")
     print()
     print(f"已写出: {path}")
-    md_path = emit_markdown(out)
-    print(f"已写出: {md_path}  ({md_path.stat().st_size} bytes)")
-    print()
     print("打包附件:")
     staged = stage_attachments()
-    for name in staged:
-        size = (OUT_DIR / name).stat().st_size
-        print(f"  ✓ {name}  ({size} bytes)")
+    rows = "\n".join(f"| `{a['name']}` | {a['note']} | |" for a in staged)
+    md_path = emit_markdown(out, attachment_rows=rows + "\n")
+    print(f"已写出: {md_path}  ({md_path.stat().st_size} bytes)")
+    for a in staged:
+        size = (OUT_DIR / a["name"]).stat().st_size
+        print(f"  ✓ {a['name']}  ({size} bytes)")
     print(f"  共 {len(staged)}/{len(ATTACHMENTS)} 个附件就绪")
     return 0
 

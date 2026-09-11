@@ -6,7 +6,7 @@
 
 校验三件事：
   1. 尺寸配合 —— 元件能否放进对应的安装空腔
-  2. 质量闭合 —— 真实元件质量 + 结构质量 vs 原设计预算
+  2. 质量闭合 —— 模型口径（link 质量合计）vs 元件口径（BOM 清单核算）
   3. 力矩重算 —— 用真实质量重新推导关节需求（质量变大会放大需求）
 
 输出：design/handoff/fit_report.md
@@ -122,7 +122,7 @@ def check_servo_housing(model: Dict[str, Any],
 # 质量闭合
 # --------------------------------------------------------------------------
 def mass_rollup(model: Dict[str, Any], comps: Dict[str, Any]) -> Dict[str, Any]:
-    """真实元件质量 vs 原设计预算。"""
+    """模型口径 vs 元件口径的质量闭合（v2 起两者均已含舵机/电子件/线束）。"""
     servo = next(c for c in comps["components"] if c["role"] == "servo_s")
     joint_n = len(model["joints"])
     servo_total = servo["mass_g"] * joint_n
@@ -140,12 +140,16 @@ def mass_rollup(model: Dict[str, Any], comps: Dict[str, Any]) -> Dict[str, Any]:
                     "items": [f"{servo['name']} × {joint_n}"]}
 
     electronics = sum(g["mass_g"] for k, g in groups.items() if k != "舵机")
-    struct_design = sum(l["mass_kg"] for l in model["links"]) * 1000.0
-    design_total = (struct_design + comps["cable_mass_g"]
-                    + comps["fastener_mass_g"])
+    # v2 起 link 质量已含"结构 + 舵机 + 电子件 + 分摊线束"，因此两侧口径必须一致：
+    #   模型侧 = sum(link mass)
+    #   元件侧 = 舵机 + 电子件 + 结构估算 + 线束 + 紧固件
+    # 两侧相等即说明"模型质量分布"与"BOM 清单"自洽。
+    model_total = sum(l["mass_kg"] for l in model["links"]) * 1000.0
+    struct_design = model_total
 
     real_struct = comps.get("structure_mass_estimate_g", 0.0)
-    real_total = servo_total + electronics + real_struct
+    real_total = (servo_total + electronics + real_struct
+                  + comps["cable_mass_g"] + comps["fastener_mass_g"])
 
     return {
         "servo_count": joint_n,
@@ -156,10 +160,10 @@ def mass_rollup(model: Dict[str, Any], comps: Dict[str, Any]) -> Dict[str, Any]:
         "group_items": {k: list(v["items"]) for k, v in groups.items()},
         "design_structure_g": round(struct_design, 1),
         "real_structure_estimate_g": real_struct,
-        "design_total_g": round(design_total, 1),
+        "design_total_g": round(model_total, 1),
         "real_total_g": round(real_total, 1),
-        "overrun_g": round(real_total - design_total, 1),
-        "overrun_pct": round((real_total / design_total - 1) * 100, 1),
+        "overrun_g": round(real_total - model_total, 1),
+        "overrun_pct": round((real_total / model_total - 1) * 100, 1),
     }
 
 
@@ -249,7 +253,7 @@ def emit_report(model: Dict[str, Any], comps: Dict[str, Any],
 |---|---|
 | 电子件装入空腔 | {len(placements) - len(bad_p)}/{len(placements)} 通过 |
 | 舵机装入关节壳 | {len(housings) - len(bad_h)}/{len(housings)} 通过 |
-| 质量闭合 | 设计预算 {mass['design_total_g']:.0f} g → 真实 **{mass['real_total_g']:.0f} g**，超 {mass['overrun_g']:+.0f} g（{mass['overrun_pct']:+.1f}%） |
+| 质量闭合 | 模型口径 {mass['design_total_g']:.0f} g ↔ 元件口径 **{mass['real_total_g']:.0f} g**，差 {mass['overrun_g']:+.0f} g（{mass['overrun_pct']:+.1f}%） |
 | 力矩需求 | 按真实总重放大 **×{torque['scale']}**，最大关节 {torque['worst']['joint']} 需 **{torque['worst']['new_required_nm']:.2f} N·m** |
 
 ---
@@ -280,10 +284,11 @@ def emit_report(model: Dict[str, Any], comps: Dict[str, Any],
 | 类别 | 质量 (g) | 明细 |
 |---|---|---|
 {mg_rows}
-| **真实合计** | **{mass['real_total_g']:.0f}** | 舵机 + 电子件 + 结构估算 |
-| 原设计预算 | {mass['design_total_g']:.0f} | 结构 {mass['design_structure_g']:.0f} + 线束 {comps['cable_mass_g']:.0f} + 紧固件 {comps['fastener_mass_g']:.0f} |
+| **元件口径**（BOM 清单核算） | **{mass['real_total_g']:.0f}** | 舵机 + 电子件 + 结构估算 + 线束 + 紧固件 |
+| **模型口径**（link 质量合计） | {mass['design_total_g']:.0f} | 结构 + 舵机 + 电子件 + 分摊线束（v2 起已全部摊入 link） |
 
 **差异 {mass['overrun_g']:+.0f} g（{mass['overrun_pct']:+.1f}%）**
+（两口径相等 = 模型质量分布与 BOM 清单自洽；URDF 的 sum(link mass) 即实物口径总重）
 
 ---
 
@@ -349,8 +354,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print("\n质量闭合:")
     for k, v in sorted(mass["groups"].items(), key=lambda kv: -kv[1]):
         print(f"  {k:<12} {v:>7.0f} g")
-    print(f"  {'真实合计':<12} {mass['real_total_g']:>7.0f} g")
-    print(f"  {'原设计预算':<12} {mass['design_total_g']:>7.0f} g")
+    print(f"  {'元件口径':<12} {mass['real_total_g']:>7.0f} g")
+    print(f"  {'模型口径':<12} {mass['design_total_g']:>7.0f} g")
     print(f"  {'差异':<12} {mass['overrun_g']:>+7.0f} g "
           f"({mass['overrun_pct']:+.1f}%)")
     print("\n力矩重算（总重 ×%.3f）:" % torque["scale"])

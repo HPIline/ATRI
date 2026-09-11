@@ -90,6 +90,30 @@ def build_urdf(model: dict) -> str:
         lines.append(f'      <origin xyz="{origin}" rpy="{rpy}"/>')
         lines.append(geometry.urdf_xml(coll, indent="      "))
         lines.append("    </collision>")
+        # 附加体：舵机、电子件等"装在 link 上但不是主壳"的实体（v2 起）。
+        # 只出 visual/collision，不重复计质量 —— 它们的质量已并入本 link 的 inertial，
+        # 目的是让刚体引擎里的自碰撞与体积表达与真实装配一致。
+        for extra in link.get("extra_geometry", []):
+            exo = geometry.geometry_origin(extra)
+            ex_origin = (f"{mm_to_m(exo[0]):.6f} {mm_to_m(exo[1]):.6f} "
+                         f"{mm_to_m(exo[2]):.6f}")
+            ex_rpy = geometry.urdf_rpy(extra)
+            label = extra.get("label", "附件")
+            ex_color = extra.get("color", [0.25, 0.27, 0.32])
+            lines.append(f"    <!-- {label} -->")
+            lines.append("    <visual>")
+            lines.append(f'      <origin xyz="{ex_origin}" rpy="{ex_rpy}"/>')
+            lines.append(geometry.urdf_xml(extra, indent="      "))
+            lines.append("      <material>")
+            lines.append(f'        <color rgba="{ex_color[0]:.3f} '
+                         f'{ex_color[1]:.3f} {ex_color[2]:.3f} 1.0"/>')
+            lines.append("      </material>")
+            lines.append("    </visual>")
+            lines.append("    <collision>")
+            lines.append(f'      <origin xyz="{ex_origin}" rpy="{ex_rpy}"/>')
+            lines.append(geometry.urdf_xml(geometry.equivalent_box(extra),
+                                           indent="      "))
+            lines.append("    </collision>")
         lines.append("    <inertial>")
         lines.append(f'      <origin xyz="{origin}" rpy="0 0 0"/>')
         lines.append(f'      <mass value="{mass:.6f}"/>')

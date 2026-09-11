@@ -1,0 +1,63 @@
+{
+  "name": "幻尔 TonyPi Pro",
+  "role": "参考构型（量产验证），非采购目标",
+  "source": "https://www.hiwonder.com.cn/product-detail/TonyPi-Pro-2025.html",
+  "envelope_mm": {
+    "height": 373.0,
+    "width": 187.0,
+    "depth": 106.0
+  },
+  "mass_kg": 1.8,
+  "dof": {
+    "total": 20,
+    "per_leg": 5,
+    "per_arm": 4,
+    "head": 2,
+    "trunk": 0,
+    "note": "身体 18 + 头 2；每臂 4 = 3 关节 + 1 开合手掌"
+  },
+  "material": "硬铝合金",
+  "battery": "11.1V 2000mAh 10C",
+  "endurance_min": 60,
+  "servos": {
+    "body": {
+      "model": "LX-824HV",
+      "qty": 18,
+      "stall_torque_kgcm": 17.0,
+      "voltage_v": 11.1,
+      "feedback": "电位器 / 角度+温度",
+      "topology": "三端口串联总线"
+    },
+    "head": {
+      "model": "LFD-01M",
+      "qty": 2,
+      "mass_g": 13.5,
+      "size_mm": [
+        22.3,
+        12.0,
+        23.2
+      ],
+      "voltage_v": "4.8-6 (PWM)",
+      "stall_torque_kgcm": 1.8,
+      "speed_s_per_60deg": 0.12
+    }
+  },
+  "main_controller": "树莓派 4B (4GB) + 幻尔树莓派扩展板",
+  "vision": "480P 120° 广角 + 2 DOF 云台",
+  "voice": "WonderEcho Pro AI 语音交互盒",
+  "price_cny_per_unit": 4600,
+  "price_source": "山东大学浪潮人工智能学院 2026-08 采购 10 台共 ¥46,000",
+  "derived_lessons": [
+    "全机身用同一款舵机（18 个身体关节同型号），不做扭矩分档",
+    "腿 5 DOF / 臂 4 DOF（含末端 1 DOF）/ 头 2 DOF 的分配有量产行走验证",
+    "11.1V 高压总线比 7.4V 版电流低约 60%",
+    "1.8 kg 机体用 1.67 N·m 堵转舵机可跑跨栏与上下台阶 → 连续可用 ≈ 堵转一半",
+    "宽度与深度由树莓派 4B（85 mm 边）与 3S 电池决定，身高才是可压缩量"
+  ],
+  "unverified": [
+    "LX-824HV 的外形尺寸/质量/空载速度/电流",
+    "LX-824HV 单价",
+    "官方 URDF/CAD 是否公开",
+    "每腿 5 个舵机的具体关节类型"
+  ]
+}

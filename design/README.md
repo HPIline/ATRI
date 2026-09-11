@@ -7,6 +7,9 @@
 > 本目录产出的是**设计阶段（design-provisional）**数据：
 > - 结构尺寸由关节链几何推导，**不是已加工零件的实测值**
 > - 舵机参数为**同级别舵机的典型量级**，不是实测值
+> - **v2（2026-09-11）**：身高对齐参考机 373 mm；**link 质量已改为真实分布**
+>   （结构 + 舵机 + 电子件 + 分摊线束），`sum(link mass)` = 实物口径总重 **2.146 kg**，
+>   URDF 可直接用作刚体动力学输入。v1 的 URDF 只有 1.65 kg 结构占位、**不含舵机与电子件**。
 > - 仿真为**运动学 + 规则控制器层面**，**不是刚体动力学仿真**
 >
 > 它验证的是：关节限位可达性、视觉伺服收敛性、舵机非理想特性的影响、
@@ -19,9 +22,14 @@
 
 ```
 design/
-├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义
+├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义（v2）
+├── placements.json           # ★ 配件位置总表：22 舵机 + 10 电子件 + 23 结构件（宿主/坐标/尺寸/质量）
+├── reference/
+│   └── tonypi_pro_baseline.json  # 参考机（幻尔 TonyPi Pro）公开参数与可迁移结论
+├── gen_v2_baseline.py        # v1→v2 一次性迁移：身高对齐 373 mm + 质量改为真实分布
 ├── geometry.py               # 几何基元（6 种）+ 惯量 + 三维变换 + 正交投影
-├── gen_urdf.py               # 纯标准库 URDF 生成器 + 设计约束校验
+├── gen_urdf.py               # 纯标准库 URDF 生成器 + 设计约束校验（支持 link 附加体）
+├── gen_spec_sheet.py         # ★ 渲染《新架构参数总表》（人看的视图，禁止手工维护）
 ├── atri.urdf                 # 生成产物，可直接喂给 PyBullet / Webots
 ├── gen_drawings.py           # 2D 工程图生成器（纯标准库 SVG）
 ├── gen_render.py             # 等轴测软件渲染器（纯标准库）
@@ -53,6 +61,10 @@ design/
 
 ```bash
 cd /path/to/ATRI
+
+# 0) 看/改模型版本与配件位置
+python3 design/gen_v2_baseline.py --check          # 当前版本
+python3 design/gen_spec_sheet.py                   # 渲染《新架构参数总表.md》
 
 # 1) 校验设计并生成 URDF
 python3 design/gen_urdf.py --summary --validate --write

@@ -8,7 +8,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
     <!-- rounded_box 近似为 box -->
-        <box size="0.100000 0.080000 0.045000"/>
+        <box size="0.100000 0.080000 0.035300"/>
       </geometry>
       <material>
         <color rgba="0.220 0.250 0.310 1.0"/>
@@ -17,13 +17,61 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.100000 0.080000 0.045000"/>
+        <box size="0.100000 0.080000 0.035300"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 trunk_roll -->
+    <visual>
+      <origin xyz="0.000000 0.000000 0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_hip_yaw -->
+    <visual>
+      <origin xyz="0.000000 0.045000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.045000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_hip_yaw -->
+    <visual>
+      <origin xyz="0.000000 -0.045000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 -0.045000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.130000"/>
-      <inertia ixx="0.000091271" ixy="0" ixz="0" iyy="0.000130271" iyz="0" izz="0.000177667"/>
+      <mass value="0.225160"/>
+      <inertia ixx="0.000143466" ixy="0" ixz="0" iyy="0.000211014" iyz="0" izz="0.000307719"/>
     </inertial>
   </link>
   <link name="left_hip_yaw_link">
@@ -31,7 +79,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
         <!-- sphere_shell 近似为外球 -->
-        <sphere radius="0.020000"/>
+        <sphere radius="0.018600"/>
       </geometry>
       <material>
         <color rgba="0.320 0.360 0.440 1.0"/>
@@ -40,13 +88,29 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <box size="0.037200 0.037200 0.037200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_hip_roll -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
+      <mass value="0.071910"/>
+      <inertia ixx="0.000014339" ixy="0" ixz="0" iyy="0.000014339" iyz="0" izz="0.000014339"/>
     </inertial>
   </link>
   <link name="left_hip_roll_link">
@@ -54,7 +118,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
         <!-- sphere_shell 近似为外球 -->
-        <sphere radius="0.020000"/>
+        <sphere radius="0.018600"/>
       </geometry>
       <material>
         <color rgba="0.320 0.360 0.440 1.0"/>
@@ -63,59 +127,107 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <box size="0.037200 0.037200 0.037200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_hip_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
+      <mass value="0.071910"/>
+      <inertia ixx="0.000014339" ixy="0" ixz="0" iyy="0.000014339" iyz="0" izz="0.000014339"/>
     </inertial>
   </link>
   <link name="left_thigh">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.022500" length="0.090000"/>
+        <cylinder radius="0.022500" length="0.080300"/>
       </geometry>
       <material>
         <color rgba="0.880 0.900 0.930 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
-        <box size="0.045000 0.045000 0.090000"/>
+        <box size="0.045000 0.045000 0.080300"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_knee_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
-      <mass value="0.080000"/>
-      <inertia ixx="0.000051283" ixy="0" ixz="0" iyy="0.000051283" iyz="0" izz="0.000018630"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
+      <mass value="0.088690"/>
+      <inertia ixx="0.000047027" ixy="0" ixz="0" iyy="0.000047027" iyz="0" izz="0.000020387"/>
     </inertial>
   </link>
   <link name="left_shank">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.020000" length="0.087000"/>
+        <cylinder radius="0.020000" length="0.076900"/>
       </geometry>
       <material>
         <color rgba="0.800 0.830 0.880 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.087000"/>
+        <box size="0.040000 0.040000 0.076900"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_ankle_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
-      <mass value="0.070000"/>
-      <inertia ixx="0.000041093" ixy="0" ixz="0" iyy="0.000041093" iyz="0" izz="0.000012986"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
+      <mass value="0.083750"/>
+      <inertia ixx="0.000039659" ixy="0" ixz="0" iyy="0.000039659" iyz="0" izz="0.000015345"/>
     </inertial>
   </link>
   <link name="left_foot">
@@ -123,7 +235,7 @@
       <origin xyz="0.018000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
     <!-- rounded_box 近似为 box -->
-        <box size="0.110000 0.060000 0.025000"/>
+        <box size="0.110000 0.060000 0.019600"/>
       </geometry>
       <material>
         <color rgba="0.170 0.200 0.250 1.0"/>
@@ -132,13 +244,13 @@
     <collision>
       <origin xyz="0.018000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.110000 0.060000 0.025000"/>
+        <box size="0.110000 0.060000 0.019600"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.018000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.085000"/>
-      <inertia ixx="0.000029927" ixy="0" ixz="0" iyy="0.000090135" iyz="0" izz="0.000111208"/>
+      <mass value="0.032670"/>
+      <inertia ixx="0.000010847" ixy="0" ixz="0" iyy="0.000033988" iyz="0" izz="0.000042743"/>
     </inertial>
   </link>
   <link name="right_hip_yaw_link">
@@ -146,7 +258,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
         <!-- sphere_shell 近似为外球 -->
-        <sphere radius="0.020000"/>
+        <sphere radius="0.018600"/>
       </geometry>
       <material>
         <color rgba="0.320 0.360 0.440 1.0"/>
@@ -155,13 +267,29 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <box size="0.037200 0.037200 0.037200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_hip_roll -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
+      <mass value="0.071910"/>
+      <inertia ixx="0.000014339" ixy="0" ixz="0" iyy="0.000014339" iyz="0" izz="0.000014339"/>
     </inertial>
   </link>
   <link name="right_hip_roll_link">
@@ -169,7 +297,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
         <!-- sphere_shell 近似为外球 -->
-        <sphere radius="0.020000"/>
+        <sphere radius="0.018600"/>
       </geometry>
       <material>
         <color rgba="0.320 0.360 0.440 1.0"/>
@@ -178,59 +306,107 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <box size="0.037200 0.037200 0.037200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_hip_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
+      <mass value="0.071910"/>
+      <inertia ixx="0.000014339" ixy="0" ixz="0" iyy="0.000014339" iyz="0" izz="0.000014339"/>
     </inertial>
   </link>
   <link name="right_thigh">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.022500" length="0.090000"/>
+        <cylinder radius="0.022500" length="0.080300"/>
       </geometry>
       <material>
         <color rgba="0.880 0.900 0.930 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
-        <box size="0.045000 0.045000 0.090000"/>
+        <box size="0.045000 0.045000 0.080300"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_knee_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
-      <mass value="0.080000"/>
-      <inertia ixx="0.000051283" ixy="0" ixz="0" iyy="0.000051283" iyz="0" izz="0.000018630"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
+      <mass value="0.088690"/>
+      <inertia ixx="0.000047027" ixy="0" ixz="0" iyy="0.000047027" iyz="0" izz="0.000020387"/>
     </inertial>
   </link>
   <link name="right_shank">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.020000" length="0.087000"/>
+        <cylinder radius="0.020000" length="0.076900"/>
       </geometry>
       <material>
         <color rgba="0.800 0.830 0.880 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.087000"/>
+        <box size="0.040000 0.040000 0.076900"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_ankle_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.040000" rpy="0 0 0"/>
-      <mass value="0.070000"/>
-      <inertia ixx="0.000041093" ixy="0" ixz="0" iyy="0.000041093" iyz="0" izz="0.000012986"/>
+      <origin xyz="0.000000 0.000000 -0.031400" rpy="0 0 0"/>
+      <mass value="0.083750"/>
+      <inertia ixx="0.000039659" ixy="0" ixz="0" iyy="0.000039659" iyz="0" izz="0.000015345"/>
     </inertial>
   </link>
   <link name="right_foot">
@@ -238,7 +414,7 @@
       <origin xyz="0.018000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
     <!-- rounded_box 近似为 box -->
-        <box size="0.110000 0.060000 0.025000"/>
+        <box size="0.110000 0.060000 0.019600"/>
       </geometry>
       <material>
         <color rgba="0.170 0.200 0.250 1.0"/>
@@ -247,20 +423,20 @@
     <collision>
       <origin xyz="0.018000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.110000 0.060000 0.025000"/>
+        <box size="0.110000 0.060000 0.019600"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.018000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.085000"/>
-      <inertia ixx="0.000029927" ixy="0" ixz="0" iyy="0.000090135" iyz="0" izz="0.000111208"/>
+      <mass value="0.032670"/>
+      <inertia ixx="0.000010847" ixy="0" ixz="0" iyy="0.000033988" iyz="0" izz="0.000042743"/>
     </inertial>
   </link>
   <link name="trunk_roll_link">
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.017500" length="0.030000"/>
+        <cylinder radius="0.017500" length="0.023600"/>
       </geometry>
       <material>
         <color rgba="0.300 0.340 0.420 1.0"/>
@@ -269,13 +445,29 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.035000 0.030000"/>
+        <box size="0.035000 0.035000 0.023600"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 trunk_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 0.027500" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 0.027500" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000006063" ixy="0" ixz="0" iyy="0.000006063" iyz="0" izz="0.000006125"/>
+      <mass value="0.067720"/>
+      <inertia ixx="0.000008328" ixy="0" ixz="0" iyy="0.000008328" iyz="0" izz="0.000010370"/>
     </inertial>
   </link>
   <link name="torso_upper">
@@ -283,7 +475,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
     <!-- rounded_box 近似为 box -->
-        <box size="0.100000 0.090000 0.070000"/>
+        <box size="0.100000 0.090000 0.055000"/>
       </geometry>
       <material>
         <color rgba="0.910 0.930 0.960 1.0"/>
@@ -292,35 +484,99 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.100000 0.090000 0.070000"/>
+        <box size="0.100000 0.090000 0.055000"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 head_yaw -->
+    <visual>
+      <origin xyz="0.000000 0.000000 0.082400" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 0.082400" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_shoulder_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.075000 0.011800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.075000 0.011800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_shoulder_pitch -->
+    <visual>
+      <origin xyz="0.000000 -0.075000 0.011800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 -0.075000 0.011800" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.300000"/>
-      <inertia ixx="0.000325000" ixy="0" ixz="0" iyy="0.000372500" iyz="0" izz="0.000452500"/>
+      <mass value="0.545920"/>
+      <inertia ixx="0.000506113" ixy="0" ixz="0" iyy="0.000592551" iyz="0" izz="0.000823429"/>
     </inertial>
   </link>
   <link name="head_yaw_link">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.031250" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.024500" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.015000" length="0.078000"/>
+        <cylinder radius="0.015000" length="0.061200"/>
       </geometry>
       <material>
         <color rgba="0.280 0.320 0.390 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.031250" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.024500" rpy="0 0 0"/>
       <geometry>
-        <box size="0.030000 0.030000 0.078000"/>
+        <box size="0.030000 0.030000 0.061200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 head_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 0.027500" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 0.027500" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.031250" rpy="0 0 0"/>
-      <mass value="0.030000"/>
-      <inertia ixx="0.000016898" ixy="0" ixz="0" iyy="0.000016898" iyz="0" izz="0.000003375"/>
+      <origin xyz="0.000000 0.000000 -0.024500" rpy="0 0 0"/>
+      <mass value="0.073290"/>
+      <inertia ixx="0.000026998" ixy="0" ixz="0" iyy="0.000026998" iyz="0" izz="0.000008245"/>
     </inertial>
   </link>
   <link name="head">
@@ -328,7 +584,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
     <!-- rounded_box 近似为 box -->
-        <box size="0.076000 0.068000 0.055000"/>
+        <box size="0.076000 0.068000 0.043200"/>
       </geometry>
       <material>
         <color rgba="0.940 0.950 0.970 1.0"/>
@@ -337,13 +593,13 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.076000 0.068000 0.055000"/>
+        <box size="0.076000 0.068000 0.043200"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.120000"/>
-      <inertia ixx="0.000076490" ixy="0" ixz="0" iyy="0.000088010" iyz="0" izz="0.000104000"/>
+      <mass value="0.061820"/>
+      <inertia ixx="0.000033436" ixy="0" ixz="0" iyy="0.000039370" iyz="0" izz="0.000053577"/>
     </inertial>
   </link>
   <link name="left_shoulder_pitch_link">
@@ -351,7 +607,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
         <!-- sphere_shell 近似为外球 -->
-        <sphere radius="0.020000"/>
+        <sphere radius="0.018600"/>
       </geometry>
       <material>
         <color rgba="0.320 0.360 0.440 1.0"/>
@@ -360,66 +616,114 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <box size="0.037200 0.037200 0.037200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_shoulder_roll -->
+    <visual>
+      <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
+      <mass value="0.071910"/>
+      <inertia ixx="0.000014339" ixy="0" ixz="0" iyy="0.000014339" iyz="0" izz="0.000014339"/>
     </inertial>
   </link>
   <link name="left_upper_arm">
     <visual>
-      <origin xyz="0.000000 0.000000 0.030000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 0.023600" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.020000" length="0.070000"/>
+        <cylinder radius="0.020000" length="0.063600"/>
       </geometry>
       <material>
         <color rgba="0.880 0.900 0.930 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 0.030000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 0.023600" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.070000"/>
+        <box size="0.040000 0.040000 0.063600"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_elbow_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.047100" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.047100" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 0.030000" rpy="0 0 0"/>
-      <mass value="0.075000"/>
-      <inertia ixx="0.000030463" ixy="0" ixz="0" iyy="0.000030463" iyz="0" izz="0.000013588"/>
+      <origin xyz="0.000000 0.000000 0.023600" rpy="0 0 0"/>
+      <mass value="0.080250"/>
+      <inertia ixx="0.000028186" ixy="0" ixz="0" iyy="0.000028186" iyz="0" izz="0.000014347"/>
     </inertial>
   </link>
   <link name="left_forearm">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.017500" length="0.060000"/>
+        <cylinder radius="0.017500" length="0.054600"/>
       </geometry>
       <material>
         <color rgba="0.800 0.830 0.880 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.035000 0.060000"/>
+        <box size="0.035000 0.035000 0.054600"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 left_gripper -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.039200" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.039200" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
-      <mass value="0.055000"/>
-      <inertia ixx="0.000016561" ixy="0" ixz="0" iyy="0.000016561" iyz="0" izz="0.000007609"/>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <mass value="0.074860"/>
+      <inertia ixx="0.000019587" ixy="0" ixz="0" iyy="0.000019587" iyz="0" izz="0.000010217"/>
     </inertial>
   </link>
   <link name="left_gripper">
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.050000 0.030000 0.025000"/>
+        <box size="0.050000 0.030000 0.019600"/>
       </geometry>
       <material>
         <color rgba="0.190 0.220 0.270 1.0"/>
@@ -428,13 +732,13 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.050000 0.030000 0.025000"/>
+        <box size="0.050000 0.030000 0.019600"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.030000"/>
-      <inertia ixx="0.000003812" ixy="0" ixz="0" iyy="0.000007813" iyz="0" izz="0.000008500"/>
+      <mass value="0.010090"/>
+      <inertia ixx="0.000001080" ixy="0" ixz="0" iyy="0.000002425" iyz="0" izz="0.000002859"/>
     </inertial>
   </link>
   <link name="right_shoulder_pitch_link">
@@ -442,7 +746,7 @@
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
         <!-- sphere_shell 近似为外球 -->
-        <sphere radius="0.020000"/>
+        <sphere radius="0.018600"/>
       </geometry>
       <material>
         <color rgba="0.320 0.360 0.440 1.0"/>
@@ -451,66 +755,114 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.040000"/>
+        <box size="0.037200 0.037200 0.037200"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_shoulder_roll -->
+    <visual>
+      <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.040000"/>
-      <inertia ixx="0.000009227" ixy="0" ixz="0" iyy="0.000009227" iyz="0" izz="0.000009227"/>
+      <mass value="0.071910"/>
+      <inertia ixx="0.000014339" ixy="0" ixz="0" iyy="0.000014339" iyz="0" izz="0.000014339"/>
     </inertial>
   </link>
   <link name="right_upper_arm">
     <visual>
-      <origin xyz="0.000000 0.000000 0.030000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 0.023600" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.020000" length="0.070000"/>
+        <cylinder radius="0.020000" length="0.063600"/>
       </geometry>
       <material>
         <color rgba="0.880 0.900 0.930 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 0.030000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 0.023600" rpy="0 0 0"/>
       <geometry>
-        <box size="0.040000 0.040000 0.070000"/>
+        <box size="0.040000 0.040000 0.063600"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_elbow_pitch -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.047100" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.047100" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 0.030000" rpy="0 0 0"/>
-      <mass value="0.075000"/>
-      <inertia ixx="0.000030463" ixy="0" ixz="0" iyy="0.000030463" iyz="0" izz="0.000013588"/>
+      <origin xyz="0.000000 0.000000 0.023600" rpy="0 0 0"/>
+      <mass value="0.080250"/>
+      <inertia ixx="0.000028186" ixy="0" ixz="0" iyy="0.000028186" iyz="0" izz="0.000014347"/>
     </inertial>
   </link>
   <link name="right_forearm">
     <visual>
-      <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
       <geometry>
         <!-- capsule 近似为 cylinder（长度含两端球头） -->
-        <cylinder radius="0.017500" length="0.060000"/>
+        <cylinder radius="0.017500" length="0.054600"/>
       </geometry>
       <material>
         <color rgba="0.800 0.830 0.880 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
       <geometry>
-        <box size="0.035000 0.035000 0.060000"/>
+        <box size="0.035000 0.035000 0.054600"/>
+      </geometry>
+    </collision>
+    <!-- 舵机 飞特 STS3215 — 驱动 right_gripper -->
+    <visual>
+      <origin xyz="0.000000 0.000000 -0.039200" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
+      </geometry>
+      <material>
+        <color rgba="0.250 0.270 0.320 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.000000 0.000000 -0.039200" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.045200 0.024700 0.035000"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
-      <mass value="0.055000"/>
-      <inertia ixx="0.000016561" ixy="0" ixz="0" iyy="0.000016561" iyz="0" izz="0.000007609"/>
+      <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
+      <mass value="0.074860"/>
+      <inertia ixx="0.000019587" ixy="0" ixz="0" iyy="0.000019587" iyz="0" izz="0.000010217"/>
     </inertial>
   </link>
   <link name="right_gripper">
     <visual>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.050000 0.030000 0.025000"/>
+        <box size="0.050000 0.030000 0.019600"/>
       </geometry>
       <material>
         <color rgba="0.190 0.220 0.270 1.0"/>
@@ -519,118 +871,118 @@
     <collision>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
       <geometry>
-        <box size="0.050000 0.030000 0.025000"/>
+        <box size="0.050000 0.030000 0.019600"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0.000000 0.000000 0.000000" rpy="0 0 0"/>
-      <mass value="0.030000"/>
-      <inertia ixx="0.000003812" ixy="0" ixz="0" iyy="0.000007813" iyz="0" izz="0.000008500"/>
+      <mass value="0.010090"/>
+      <inertia ixx="0.000001080" ixy="0" ixz="0" iyy="0.000002425" iyz="0" izz="0.000002859"/>
     </inertial>
   </link>
   <joint name="head_yaw" type="revolute">
     <parent link="torso_upper"/>
     <child link="head_yaw_link"/>
     <axis xyz="0 0 1"/>
-    <origin xyz="0.000000 0.000000 0.105000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 0.082400" rpy="0 0 0"/>
     <limit lower="-1.570796" upper="1.570796" effort="1.000" velocity="4.188790"/>
   </joint>
   <joint name="head_pitch" type="revolute">
     <parent link="head_yaw_link"/>
     <child link="head"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 0.035000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 0.027500" rpy="0 0 0"/>
     <limit lower="-0.785398" upper="0.785398" effort="1.000" velocity="4.188790"/>
   </joint>
   <joint name="trunk_roll" type="revolute">
     <parent link="pelvis"/>
     <child link="trunk_roll_link"/>
     <axis xyz="1 0 0"/>
-    <origin xyz="0.000000 0.000000 0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 0.019600" rpy="0 0 0"/>
     <limit lower="-0.174533" upper="0.174533" effort="2.000" velocity="3.141593"/>
   </joint>
   <joint name="trunk_pitch" type="revolute">
     <parent link="trunk_roll_link"/>
     <child link="torso_upper"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 0.035000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 0.027500" rpy="0 0 0"/>
     <limit lower="-0.261799" upper="0.261799" effort="2.000" velocity="3.141593"/>
   </joint>
   <joint name="left_hip_yaw" type="revolute">
     <parent link="pelvis"/>
     <child link="left_hip_yaw_link"/>
     <axis xyz="0 0 1"/>
-    <origin xyz="0.000000 0.045000 -0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.045000 -0.019600" rpy="0 0 0"/>
     <limit lower="-0.785398" upper="0.785398" effort="2.500" velocity="3.141593"/>
   </joint>
   <joint name="left_hip_roll" type="revolute">
     <parent link="left_hip_yaw_link"/>
     <child link="left_hip_roll_link"/>
     <axis xyz="1 0 0"/>
-    <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
     <limit lower="-0.436332" upper="0.436332" effort="2.500" velocity="3.141593"/>
   </joint>
   <joint name="left_hip_pitch" type="revolute">
     <parent link="left_hip_roll_link"/>
     <child link="left_thigh"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
     <limit lower="-1.047198" upper="1.047198" effort="3.000" velocity="3.141593"/>
   </joint>
   <joint name="left_knee_pitch" type="revolute">
     <parent link="left_thigh"/>
     <child link="left_shank"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.080000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
     <limit lower="0.000000" upper="1.570796" effort="3.000" velocity="3.141593"/>
   </joint>
   <joint name="left_ankle_pitch" type="revolute">
     <parent link="left_shank"/>
     <child link="left_foot"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.080000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
     <limit lower="-0.698132" upper="0.698132" effort="2.000" velocity="3.141593"/>
   </joint>
   <joint name="right_hip_yaw" type="revolute">
     <parent link="pelvis"/>
     <child link="right_hip_yaw_link"/>
     <axis xyz="0 0 1"/>
-    <origin xyz="0.000000 -0.045000 -0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 -0.045000 -0.019600" rpy="0 0 0"/>
     <limit lower="-0.785398" upper="0.785398" effort="2.500" velocity="3.141593"/>
   </joint>
   <joint name="right_hip_roll" type="revolute">
     <parent link="right_hip_yaw_link"/>
     <child link="right_hip_roll_link"/>
     <axis xyz="1 0 0"/>
-    <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
     <limit lower="-0.436332" upper="0.436332" effort="2.500" velocity="3.141593"/>
   </joint>
   <joint name="right_hip_pitch" type="revolute">
     <parent link="right_hip_roll_link"/>
     <child link="right_thigh"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.025000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.019600" rpy="0 0 0"/>
     <limit lower="-1.047198" upper="1.047198" effort="3.000" velocity="3.141593"/>
   </joint>
   <joint name="right_knee_pitch" type="revolute">
     <parent link="right_thigh"/>
     <child link="right_shank"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.080000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
     <limit lower="0.000000" upper="1.570796" effort="3.000" velocity="3.141593"/>
   </joint>
   <joint name="right_ankle_pitch" type="revolute">
     <parent link="right_shank"/>
     <child link="right_foot"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.080000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.062800" rpy="0 0 0"/>
     <limit lower="-0.698132" upper="0.698132" effort="2.000" velocity="3.141593"/>
   </joint>
   <joint name="left_shoulder_pitch" type="revolute">
     <parent link="torso_upper"/>
     <child link="left_shoulder_pitch_link"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.075000 0.015000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.075000 0.011800" rpy="0 0 0"/>
     <limit lower="-1.570796" upper="1.570796" effort="1.500" velocity="4.188790"/>
   </joint>
   <joint name="left_shoulder_roll" type="revolute">
@@ -644,21 +996,21 @@
     <parent link="left_upper_arm"/>
     <child link="left_forearm"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.060000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.047100" rpy="0 0 0"/>
     <limit lower="-2.094395" upper="0.000000" effort="1.000" velocity="4.188790"/>
   </joint>
   <joint name="left_gripper" type="revolute">
     <parent link="left_forearm"/>
     <child link="left_gripper"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.050000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.039200" rpy="0 0 0"/>
     <limit lower="0.000000" upper="1.047198" effort="0.400" velocity="4.188790"/>
   </joint>
   <joint name="right_shoulder_pitch" type="revolute">
     <parent link="torso_upper"/>
     <child link="right_shoulder_pitch_link"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 -0.075000 0.015000" rpy="0 0 0"/>
+    <origin xyz="0.000000 -0.075000 0.011800" rpy="0 0 0"/>
     <limit lower="-1.570796" upper="1.570796" effort="1.500" velocity="4.188790"/>
   </joint>
   <joint name="right_shoulder_roll" type="revolute">
@@ -672,14 +1024,14 @@
     <parent link="right_upper_arm"/>
     <child link="right_forearm"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.060000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.047100" rpy="0 0 0"/>
     <limit lower="-2.094395" upper="0.000000" effort="1.000" velocity="4.188790"/>
   </joint>
   <joint name="right_gripper" type="revolute">
     <parent link="right_forearm"/>
     <child link="right_gripper"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0.000000 0.000000 -0.050000" rpy="0 0 0"/>
+    <origin xyz="0.000000 0.000000 -0.039200" rpy="0 0 0"/>
     <limit lower="0.000000" upper="1.047198" effort="0.400" velocity="4.188790"/>
   </joint>
 </robot>

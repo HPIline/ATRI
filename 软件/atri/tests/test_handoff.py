@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -172,14 +173,26 @@ class TestHandoffDocument(unittest.TestCase):
         self.assertIn("what_is_real", d)
 
     def test_all_declared_attachments_exist(self):
+        """文档「附件清单」里声明的每个文件都必须在 handoff/ 里真实存在。
+
+        v2 起不再硬编码文件名：渲染附件**优先 PNG、回退已入库的 SVG**
+        （PNG 被 .gitignore 排除，硬编码 PNG 名会让全新 clone / CI 必红）。
+        这里改为从文档表格里解析实际声明的文件名，再逐个查存在性。
+        """
         d = json.loads(self.data.read_text(encoding="utf-8"))
         self.assertTrue(d["robot"]["dof"] == 22)
         text = self.md.read_text(encoding="utf-8")
-        for name in ("hardware_requirements.json", "atri.urdf",
-                     "render_iso.png", "render_front.png",
-                     "render_joints.png"):
+
+        # 只认"带扩展名的文件名"，避免把内腔表等其它表格的 link 名当成附件
+        declared = re.findall(
+            r"^\| `([^`]+\.(?:urdf|json|md|png|svg))` \|", text, flags=re.M)
+        self.assertIn("atri.urdf", declared)
+        self.assertIn("fit_report.md", declared)
+        render_exts = {Path(n).suffix for n in declared if n.startswith("render_")}
+        self.assertTrue(render_exts.issubset({".png", ".svg"}),
+                        f"渲染附件扩展名异常: {render_exts}")
+        for name in declared:
             with self.subTest(attachment=name):
-                self.assertIn(name, text)
                 self.assertTrue((DESIGN / "handoff" / name).exists(),
                                 f"附件 {name} 未打包")
 
