@@ -745,7 +745,8 @@ def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
                rib_h: float = 6.0, mirror: bool = False) -> cq.Workplane:
     """足底板：踝轴 x=0，后跟 48 mm，前掌 74 mm（整机深 ≤147）。左右脚同一零件。
 
-    纵梁贴踝叉臂（y=±Y_HALF），不浮在板面中间。橡胶垫只在底板之下。
+    纵梁贴踝叉臂（y=±Y_HALF）。四角垫低于踝笼半高，是唯一着地点。
+    踝区按 servo_frame 挖槽，笼/舵机留在关节轴上，不平移离轴。
     """
     part = cq.Workplane("XY")
     heel = 48.0
@@ -775,9 +776,15 @@ def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
     part = part.cut(box(16.0, width + 2.0, 1.4,
                         at=(x_front - 7.0, 0.0, -sole_t - 0.2)))
 
+    # 踝窝：笼/舵机按轴对半，穿过鞋底。尺寸来自 servo_frame，不切 AABB 列表。
+    well_x = SPAN_X + 2.0
+    well_y = GAP + 2.0 * PLATE_T + 2.0
+    part = part.cut(box(well_x, well_y, sole_t + 8.0,
+                        at=(X_CTR, 0.0, -sole_t - 4.0)))
+
     part = safe_fillet(part, 1.5, "|Z")
-    # 垫在圆角之后加，避免 |Z| fillet 把前掌垫剪开
-    pad_h = 2.0
+    # 垫必须低于笼半高（约 −15.4），才能成为唯一着地点。圆角之后再加。
+    pad_h = 13.0
     inset = 9.0
     for sx, sy in ((x_rear + inset, 20.0), (x_rear + inset, -20.0),
                    (x_front - inset, 20.0), (x_front - inset, -20.0)):

@@ -129,10 +129,26 @@ class LayoutGates(unittest.TestCase):
         self.assertLessEqual(bb.xmin, -45.0, f"后跟 xmin={bb.xmin:.1f}")
         self.assertLessEqual(bb.ylen, 62.0, f"足宽 {bb.ylen:.1f}")
         self.assertGreaterEqual(bb.ylen, 58.0, f"足宽 {bb.ylen:.1f}")
-        self.assertLessEqual(bb.zmin, -4.5, f"垫高 zmin={bb.zmin:.1f}")
-        self.assertGreaterEqual(bb.zmin, -8.0, "垫太厚会抬整机")
+        # 垫必须低于踝笼半高（笼约 −15.4），才能成为唯一着地点。
+        self.assertLessEqual(bb.zmin, -15.5, f"垫高 zmin={bb.zmin:.1f}")
+        self.assertGreaterEqual(bb.zmin, -18.5, "垫过厚会把整机抬出 420 门禁")
         m = printed_mass(wp, material="PETG", infill=0.45)
         self.assertLessEqual(m["mass_printed_g"], 42.0, m)
+
+    def test_soles_are_lowest(self):
+        """橡胶垫是唯一着地点；踝笼/舵机不得低于垫。"""
+        boxes = {n: bbox_of(w) for n, w in self.shapes.items()}
+        zmin = min(b.zmin for b in boxes.values())
+        for side in ("left", "right"):
+            sole = boxes[f"{side}_foot__foot_plate"]
+            cage = boxes[f"cage__{side}_ankle_pitch"]
+            servo = boxes[f"servo__{side}_ankle_pitch"]
+            self.assertAlmostEqual(
+                sole.zmin, zmin, delta=0.5, msg=f"{side} 垫不是全机最低")
+            self.assertGreaterEqual(
+                cage.zmin, sole.zmin + 0.5, f"{side} 笼仍低于垫")
+            self.assertGreaterEqual(
+                servo.zmin, sole.zmin + 0.5, f"{side} 舵机仍低于垫")
 
     def test_feet_are_left_right_mirrors(self):
         """左右脚同一零件镜像，包络应对称。"""

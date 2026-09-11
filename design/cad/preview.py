@@ -51,11 +51,12 @@ KIND_COLORS = {
     "tube":    (115, 148, 115),
     "servo":   (64, 69, 82),
     "elec":    (217, 140, 51),
+    "ground":  (90, 140, 110),
 }
 KIND_LABEL = {
     "bulk": "结构框架/大件", "cage": "关节笼", "fork": "连杆叉",
     "adapter": "紧凑转接块", "tube": "连杆管", "servo": "舵机（占位）",
-    "elec": "电子件（占位）",
+    "elec": "电子件（占位）", "ground": "地平面（垫高）",
 }
 
 PREVIEW_POSE_DEG = A.DISPLAY_POSE_DEG
@@ -91,6 +92,21 @@ def build_batches(items: Sequence[Tuple[str, cq.Workplane]], tol: float
                       "color": KIND_COLORS[k]})
     stats.sort(key=lambda s: -s["triangles"])
     return batches, stats
+
+
+def ground_batch(bbox: Sequence[float], margin: float = 40.0) -> Dict[str, np.ndarray]:
+    """垫高处一张薄地平面，不计入装配零件。"""
+    z = float(bbox[2])
+    x0, y0 = float(bbox[0]) - margin, float(bbox[1]) - margin
+    x1, y1 = float(bbox[3]) + margin, float(bbox[4]) + margin
+    pos = np.array(
+        [[x0, y0, z], [x1, y0, z], [x1, y1, z],
+         [x0, y0, z], [x1, y1, z], [x0, y1, z]],
+        dtype=np.float32,
+    )
+    nrm = np.tile(np.array([0.0, 0.0, 1.0], dtype=np.float32), (6, 1))
+    col = np.tile(np.array(KIND_COLORS["ground"], dtype=np.uint8), (6, 1))
+    return {"pos": pos, "nrm": nrm, "col": col}
 
 
 # --------------------------------------------------------------------------
@@ -332,7 +348,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="生成交互式 3D 预览")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--zero", action="store_true",
-                    help="用机械零位（默认是展示姿态，手臂抬到身前避免穿髋）")
+                    help="用机械零位（默认是展示姿态；零位零件本身不得穿髋）")
     ap.add_argument("--part", type=str, default=None, help="只看单个零件")
     ap.add_argument("--tol", type=float, default=1.2, help="网格容差 mm")
     args = ap.parse_args(argv)
@@ -366,6 +382,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         b = wp.val().BoundingBox()
         bb = b if bb is None else bb.add(b)
     bbox = [bb.xmin, bb.ymin, bb.zmin, bb.xmax, bb.ymax, bb.zmax]
+    if not args.part:
+        batches["ground"] = ground_batch(bbox)
+        stats.append({"kind": "ground", "label": KIND_LABEL["ground"],
+                      "triangles": 2, "color": KIND_COLORS["ground"]})
 
     html = PREVIEW / "ATRI-preview.html"
     info = write_html(batches, stats, bbox, html, title, subtitle)
