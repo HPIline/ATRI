@@ -87,8 +87,34 @@ def main(argv: Sequence[str]) -> int:
     shapes = [w for _, w in items]
     boxes = [bbox_of(w) for w in shapes]
 
+    # ---- ⓪ 关节轴对齐：每个舵机的"沿轴厚度"必须落在该关节的轴上 ----
+    #     舵机包络 45.2(长) × 43.1(沿轴含凸台/花键/副轴) × 24.7(宽)；
+    #     若沿关节轴方向的尺寸不是 43.1，说明这个关节的舵机转向错了 90°。
+    item_map = dict(items)
+    mis = []
+    for j, sc in A.JOINT_SCHEME.items():
+        nm = f"servo__{j}"
+        if nm not in item_map:
+            continue
+        b = item_map[nm].val().BoundingBox()
+        dims = (b.xlen, b.ylen, b.zlen)
+        w = kin.axis_world(j)
+        idx = max(range(3), key=lambda i: abs(w[i]))
+        if abs(dims[idx] - 43.1) > 1.0:
+            mis.append((j, sc["shaft"], sc["parent"],
+                        [round(x, 1) for x in dims]))
+    print(f"\n## 关节轴对齐\n\n舵机轴向与关节轴一致："
+          f"**{len(A.JOINT_SCHEME) - len(mis)}/{len(A.JOINT_SCHEME)}**")
+    for j, sh, pa, dims in mis:
+        print(f"  ✗ `{j}` shaft={sh} parent={pa} 包络 {dims}")
+
     # ---- ① 穿模：包围盒相交 → 精确求交体积 ----
-    inter: List[Tuple[str, str, float]] = []
+    #     关键指标不是"体积"而是**重合率** = 交集体积 / 较小件自身体积：
+    #        几个 mm³  = 让位不足（改尺寸/倒角可解）
+    #        >30%      = **摆放错误**（两个零件被指派到同一块空间，改尺寸无解）
+    #     这个区分很重要：光看总体积会把"摆放错误"和"配合差"混成一锅。
+    vols = [w.val().Volume() for w in shapes]
+    inter: List[Tuple[str, str, float, float, float]] = []
     if not iso_only:
         for i in range(len(items)):
             for j in range(i + 1, len(items)):
@@ -96,8 +122,16 @@ def main(argv: Sequence[str]) -> int:
                     continue
                 v = common_volume(shapes[i], shapes[j])
                 if v > 1.0:
-                    inter.append((names[i], names[j], v))
+                    smaller = max(min(vols[i], vols[j]), 1e-9)
+                    inter.append((names[i], names[j], v, v / smaller, smaller))
     inter.sort(key=lambda t: -t[2])
+
+    def verdict(frac: float, v: float) -> str:
+        if frac >= 0.30 or v >= 5000.0:
+            return "❌ 摆放错误"
+        if frac >= 0.05 or v >= 500.0:
+            return "⚠️ 让位不足"
+        return "· 局部干涉"
 
     # ---- ② 未衔接：最小距离图 + 连通分量 ----
     adj: Dict[str, List[str]] = defaultdict(list)
@@ -136,19 +170,39 @@ def main(argv: Sequence[str]) -> int:
     # ---- 报告 ----
     print(f"\n## 穿模（相交体积 > 1 mm³，共 {len(inter)} 对）\n")
     if inter:
-        print("| # | 件 A | 件 B | 相交体积 mm³ |")
-        print("|---|---|---|---|")
-        for k, (a, b, v) in enumerate(inter[:top_n], 1):
-            print(f"| {k} | `{a}` | `{b}` | {v:.0f} |")
-        tot = sum(v for _, _, v in inter)
+        n_bad = sum(1 for _, _, v, f, _ in inter if verdict(f, v) == "❌ 摆放错误")
+        n_fit = sum(1 for _, _, v, f, _ in inter if verdict(f, v) == "⚠️ 让位不足")
+        n_min = len(inter) - n_bad - n_fit
+        print(f"**性质判定**：摆放错误 **{n_bad}** 对 ｜ 让位不足 **{n_fit}** 对 ｜ "
+              f"局部干涉 {n_min} 对\n")
+        print("| # | 件 A | 件 B | 相交 mm³ | 重合率 | 判定 |")
+        print("|---|---|---|---|---|---|")
+        for k, (a, b, v, f, _sm) in enumerate(inter[:top_n], 1):
+            print(f"| {k} | `{a}` | `{b}` | {v:.0f} | {f * 100:.0f}% | {verdict(f, v)} |")
+        tot = sum(v for _, _, v, _f, _s in inter)
         print(f"\n合计相交体积 **{tot:.0f} mm³**；"
-              f"按零件统计前 8：")
+              f"按零件统计前 8（含各自自身体积占比）：")
         per: Dict[str, float] = defaultdict(float)
-        for a, b, v in inter:
+        per_own: Dict[str, float] = {}
+        for a, b, v, _f, _s in inter:
             per[a] += v
             per[b] += v
+        for i, n in enumerate(names):
+            per_own[n] = vols[i]
         for n, v in sorted(per.items(), key=lambda kv: -kv[1])[:8]:
-            print(f"  - `{n}`：{v:.0f} mm³")
+            own = per_own.get(n, 1.0)
+            print(f"  - `{n}`：{v:.0f} mm³（自身 {own:.0f} mm³，"
+                  f"被侵占 {100 * v / max(own, 1e-9):.0f}%）")
+        # 体积分布直方图：看"少数大错"还是"大量小差"
+        ranges = [(10000.0, 1e9, "≥10 000"),
+                  (5000.0, 10000.0, "5 000–10 000"),
+                  (1000.0, 5000.0, "1 000–5 000"),
+                  (100.0, 1000.0, "100–1 000"),
+                  (1.0, 100.0, "<100")]
+        print("\n体积分布（用于区分「少数摆错」与「普遍配合差」）：")
+        for lo, hi, tag in ranges:
+            c = sum(1 for _, _, v, _f, _s in inter if lo <= v < hi)
+            print(f"  - {tag:>12s} mm³：{c} 对")
     else:
         print("（无）")
 

@@ -87,20 +87,37 @@ IF: Dict[str, Dict[str, Any]] = {
     },
 }
 
-# 舵机输出轴相对机身高度的偏置（图纸值 11.0 mm，从主端面算）
-SERVO_SHAFT_FROM_FACE_MM = 11.0
-
-
-def servo_axis_offset_mm(servo_name: str = "STS3215") -> float:
-    """关节轴线相对舵机几何中心的 Z 偏置（mm）。
-
-    舵机高度 H=35.0，输出轴中心距主端面 11.0 mm →
-    轴线在几何中心上方 (H/2 − 11.0) = 6.5 mm。
-    即：**把舵机中心放在轴线下方 6.5 mm** 才是真实姿态。
-    旧 `servo_yoke` 按居中建模，图纸核验后才暴露这个偏差。
-    """
-    H = servo(servo_name)["body_mm"][2]
-    return H / 2.0 - SERVO_SHAFT_FROM_FACE_MM
+# 舵机在**标准姿态**下的几何 —— 全库唯一真值来源。
+#
+# 标准姿态（`orient()` 的约定）：输出轴沿 **+Y**、母端接口朝 **+Z**、机身长度沿 **X**。
+# ⚠️ 历史坑（2026-09-11 修正，曾导致整机预览大面积穿模与方向错误）：
+#   ① 机身的 35.0 是**沿输出轴**的厚度，不是"垂直轴的高度"；
+#      垂直轴截面是 45.2（长）× 24.7（宽）。
+#   ② 输出轴心**不在机身中心**：距 +X 端面 10.2 mm、距 −X 端面 35.0 mm。
+#   ③ 输出端有一个 Φ20 × 2.5 凸台，副轴端是 Φ20 × 2.1 沉台 + Φ6 × 4.1 副轴。
+#   依据：design/handoff/STS3215-官方规格书核验.md（官方图纸 + B-rep 实测）
+def servo_frame(name: str = "STS3215") -> Dict[str, Any]:
+    s = servo(name)
+    length, width, axial = s["body_mm"]          # 45.2 / 24.7 / 35.0
+    near = s["shaft_depth_from_face_mm"]         # 10.2：轴心 → +X 端面
+    boss_t = s["body_mount_disc_thickness_mm"][1]        # 2.5：输出端凸台
+    horn_t = s["horn_disc_thickness_mm"]                 # 4.0：金属舵盘盘厚
+    return {
+        "len": length, "width": width, "axial": axial,
+        "x_min": near - length, "x_max": near,   # −35.0 … +10.2（轴心为原点）
+        "z_half": width / 2.0,                   # 12.35
+        "y_half": axial / 2.0,                   # 17.5：机壳沿轴半厚
+        "boss_face": axial / 2.0 + boss_t,       # +20.0：输出端凸台面
+        "boss_d": s["body_mount_disc_od_mm"],    # 20.0：输出端凸台直径
+        "boss_t": boss_t,                        # 2.5：凸台高
+        "spline_d": s["horn_spline_od_mm"],      # 5.9：25T 花键外径（包络）
+        "spline_h": 1.5,                         # 1.5：花键高出凸台面（实测）
+        "horn_face": axial / 2.0 + boss_t + horn_t,   # +24.0：舵盘外表面
+        "stub_dia": s["secondary_shaft_dia_mm"],      # 6.0
+        "stub_len": s["secondary_shaft_protrusion_mm"],  # 4.1（官方图纸）
+        "mount_pitch": list(s["bottom_hole_pitch_mm"]),  # [9.9, 9.9] → Φ14 节圆
+        "clearance": FDM["servo_cavity_clearance_mm"],
+    }
 
 
 # --------------------------------------------------------------------------
@@ -290,18 +307,25 @@ def orient(shape: cq.Workplane, shaft: str, parent: str) -> cq.Workplane:
         - 母端接口板朝 **+Z**
         - 子端（连杆）朝 **−Z**
 
-    这两个方向正交，唯一确定一个旋转；`yaw` 关节（轴与母端同向）
-    是退化情形，由零件自己显式建模，不走这里。
+    ⚠️ 2026-09-11 重写：原实现用 `gp_Trsf.SetTransformation(gp_Ax3(from), gp_Ax3(to))`，
+    它在"轴与母端同为某一坐标轴"的组合下会给出**与文档不符的映射**（实测
+    `shaft=-z, parent=+y` 时局部 +Y 跑到世界 Y 上），导致 yaw 关节的舵机整整偏 90°。
+    现在改为**显式构造右手正交矩阵**，映射关系可逐条验证：
+        局部 +Y → shaft，局部 +Z → parent，局部 +X = shaft × parent
+    这两个方向必须正交；`yaw`（轴与母端同向）是退化情形，由零件自己显式建模。
     """
-    from OCP.gp import gp_Ax3, gp_Dir, gp_Pnt, gp_Trsf
+    from OCP.gp import gp_Dir, gp_Mat, gp_Pnt, gp_Trsf, gp_Vec
 
-    src = DIRS[parent], DIRS[shaft]
-    if abs(sum(a * b for a, b in zip(*src))) > 1e-9:
-        raise ValueError(f"shaft={shaft} 与 parent={parent} 不能同向（yaw 请显式建模）")
-    from_ax = gp_Ax3(gp_Pnt(0, 0, 0), gp_Dir(*DIRS["+z"]), gp_Dir(*DIRS["+y"]))
-    to_ax = gp_Ax3(gp_Pnt(0, 0, 0), gp_Dir(*DIRS[parent]), gp_Dir(*DIRS[shaft]))
+    u = gp_Vec(*DIRS[shaft])
+    v = gp_Vec(*DIRS[parent])
+    if abs(u.Dot(v)) > 1e-9:
+        raise ValueError(f"shaft={shaft} 与 parent={parent} 必须正交（yaw 请显式建模）")
+    w = u.Crossed(v)                      # 局部 +X 的像
     trsf = gp_Trsf()
-    trsf.SetTransformation(from_ax, to_ax)
+    # gp_Trsf::SetValues 按行给出：第 1 行 = 局部 x/y/z 三个基向量的像的 X 分量
+    trsf.SetValues(w.X(), u.X(), v.X(), 0.0,
+                   w.Y(), u.Y(), v.Y(), 0.0,
+                   w.Z(), u.Z(), v.Z(), 0.0)
     return apply_trsf(shape, trsf)
 
 

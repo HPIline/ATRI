@@ -23,7 +23,7 @@ import cadquery as cq
 
 from kit import (FDM, IF, MATERIALS, bolt_circle, box, bosses, cyl, drill,
                  needs_support, orient, part_report, plate, printed_mass,
-                 safe_chamfer, safe_fillet, servo_axis_offset_mm, tube)
+                 safe_chamfer, safe_fillet, servo_frame, tube)
 from parts import sanitize
 from standards import (ASSEMBLY, WIRING, bearing, fastener, servo,
                        servo_horn_interface)
@@ -34,16 +34,29 @@ SERVO_NAME = "STS3215"
 # 舵机几何（所有关节模块的唯一真值来源）
 # --------------------------------------------------------------------------
 S = servo(SERVO_NAME)
-L_S, W_S, H_S = S["body_mm"]          # 45.2 / 24.7 / 35.0
-GAP = W_S + FDM["servo_cavity_clearance_mm"]     # 两侧板净距 25.2
-AXIS_DZ = servo_axis_offset_mm(SERVO_NAME)       # 6.5：轴线在几何中心上方
-Z_TOP = H_S / 2.0 - AXIS_DZ                      # 11.0：机体上表面（轴线为 0）
-Z_BOT = -H_S / 2.0 - AXIS_DZ                     # -24.0：机体下表面
-X_HALF = L_S / 2.0                               # 22.6
-Y_HALF = W_S / 2.0                               # 12.35
-PLATE_T = FDM["wall_mm"]                         # 3.0
-PLATE_Y = GAP / 2.0 + PLATE_T / 2.0              # 14.1：两侧板中心
-SPAN_X = 52.0                                    # 侧板长（含端部包边）
+
+# --------------------------------------------------------------------------
+# 舵机在**标准姿态**下的包络（唯一真值来源：kit.servo_frame）
+#   标准姿态：输出轴 +Y、母端接口 +Z、机身长度沿 X（见 kit.orient）
+#
+# ⚠️ 2026-09-11 修正（此前把 35 与 24.7 用反，导致整机预览大面积穿模）：
+#     机身长度 45.2 沿 X（且**轴心不在中点**：+X 侧 10.2、−X 侧 35.0）
+#     机身厚度 35.0 沿 Y（＝输出轴方向），两侧板净距 = 35.0 + 0.5 间隙
+#     机身宽度 24.7 沿 Z（轴线在宽度方向**居中**，不是"偏上 6.5"）
+# --------------------------------------------------------------------------
+SF = servo_frame(SERVO_NAME)
+X_MIN, X_MAX = SF["x_min"], SF["x_max"]      # −35.0 … +10.2（轴心为原点）
+Z_HALF = SF["z_half"]                        # 12.35：宽度方向半宽
+Y_HALF = SF["y_half"]                        # 17.5：机壳沿轴半厚
+BOSS_FACE = SF["boss_face"]                  # +20.0：输出端 Φ20 凸台面
+HORN_FACE = SF["horn_face"]                  # +24.0：金属舵盘外表面
+GAP = SF["axial"] + SF["clearance"]          # 35.5：两侧板（⊥输出轴）净距
+Z_TOP, Z_BOT = Z_HALF, -Z_HALF               # ±12.35：机体上/下表面（轴线为 0）
+X_HALF = (X_MAX - X_MIN) / 2.0               # 22.6：长度方向半长（参考值）
+X_CTR = (X_MIN + X_MAX) / 2.0                # −12.4：机身长度方向中心
+PLATE_T = FDM["wall_mm"]                     # 3.0
+PLATE_Y = GAP / 2.0 + PLATE_T / 2.0          # 19.25：两侧板中心
+SPAN_X = (X_MAX - X_MIN) + 8.0               # 53.2：侧板长（含端部包边）
 SPIGOT_D, SPIGOT_H, SPIGOT_BORE = 34.0, 12.0, 26.0
 
 
@@ -65,7 +78,9 @@ def joint_cage(shaft: str = "+y", parent: str = "+z",
     z_floor_top = Z_BOT                      # 舵机底面
     z_floor_bot = z_floor_top - wall
     z_cap_bot = Z_TOP + 2.0                  # 顶板与舵机之间留 2 mm 散热缝
-    z_cap_top = z_cap_bot + wall + 2.0       # 顶板兼作母端插接座
+    # ⚠️ 芯棒必须**坐在顶板上**：原为 z_cap_bot + wall + 2.0，凭空多出 2 mm 空隙，
+    #    使 Φ34 芯棒成为与本体不相连的独立实体（预览里就是"飘着一块"）。
+    z_cap_top = z_cap_bot + wall             # 顶板上表面 = 母端插接座面
 
     part = cq.Workplane("XY")
 
@@ -75,9 +90,9 @@ def joint_cage(shaft: str = "+y", parent: str = "+z",
                 at=(0, sign * PLATE_Y, z_floor_bot))
         part = part.union(p)
 
-    # --- 底板（舵机坐在上面，4 个 M2.5 从下方拧进舵机底孔）---
+    # --- 底板（托住舵机底面，同时把两块侧板连成一体）---
     floor = box(SPAN_X, GAP + 2 * wall, wall, at=(0, 0, z_floor_bot))
-    for dx in (-9.0, 9.0):          # 螺钉孔之间挖窗（螺钉位置 ±19/±7.5 不动）
+    for dx in (-9.0, 9.0):
         floor = floor.cut(box(12.0, GAP - 6.0, wall * 4,
                               at=(dx, 0, z_floor_bot - wall)))
     part = part.union(floor)
@@ -108,12 +123,15 @@ def joint_cage(shaft: str = "+y", parent: str = "+z",
                             at=(0, -PLATE_Y - PLATE_T / 2.0, 0), axis="Y")
                         .translate((0, -0.1, 0)))
 
-    # --- 舵机底部 4×M2.5 通孔（拧进舵机自带底孔，pitch 38×15）---
-    pitch = S["bottom_hole_pitch_mm"]
+    # --- 舵机 4×M2.5 安装孔（**沿输出轴方向**穿过两块侧板）---
+    #     实测：舵机两个轴向端面各有 4×Φ2.5，方形 9.9×9.9（= 节圆 Φ14），
+    #     孔阵中心就是输出轴心。所以螺钉走 ±Y，不是"从底部往上拧"。
+    pitch = SF["mount_pitch"]
     part = drill(part, [(sx * pitch[0] / 2.0, sy * pitch[1] / 2.0)
                         for sx in (-1, 1) for sy in (-1, 1)],
                  dia=fastener("M2.5")["clearance_hole_mm"],
-                 depth=wall * 3, z0=z_floor_bot - wall)
+                 depth=2 * (PLATE_Y + PLATE_T) + 2.0,
+                 z0=-PLATE_Y - PLATE_T - 1.0, axis="Y")
 
     # --- 母端插接芯棒的 3×M3 径向螺钉（120°，攻丝底孔，现场攻丝或热熔）---
     for i in range(3):
@@ -125,11 +143,17 @@ def joint_cage(shaft: str = "+y", parent: str = "+z",
         part = part.cut(hole)
 
     # --- 减重窗 ---
+    #     ⚠️ 原窗口高 30 且从 z_floor_bot+8 起，会切穿顶板、把侧板切成孤岛
+    #     （预览里表现为"多出来两块碎料"）。现在窗口两端各留 6/3 mm 连续材料，
+    #     并避开 4×M2.5 安装孔带（|X| ≤ 6.3、|Z| ≤ 6.3）。
     if lighten:
+        wz0, wz1 = z_floor_bot + 6.0, z_cap_bot - 3.0
         for sign in (-1, 1):
-            for dx in (-13.0, 0.0, 13.0):
-                part = part.cut(box(11.0, wall * 4, 30.0,
-                                    at=(dx, sign * PLATE_Y, z_floor_bot + 8.0)))
+            for dx in (-13.0, 13.0):
+                part = part.cut(box(11.0, wall * 4, wz1 - wz0,
+                                    at=(dx, sign * PLATE_Y, wz0)))
+            part = part.cut(box(24.0, wall * 4, 4.0,
+                                at=(0, sign * PLATE_Y, 7.5)))
 
     part = safe_fillet(part, FDM["fillet_struct_mm"], "|Y")
     part = orient(part, shaft, parent)
@@ -150,11 +174,15 @@ def joint_cage_yaw(parent: str = "+z", shaft: str = "+z",
     舵机本体的 4×M2.5 是从 ±Y 侧拧进舵机底面螺孔的，所以侧向必须留出批头空间。
     """
     part = cq.Workplane("XY")
-    z_out = -Y_HALF - 0.25          # 输出面（−Z）
-    z_sec = +Y_HALF + 0.25          # 副轴面（+Z）
+    # ⚠️ 2026-09-11 订正：两端面位置必须按**真实轴向尺寸链**取
+    #    输出侧板内表面 = −(机壳半厚 17.5 + 凸台 2.5) = −20.0（让开 Φ20 凸台）
+    #    副轴侧板内表面 = +机壳半厚 17.5（贴住舵机副轴端面，4×M2.5 就拧在这里）
+    z_out = -BOSS_FACE              # −20.0：输出面（−Z）
+    z_sec = +Y_HALF                 # +17.5：副轴面（+Z）
 
     plate_t = wall
     span_x, span_y = 56.0, 46.0
+    post_h = (z_sec + plate_t) - (z_out - plate_t) or 1.0
 
     # 输出侧板（开 Ø21 舵盘避空 + 四角挖窗）
     part = part.union(box(span_x, span_y, plate_t, at=(0, 0, z_out - plate_t)))
@@ -175,12 +203,18 @@ def joint_cage_yaw(parent: str = "+z", shaft: str = "+z",
     part = drill(part, bolt_circle(IF["cage_flange"]["pcd_mm"], 4),
                  dia=IF["cage_flange"]["hole_dia_mm"], depth=plate_t * 3,
                  z0=z_sec - plate_t)
-    # 4 根角柱
+    # 4 根角柱（高度按两端板外表面实际跨度，旧式 2*z_sec 假设两端对称 → 会差 3.5 mm）
     for sx in (-1, 1):
         for sy in (-1, 1):
-            part = part.union(box(8.0, 8.0, 2 * z_sec + 2 * plate_t - 1.0,
+            part = part.union(box(8.0, 8.0, post_h,
                                   at=(sx * (span_x / 2 - 4.0),
                                       sy * (span_y / 2 - 4.0), z_out - plate_t)))
+    # 舵机 4×M2.5 安装孔：沿输出轴方向贯穿两块端板（方形 9.9×9.9 = 节圆 Φ14）
+    pitch = SF["mount_pitch"]
+    part = drill(part, [(sx * pitch[0] / 2.0, sy * pitch[1] / 2.0)
+                        for sx in (-1, 1) for sy in (-1, 1)],
+                 dia=fastener("M2.5")["clearance_hole_mm"],
+                 depth=post_h + 2.0, z0=z_out - plate_t - 1.0, axis="Z")
     part = safe_fillet(part, FDM["fillet_min_mm"], "|Z")
     if parent == "-z":                      # 翻转：母端朝下（head_yaw 装在躯干下方）
         part = part.rotate((0, 0, 0), (1, 0, 0), 180)
@@ -200,22 +234,24 @@ def joint_cage_yaw(parent: str = "+z", shaft: str = "+z",
 def limb_fork(shaft: str = "+y", parent: str = "+z",
               wall: float = PLATE_T, compact: bool = False,
               spigot: bool = True) -> cq.Workplane:
-    """连杆叉：一侧螺栓锁在金属舵盘上，另一侧套在副轴轴承上，底部接连杆管。
+    """连杆叉：一侧螺栓锁在金属舵盘上，另一侧托住下一级连杆管。
 
-    **为什么必须两侧都接**：舵机输出轴单侧悬臂，落地的交变弯矩全部由
-    输出轴轴承承担，齿轮箱会早期磨损。副轴侧加一个 MF106ZZ 后，
-    弯矩由两个支点分担（第二个支点就是笼子 −Y 板里的轴承）。
+    ⚠️ 2026-09-11 订正：本件原来还有"臂 B + Φ5.96 轴颈"（插进笼子里的轴承内圈）。
+    但**舵机副轴 Φ6 与它同轴**、且副轴本身要穿过那个轴承 —— 二者不可能同时占
+    同一条轴线（轴颈 Φ5.96 套不进 Φ6 的副轴）。按实物结论：
+        **第二支点 = 笼子 −Y 板里的 MF106ZZ 骑在舵机副轴上**（副轴随输出一起转），
+    故本件不再做轴颈，臂 B 取消，载荷路径改为：
+        舵盘（臂 A）→ 底座 → 子端插接芯棒。
     """
     horn = servo_horn_interface(SERVO_NAME)
-    b = bearing(IF["secondary_shaft"]["bearing"])
 
-    horn_face = Y_HALF + S["horn_disc_thickness_mm"]         # 16.35 舵盘外表面
-    arm_out = horn_face + 0.05
+    arm_out = HORN_FACE + 0.05              # 24.05：臂 A 内表面（贴舵盘外表面）
     arm_t = wall
 
     z_top = (Z_TOP + 2.0) if not compact else 16.0
     z_base_top = (Z_BOT - 12.0) if not compact else -13.0    # 紧凑型只跨过轴线
     z_base_bot = z_base_top - wall
+    y_sec_out = -(Y_HALF + 1.0)             # 底座副轴侧收边（不越过副轴）
 
     part = cq.Workplane("XY")
 
@@ -234,24 +270,12 @@ def limb_fork(shaft: str = "+y", parent: str = "+z",
     part = part.cut(cyl(26.0, arm_t * 4,
                         at=(0, arm_out - arm_t * 2, 0), axis="Y"))
 
-    # --- 臂 B：Φ5.96 h7 轴颈，插进笼子里的轴承内圈 ---
-    arm_b_out = -(Y_HALF + b["width_mm"] + 0.4 + arm_t)
-    arm_b = box(34.0, arm_t, z_top - z_base_bot,
-                at=(0, arm_b_out + arm_t / 2.0, z_base_bot))
-    if _wt - _wb > 4.0:
-        arm_b = arm_b.cut(box(18.0, arm_t * 4, _wt - _wb,
-                              at=(0, arm_b_out + arm_t / 2.0, _wb)))
-    part = part.union(arm_b)
-    part = part.union(cyl(S["secondary_shaft_dia_mm"] - 0.04,
-                          b["width_mm"] + 4.0,
-                          at=(0, arm_b_out + 1.0, 0), axis="Y"))
-
-    # --- 底座：跨过舵机下方，接子端插接芯棒 ---
-    base = box(38.0, abs(arm_out + arm_t - arm_b_out), wall,
-               at=(0, (arm_out + arm_t + arm_b_out) / 2.0, z_base_bot))
+    # --- 底座：从舵盘侧跨到副轴侧收边，下挂子端插接芯棒 ---
+    y_a_out = arm_out + arm_t
+    base = box(38.0, y_a_out - y_sec_out, wall,
+               at=(0, (y_a_out + y_sec_out) / 2.0, z_base_bot))
     base = base.cut(box(14.0, 16.0, wall,
-                        at=(0, (arm_out + arm_t + arm_b_out) / 2.0,
-                            z_base_bot)))
+                        at=(0, (y_a_out + y_sec_out) / 2.0, z_base_bot)))
     part = part.union(base)
     if spigot:
         part = part.union(cyl(SPIGOT_D, SPIGOT_H, at=(0, 0, z_base_bot - SPIGOT_H)))
@@ -331,7 +355,7 @@ def compact_adapter(in_shaft: str = "+z", out_shaft: str = "+x",
     part = part.union(box(34.0, wall, drop + horn_t + 12.0,
                           at=(0, -15.0 + wall / 2.0, -horn_t - drop - 12.0)))
 
-    # 输出侧：托住下一级舵机（两侧板 + 底板，舵机从 +X 滑入）
+    # 输出侧：托住下一级舵机（两侧板 ⊥ 输出轴 + 底板，舵机从 +X 滑入）
     out_top = -drop + Z_TOP
     out_bot = -drop + Z_BOT
     span = 46.0
@@ -339,15 +363,19 @@ def compact_adapter(in_shaft: str = "+z", out_shaft: str = "+x",
         part = part.union(box(span, wall, out_top - out_bot + 6.0,
                               at=(0, sign * PLATE_Y, out_bot - 3.0)))
     part = part.union(box(span, 2 * PLATE_Y + wall, wall, at=(0, 0, out_bot - wall)))
-    pitch = S["bottom_hole_pitch_mm"]
-    part = drill(part, [(sx * pitch[0] / 2.0, sy * pitch[1] / 2.0)
+    # 下一级舵机 4×M2.5：沿输出轴方向穿过两块侧板（方形 9.9×9.9 = 节圆 Φ14）
+    pitch = SF["mount_pitch"]
+    part = drill(part, [(sx * pitch[0] / 2.0, -drop + sy * pitch[1] / 2.0)
                         for sx in (-1, 1) for sy in (-1, 1)],
                  dia=fastener("M2.5")["clearance_hole_mm"],
-                 depth=wall * 3, z0=out_bot - wall * 2)
-    # 输出侧轴承位（副轴第二支点）
+                 depth=2 * (PLATE_Y + wall) + 2.0,
+                 z0=-PLATE_Y - wall - 1.0, axis="Y")
+    # 输出侧（+Y 板）：让舵机 Φ20 凸台与花键穿出的避空
+    part = part.cut(cyl(26.0, wall * 4, at=(0, PLATE_Y - wall, -drop), axis="Y"))
+    # 副轴侧（−Y 板）：MF106ZZ 压入孔（第二支点骑在下一级舵机副轴上）
     b = bearing(IF["secondary_shaft"]["bearing"])
     part = part.cut(cyl(b["od_mm"] + FDM["bearing_bore_interference_mm"],
-                        wall * 4, at=(0, PLATE_Y - wall * 2, -drop), axis="Y"))
+                        wall * 4, at=(0, -PLATE_Y - wall * 2, -drop), axis="Y"))
 
     part = safe_fillet(part, FDM["fillet_min_mm"], "|Y")
     part = orient(part, out_shaft, {"+z": "-z", "-z": "+z"}.get(in_shaft, in_shaft))

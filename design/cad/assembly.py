@@ -29,7 +29,7 @@ sys.path.insert(0, str(HERE))
 import cadquery as cq
 
 import skeleton as sk
-from kit import MATERIALS, apply_trsf, box, cyl, printed_mass
+from kit import MATERIALS, apply_trsf, box, cyl, printed_mass, servo_frame
 from parts import sanitize
 from standards import SERVOS, servo
 
@@ -223,28 +223,29 @@ def _place(shape: cq.Workplane, m: Mat) -> cq.Workplane:
 def servo_placeholder(name: str = SERVO_NAME) -> cq.Workplane:
     """舵机占位实体（干涉检查用；真实外形见 standards.SERVOS）。
 
-    ⚠️ 2026-09-11 订正（见 design/handoff/STS3215-机械接口核验.md）：
-    本函数原来在机身两侧 union 两个 `ear_extend_mm` 方块来表示"安装耳"，
-    但 **STS3215 根本没有安装耳** —— 实物包装标签（A:45.22mm）、实物照片、
-    以及 B-rep 模型三方一致证伪，`ear_*` 字段已从 standards.py 删除。
-    那些方块会让每个舵机的包络虚增 6 mm，并使干涉检查报**假干涉**。
+    ⚠️ 2026-09-11 两处订正（此前导致整机预览**每个关节都差 90°**并大面积穿模）：
+      ① 本函数原按"输出轴沿 +Z"建模，但 `kit.orient()` 的约定是**局部 +Y → 输出轴**、
+         +Z → 母端。两者差 90°，22 个关节全错位。
+      ② 原按"机身居中"建模，实际**轴心不在长度中点**（距 +X 端面 10.2、距 −X 端面 35.0），
+         所以机身相对轴线是偏置的。
 
-    现按实测真实接口重建：
-        机身     45.2 × 24.7 × 35.0
-        ±Z 两端面各一个 Φ20 圆盘（厚 2.1 / 2.5）
-        → 总高 35.0 + 2.1 + 2.5 = 39.6，与模型实测包络 39.619 吻合 ✅
+    现在的标准姿态（与 `kit.servo_frame()` 同源）：
+        X = 机身长度 45.2（轴心在原点 ⇒ x ∈ [−35.0, +10.2]）
+        Y = 沿输出轴厚度 35.0（输出端 +Y）；Z = 宽度 24.7
+        +Y：Φ20 × 2.5 输出凸台 + Φ5.9 × 1.5 花键
+        −Y：Φ6 × 4.1 副轴（官方图纸值；开源模型只建了 0.6）
     """
-    s = servo(name)
-    L, W, H = s["body_mm"]
-    part = box(L, W, H)
-
-    disc_d = s["body_mount_disc_od_mm"]
-    t_bottom, t_top = s["body_mount_disc_thickness_mm"]
-    # ⚠️ 轴心 X 偏移为 provisional（模型坐标系 vs 实物基准面尚未完全对应），
-    #    见 standards.py 的 body_mount_axis_note。数据坐实后自动生效。
-    ax, ay = s["body_mount_axis_xy_mm"]
-    part = part.union(cyl(disc_d, t_bottom, at=(ax, ay, -t_bottom), axis="Z"))
-    part = part.union(cyl(disc_d, t_top, at=(ax, ay, H), axis="Z"))
+    f = servo_frame(name)
+    part = box(f["len"], f["axial"], f["width"],
+               at=((f["x_min"] + f["x_max"]) / 2.0, 0.0, -f["z_half"]))
+    # 输出端：凸台 + 花键（花键实际是 25T 齿，干涉检查用包络圆柱代替）
+    part = part.union(cyl(f["boss_d"], f["boss_t"],
+                          at=(0.0, f["y_half"], 0.0), axis="Y"))
+    part = part.union(cyl(f["spline_d"], f["spline_h"],
+                          at=(0.0, f["boss_face"], 0.0), axis="Y"))
+    # 副轴端：Φ6 副轴（伸向 −Y）
+    part = part.union(cyl(f["stub_dia"], f["stub_len"],
+                          at=(0.0, -f["y_half"] - f["stub_len"], 0.0), axis="Y"))
     return part
 
 
