@@ -488,8 +488,31 @@ ASSEMBLY = {
         "rule": ("闭合 U 型框架必须预留改锥避空过孔。"
                  "常见错误：把舵机两端封死后，主轴锁舵盘的 M3 中心螺钉"
                  "被结构件挡住，螺丝刀插不进去，无法固定或拆卸舵盘。"),
-        "applies_to": ["servo_yoke", "pitch_module"],
-        "min_access_dia_mm": 8.0,
+        "applies_to": ["servo_yoke", "pitch_module",
+                       "cluster_horn_arm", "cluster_outrigger"],
+        "min_access_dia_mm": 8.0,          # 过孔；批头包络见 cluster_fit.driver_envelope_dia_mm
+    },
+    # 髋/肩错轴簇的装配校核候选阈值（Gemini S6，2026-09-12 核验）
+    # 全部 provisional：不得覆盖通孔 2.7 / 过盈 −0.03 / 同轴 0.05 / 过孔 8.0。
+    "cluster_fit": {
+        "verify": "provisional",
+        "source": "Gemini S6 + 第5轮核验记录；数值是 D 级告警线",
+        "body_clearance_mm": 1.5,                 # S6#01 机体轴向净距
+        "horn_face_standoff_mm": [8.0, 12.0],     # S2 两级端面净距（≠ 机体 stagger）
+        "connector_extract_mm": 15.0,             # S6#03 插头抽出长度
+        "connector_extract_section_mm": [10.0, 8.0],
+        "connector_seat_gap_mm": 8.0,             # 第 4 轮 K6 座对座下限，与抽出长度并存
+        "driver_envelope_dia_mm": 5.5,            # K4/S6#04 批头包络（过孔仍 8.0）
+        "driver_envelope_len_mm": 40.0,
+        "metal_to_case_gap_mm": 0.50,             # 与 servo_cavity_clearance 同量级
+        "motion_clearance_mm": 1.50,              # S6#06；极限姿态留第 6 轮
+        "bearing_flange_overlap_mm": 0.4,         # S6#07 径向搭边下限（来源标 ISO 286 过高，按 D）
+        "stagger_authority": "fit_stagger.py",    # 机体沿轴偏置以该表为准（30–35 mm），禁止用 8–12 回改
+        "note": (
+            "端面孔是通孔（盘厚 2.1/2.5 mm），M2.5 咬合做在支架侧铜螺母/铝板，"
+            "不要按盲孔 3–4 mm 拧进舵机壳体。"
+            "线座在「长端 35 mm 侧」尚未被官方图纸证实（cable_exit=side）。"
+        ),
     },
     "servo_zero_calibration": {
         "rule": ("先接线通电 → 发中位指令（512 或 2048 脉冲）锁轴 → "
@@ -506,6 +529,8 @@ ASSEMBLY = {
     "buy_metal_not_print": [
         "所有主轴舵盘（塑料/树脂经不起踝关节 0.84 N·m 周期性交变剪切）",
         "踝/膝关节的 U 型传动架（落地冲程应力集中区，PETG 层间易剪切剥离）",
+        "髋/肩簇跨 19.6 mm 的承力臂 cluster_horn_arm"
+        "（S5 红线：全 PETG 单臂；现 PETG 几何仅占位，目标 6061-T6 2–3 mm / PCD14）",
     ],
     "safe_to_print": [
         "躯干主舱框架、头壳、足底板（大面积面接触受压）",

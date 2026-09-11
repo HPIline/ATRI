@@ -5,8 +5,9 @@
 1. **骨架不是盒子**：所有大件都是"框 + 筋 + 减重窗"，不是闭合薄壳。
    闭合薄壳按 3 mm 壁算，一个 100×90×55 的躯干壳就是 137 g，
    而 v2 给整机结构的预算是 **500 g / 23 个 link** —— 壳体方案必然超支。
-2. **模块化**：22 个自由度只用 4 类结构件覆盖
-   （关节笼 `joint_cage` + 连杆叉 `limb_fork` + 连杆管 `limb_tube` + 紧凑转接块 `compact_adapter`）。
+2. **模块化**：膝/踝/肘仍是笼+叉+管；髋/肩 19.6 mm 簇改走
+   `cluster_horn_arm` + `cluster_outrigger`（不对称 C 臂，机体沿轴抽出）。
+   `compact_adapter` 只留给颈/腰 27.5 mm 短链。
 3. **接口固定**：所有连接面尺寸取自 `kit.IF`，零件里不出现魔数。
 4. **能买不打印**：主轴舵盘、踝/膝 U 型传动架按 `ASSEMBLY.buy_metal_not_print` 走商品件。
 
@@ -415,6 +416,9 @@ def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
     `parent_stagger`：上一级机体沿自身轴（本地 +Z）的偏置，法兰跟着舵盘走。
     `stagger`：下一级机体沿 +Y 的偏置。两者都来自 fit_stagger.py。
     臂走 −X 侧，躲开轴距核心；弯矩走支架，不走舵机壳体。
+
+    承力目标：6061-T6 2–3 mm 激光/CNC（Gemini S4，provisional）。
+    现几何按 PETG `wall` 占位，改铝板厚前不要用铝密度去乘本实体体积。
     """
     horn = servo_horn_interface(SERVO_NAME)
     horn_t = wall + 1.0
@@ -480,6 +484,12 @@ def cluster_outrigger(shaft: str = "+y", parent: str = "+z",
     bore = b["od_mm"] + FDM["bearing_bore_interference_mm"]
     p_sec = p_sec.cut(cyl(bore, wall * 4,
                           at=(0, y_sec - wall * 2, 0), axis="Y"))
+    if {"flange_od_mm", "flange_width_mm"} <= set(b):
+        # 法兰沉台在副轴板外侧（与 joint_cage 同源，S6#07 径向搭边）
+        p_sec = p_sec.cut(cyl(b["flange_od_mm"] + FDM["clearance_snug_mm"],
+                              b["flange_width_mm"] + 0.2,
+                              at=(0, y_sec - wall, 0), axis="Y")
+                          .translate((0, -0.1, 0)))
     part = part.union(p_sec)
 
     # 底板把两块端板连成一体（走在机体 −Z 外侧，不进轴距核心）
@@ -912,7 +922,8 @@ SKELETON_PARTS: Dict[str, Dict[str, Any]] = {
     },
     "cluster_horn_arm": {
         "builder": cluster_horn_arm, "count": 6, "material": "PETG", "infill": 0.55,
-        "desc": "髋/肩错轴单侧臂（锁上一级舵盘，轴距 19.6 mm）",
+        "intended_material": "6061-T6",
+        "desc": "髋/肩错轴单侧臂（锁上一级舵盘，轴距 19.6 mm；承力目标 6061-T6）",
         "used_by": "hip_yaw→roll、hip_roll→pitch、shoulder_pitch→roll",
     },
     "cluster_outrigger": {

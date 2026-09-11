@@ -18,6 +18,9 @@
 
 成功线：下列关节对的舵机-舵机干涉 < 500 mm³ 或重合率 < 5%。
 
+Gemini S2 的「8–12 mm」是两级*端面净距*（盘厚+螺钉头+臂厚），
+不是本脚本的机体 stagger。本表收敛在 30–35 mm，禁止用 8–12 回改。
+
     .venv-cad/bin/python design/cad/fit_stagger.py
     .venv-cad/bin/python design/cad/fit_stagger.py --step 5 --limit 40
 """
