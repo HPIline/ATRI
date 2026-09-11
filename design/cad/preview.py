@@ -370,7 +370,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             b0 = wp.val().BoundingBox()
             bb0 = b0 if bb0 is None else bb0.add(b0)
         title = "A.T.R.I. 骨架装配预览"
-        subtitle = (f"{len(items)} 个零件 · 22 DOF · 展示姿态 · 包络 "
+        pose_label = "机械零位" if args.zero else "展示姿态"
+        subtitle = (f"{len(items)} 个零件 · 22 DOF · {pose_label} · 包络 "
                     f"{bb0.xlen:.0f}×{bb0.ylen:.0f}×{bb0.zlen:.0f} mm")
         if bad:
             print(f"  [WARN] {len(bad)} 个件装配失败")

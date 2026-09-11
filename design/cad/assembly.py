@@ -38,7 +38,7 @@ OUT = HERE / "out"
 DESIGN = REPO / "design"
 SERVO_NAME = "STS3215"
 
-# 展示姿态（度）。机械零位右夹爪穿进 hip_yaw；预览把臂抬到身前。
+# 展示姿态（度）。零位夹爪已随轴朝外，不再穿髋；预览仍把臂抬到身前好看。
 # 不加 shoulder_roll（外展会超宽）。校核脚本继续用全 0。
 DISPLAY_POSE_DEG = {
     "left_shoulder_pitch": -40.0,
