@@ -44,6 +44,26 @@ def distance(a: cq.Workplane, b: cq.Workplane) -> float:
     return d.Value() if d.IsDone() else 1e9
 
 
+def joint_kind(name: str) -> Tuple[Optional[str], Optional[str]]:
+    """零件名 → (关节名, 种类)。种类：servo/cage/fork/gripper_jaw。"""
+    head, _, tail = name.partition("__")
+    if head in ("servo", "cage", "fork", "outrigger"):
+        return tail, head
+    if tail == "gripper_jaw":
+        return head, "gripper_jaw"
+    return None, None
+
+
+def is_joint_mate(a: str, b: str) -> bool:
+    """同一关节上的锁盘/夹持配合：叉/爪/笼 × 该关节舵机。"""
+    ja, ka = joint_kind(a)
+    jb, kb = joint_kind(b)
+    if not ja or ja != jb or not ka or not kb:
+        return False
+    kinds = {ka, kb}
+    return kinds in ({"servo", "cage"}, {"servo", "fork"}, {"servo", "gripper_jaw"})
+
+
 def verdict(overlap_mm3: float, frac: float) -> str:
     """按"重合率 + 绝对体积"给出性质判定。
 

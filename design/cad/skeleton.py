@@ -535,6 +535,14 @@ def backpack_plate(wall: float = 3.0) -> cq.Workplane:
 # --------------------------------------------------------------------------
 # 零件 5：骨盆框架（下半身中枢）
 # --------------------------------------------------------------------------
+def servo_body_clearance(shaft: str = "+y", parent: str = "+z",
+                         pad: float = 1.5) -> cq.Workplane:
+    """按 servo_frame 的机体包络挖槽，不是 pair_inspect AABB。"""
+    body = box(SF["len"] + 2.0 * pad, SF["axial"] + 2.0 * pad, SF["width"] + 2.0 * pad,
+               at=(X_CTR, 0.0, -SF["z_half"] - pad))
+    return orient(body, shaft, parent)
+
+
 def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
     """U 形骨盆：胯中空，材料只走髋舵机外侧和后方。
 
@@ -569,6 +577,9 @@ def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
     for pt in bolt_circle(16.0, 4):
         part = part.union(bosses([(pt[0] - 36.0, pt[1])], od=4.5, height=5.0,
                                  bore_dia=1.6, bore_depth=6.0, z0=-7.0))
+
+    # trunk_roll 在骨盆系 (0,0,+19.6)，轴 +X。法兰/上梁按机体让位。
+    part = part.cut(servo_body_clearance("+x", "-z", pad=1.5).translate((0.0, 0.0, 19.6)))
 
     part = safe_fillet(part, FDM["fillet_struct_mm"], "|Z")
     return sanitize(part)
@@ -737,7 +748,8 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 
     # --- 舵机让位切口（按 kit.servo_frame 实测包络 + 1.5 mm 单边余量，
     #     取「框架实体 ∩ 舵机包络」的实际重叠区）---
-    #   head_pitch（轴 Y）：穿壳底与底部叉，切口覆盖整颗机体。
+    #   head_pitch（轴 +Y，母端 −Z）：按真实 JOINT_SCHEME 挖机体，留下舵盘锁面。
+    part = part.cut(servo_body_clearance("+y", "-z", pad=2.0))
     part = part.cut(box(50.0, 48.0, 28.0, at=(0.0, 0.0, -16.0)))
     #   head_yaw（轴 Z）：在壳底下方穿过。
     part = part.cut(box(36.0, 30.0, 22.0, at=(-4.4, 0.0, -44.0)))
@@ -784,11 +796,15 @@ def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
     part = part.cut(box(16.0, width + 2.0, 1.4,
                         at=(x_front - 7.0, 0.0, -sole_t - 0.2)))
 
-    # 踝窝：笼/舵机按轴对半，穿过鞋底。尺寸来自 servo_frame，不切 AABB 列表。
+    # 踝窝：舵机沿轴不对称（x_min=-35, x_max=+10.2）。右脚 mirror 只翻 Y，
+    # 必须把窝中心翻到 −X_CTR，才能让开 shaft=-y 的右踝舵机。
     well_x = SPAN_X + 2.0
     well_y = GAP + 2.0 * PLATE_T + 2.0
+    well_x_ctr = -X_CTR if mirror else X_CTR
+    well_shaft = "-y" if mirror else "+y"
     part = part.cut(box(well_x, well_y, sole_t + 8.0,
-                        at=(X_CTR, 0.0, -sole_t - 4.0)))
+                        at=(well_x_ctr, 0.0, -sole_t - 4.0)))
+    part = part.cut(servo_body_clearance(well_shaft, "+z", pad=2.0))
 
     part = safe_fillet(part, 1.5, "|Z")
     # 垫必须低于笼半高（约 −15.4），才能成为唯一着地点。圆角之后再加。

@@ -25,7 +25,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import assembly as A  # noqa: E402
-from fitcheck import bbox_of, common_volume, verdict  # noqa: E402
+from fitcheck import bbox_of, common_volume, is_joint_mate, verdict  # noqa: E402
 from kit import printed_mass  # noqa: E402
 from skeleton import foot_plate, head_shell, pelvis_frame  # noqa: E402
 
@@ -68,6 +68,14 @@ ROUND9_PAIRS = [
     ("right_hip_yaw_link__cluster_horn_arm", "servo__right_hip_yaw"),
     ("right_hip_yaw_link__cluster_horn_arm", "servo__right_gripper"),
     ("right_hip_roll_link__cluster_horn_arm", "cage__right_hip_yaw"),
+]
+
+# 第 10 轮：非配合让位。右脚窝必须跟着镜像后的舵机 X。
+ROUND10_CLEAR_PAIRS = [
+    ("right_foot__foot_plate", "servo__right_ankle_pitch"),
+    ("left_foot__foot_plate", "servo__left_ankle_pitch"),
+    ("pelvis__pelvis_frame", "servo__trunk_roll"),
+    ("head__head_shell", "servo__head_pitch"),
 ]
 
 
@@ -189,6 +197,25 @@ class LayoutGates(unittest.TestCase):
         xmax = max(b.xmax for b in boxes)
         self.assertLessEqual(mic.xmax, xmax + 0.05)
         self.assertLessEqual(xmax - min(b.xmin for b in boxes), ENVELOPE_DEPTH_MAX_MM)
+
+    def test_joint_mates_are_classified(self):
+        self.assertTrue(is_joint_mate("fork__left_ankle_pitch", "servo__left_ankle_pitch"))
+        self.assertTrue(is_joint_mate("cage__right_hip_yaw", "servo__right_hip_yaw"))
+        self.assertTrue(is_joint_mate("left_gripper__gripper_jaw", "servo__left_gripper"))
+        self.assertFalse(is_joint_mate("right_foot__foot_plate", "servo__right_ankle_pitch"))
+        self.assertFalse(is_joint_mate("right_gripper__gripper_jaw", "servo__right_hip_yaw"))
+
+    def test_round10_non_mate_clearance(self):
+        """非配合对不得让位不足/摆放错误（踝叉锁盘不算在脚底板里的配合白名单）。"""
+        bad = []
+        for a, b in ROUND10_CLEAR_PAIRS:
+            self.assertIn(a, self.shapes, a)
+            self.assertIn(b, self.shapes, b)
+            self.assertFalse(is_joint_mate(a, b), f"{a} ∩ {b} 不应算配合")
+            vol, frac, verd = self._pair_verdict(a, b)
+            if verd in ("❌ 摆放错误", "⚠️ 让位不足"):
+                bad.append(f"{a} ∩ {b} = {vol:.0f} mm³ ({frac*100:.0f}%) {verd}")
+        self.assertFalse(bad, "第 10 轮非配合仍穿模:\n  " + "\n  ".join(bad))
 
     def test_round9_cluster_and_backpack_clear(self):
         """簇臂不得穿进父舵机/笼或右夹爪舵机；XL4015 不得穿背板。"""

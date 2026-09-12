@@ -181,11 +181,11 @@ const VS=`attribute vec3 aPos;attribute vec3 aNrm;attribute vec3 aCol;
 uniform mat4 uMVP;varying vec3 vN;varying vec3 vC;varying float vD;
 void main(){vN=aNrm;vC=aCol;gl_Position=uMVP*vec4(aPos,1.0);
 vD=gl_Position.z;}`;
-const FS=`precision mediump float;varying vec3 vN;varying vec3 vC;
+const FS=`precision mediump float;varying vec3 vN;varying vec3 vC;uniform float uAlpha;
 void main(){vec3 L=normalize(vec3(0.42,-0.62,0.66));
 float d=max(dot(normalize(vN),L),0.0);
 vec3 c=vC*(0.46+0.58*d);
-gl_FragColor=vec4(c,1.0);}`;
+gl_FragColor=vec4(c,uAlpha);}`;
 function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
   if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o;}
 const prog=gl.createProgram();
@@ -193,7 +193,8 @@ gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));
 gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
 gl.linkProgram(prog);gl.useProgram(prog);
 const aPos=gl.getAttribLocation(prog,"aPos"),aNrm=gl.getAttribLocation(prog,"aNrm"),
-      aCol=gl.getAttribLocation(prog,"aCol"),uMVP=gl.getUniformLocation(prog,"uMVP");
+      aCol=gl.getAttribLocation(prog,"aCol"),uMVP=gl.getUniformLocation(prog,"uMVP"),
+      uAlpha=gl.getUniformLocation(prog,"uAlpha");
 
 // ---------- 上传几何 ----------
 const F32=new Float32Array(BUF,0,META.floatCount);
@@ -219,6 +220,7 @@ function draw(){
   gl.viewport(0,0,w,h);
   gl.clearColor(0.039,0.145,0.251,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   const eye=[target[0]+dist*Math.sin(phi)*Math.cos(theta),
              target[1]+dist*Math.sin(phi)*Math.sin(theta),
              target[2]+dist*Math.cos(phi)];
@@ -232,8 +234,12 @@ function draw(){
     gl.enableVertexAttribArray(aNrm);gl.vertexAttribPointer(aNrm,3,gl.FLOAT,false,24,12);
     gl.bindBuffer(gl.ARRAY_BUFFER,g.col);
     gl.enableVertexAttribArray(aCol);gl.vertexAttribPointer(aCol,3,gl.UNSIGNED_BYTE,true,3,0);
+    const mate=g.meta.kind==="fork"||g.meta.kind==="cage";
+    gl.uniform1f(uAlpha,mate?0.55:1.0);
+    gl.depthMask(!mate);
     gl.drawArrays(wire?gl.LINES:gl.TRIANGLES,0,g.meta.verts);
   }
+  gl.depthMask(true);
 }
 
 // ---------- 交互 ----------
