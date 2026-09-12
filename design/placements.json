@@ -629,16 +629,16 @@
       "link": "head",
       "mass_g": 8.0,
       "size_mm": [
-        8.0,
         25.0,
+        15.0,
         8.0
       ],
       "position_mm": [
-        35.0,
+        10.0,
         0.0,
-        -12.0
+        -10.0
       ],
-      "note": "CAD 占位：厚度沿 X 收进相机罩。实物仍是 25×15×8，质量 8 g"
+      "note": ""
     },
     {
       "id": "ICM-42688-P 模块",
@@ -652,11 +652,11 @@
         3.0
       ],
       "position_mm": [
-        -36.0,
+        -20.0,
         0.0,
-        -3.0
+        -18.0
       ],
-      "note": "坐后桥 IMU 座上表面（座 z≈−7..−4.5）；避开 trunk_roll"
+      "note": "贴在骨盆框内侧（重心附近，避免头部摆动干扰姿态解算）。⚠️ 2026-09-12 修正：原值 [0,0,9.5] 让模块**整个埋进 trunk_roll 舵机**（900 mm³ / 重合率 100% = ❌ 摆放错误）；实测 [-20,0,-18] 相交 0 mm³ 且与骨盆框真接触（距离 0.00 mm）。更早的 [-36,0,-3]（后桥）与骨盆框重叠 131.8 mm³（⚠️ 级），亦不再使用。"
     },
     {
       "id": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
@@ -674,7 +674,7 @@
         0.0,
         -26.0
       ],
-      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；按 v3 电源模型 30 min 任务需标称 ≥4.53 Ah，现选 2000 mAh 仅约 13 min，**不满足 30 min 指标**，选型时须换更大容量"
+      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；按仓库电源模型（2026-09-12 回灌质量后）30 min 任务需标称 ≥10.40 Ah，现选 2000 mAh 约 13 min ⇒ 电源架构未定案"
     }
   ],
   "harness_fasteners": {
@@ -692,8 +692,8 @@
         80.0,
         35.3
       ],
-      "structure_mass_g": 159.7,
-      "total_link_mass_g": 339.6
+      "structure_mass_g": 124.0,
+      "total_link_mass_g": 304.0
     },
     {
       "link": "left_hip_yaw_link",
@@ -704,8 +704,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 46.2,
-      "total_link_mass_g": 104.9
+      "structure_mass_g": 35.9,
+      "total_link_mass_g": 94.6
     },
     {
       "link": "left_hip_roll_link",
@@ -716,8 +716,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 46.2,
-      "total_link_mass_g": 104.9
+      "structure_mass_g": 35.9,
+      "total_link_mass_g": 94.6
     },
     {
       "link": "left_thigh",
@@ -728,8 +728,8 @@
         45.0,
         80.3
       ],
-      "structure_mass_g": 102.7,
-      "total_link_mass_g": 163.4
+      "structure_mass_g": 79.8,
+      "total_link_mass_g": 140.3
     },
     {
       "link": "left_shank",
@@ -740,8 +740,8 @@
         40.0,
         76.9
       ],
-      "structure_mass_g": 86.3,
-      "total_link_mass_g": 146.4
+      "structure_mass_g": 67.0,
+      "total_link_mass_g": 127.0
     },
     {
       "link": "left_foot",
@@ -752,8 +752,8 @@
         60.0,
         19.6
       ],
-      "structure_mass_g": 110.3,
-      "total_link_mass_g": 114.3
+      "structure_mass_g": 85.7,
+      "total_link_mass_g": 89.2
     },
     {
       "link": "right_hip_yaw_link",
@@ -764,8 +764,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 46.2,
-      "total_link_mass_g": 104.9
+      "structure_mass_g": 35.9,
+      "total_link_mass_g": 94.6
     },
     {
       "link": "right_hip_roll_link",
@@ -776,8 +776,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 46.2,
-      "total_link_mass_g": 104.9
+      "structure_mass_g": 35.9,
+      "total_link_mass_g": 94.6
     },
     {
       "link": "right_thigh",
@@ -788,8 +788,8 @@
         45.0,
         80.3
       ],
-      "structure_mass_g": 102.7,
-      "total_link_mass_g": 163.4
+      "structure_mass_g": 79.8,
+      "total_link_mass_g": 140.3
     },
     {
       "link": "right_shank",
@@ -800,8 +800,8 @@
         40.0,
         76.9
       ],
-      "structure_mass_g": 86.3,
-      "total_link_mass_g": 146.4
+      "structure_mass_g": 67.0,
+      "total_link_mass_g": 127.0
     },
     {
       "link": "right_foot",
@@ -812,8 +812,8 @@
         60.0,
         19.6
       ],
-      "structure_mass_g": 110.3,
-      "total_link_mass_g": 114.3
+      "structure_mass_g": 85.7,
+      "total_link_mass_g": 89.2
     },
     {
       "link": "trunk_roll_link",
@@ -824,8 +824,8 @@
         35.0,
         23.6
       ],
-      "structure_mass_g": 31.9,
-      "total_link_mass_g": 90.0
+      "structure_mass_g": 24.8,
+      "total_link_mass_g": 83.1
     },
     {
       "link": "torso_upper",
@@ -836,8 +836,8 @@
         90.0,
         55.0
       ],
-      "structure_mass_g": 216.2,
-      "total_link_mass_g": 695.5
+      "structure_mass_g": 168.0,
+      "total_link_mass_g": 648.6
     },
     {
       "link": "head_yaw_link",
@@ -848,8 +848,8 @@
         30.0,
         61.2
       ],
-      "structure_mass_g": 50.8,
-      "total_link_mass_g": 109.6
+      "structure_mass_g": 39.5,
+      "total_link_mass_g": 98.4
     },
     {
       "link": "head",
@@ -860,8 +860,8 @@
         68.0,
         43.2
       ],
-      "structure_mass_g": 126.7,
-      "total_link_mass_g": 155.1
+      "structure_mass_g": 98.4,
+      "total_link_mass_g": 126.4
     },
     {
       "link": "left_shoulder_pitch_link",
@@ -872,8 +872,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 46.2,
-      "total_link_mass_g": 104.9
+      "structure_mass_g": 35.9,
+      "total_link_mass_g": 94.6
     },
     {
       "link": "left_upper_arm",
@@ -884,8 +884,8 @@
         40.0,
         63.6
       ],
-      "structure_mass_g": 74.5,
-      "total_link_mass_g": 134.2
+      "structure_mass_g": 57.9,
+      "total_link_mass_g": 117.5
     },
     {
       "link": "left_forearm",
@@ -896,8 +896,8 @@
         35.0,
         54.6
       ],
-      "structure_mass_g": 56.2,
-      "total_link_mass_g": 115.2
+      "structure_mass_g": 43.7,
+      "total_link_mass_g": 102.8
     },
     {
       "link": "left_gripper",
@@ -908,8 +908,8 @@
         30.0,
         19.6
       ],
-      "structure_mass_g": 34.0,
-      "total_link_mass_g": 35.2
+      "structure_mass_g": 26.4,
+      "total_link_mass_g": 27.5
     },
     {
       "link": "right_shoulder_pitch_link",
@@ -920,8 +920,8 @@
         37.2,
         37.2
       ],
-      "structure_mass_g": 46.2,
-      "total_link_mass_g": 104.9
+      "structure_mass_g": 35.9,
+      "total_link_mass_g": 94.6
     },
     {
       "link": "right_upper_arm",
@@ -932,8 +932,8 @@
         40.0,
         63.6
       ],
-      "structure_mass_g": 74.5,
-      "total_link_mass_g": 134.2
+      "structure_mass_g": 57.9,
+      "total_link_mass_g": 117.5
     },
     {
       "link": "right_forearm",
@@ -944,8 +944,8 @@
         35.0,
         54.6
       ],
-      "structure_mass_g": 56.2,
-      "total_link_mass_g": 115.2
+      "structure_mass_g": 43.7,
+      "total_link_mass_g": 102.8
     },
     {
       "link": "right_gripper",
@@ -956,8 +956,8 @@
         30.0,
         19.6
       ],
-      "structure_mass_g": 34.0,
-      "total_link_mass_g": 35.2
+      "structure_mass_g": 26.4,
+      "total_link_mass_g": 27.5
     }
   ],
   "summary": {
@@ -965,24 +965,26 @@
     "joints": 22,
     "servos": 22,
     "envelope_installed_mm": [
-      418.0,
-      223.0,
-      129.0
+      407.0,
+      268.0,
+      160.0
     ],
     "envelope_kinematic_mm": [
       372.8,
       190.0,
       123.0
     ],
-    "total_mass_g": 3436.6,
+    "total_mass_g": 3036.7,
     "mass_budget_g": {
-      "structure_g": 1790.0,
+      "structure_g": 1390.4,
       "servos_g": 1210.0,
       "electronics_g": 316.0,
       "harness_fasteners_g": 120.0,
-      "total_g": 3436.6,
-      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / design/robot_model.json §6–§7",
-      "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。"
+      "total_g": 3036.4,
+      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 → 2026-09-12 09:06 重测（第 6–10 轮合入后） / design/cad/out/report.md（2026-09-12 09:06，自动生成）",
+      "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。结构件为实算，整机为纸面推算，重量方案未定案，见 mass_status。",
+      "total_g_from_links": 3036.7,
+      "closure_delta_g": 0.3
     },
     "reduction_paths": [
       {
@@ -997,11 +999,7 @@
           2.5,
           2.7
         ],
-        "ankle_pct_continuous": [
-          125,
-          135
-        ],
-        "ankle_pct_peak": [
+        "ankle_pct": [
           84,
           90
         ],
@@ -1019,12 +1017,8 @@
           2.2,
           2.4
         ],
-        "ankle_pct_continuous": [
-          110,
-          120
-        ],
-        "ankle_pct_peak": [
-          74,
+        "ankle_pct": [
+          73,
           80
         ],
         "cost": "单价上升约 300 元，但省 20+ 小时打印"
@@ -1035,8 +1029,7 @@
         "method": "躯干 2 自由度改 1；或换 40 g 级舵机",
         "structure_g": null,
         "total_kg": 3.0,
-        "ankle_pct_continuous": 150,
-        "ankle_pct_peak": 100,
+        "ankle_pct": 100,
         "cost": "违背赛题『上肢+躯干 ≥10』或牺牲力矩余量"
       }
     ]
