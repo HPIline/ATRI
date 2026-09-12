@@ -7,6 +7,15 @@
     - **断网可用**：几何数据以 base64 内嵌，不依赖 CDN（比赛现场没网也能给评委看）。
 
 **交互（第 11 轮新增）**：22 条关节滑条 + 5 个姿势预设 + 配合件半透明。
+
+**冲突可视化（第 12 轮新增）**：每个零件按"最严重冲突档"着色 + 描边，配五档图例；
+一个"只看冲突件"的隔离开关；点零件高亮它的对手件并列出体积/重合率/判定；重合体的
+**包围盒热区**（近似）可叠加显示。档位判定的**唯一来源仍是 `fitcheck.verdict()`**，
+本文件只做"判定串 → 颜色/档位"的映射，不复制阈值。
+冲突表在**建几何那一次顺手算**（那时 `items` 真实体就在手上，不必再装配一遍），
+随几何缓存落盘、并另存一个小 JSON `ATRI-conflicts.json`——
+**重复出 HTML 不重算布尔求交**。
+
 关键工程决定：
     几何**只在机械零位三角化一次**并缓存成 JSON；拖动滑条只改 4×4 矩阵，
     正运动学（FK）在 JS 里按 URDF 的 origin/axis/limit 现算——**不重新三角化**：
@@ -30,8 +39,9 @@
     .venv-cad/bin/python design/cad/preview.py --part joint_cage
     .venv-cad/bin/python design/cad/preview.py --check          # 静态自检 + JS/Python FK 数值对拍
 产出：
-    out/preview/ATRI-preview.html            自包含交互预览（滑条/预设/半透明，双击即用）
-    out/preview/ATRI-geometry-cache.json     三角化几何缓存（base64 内嵌二进制数组）
+    out/preview/ATRI-preview.html            自包含交互预览（滑条/预设/半透明/冲突分档，双击即用）
+    out/preview/ATRI-geometry-cache.json     三角化几何缓存（base64 内嵌二进制数组 + 冲突表）
+    out/preview/ATRI-conflicts.json          冲突表（每对的重合体积/重合率/档位 + 热区盒，可单独读）
     out/preview/ATRI-assembly.glb            标准 glTF 二进制（机械零位）
 """
 from __future__ import annotations
@@ -60,19 +70,26 @@ import cadquery as cq
 import assembly as A
 import render3d as R
 import skeleton as sk
-import fitcheck as FC          # 只用 is_joint_mate / joint_kind，**不修改**该文件
+import fitcheck as FC          # 只用 is_joint_mate / joint_kind / overlap_report / verdict
+from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
+from OCP.BRepBndLib import BRepBndLib
+from OCP.Bnd import Bnd_Box
 
 OUT = HERE / "out"
 PREVIEW = OUT / "preview"
 DESIGN = REPO / "design"
 
-# ⚠️ 改了三角化/法线/索引打包算法必须 +1，否则会复用旧缓存（几何与代码不一致）
-GEOM_VERSION = 5
+# ⚠️ 改了三角化/法线/索引打包算法**或缓存字段结构**必须 +1，否则会复用旧缓存
+#    （v6 = 冲突表 + 热区盒并入缓存；旧缓存没有这一节，会让预览退化成"无冲突数据"）
+GEOM_VERSION = 6
 CACHE_FILE = PREVIEW / "ATRI-geometry-cache.json"
 HTML_FILE = PREVIEW / "ATRI-preview.html"
 GLB_FILE = PREVIEW / "ATRI-assembly.glb"
+CONFLICT_FILE = PREVIEW / "ATRI-conflicts.json"
 MATE_ALPHA = 0.5
 BLANK = "机械零位"
+CONFLICT_MIN_VOL = 1.0      # 判"重合"的体积下限 mm³（与 audit_assembly.py 的 1.0 一致）
+HEAT_BUDGET_S = 90.0        # 热区盒（重合体包围盒）计算预算，超时截断并在报告里写明
 
 # 与渲染图一致的配色（同一套视觉语言，PPT 里能混用）
 KIND_COLORS = {
@@ -90,6 +107,34 @@ KIND_LABEL = {
     "adapter": "紧凑转接块", "tube": "连杆管", "servo": "舵机（占位）",
     "elec": "电子件（占位）", "ground": "地平面（垫高）",
 }
+
+# --------------------------------------------------------------------------
+# 冲突五档：**判定口径的唯一来源是 `fitcheck.verdict()`**。
+# 这里只写"判定 → 颜色/档位"的映射 + 给 UI 看的阈值文案（文案与 fitcheck 的 docstring
+# 一字对应，改 fitcheck 的阈值时这段文案也必须跟着改——`--check` 会做边界对拍）。
+# --------------------------------------------------------------------------
+CONFLICT_TIERS: List[Dict[str, Any]] = [
+    {"id": "err", "label": "❌ 摆放错误", "color": [255, 69, 58], "rank": 3,
+     "rule": "重合率 ≥30% 或 重合体积 ≥5000 mm³（两件被指派到同一块空间，改尺寸无解）"},
+    {"id": "warn", "label": "⚠️ 让位不足", "color": [255, 159, 10], "rank": 2,
+     "rule": "重合率 ≥5% 或 重合体积 ≥500 mm³（改尺寸/倒角/挪位可解）"},
+    {"id": "dot", "label": "· 局部干涉", "color": [255, 214, 10], "rank": 1,
+     "rule": "重合体积 >1 mm³，未达上两档（多是圆角/公差量级）"},
+    {"id": "none", "label": "无冲突", "color": None, "rank": 0,
+     "rule": "与任何零件的重合体积都 ≤1 mm³ —— 保留零件本色（不涂警告色）"},
+    {"id": "mate", "label": "配合面（半透明）", "color": None, "rank": 0,
+     "rule": "同关节 舵机×笼/叉/爪（含错轴抱架）→ alpha 0.5：**设计配合，不是冲突**"},
+]
+_TIER_RANK = {t["id"]: t["rank"] for t in CONFLICT_TIERS}
+_TIER_INDEX = {t["id"]: i for i, t in enumerate(CONFLICT_TIERS)}
+
+
+def tier_of(verdict: str) -> str:
+    """`fitcheck.verdict()` 的判定串 → 档位 id（按标签首字符匹配，**不复制阈值**）。"""
+    for t in CONFLICT_TIERS[:3]:
+        if verdict.startswith(t["label"][0]):
+            return t["id"]
+    raise KeyError(f"未知判定 {verdict!r}——fitcheck.verdict 的输出变了？")
 
 # --------------------------------------------------------------------------
 # 姿势预设：**一处常量表**（单位度），改这里就够，别去 JS 里再抄一份。
@@ -276,6 +321,134 @@ def mate_joint_map(names: Sequence[str]) -> Tuple[Dict[str, str], Dict[str, int]
 
 
 # --------------------------------------------------------------------------
+# 冲突扫描：判定走 fitcheck，本文件只做"档位映射 + 可视化辅助数据"
+# --------------------------------------------------------------------------
+def _common_bbox(a: cq.Workplane, b: cq.Workplane) -> Optional[List[float]]:
+    """两件**重合体**的轴对齐包围盒（mm，零位世界系）——**只用于可视化**。
+
+    ⚠️ 这是热区盒的近似：真实重合体是"管壁啃舵机角"这类奇形，用包围盒画会偏大。
+    它**不参与任何判定**——体积/重合率/档位一律走 `fitcheck.overlap_report()`。
+    这里重算一次布尔只是为了拿到形状本身（`fitcheck.common_volume()` 把形状丢掉了）。
+    """
+    op = BRepAlgoAPI_Common(a.val().wrapped, b.val().wrapped)
+    op.Build()
+    if not op.IsDone():
+        return None
+    box = Bnd_Box()
+    BRepBndLib.Add_s(op.Shape(), box)
+    if box.IsVoid():
+        return None
+    x0, y0, z0, x1, y1, z1 = box.Get()
+    if not all(math.isfinite(v) for v in (x0, y0, z0, x1, y1, z1)):
+        return None
+    if x1 < x0 or y1 < y0 or z1 < z0:
+        return None
+    return [round(v, 1) for v in (x0, y0, z0, x1, y1, z1)]
+
+
+def scan_conflicts(items: Sequence[Tuple[str, cq.Workplane]], idx_of: Dict[str, int],
+                   heat: bool = True, heat_budget_s: float = HEAT_BUDGET_S
+                   ) -> Dict[str, Any]:
+    """整机两两求交 → 冲突表（含每件最严重档）+ 重合体包围盒。
+
+    **为什么在 build_cache 里做**：那时装配好的真实体 `items` 就在手上，
+    不必为体检再装配一遍；算完随几何缓存落盘，之后每次 `--all` 都是秒级。
+    判定本身**一行都没复制**：体积/重合率/判定串全部来自 `FC.overlap_report()`。
+    """
+    t0 = time.time()
+    rows = FC.overlap_report(items, threshold=CONFLICT_MIN_VOL)
+    shapes = dict(items)
+    counts = {"err": 0, "warn": 0, "dot": 0}
+    pairs: List[Dict[str, Any]] = []
+    per: Dict[str, Dict[str, Any]] = {}
+    for r in rows:
+        t = tier_of(r["verdict"])
+        counts[t] += 1
+        ia, ib = idx_of.get(r["a"]), idx_of.get(r["b"])
+        if ia is None or ib is None:
+            print(f"  [WARN] 冲突对 {r['a']} × {r['b']} 的零件不在几何里，跳过")
+            continue
+        for nm, ii in ((r["a"], ia), (r["b"], ib)):
+            d = per.setdefault(nm, {"i": ii, "tier": "none", "vol": 0.0, "n": 0,
+                                    "verdict": ""})
+            d["vol"] += r["vol"]
+            d["n"] += 1
+            if _TIER_RANK[t] > _TIER_RANK[d["tier"]]:
+                d["tier"] = t
+                d["verdict"] = r["verdict"]
+        pairs.append({"a": r["a"], "b": r["b"], "ai": ia, "bi": ib,
+                      "vol": round(r["vol"], 1), "frac": round(r["frac"], 4),
+                      "tier": t, "verdict": r["verdict"], "box": None})
+    scan_s = time.time() - t0
+
+    # 热区盒：按体积降序算（超预算就截断，先保大错），预算用完记进 JSON
+    n_box = 0
+    truncated = False
+    if heat:
+        th0 = time.time()
+        for p in sorted(pairs, key=lambda d: -d["vol"]):
+            if time.time() - th0 > heat_budget_s:
+                truncated = True
+                break
+            p["box"] = _common_bbox(shapes[p["a"]], shapes[p["b"]])
+            n_box += int(p["box"] is not None)
+        if truncated:
+            print(f"  [WARN] 热区盒计算超过预算 {heat_budget_s:.0f} s，"
+                  f"只算了体积最大的 {n_box}/{len(pairs)} 对（其余对无热区盒）")
+
+    parts = [dict(d, name=n) for n, d in per.items()]
+    parts.sort(key=lambda d: (-_TIER_RANK[d["tier"]], -d["vol"]))
+    return {
+        "schema": 1, "builtAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "sourceHash": "", "threshold": CONFLICT_MIN_VOL,
+        "tiers": CONFLICT_TIERS,
+        "counts": dict(counts, pairs=len(pairs), parts=len(parts),
+                       totalVol=round(sum(p["vol"] for p in pairs), 1)),
+        "pairs": pairs, "parts": parts,
+        "scanSec": round(scan_s, 1), "heatSec": round(time.time() - t0 - scan_s, 1),
+        "heatBoxes": n_box, "heatBudgetHit": truncated,
+    }
+
+
+def compact_conflicts(conf: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """冲突表 → 塞进 HTML 的紧凑形（数组而非对象，省体积）。
+
+    pairs 项 = [件A下标, 件B下标, 体积mm³, 重合率, 档位下标, (可选)热区盒 6 个数]；
+    parts 项 = [零件下标, 最严重档下标, 合计体积mm³, 冲突对数]。
+    """
+    if not conf:
+        return None
+    ti = _TIER_INDEX
+    return {
+        "builtAt": conf["builtAt"], "scanSec": conf["scanSec"],
+        "heatBoxes": conf["heatBoxes"], "heatBudgetHit": conf["heatBudgetHit"],
+        "counts": conf["counts"], "tiers": conf["tiers"],
+        "pairs": [[p["ai"], p["bi"], p["vol"], p["frac"], ti[p["tier"]]]
+                  + (p["box"] or []) for p in conf["pairs"]],
+        "parts": [[p["i"], ti[p["tier"]], p["vol"], p["n"]] for p in conf["parts"]],
+    }
+
+
+def load_conflicts(cache: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """从几何缓存取冲突表；缓存里没有就退回同目录的 `ATRI-conflicts.json`（校验指纹）。"""
+    conf = cache.get("conflicts")
+    if conf:
+        return conf
+    if CONFLICT_FILE.exists():
+        try:
+            d = json.loads(CONFLICT_FILE.read_text(encoding="utf-8"))
+            if d.get("sourceHash") == cache.get("sourceHash"):
+                print(f"  冲突表取自 {CONFLICT_FILE.name}（几何缓存里没有这一节）")
+                return d
+            print(f"  [WARN] {CONFLICT_FILE.name} 与几何缓存指纹不符，忽略")
+        except Exception as exc:  # noqa: BLE001
+            print(f"  [WARN] {CONFLICT_FILE.name} 读取失败（{type(exc).__name__}: {exc}）")
+    print("  [WARN] 没有冲突数据 → 本次不出冲突着色；"
+          "跑 `preview.py --all --rebuild` 重建几何时会把冲突表一起算出来")
+    return None
+
+
+# --------------------------------------------------------------------------
 # 几何缓存
 # --------------------------------------------------------------------------
 def geom_fingerprint(tol: float) -> str:
@@ -291,7 +464,8 @@ def geom_fingerprint(tol: float) -> str:
     return h.hexdigest()
 
 
-def build_cache(tol: float, want_glb: bool = True) -> Dict[str, Any]:
+def build_cache(tol: float, want_glb: bool = True, heat: bool = True,
+                heat_budget_s: float = HEAT_BUDGET_S) -> Dict[str, Any]:
     """**唯一**一次三角化：机械零位装配 → 每零件索引几何 + 运动学 + 配合对。
 
     ⚠️ 指纹必须**在构建开始时**取一次：构建要 1 分多钟，期间别的线程可能改
@@ -370,6 +544,31 @@ def build_cache(tol: float, want_glb: bool = True) -> Dict[str, Any]:
     for p in parts:
         p["mate"] = mates.get(p["name"], "")
 
+    # --- 冲突表：判定走 fitcheck.overlap_report（真实体就在手上，顺手算完）---
+    conf: Optional[Dict[str, Any]] = None
+    idx_of = {p["name"]: i for i, p in enumerate(parts)}
+    try:
+        print(f"  冲突扫描（两两求交 >{CONFLICT_MIN_VOL:g} mm³"
+              f"{'，含热区盒' if heat else ''}）…")
+        conf = scan_conflicts(items, idx_of, heat=heat, heat_budget_s=heat_budget_s)
+        conf["sourceHash"] = fp0
+        c = conf["counts"]
+        print(f"  冲突 {c['pairs']} 对 / 合计 {c['totalVol']:.0f} mm³"
+              f"（❌ {c['err']} ｜ ⚠️ {c['warn']} ｜ · {c['dot']}）"
+              f"· 涉及 {c['parts']} 件 · 热区盒 {conf['heatBoxes']} 个"
+              f"· 用时 {conf['scanSec']:.0f}s + {conf['heatSec']:.0f}s")
+    except Exception as exc:  # noqa: BLE001
+        print(f"  [WARN] 冲突扫描失败（{type(exc).__name__}: {exc}）"
+              "→ 预览仍可出，但**没有分档着色/隔离/热区**")
+    if conf:
+        try:                       # 另存一份小 JSON：人能直接读，别的脚本也能拿去用
+            CONFLICT_FILE.write_text(
+                json.dumps(conf, ensure_ascii=False, indent=1), encoding="utf-8")
+            print(f"  已写冲突表 {CONFLICT_FILE.name}"
+                  f"（{CONFLICT_FILE.stat().st_size / 1e3:.0f} KB）")
+        except Exception as exc:  # noqa: BLE001
+            print(f"  [WARN] 冲突表落盘失败：{type(exc).__name__}: {exc}")
+
     # --- 运动学（FK 在 JS 里算，这里只导出常量）---
     order: List[str] = []
     queue = [kin.root]
@@ -425,6 +624,7 @@ def build_cache(tol: float, want_glb: bool = True) -> Dict[str, Any]:
         "fkOrder": fk_order,           # 拓扑序（父先子后）—— FK 必须按它算
         "parts": parts,
         "kinds": sorted(kinds.values(), key=lambda k: -k["tris"]),
+        "conflicts": conf,            # 冲突表（含每对档位与热区盒）——没有就是 None
         "vertexCount": int(f_off), "floatCount": int(f_off) * 6,
         "indexCount": int(i_off),
         "vertsB64": base64.b64encode(np.concatenate(v_float).astype(np.float32)
@@ -439,6 +639,9 @@ def build_cache(tol: float, want_glb: bool = True) -> Dict[str, Any]:
             "parts": len(parts),
             "maxDevDeg": max(p["degMax"] for p in parts),
             "mates": mate_stats, "blobBytes": len(blob),
+            "conflicts": (None if not conf else
+                          dict(conf["counts"], heatBoxes=conf["heatBoxes"],
+                               scanSec=conf["scanSec"])),
         },
     }
     st = cache["stats"]
@@ -462,7 +665,7 @@ def build_cache(tol: float, want_glb: bool = True) -> Dict[str, Any]:
 
 
 def load_cache(tol: float, rebuild: bool, want_glb: bool = True,
-               stale_ok: bool = False) -> Tuple[Dict[str, Any], bool]:
+               stale_ok: bool = False, heat: bool = True) -> Tuple[Dict[str, Any], bool]:
     """读缓存；指纹不符或 --rebuild 时重建并落盘。返回 (cache, 是否重建)。
 
     `--stale-ok`：**跳指纹校验、直接用现有缓存**，只用于"只改 HTML/JS 反复出预览"时
@@ -490,7 +693,7 @@ def load_cache(tol: float, rebuild: bool, want_glb: bool = True,
         print("  --rebuild：强制重建几何")
     else:
         print("  无缓存 → 首次建几何")
-    cache = build_cache(tol, want_glb=want_glb)
+    cache = build_cache(tol, want_glb=want_glb, heat=heat)
     PREVIEW.mkdir(parents=True, exist_ok=True)
     CACHE_FILE.write_text(json.dumps(cache, ensure_ascii=False, separators=(",", ":")),
                           encoding="utf-8")
@@ -538,6 +741,32 @@ _HTML = r"""<!DOCTYPE html>
   #poseOut{display:none;width:100%;height:52px;margin-top:6px;background:rgba(0,0,0,.35);
            color:#cfe3ff;border:1px solid rgba(255,255,255,.2);border-radius:6px;
            font:11px/1.4 ui-monospace,Menlo,monospace;resize:vertical}
+  /* ---- 冲突可视化 ---- */
+  #legend{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+  .lg{display:grid;grid-template-columns:14px 1fr auto;gap:6px;align-items:center;
+      font-size:11px;padding:2px 3px;border-radius:5px}
+  .lg .sw{width:12px;height:12px;border-radius:3px;flex:none}
+  .lg .n{opacity:.6;font-size:10.5px;font-variant-numeric:tabular-nums}
+  .lg .rule{grid-column:1/4;font-size:10px;line-height:1.35;opacity:.55;margin:-1px 0 2px 20px}
+  #legend .lg.pick{cursor:pointer}
+  #legend .lg.pick:hover{background:rgba(255,255,255,.09)}
+  #legend .lg.on{background:rgba(47,111,208,.35);box-shadow:inset 0 0 0 1px #5b9bff}
+  #selbox{display:none;margin:6px 0 2px;padding:6px 7px;border-radius:7px;
+          background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.16);font-size:11px}
+  #selbox .hd{font-weight:600;line-height:1.4}
+  #selbox .sub{opacity:.6;font-size:10px;margin:2px 0 4px}
+  .pr{display:grid;grid-template-columns:15px 1fr auto;gap:5px;align-items:center;
+      padding:2px 3px;border-radius:5px;cursor:pointer}
+  .pr:hover{background:rgba(255,255,255,.12)}
+  .pr .num{opacity:.7;font-size:10px;font-variant-numeric:tabular-nums;text-align:right}
+  .pr .bg{font-size:11px}
+  .pr.sel{background:rgba(47,111,208,.4)}
+  #selbox button{margin-top:4px;padding:3px 5px;font-size:11px}
+  #confWrap{margin-top:5px}
+  #confWrap summary{font-size:11px;opacity:.7;cursor:pointer;outline:none}
+  #confList{margin-top:3px;max-height:170px;overflow:auto}
+  .heatnote{font-size:10px;opacity:.55;margin-top:5px;line-height:1.4}
+  #confMissing{font-size:11px;opacity:.7;padding:4px 0}
 </style>
 </head>
 <body>
@@ -546,6 +775,20 @@ _HTML = r"""<!DOCTYPE html>
 <div id="panel">
   <h4>姿势预设</h4>
   <div class="row" id="presets"></div>
+  <h4>冲突可视化（机械零位实测）</h4>
+  <div id="legend"></div>
+  <div id="confMissing" style="display:none"></div>
+  <label><input type="checkbox" id="confChk" checked> 按冲突分档着色 + 描边（C）</label>
+  <label><input type="checkbox" id="isoChk"> 只看冲突件 + 对手件（X）</label>
+  <div class="jrow" style="grid-template-columns:56px 1fr">
+    <span class="jn" title="隔离模式的档位门槛">隔离门槛</span>
+    <select id="isoSel" style="font-size:11px;background:rgba(0,0,0,.35);color:#e8eef7;
+            border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:2px"></select>
+  </div>
+  <label><input type="checkbox" id="heatChk"> 全部热区盒（近似，V）</label>
+  <div id="selbox"></div>
+  <details id="confWrap"><summary>冲突清单（按体积，前 12 对）</summary>
+    <div id="confList"></div></details>
   <h4>关节（__NJOINT__ DOF · URDF 限位）</h4>
   <div id="sliders"></div>
   <div class="row" style="margin-top:6px">
@@ -564,7 +807,7 @@ _HTML = r"""<!DOCTYPE html>
     <button id="spin">自动旋转 (空格)</button>
   </div>
 </div>
-<div id="tip">左键拖拽旋转 · 滚轮缩放 · 右键/Shift 平移 · 拖滑条摆姿态 · 点关节名=只看该关节配合件</div>
+<div id="tip">左键拖拽旋转 · 滚轮缩放 · 右键/Shift 平移 · 拖滑条摆姿态 · <b>点零件</b>=高亮它的冲突对手件 · 点关节名=只看该关节配合件 · Esc 取消选中</div>
 <script id="geo" type="application/octet-stream">__B64__</script>
 <script id="meta" type="application/json">__META__</script>
 <script>
@@ -653,6 +896,20 @@ const aPos=gl.getAttribLocation(prog,"aPos"),aNrm=gl.getAttribLocation(prog,"aNr
       uColor=gl.getUniformLocation(prog,"uColor"),
       uAlpha=gl.getUniformLocation(prog,"uAlpha");
 
+// ---------- 拾取用的小程序：把零件号编码成颜色画 1 个像素，再 readPixels ----------
+// 为什么不用射线求交：87 件 / 16 万顶点在 JS 里逐三角形求交要几百毫秒且要维护 BVH；
+// 这里复用自己的渲染路径 + scissor 到 1×1，一次点击只多一帧的顶点开销。
+const PICK_VS="attribute vec3 aPos;uniform mat4 uMVP;"+
+  "void main(){gl_Position=uMVP*vec4(aPos,1.0);}";
+const PICK_FS="precision mediump float;uniform vec3 uId;"+
+  "void main(){gl_FragColor=vec4(uId,1.0);}";
+const pickProg=gl.createProgram();
+gl.attachShader(pickProg,sh(gl.VERTEX_SHADER,PICK_VS));
+gl.attachShader(pickProg,sh(gl.FRAGMENT_SHADER,PICK_FS));
+gl.linkProgram(pickProg);
+const pMVP=gl.getUniformLocation(pickProg,"uMVP"),pId=gl.getUniformLocation(pickProg,"uId"),
+      pPos=gl.getAttribLocation(pickProg,"aPos");
+
 // ---------- 上传几何（一次性：顶点/法线交错 VBO + 索引 IBO）----------
 const F32=new Float32Array(BUF,0,META.floatCount);
 const IDX=META.indexCount?new Uint16Array(BUF,META.floatCount*4,META.indexCount):null;
@@ -662,6 +919,27 @@ gl.bufferData(gl.ARRAY_BUFFER,F32,gl.STATIC_DRAW);
 gl.enableVertexAttribArray(aPos);gl.enableVertexAttribArray(aNrm);
 if(IDX){const ibo=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,IDX,gl.STATIC_DRAW);}
+
+// ---------- 热区盒：一个单位立方体（36 顶点，逐面法线），每个盒子只换模型矩阵 ----------
+const CUBE=(function(){
+  const out=[];
+  [[0,1,2],[1,2,0],[2,0,1]].forEach(function(ax){
+    [1,-1].forEach(function(sg){
+      const n=[0,0,0];n[ax[0]]=sg;
+      const u=[0,0,0],w=[0,0,0];u[ax[1]]=sg;w[ax[2]]=sg;
+      function P(su,sw){const p=[0,0,0];
+        for(let k=0;k<3;k++)p[k]=0.5*n[k]+0.5*su*u[k]+0.5*sw*w[k];return p;}
+      const q=[P(-1,-1),P(1,-1),P(1,1),P(-1,1)];
+      [[0,1,2],[0,2,3]].forEach(function(t){
+        t.forEach(function(i){out.push(q[i][0],q[i][1],q[i][2],n[0],n[1],n[2]);});});
+    });
+  });
+  return new Float32Array(out);
+})();
+const cubeBuf=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,cubeBuf);
+gl.bufferData(gl.ARRAY_BUFFER,CUBE,gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
 
 // ---------- 相机 ----------
 const bbox=META.bbox, ctr=[(bbox[0]+bbox[3])/2,(bbox[1]+bbox[4])/2,(bbox[2]+bbox[5])/2];
@@ -673,12 +951,155 @@ const kindOn={},KCOL={};
 META.kinds.forEach(function(k){kindOn[k.kind]=true;KCOL[k.kind]=k.color;});
 let focus=null;                                  // 聚焦的关节下标（null = 不聚焦）
 
+// ---------- 冲突分档：着色 / 隔离 / 点选 / 热区 ----------
+// 档位定义与判定文案来自 Python 侧（唯一判定源 fitcheck.verdict）；JS 只做显示。
+const CONF=META.conf||null;
+const TIERS=CONF?CONF.tiers:[];
+const RANK=TIERS.map(function(t){return t.rank||0;});
+const TRGB=TIERS.map(function(t){return t.color?[t.color[0]/255,t.color[1]/255,
+  t.color[2]/255]:null;});
+const NP=META.parts.length;
+META.parts.forEach(function(p,i){p.i=i;});
+const PAIRS=CONF?CONF.pairs:[];
+const PART_PAIRS=[];for(let i=0;i<NP;i++)PART_PAIRS.push([]);
+PAIRS.forEach(function(pr,pi){PART_PAIRS[pr[0]].push(pi);PART_PAIRS[pr[1]].push(pi);});
+const PCONF=new Array(NP).fill(null);            // 每件：{t:最严重档, v:合计体积, n:对数}
+PAIRS.forEach(function(pr){
+  for(let s=0;s<2;s++){const i=pr[s],t=pr[4];
+    if(!PCONF[i])PCONF[i]={t:t,v:0,n:0};
+    if(RANK[t]>RANK[PCONF[i].t])PCONF[i].t=t;
+    PCONF[i].v+=pr[2];PCONF[i].n++;}
+});
+const N_CONF=PCONF.filter(function(c){return c;}).length;
+let confColor=true;                              // 按分档着色
+let isolate=false;                               // 只看冲突件+对手件
+let isoMin=2;                                    // 隔离门槛（档位 rank：2=⚠️及以上）
+let heatAll=false;                               // 全部热区盒
+let sel=-1,selPair=-1;                           // 选中的零件 / 选中的"一对"
+const partnerSet=new Set();
+const VIS=new Array(NP).fill(false);             // 隔离模式下可见（含对手件）
+function rebuildVis(){
+  for(let i=0;i<NP;i++)VIS[i]=false;
+  PAIRS.forEach(function(pr){if(RANK[pr[4]]>=isoMin){VIS[pr[0]]=true;VIS[pr[1]]=true;}});
+}
+rebuildVis();
+function partVisible(i){
+  const p=META.parts[i];
+  if(!kindOn[p.kind])return false;
+  if(p.kind==="ground"&&!groundOn)return false;
+  return true;
+}
+function refreshPartners(){
+  partnerSet.clear();
+  if(sel<0)return;
+  PART_PAIRS[sel].forEach(function(pi){
+    const pr=PAIRS[pi];partnerSet.add(pr[0]===sel?pr[1]:pr[0]);});
+}
+function baseAlpha(i){
+  return META.parts[i].mate?__MATE_ALPHA__:1.0;  // 配合面始终半透明（五档第 5 档）
+}
 function alphaOf(p){
+  const i=p.i;
+  if(selPair>=0){const pr=PAIRS[selPair];return (i===pr[0]||i===pr[1])?baseAlpha(i):0.05;}
+  if(sel>=0)return (i===sel||partnerSet.has(i))?baseAlpha(i):0.05;
   if(focus!==null){return p.mate===META.joints[focus].name?0.92:0.10;}
-  if(mateAlpha&&p.mate) return __MATE_ALPHA__;
+  if(isolate)return VIS[i]?baseAlpha(i):0.05;
+  if(mateAlpha&&p.mate)return __MATE_ALPHA__;
   return 1.0;
 }
+function colorOf(p){
+  if(!confColor||!CONF)return KCOL[p.kind];
+  const c=PCONF[p.i];
+  const rgb=c?TRGB[c.t]:null;
+  return rgb||KCOL[p.kind];                      // 无冲突 → 保留零件本色
+}
+function tierOf(i){const c=PCONF[i];return c?TIERS[c.t]:null;}
+function tierText(i){
+  const t=tierOf(i);
+  if(!CONF)return "无冲突数据";
+  return t?(t.label+"（"+t.rule.split("（")[0]+"）"):"无冲突（与任何零件重合 ≤1 mm³）";
+}
 const SCR=new Float32Array(16), SCR3=new Float32Array(9);
+function partMatrix(p){return (p.link==="")?mIdent():MLINK[META.linkIdx[p.link]];}
+function mScaleAbout(c,s){const o=mIdent();o[0]=o[5]=o[10]=s;
+  o[12]=c[0]*(1-s);o[13]=c[1]*(1-s);o[14]=c[2]*(1-s);return o;}
+// 描边 = 反壳法（放大后只画背面）：≈1.3 mm 等宽，不随零件大小变
+function outlineList(){
+  const list=[];
+  if(wire)return list;
+  for(let i=0;i<NP;i++){
+    const p=META.parts[i];
+    if(!partVisible(i))continue;
+    const a=alphaOf(p);
+    if(a<0.45)continue;
+    const inPair=(selPair>=0)&&(i===PAIRS[selPair][0]||i===PAIRS[selPair][1]);
+    if(i===sel||inPair){list.push([i,[1,1,1],1.055]);continue;}
+    if(partnerSet.has(i)){list.push([i,[0.42,0.95,1.0],1.045]);continue;}
+    const c=confColor?PCONF[i]:null;
+    if(c&&RANK[c.t]>=2)list.push([i,[0.04,0.07,0.11],1.0]);   // ⚠️/❌ 加深色描边
+  }
+  return list;
+}
+function drawOutlines(pv){
+  const list=outlineList();
+  if(!list.length)return;
+  gl.enable(gl.CULL_FACE);gl.cullFace(gl.FRONT);
+  gl.depthMask(true);
+  gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+  for(let k=0;k<list.length;k++){
+    const p=META.parts[list[k][0]],c=list[k][1],b=p.aabb;
+    const diag=Math.hypot(b[3]-b[0],b[4]-b[1],b[5]-b[2])||1;
+    const ctr=[(b[0]+b[3])/2,(b[1]+b[4])/2,(b[2]+b[5])/2];
+    const M=mMul(partMatrix(p),mScaleAbout(ctr,1+2.6*list[k][2]/diag));
+    gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,p.vOff*24);
+    gl.vertexAttribPointer(aNrm,3,gl.FLOAT,false,24,p.vOff*24+12);
+    SCR.set(mMul(pv,M));gl.uniformMatrix4fv(uMVP,false,SCR);
+    SCR3.set(m3of(M));gl.uniformMatrix3fv(uNrm,false,SCR3);
+    gl.uniform3f(uColor,c[0],c[1],c[2]);gl.uniform1f(uAlpha,1.0);
+    if(p.indexed)gl.drawElements(gl.TRIANGLES,p.iCount,gl.UNSIGNED_SHORT,p.iOff*2);
+    else gl.drawArrays(gl.TRIANGLES,p.vOff,p.vCount);
+  }
+  gl.cullFace(gl.BACK);
+}
+// 热区盒 = 重合体的**轴对齐包围盒**（近似）：零位算好，随"件 A"所在 link 刚性移动
+let heatDrawn=0;
+function heatList(){
+  if(selPair>=0)return PAIRS[selPair].length>=11?[selPair]:[];
+  if(!heatAll)return [];
+  const out=[];
+  for(let k=0;k<PAIRS.length;k++)
+    if(PAIRS[k].length>=11&&RANK[PAIRS[k][4]]>=isoMin)out.push(k);
+  return out;
+}
+function drawHeat(pv){
+  const list=heatList();
+  heatDrawn=list.length;
+  if(!list.length)return;
+  gl.bindBuffer(gl.ARRAY_BUFFER,cubeBuf);
+  gl.disable(gl.CULL_FACE);gl.depthMask(false);
+  gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);
+  gl.vertexAttribPointer(aNrm,3,gl.FLOAT,false,24,12);
+  gl.uniform3f(uColor,1.0,0.22,0.20);gl.uniform1f(uAlpha,0.30);
+  for(let k=0;k<list.length;k++){
+    const pr=PAIRS[list[k]],b=pr.slice(5,11);
+    const m=mIdent();
+    m[0]=Math.max(b[3]-b[0],0.3);m[5]=Math.max(b[4]-b[1],0.3);
+    m[10]=Math.max(b[5]-b[2],0.3);
+    m[12]=(b[0]+b[3])/2;m[13]=(b[1]+b[4])/2;m[14]=(b[2]+b[5])/2;
+    const M=mMul(partMatrix(META.parts[pr[0]]),m);
+    SCR.set(mMul(pv,M));gl.uniformMatrix4fv(uMVP,false,SCR);
+    SCR3.set(m3of(M));gl.uniformMatrix3fv(uNrm,false,SCR3);
+    gl.drawArrays(gl.TRIANGLES,0,36);
+  }
+  gl.depthMask(true);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
+}
+function viewProj(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  const eye=[target[0]+dist*Math.sin(phi)*Math.cos(theta),
+             target[1]+dist*Math.sin(phi)*Math.sin(theta),
+             target[2]+dist*Math.cos(phi)];
+  return mMul(persp(Math.PI/4,w/h,radius*0.02,radius*40), lookAt(eye,target,[0,0,1]));
+}
 function draw(){
   const w=canvas.clientWidth,h=canvas.clientHeight;
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
@@ -687,50 +1108,96 @@ function draw(){
   gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   if(wire){gl.disable(gl.CULL_FACE);}else{gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);}
-  const eye=[target[0]+dist*Math.sin(phi)*Math.cos(theta),
-             target[1]+dist*Math.sin(phi)*Math.sin(theta),
-             target[2]+dist*Math.cos(phi)];
-  const pv=mMul(persp(Math.PI/4,w/h,radius*0.02,radius*40), lookAt(eye,target,[0,0,1]));
+  const pv=viewProj();
   fkSolve();                                     // ← 每次重绘只做这一件事（矩阵）
   const mode=wire?gl.LINES:gl.TRIANGLES;
   gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+  if(!wire)drawOutlines(pv);                     // 描边先画（写深度），实体再盖住内部
   for(let pass=0;pass<2;pass++){
     const opaque=(pass===0);
     gl.depthMask(opaque);
     for(let i=0;i<META.parts.length;i++){
       const p=META.parts[i];
-      if(!kindOn[p.kind])continue;
-      if(p.kind==="ground"&&!groundOn)continue;
+      if(!partVisible(i))continue;
       const a=alphaOf(p);
       if((a>=0.999)!==opaque)continue;
-      const M=(p.link==="")?mIdent():MLINK[META.linkIdx[p.link]];
+      const M=partMatrix(p);
       gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,p.vOff*24);
       gl.vertexAttribPointer(aNrm,3,gl.FLOAT,false,24,p.vOff*24+12);
       SCR.set(mMul(pv,M));gl.uniformMatrix4fv(uMVP,false,SCR);
       SCR3.set(m3of(M));gl.uniformMatrix3fv(uNrm,false,SCR3);
       if(wire) gl.uniform3f(uColor,0.62,0.74,0.96);
-      else gl.uniform3f(uColor,KCOL[p.kind][0]/255,KCOL[p.kind][1]/255,KCOL[p.kind][2]/255);
+      else{const c=colorOf(p);gl.uniform3f(uColor,c[0]/255,c[1]/255,c[2]/255);}
       gl.uniform1f(uAlpha,wire?1.0:a);
       if(p.indexed) gl.drawElements(mode,p.iCount,gl.UNSIGNED_SHORT,p.iOff*2);
       else if(!wire) gl.drawArrays(gl.TRIANGLES,p.vOff,p.vCount);
     }
   }
+  if(!wire)drawHeat(pv);
   gl.depthMask(true);
 }
+
+// ---------- 点选：把零件号编码成颜色，scissor 到 1×1 画一遍再 readPixels ----------
+function pickAt(cx,cy){
+  const x=Math.round(cx),y=Math.round(canvas.height-Math.round(cy));
+  if(x<0||y<0||x>=canvas.width||y>=canvas.height)return -1;
+  gl.enable(gl.SCISSOR_TEST);gl.scissor(x,y,1,1);
+  gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.disable(gl.BLEND);gl.enable(gl.DEPTH_TEST);gl.depthMask(true);
+  gl.disable(gl.CULL_FACE);
+  const pv=viewProj();
+  fkSolve();
+  gl.useProgram(pickProg);gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+  for(let i=0;i<NP;i++){
+    const p=META.parts[i];
+    if(!partVisible(i))continue;
+    const id=i+1;
+    gl.uniform3f(pId,(id&255)/255,((id>>8)&255)/255,((id>>16)&255)/255);
+    gl.vertexAttribPointer(pPos,3,gl.FLOAT,false,24,p.vOff*24);
+    if(p.iCount){const M=partMatrix(p);
+      SCR.set(mMul(pv,M));gl.uniformMatrix4fv(pMVP,false,SCR);
+      gl.drawElements(gl.TRIANGLES,p.iCount,gl.UNSIGNED_SHORT,p.iOff*2);}
+  }
+  const px=new Uint8Array(4);
+  gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+  gl.disable(gl.SCISSOR_TEST);
+  gl.useProgram(prog);gl.enable(gl.BLEND);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
+  gl.clearColor(0.039,0.145,0.251,1);
+  const id=px[0]+px[1]*256+px[2]*65536-1;
+  return (id>=0&&id<NP)?id:-1;
+}
+function selectPart(i){
+  sel=i;selPair=-1;focus=null;
+  jointRow.forEach(function(r){r.classList.remove("focus");});
+  refreshPartners();renderSel();request();
+}
+function selectPair(pi){
+  selPair=pi;sel=-1;partnerSet.clear();
+  focus=null;jointRow.forEach(function(r){r.classList.remove("focus");});
+  renderSel();request();
+}
+function clearSel(){sel=-1;selPair=-1;partnerSet.clear();renderSel();request();}
 let dirty=true;
 function request(){dirty=true;}
 let halt=false;                                  // 自检跑完就停 RAF（headless 软件渲染很贵）
 (function loop(){if(halt)return;if(spin){theta+=0.006;dirty=true;}
   if(dirty){dirty=false;draw();}requestAnimationFrame(loop);})();
 
-// ---------- 交互：视角 ----------
+// ---------- 键鼠：拖拽旋转 / 平移 / 单击点选 ----------
 let drag=null;
 canvas.addEventListener("contextmenu",function(e){e.preventDefault();});
-canvas.addEventListener("mousedown",function(e){drag={x:e.clientX,y:e.clientY,
-  pan:(e.button===2||e.shiftKey)};});
-window.addEventListener("mouseup",function(){drag=null;});
+canvas.addEventListener("mousedown",function(e){drag={ox:e.clientX,oy:e.clientY,
+  x:e.clientX,y:e.clientY,b:e.button,pan:(e.button===2||e.shiftKey),moved:false};});
+window.addEventListener("mouseup",function(e){
+  if(drag&&!drag.moved&&!drag.pan&&drag.b===0&&e.target===canvas){
+    const r=canvas.getBoundingClientRect();
+    const hit=pickAt(e.clientX-r.left,e.clientY-r.top);
+    if(hit>=0&&META.parts[hit].kind!=="ground")selectPart(hit);else clearSel();
+  }
+  drag=null;});
 window.addEventListener("mousemove",function(e){
   if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;
+  if(Math.abs(e.clientX-drag.ox)>3||Math.abs(e.clientY-drag.oy)>3)drag.moved=true;
   if(drag.pan){
     const k=dist*0.0016;
     const right=[-Math.sin(theta),Math.cos(theta),0];
