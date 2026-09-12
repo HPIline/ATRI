@@ -70,10 +70,12 @@ NOMINAL_FOCAL_PX = (NOMINAL_WIDTH_PX / 2.0) / math.tan(math.radians(NOMINAL_HFOV
 FRAME_W, FRAME_H = 320, 240          # 评测帧尺寸：够小能快跑，够大不让色块贴边
 # B 段用**同一台相机**在 320×240 下的焦距：由视场角定义，不是拍的脑袋。
 #   f = (W/2) / tan(HFOV/2) = 277.1 px  →  像素当量 ppcm = f / 物距(cm)
+# B 段相机焦距：由视场角定义；实机标定后应由 --h-fov-deg（或直接改这里）覆盖。
 FRAME_FOCAL_PX = (FRAME_W / 2.0) / math.tan(math.radians(NOMINAL_HFOV_DEG / 2.0))
 FOV_HALF_CM_AT = lambda d_cm: d_cm * math.tan(math.radians(NOMINAL_HFOV_DEG / 2.0))  # noqa: E731
 
-PIXELS_PER_CM = 10.0                 # A 段固定像素当量（只考察检测鲁棒性，不涉及几何）
+# A 段像素当量：只考察检测鲁棒性，不涉及几何。实机标定后应由 --pixels-per-cm 覆盖。
+PIXELS_PER_CM = 10.0
 TARGET_SIZE_CM = 4.0                 # 目标物名义边长（红块 4cm）
 RED_BGR = (0, 0, 255)
 BLUE_BGR = (255, 0, 0)
@@ -538,6 +540,9 @@ def build_report(det_rows: List[DetectorRow], det_sum: Dict[str, Any],
     add(">     --json design/results/t03_carry_eval.json")
     add("> ```")
     add(">")
+    add(f"> 本次实跑用的标定旋钮：`--pixels-per-cm={PIXELS_PER_CM:g}`（A 段）、"
+        f"`--h-fov-deg={NOMINAL_HFOV_DEG:g}°`（B 段 → f={FRAME_FOCAL_PX:.1f} px）。")
+    add(">")
     add("> **本报告测的是代码与几何，不是实物。** 没有样机、没有相机、没有夹爪，")
     add("> 因此这里没有、也不会有「抓取成功率」这类实机指标；")
     add("> 全部数字的适用范围写在 §1 与 §5，引用前请先读那两节。")
@@ -735,7 +740,30 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--report", default=None, help="markdown 报告输出路径")
     parser.add_argument("--json", default=None, help="机器可读结果输出路径")
     parser.add_argument("--no-loop", action="store_true", help="跳过 B 段（图像在环，最慢的一段）")
+    parser.add_argument(
+        "--pixels-per-cm", type=float, default=None,
+        help="A 段的像素当量 px/cm（实机用棋盘格标定后填这里；缺省用模块默认值）",
+    )
+    parser.add_argument(
+        "--h-fov-deg", type=float, default=None,
+        help="B 段相机水平视场角（决定 gain 与视场半宽；缺省用模块默认值）",
+    )
     args = parser.parse_args(argv)
+
+    # 标定旋钮：不传就用模块默认值；传了必须是正有限数（0 会让换算除零）。
+    global PIXELS_PER_CM, FRAME_FOCAL_PX, NOMINAL_HFOV_DEG
+    for option, value in (("--pixels-per-cm", args.pixels_per_cm),
+                          ("--h-fov-deg", args.h_fov_deg)):
+        if value is None:
+            continue
+        if not math.isfinite(value) or value <= 0.0:
+            print(f"{option} 必须是正有限数，收到 {value!r}")
+            return 2
+        if option == "--pixels-per-cm":
+            PIXELS_PER_CM = float(value)
+        else:
+            NOMINAL_HFOV_DEG = float(value)
+            FRAME_FOCAL_PX = (FRAME_W / 2.0) / math.tan(math.radians(NOMINAL_HFOV_DEG / 2.0))
 
     print("=" * 64)
     print("T-03 搬运评测：A 色块检测 / B 图像在环闭环 / C 参数边界")
@@ -770,6 +798,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             "task": "T-03",
             "generated_note": "合成图 + 一维几何 + 真检测器/真技能；不是实机指标",
             "pixels_per_cm": PIXELS_PER_CM,
+            "h_fov_deg": NOMINAL_HFOV_DEG,
+            "frame_focal_px": round(FRAME_FOCAL_PX, 3),
             "frame": [FRAME_W, FRAME_H],
             "nominal_focal_px": round(NOMINAL_FOCAL_PX, 2),
             "tuning": {
