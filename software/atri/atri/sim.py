@@ -105,10 +105,14 @@ def build_robot(
     sleeper: Any = None,
     face_recognizer: Any = None,
     frame_source: Any = None,
+    perception: Any = None,
 ) -> Dict[str, Any]:
     servo_bus = MockServoBus()
     cerebellum = Cerebellum(servo_bus=servo_bus, sleeper=sleeper)
-    perception = build_perception(config, servo_bus=servo_bus, frame_source=frame_source)
+    if perception is None:
+        # 两者取并集：他们的 build_perception 多了 servo_bus / frame_source 两个入口，
+        # 我的 perception 形参用于演示里注入"真取帧"的后端（--face-image / --qr-image）
+        perception = build_perception(config, servo_bus=servo_bus, frame_source=frame_source)
     tts = build_tts()
 
     motion_cfg = config.get("motion") or {}
@@ -243,6 +247,15 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--face-db", default=None, help="人脸库路径（默认 config/face_db.json）")
     parser.add_argument("--models", default=None, help="模型目录（默认 <仓库>/models）")
     parser.add_argument(
+        "--qr-image",
+        default=None,
+        help="用这张二维码图片作为 T-02 的取帧来源（没有摄像头也能真解码）",
+    )
+    parser.add_argument(
+        "--qr-decoder", default="wechat", choices=["opencv", "aruco", "wechat"],
+        help="二维码解码器（默认 wechat，由 tools/qr_eval.py 实测选定）",
+    )
+    parser.add_argument(
         "--face-expect",
         default=None,
         help="逗号分隔：临时覆盖 T-01 的 expect_names（现场要认的人；不认名单外的人）",
@@ -273,9 +286,23 @@ def main(argv: List[str] | None = None) -> int:
         else:
             print("  → T-01 退回感知接口通路（上面的原因说了缺什么）")
 
-    robot = build_robot(
-        config, sleeper=sleeper, face_recognizer=face_recognizer, frame_source=frame_source
-    )
+    if args.qr_image:
+        from .perception import OpenCVPerception
+        from .perception.sources import ImageFileSource
+
+        qr_source = ImageFileSource(args.qr_image)
+        perception = OpenCVPerception(frame_source=qr_source, qr_decoder=args.qr_decoder)
+        config = {**config, "perception": {"backend": "given"}}
+        print(f"二维码取帧来源: {args.qr_image}  解码器: {args.qr_decoder}")
+        robot = build_robot(
+            config, sleeper=sleeper, face_recognizer=face_recognizer, frame_source=frame_source,
+            perception=perception,
+        )
+        print("  → T-02 走**真解码**通路")
+    else:
+        robot = build_robot(
+            config, sleeper=sleeper, face_recognizer=face_recognizer, frame_source=frame_source
+        )
     brain = robot["brain"]
 
     print(f"运动控制后端: {robot['motion_backend']}（脚本动作库 + 步态生成，无 VLA）")

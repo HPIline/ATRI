@@ -2,7 +2,10 @@
   "schema_version": "1.0",
   "note": "场景集：对齐小人形组五项比赛内容。每个场景给出初始条件、扰动维度与成功判据，用于批量评估。",
   "arena": {
-    "size_mm": [2400, 2400],
+    "size_mm": [
+      2400,
+      2400
+    ],
     "task_zones": 5,
     "surface": "桌面 / 平整地面",
     "note": "官方赛道 2400mm × 2400mm，含五个任务区域"
@@ -14,13 +17,39 @@
       "task_card": "T-01",
       "skill": "face",
       "initial": {
-        "target_position_mm": [0, 0, 1200],
+        "target_position_mm": [
+          0,
+          0,
+          1200
+        ],
         "face_id": "测试员A"
       },
       "variation_axes": [
-        {"name": "distance_mm", "values": [500, 800, 1200, 1500]},
-        {"name": "lighting_lux", "values": [100, 400, 800]},
-        {"name": "face_count", "values": [1, 2, 3]}
+        {
+          "name": "distance_mm",
+          "values": [
+            500,
+            800,
+            1200,
+            1500
+          ]
+        },
+        {
+          "name": "lighting_lux",
+          "values": [
+            100,
+            400,
+            800
+          ]
+        },
+        {
+          "name": "face_count",
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }
       ],
       "success_criteria": {
         "name_reported_correctly": true,
@@ -33,17 +62,59 @@
       "task_card": "T-02",
       "skill": "qr",
       "initial": {
-        "qr_position_mm": [0, 0, 600],
-        "payload": {"action": "walk", "steps": 3}
+        "qr_position_mm": [
+          0,
+          0,
+          600
+        ],
+        "payload": {
+          "schema": "atri.path.v1",
+          "path": [
+            {
+              "action": "walk",
+              "steps": 3
+            },
+            {
+              "action": "turn",
+              "deg": 90
+            },
+            {
+              "action": "walk",
+              "steps": 2
+            }
+          ]
+        }
       },
       "variation_axes": [
-        {"name": "distance_mm", "values": [300, 600, 1000]},
-        {"name": "tilt_deg", "values": [0, 20, 45]},
-        {"name": "lighting_lux", "values": [100, 400, 800]}
+        {
+          "name": "distance_mm",
+          "values": [
+            300,
+            600,
+            1000
+          ]
+        },
+        {
+          "name": "tilt_deg",
+          "values": [
+            0,
+            20,
+            45
+          ]
+        },
+        {
+          "name": "lighting_lux",
+          "values": [
+            100,
+            400,
+            800
+          ]
+        }
       ],
       "success_criteria": {
         "payload_decoded_correctly": true,
-        "path_error_mm_max": 50.0
+        "path_error_mm_max": 50.0,
+        "path_error_status": "未测：小脑层无位移/里程计，仅有标称值"
       }
     },
     {
@@ -52,14 +123,46 @@
       "task_card": "T-03",
       "skill": "carry",
       "initial": {
-        "object_position_mm": [150, 0, 300],
+        "object_position_mm": [
+          150,
+          0,
+          300
+        ],
         "object_mass_g": 80,
-        "target_zone_mm": [0, 200, 600]
+        "target_zone_mm": [
+          0,
+          200,
+          600
+        ]
       },
       "variation_axes": [
-        {"name": "lateral_offset_mm", "values": [0, 50, 100, 150, 200]},
-        {"name": "object_mass_g", "values": [30, 50, 80, 100]},
-        {"name": "ground_friction", "values": [0.5, 0.7, 0.95]}
+        {
+          "name": "lateral_offset_mm",
+          "values": [
+            0,
+            50,
+            100,
+            150,
+            200
+          ]
+        },
+        {
+          "name": "object_mass_g",
+          "values": [
+            30,
+            50,
+            80,
+            100
+          ]
+        },
+        {
+          "name": "ground_friction",
+          "values": [
+            0.5,
+            0.7,
+            0.95
+          ]
+        }
       ],
       "success_criteria": {
         "grasp_achieved": true,
@@ -73,13 +176,40 @@
       "task_card": "T-04",
       "skill": "kick",
       "initial": {
-        "ball_position_mm": [120, 0, 150],
+        "ball_position_mm": [
+          120,
+          0,
+          150
+        ],
         "ball_diameter_mm": 40
       },
       "variation_axes": [
-        {"name": "lateral_offset_mm", "values": [-100, -50, 0, 50, 100]},
-        {"name": "distance_mm", "values": [100, 150, 250]},
-        {"name": "lighting_lux", "values": [100, 400, 800]}
+        {
+          "name": "lateral_offset_mm",
+          "values": [
+            -100,
+            -50,
+            0,
+            50,
+            100
+          ]
+        },
+        {
+          "name": "distance_mm",
+          "values": [
+            100,
+            150,
+            250
+          ]
+        },
+        {
+          "name": "lighting_lux",
+          "values": [
+            100,
+            400,
+            800
+          ]
+        }
       ],
       "success_criteria": {
         "ball_contact": true,
@@ -96,8 +226,22 @@
         "bars": 2
       },
       "variation_axes": [
-        {"name": "ambient_noise_db", "values": [30, 50, 70]},
-        {"name": "keyword_variants", "values": ["跳舞", "跳个舞", "来段舞蹈"]}
+        {
+          "name": "ambient_noise_db",
+          "values": [
+            30,
+            50,
+            70
+          ]
+        },
+        {
+          "name": "keyword_variants",
+          "values": [
+            "跳舞",
+            "跳个舞",
+            "来段舞蹈"
+          ]
+        }
       ],
       "success_criteria": {
         "keyword_recognized": true,

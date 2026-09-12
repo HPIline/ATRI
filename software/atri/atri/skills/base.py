@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from ..perception.base import PerceptionError
+from ..validation import as_finite_float, as_int_in_range
 
 
 @dataclass
@@ -78,30 +79,6 @@ class SkillContext:
         else:
             print(f"  [TTS] {text}")
         self.log.append(f"tts: {text}")
-
-
-def as_finite_float(value: Any) -> Optional[float]:
-    """把观测/指令里的值转成有限 float；非数值或 NaN/Inf 返回 None。"""
-    if isinstance(value, bool):
-        return None
-    try:
-        number = float(value)
-    except (TypeError, ValueError, OverflowError):
-        return None
-    return number if math.isfinite(number) else None
-
-
-def as_int_in_range(value: Any, low: int, high: int) -> Optional[int]:
-    """解析指定区间内的整数值；bool、字符串、非整数浮点与越界值返回 None。"""
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        number = value
-    elif isinstance(value, float) and value.is_integer():
-        number = int(value)
-    else:
-        return None
-    return number if low <= number <= high else None
 
 
 def failed(skill: str, reason: str) -> Dict[str, Any]:

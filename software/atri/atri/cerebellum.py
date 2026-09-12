@@ -162,6 +162,14 @@ class Cerebellum:
     def _aborted(self) -> bool:
         return self._abort_event is not None and self._abort_event.is_set()
 
+    def aborted(self) -> bool:
+        """对外可读的中止信号状态。
+
+        多段路径（如二维码指示的一串动作）需要**在段与段之间**也检查中止：
+        否则超时只在单段轨迹内部生效，下一段还会照跑，总时长失控。
+        """
+        return self._aborted()
+
     def set_pose(self, targets: Dict[str, float]) -> Dict[str, float]:
         """下发一组关节目标角（按名称），返回实际限位后的角度。
 

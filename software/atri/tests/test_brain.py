@@ -705,13 +705,21 @@ class TestQRPathAndTurn(unittest.TestCase):
         payload_out = result["result"]["results"][0]
         self.assertEqual(payload_out["path_len"], 3)
 
-    def test_path_invalid_step_fails_before_later_actions(self):
+    def test_path_invalid_step_rejected_before_any_motion(self):
+        """静态可判定的非法段 → **一步都不走**。
+
+        原先这条断言的是"第一段照走、第二段才失败"（即逐段校验）。合并 T-02 时改成
+        整条路径先校验，理由：``{"action":"fly"}`` 是**静态就能判定**的非法，而 qrgen
+        生成时用的是同一套严格校验 —— 我们自己造的码不可能带这种段。真出现它，
+        说明码是外来的或损坏的，按一条已知损坏的路径走一半比停在原地更糟。
+        运行期才暴露的失败（小脑层报错等）仍会逐段停下并报 ``path[i]``。
+        """
         cere = SpyCerebellum()
         brain = Brain(cere)
         payload = {"path": [{"action": "walk", "steps": 2}, {"action": "fly"}]}
         result = brain.execute_task(_card(["qr"]), observation={"qr": {"payload": payload}})
         self.assertFalse(result["ok"])
-        self.assertEqual(cere.calls.get("walk"), 1)
+        self.assertEqual(cere.calls.get("walk", 0), 0)
         self.assertIn("path[1]", result["error"])
 
     def test_turn_uses_stepping_not_hip_pose_only(self):

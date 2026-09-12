@@ -38,7 +38,7 @@ A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人
 # 1. 进入软件核心目录
 cd software/atri
 
-# 2. 运行主软件栈单元测试（488 项；零依赖环境下人脸相关 38 项自动跳过）
+# 2. 运行主软件栈单元测试（556 项；零依赖环境下人脸/二维码相关 44 项自动跳过）
 python3 -m unittest discover -s tests
 
 # 3. 运行赛题五项任务无硬件闭环演练（--fast 跳过动作等待，秒级自检）
@@ -88,6 +88,49 @@ cd software/atri && ../../.venv-face/bin/python run_demo.py --fast \
 > 📌 **T-01 对外口径已按赛题原文落地为「人脸识别」**。退化通路的 `expect_names[0]` 兜底仍保留，
 > 但必须打印 `source="params"`，不得写成识别成功率。PPT 成品未改（等团队重生成）。
 > 差异归档：`design/handoff/T-01-口径差异清单.md`。
+
+---
+
+## 二维码循迹 T-02（2026-09-12 做实）
+
+赛题原文是「识别二维码并按**指示路径**行走」，而原先的 payload 只能表达**一条指令**。
+本次补上路径表达、三解码器对照、多段执行与标称位移。
+
+**路径格式**（旧格式继续可用，现场已印的码不作废）：
+
+```json
+{"schema":"atri.path.v1",
+ "path":[{"action":"walk","steps":3},{"action":"turn","deg":90},{"action":"walk","steps":2}]}
+```
+
+```bash
+# 拉二维码模型（约 1 MB，带 sha256 校验；模型不入库）
+.venv-face/bin/python software/atri/tools/fetch_models.py --only qr
+
+# 生成一张路径二维码（并打印版本 / 模块数 / 像素尺寸）
+.venv-face/bin/python -m atri.qrgen \
+    --path '[{"action":"walk","steps":3},{"action":"turn","deg":90}]' -o qr_path.png
+
+# 鲁棒性评测：27 场景 × 3 解码器 + 10 组指令回放
+.venv-face/bin/python software/atri/tools/qr_eval.py \
+    --report design/handoff/T-02-二维码识别鲁棒性报告.md
+```
+
+**实测**（`design/handoff/T-02-二维码识别鲁棒性报告.md`）：
+
+| 解码器 | 判据条件成功率 | 全扫描 | 平均单帧 |
+|---|---|---|---|
+| `opencv`（自带） | 50.0% | 66.7% | 105.7 ms |
+| `aruco`（自带） | 66.7% | 59.3% | 54.0 ms |
+| **`wechat`（1 MB 模型）** | **100%** | **88.9%** | **25.9 ms** |
+
+- **主用 `wechat`**：判据条件下 6/6 全过，且**最快**（标准 `QRCodeDetector` 反而最慢）。
+- **指令执行正确率 100%（10/10）**（编码 → 真解码 → 真执行，逐段比对）。
+- **硬边界是码的像素大小**：<60 px（名义 >1 m）三种全失败；旋转 60°、暗光 ×0.4、噪声 σ=30 都扛得住。
+  → 现场该做的是**印大一点 / 走近一点**，不是换算法。
+
+> ⚠️ 畸变是**程序合成**的，不是真实相机拍的；**到位误差（S-02 的 ≤50 mm）未测** ——
+> 小脑层没有位移/里程计，路径终点只有标称值（`atri.odometry`，标注 `nominal-uncalibrated`）。
 
 ---
 

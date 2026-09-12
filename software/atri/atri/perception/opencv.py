@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import math
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from .base import PerceptionBackend, PerceptionError, PerceptionResult
 
@@ -35,11 +35,15 @@ class OpenCVPerception(PerceptionBackend):
         pixels_per_cm: float = 10.0,
         frame_source: Any = None,
         object_target: str = "红块",
+        qr_decoder: str = "opencv",
     ) -> None:
         """初始化 OpenCV 感知后端。
 
         cv2_module 仅供测试注入 fake cv2；正常使用传 None，首次检测时自动 import cv2。
         frame_source 可选：技能层不传 frame 时从这里 grab() 一帧（摄像头 / 图片文件）。
+        qr_decoder 选二维码解码器（``opencv`` / ``aruco`` / ``wechat``，见
+        :mod:`atri.perception.qr`）；主用哪个由 ``software/atri/tools/qr_eval.py``
+        的对照实测决定（实测结论：wechat 判据条件下 100%，且单帧最快）。
         """
         self._cv2 = cv2_module
         self.face_cascade_path = face_cascade_path
@@ -55,6 +59,8 @@ class OpenCVPerception(PerceptionBackend):
         self.focal_px = self._checked_positive("focal_px", focal_px, allow_none=True)
         self.pixels_per_cm = self._checked_positive("pixels_per_cm", pixels_per_cm, allow_none=False)
         self.frame_source = frame_source
+        self.qr_decoder_name = qr_decoder
+        self._qr_decoder: Any = None
 
     @staticmethod
     def _checked_positive(name: str, value: Any, allow_none: bool) -> Optional[float]:
@@ -123,22 +129,33 @@ class OpenCVPerception(PerceptionBackend):
             raw=faces,
         )
 
+    def _get_qr_decoder(self) -> Any:
+        """惰性构造二维码解码器；把本后端的 cv2（可能是注入的 fake）传下去。"""
+        if self._qr_decoder is None:
+            from .qr import build_qr_decoder
+
+            self._qr_decoder = build_qr_decoder(
+                self.qr_decoder_name, cv2_module=self._get_cv2()
+            )
+        return self._qr_decoder
+
     def detect_qr(self, frame: Any = None) -> PerceptionResult:
         frame = self._require_frame(frame)
-        cv = self._get_cv2()
-        detector = cv.QRCodeDetector()
-        data, points, _ = detector.detectAndDecode(frame)
-        if not data:
-            return PerceptionResult(kind="qr", data={"found": False}, confidence=0.0)
+        result = self._get_qr_decoder().decode(frame)
+        if not result.found:
+            data: Dict[str, Any] = {"found": False}
+            if result.error:
+                data["error"] = result.error
+            return PerceptionResult(kind="qr", data=data, confidence=0.0)
         try:
-            payload: Any = json.loads(data)
+            payload: Any = json.loads(result.data)
         except (TypeError, ValueError):
-            payload = data
+            payload = result.data
         return PerceptionResult(
             kind="qr",
-            data={"found": True, "payload": payload},
+            data={"found": True, "payload": payload, "decoder": result.decoder},
             confidence=1.0,
-            raw=points,
+            raw=result.points,
         )
 
     def _largest_hsv_blob(
