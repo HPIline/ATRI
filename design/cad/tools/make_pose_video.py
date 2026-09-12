@@ -134,10 +134,14 @@ def pose_to_hash(pose: Dict[str, float]) -> str:
     return "pose=" + items
 
 
-def make_clean_html(src: Path, dst: Path) -> None:
+def make_clean_html(src: Path, dst: Path, mate_alpha: Optional[float] = None) -> None:
     """复制预览 HTML 并注入 CSS 隐藏 UI 面板，得到"只剩画面"的录制用副本。
 
     不修改 `preview.py`（那是别人的文件）：只对产物做后处理。
+
+    `mate_alpha`：配合件半透明的 alpha（`preview.py` 的 `MATE_ALPHA = 0.5`）。
+    传 1.0 即"关掉半透明"，让结构完整可见——**拍官图/宣传片时更干净**，
+    但会遮住本该半透明显示的配合件（答辩讲干涉时应该保持 0.5）。
     """
     html = src.read_text(encoding="utf-8")
     css = (
@@ -147,6 +151,19 @@ def make_clean_html(src: Path, dst: Path) -> None:
         "canvas{width:100vw!important;height:100vh!important;display:block!important;}"
         "</style>"
     )
+    if mate_alpha is not None:
+        a = max(0.0, min(1.0, float(mate_alpha)))
+        # ⚠️ 必须**精确替换**，不能全局换 "0.5"：实测该 HTML 里 "0.5" 出现 20 次，
+        #    绝大多数是几何 AABB 坐标（如 -26.6 / 89.5）与 degMean，全局替换会把它们改坏。
+        #    `preview.py` 用 f"{MATE_ALPHA:.2f}" 注入 ⇒ 字面量恰好是 "0.50" 且只有 2 处。
+        #    用正则锚定 "mate" 上下文替换，避免依赖空白与分号的精确写法。
+        pat = re.compile(r"(mate[^;\n]{0,24}?)(0\.50)")
+        html, n = pat.subn(lambda m: m.group(1) + ("%.2f" % a), html)
+        if n == 0:
+            print("⚠️ 找不到配合件半透明字面量（正则命中 0 处）—— 跳过 --mate-alpha"
+                  "（preview.py 可能已改版）", file=sys.stderr)
+        else:
+            print("已把配合件半透明 alpha 由 0.50 改为 %.2f（命中 %d 处）" % (a, n))
     if "</head>" in html:
         html = html.replace("</head>", css + "</head>", 1)
     else:
@@ -215,6 +232,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--workdir", default=None, help="帧临时目录（默认自动建）")
     ap.add_argument("--keep-frames", action="store_true")
     ap.add_argument("--probe", action="store_true", help="只渲 3 帧验证链路")
+    ap.add_argument("--mate-alpha", type=float, default=None,
+                    help="配合件半透明的 alpha（默认沿用 preview 的 0.50）。传 1.0 = 关掉半透明，"
+                         "拍官图/宣传片更干净；讲干涉时保留默认")
     a = ap.parse_args(argv)
 
     src = Path(a.html)
@@ -240,7 +260,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     work = Path(a.workdir) if a.workdir else Path(tempfile.mkdtemp(prefix="atri-video-"))
     work.mkdir(parents=True, exist_ok=True)
     clean = work / "clean.html"
-    make_clean_html(src, clean)
+    make_clean_html(src, clean, mate_alpha=a.mate_alpha)
     print("预览源：%s" % src)
     print("录制用副本（已隐藏 UI）：%s" % clean)
     print("计划 %d 帧 @ %d fps → 约 %.1f 秒视频，%dx%d" %
