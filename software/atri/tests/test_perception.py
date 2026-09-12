@@ -165,9 +165,11 @@ class TestOpenCVPerception(unittest.TestCase):
         self.assertFalse(result.data["found"])
 
     def test_ball_distance_none_without_focal(self):
+        """无焦距时退化为像素当量估距，必须标明 uncalibrated，不能假装针孔测距。"""
         p = OpenCVPerception(cv2_module=FakeCV2(), focal_px=None, pixels_per_cm=10.0)
         result = p.detect_ball(frame=[[[0, 0, 0]] * 120 for _ in range(100)])
-        self.assertIsNone(result.data["distance_cm"])
+        self.assertIsNotNone(result.data["distance_cm"])
+        self.assertEqual(result.data["distance_source"], "uncalibrated")
 
     def test_pixels_per_cm_must_be_positive(self):
         for value in (0, -1, float("nan"), float("inf")):
@@ -184,6 +186,36 @@ class TestOpenCVPerception(unittest.TestCase):
         p = OpenCVPerception(cv2_module=FakeCV2())
         with self.assertRaises(PerceptionError):
             p.detect_face(frame=None)
+
+    def test_frame_source_used_when_frame_omitted(self):
+        class Src:
+            def __init__(self):
+                self.calls = 0
+
+            def grab(self):
+                self.calls += 1
+                return [[[0, 0, 0]]]
+
+        src = Src()
+        p = OpenCVPerception(cv2_module=FakeCV2(), frame_source=src)
+        result = p.detect_face()
+        self.assertTrue(result.data["found"])
+        self.assertEqual(src.calls, 1)
+
+    def test_empty_frame_source_raises(self):
+        class Src:
+            def grab(self):
+                return None
+
+        p = OpenCVPerception(cv2_module=FakeCV2(), frame_source=Src())
+        with self.assertRaises(PerceptionError):
+            p.detect_face()
+
+    def test_object_target_blue_uses_named_range(self):
+        p = OpenCVPerception(cv2_module=FakeCV2(), pixels_per_cm=10.0)
+        result = p.detect_object(frame=[[[0, 0, 0]] * 120 for _ in range(100)], target="蓝块")
+        self.assertTrue(result.data["found"])
+        self.assertEqual(result.data["target"], "蓝块")
 
 
 class TestSkillContextPerception(unittest.TestCase):

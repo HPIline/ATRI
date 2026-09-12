@@ -188,8 +188,8 @@ class TestFaceSkillLegacyPath(unittest.TestCase):
     def test_current_behaviour_when_no_channel_at_all(self):
         """现状记录：没有任何感知通道时，退化通路会取 ``expect_names[0]`` 当作姓名播报。
 
-        ⚠ 这是**待团队确认**的口径（真识别通路不会这样做：认不出就拒识）。
-        本用例只锁定现状，等口径定稿后按结论改写。
+        ⚠ 真识别通路不会这样做：认不出就拒识。退化通路保留 params 兜底，
+        演示必须打印 source="params"，不得把这条路径写成识别成功率。
         """
         tts = MockTTS()
         ctx = make_ctx(tts_engine=tts, params={"expect_names": ["测试员A"]})

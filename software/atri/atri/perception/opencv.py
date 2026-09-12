@@ -15,6 +15,13 @@ from .base import PerceptionBackend, PerceptionError, PerceptionResult
 class OpenCVPerception(PerceptionBackend):
     name = "opencv"
 
+    # 常见色块的 HSV 两段区间。红绕 0 断开，必须两段并起来。
+    OBJECT_HSV = {
+        "红块": (((0, 80, 80), (10, 255, 255)), ((170, 80, 80), (180, 255, 255))),
+        "蓝块": (((100, 80, 80), (130, 255, 255)),),
+        "绿块": (((35, 80, 80), (85, 255, 255)),),
+    }
+
     def __init__(
         self,
         cv2_module: Any = None,
@@ -23,25 +30,31 @@ class OpenCVPerception(PerceptionBackend):
         ball_hsv_upper: Tuple[int, int, int] = (85, 255, 255),
         object_hsv_ranges: Optional[Tuple[Tuple[Tuple[int, int, int], Tuple[int, int, int]], ...]] = None,
         ball_diameter_cm: float = 4.0,
+        object_size_cm: float = 4.0,
         focal_px: Optional[float] = None,
         pixels_per_cm: float = 10.0,
+        frame_source: Any = None,
+        object_target: str = "红块",
     ) -> None:
         """初始化 OpenCV 感知后端。
 
         cv2_module 仅供测试注入 fake cv2；正常使用传 None，首次检测时自动 import cv2。
+        frame_source 可选：技能层不传 frame 时从这里 grab() 一帧（摄像头 / 图片文件）。
         """
         self._cv2 = cv2_module
         self.face_cascade_path = face_cascade_path
         self.ball_hsv_lower = ball_hsv_lower
         self.ball_hsv_upper = ball_hsv_upper
+        self.object_target = object_target
         # 红块色相绕 0 断开，两段并起来。
-        self.object_hsv_ranges = object_hsv_ranges or (
-            ((0, 80, 80), (10, 255, 255)),
-            ((170, 80, 80), (180, 255, 255)),
+        self.object_hsv_ranges = object_hsv_ranges or self.OBJECT_HSV.get(
+            object_target, self.OBJECT_HSV["红块"]
         )
         self.ball_diameter_cm = ball_diameter_cm
+        self.object_size_cm = object_size_cm
         self.focal_px = self._checked_positive("focal_px", focal_px, allow_none=True)
         self.pixels_per_cm = self._checked_positive("pixels_per_cm", pixels_per_cm, allow_none=False)
+        self.frame_source = frame_source
 
     @staticmethod
     def _checked_positive(name: str, value: Any, allow_none: bool) -> Optional[float]:
@@ -74,12 +87,19 @@ class OpenCVPerception(PerceptionBackend):
             self._cv2 = cv2
         return self._cv2
 
-    def _require_frame(self, frame: Any) -> None:
-        if frame is None:
-            raise PerceptionError("detect_* 需要传入图像帧 frame（BGR numpy 数组）")
+    def _require_frame(self, frame: Any) -> Any:
+        """调用方没给帧时，从 frame_source 取一帧；两边都没有才报错。"""
+        if frame is not None:
+            return frame
+        if self.frame_source is not None:
+            grabbed = self.frame_source.grab()
+            if grabbed is None:
+                raise PerceptionError("frame_source.grab() 返回空帧")
+            return grabbed
+        raise PerceptionError("detect_* 需要传入图像帧 frame（BGR numpy 数组），或在构造时注入 frame_source")
 
     def detect_face(self, frame: Any = None) -> PerceptionResult:
-        self._require_frame(frame)
+        frame = self._require_frame(frame)
         cv = self._get_cv2()
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         gray = cv.equalizeHist(gray)
@@ -104,7 +124,7 @@ class OpenCVPerception(PerceptionBackend):
         )
 
     def detect_qr(self, frame: Any = None) -> PerceptionResult:
-        self._require_frame(frame)
+        frame = self._require_frame(frame)
         cv = self._get_cv2()
         detector = cv.QRCodeDetector()
         data, points, _ = detector.detectAndDecode(frame)
@@ -148,8 +168,18 @@ class OpenCVPerception(PerceptionBackend):
         height = len(frame)
         return len(frame[0]) if height else 0
 
+    def _estimate_distance_cm(self, diameter_px: float, size_cm: float) -> Tuple[Optional[float], str]:
+        """有焦距用针孔模型；没有焦距用像素当量（标为 uncalibrated，不能当实测距离）。"""
+        if diameter_px <= 0:
+            return None, "none"
+        if self.focal_px:
+            return round(size_cm * self.focal_px / float(diameter_px), 2), "calibrated"
+        if self.pixels_per_cm:
+            return round(size_cm * self.pixels_per_cm / float(diameter_px), 2), "uncalibrated"
+        return None, "none"
+
     def detect_ball(self, frame: Any = None) -> PerceptionResult:
-        self._require_frame(frame)
+        frame = self._require_frame(frame)
         blob = self._largest_hsv_blob(frame, ((self.ball_hsv_lower, self.ball_hsv_upper),))
         if blob is None:
             return PerceptionResult(kind="ball", data={"found": False}, confidence=0.0)
@@ -157,17 +187,14 @@ class OpenCVPerception(PerceptionBackend):
         width = self._frame_width(frame)
         x_cm = (cx - width / 2.0) / self.pixels_per_cm
         ball_diameter_px = max(w, h)
-        distance_cm: Optional[float] = None
-        if self.focal_px and ball_diameter_px > 0:
-            distance_cm = round(
-                self.ball_diameter_cm * self.focal_px / float(ball_diameter_px), 2
-            )
+        distance_cm, dist_source = self._estimate_distance_cm(ball_diameter_px, self.ball_diameter_cm)
         return PerceptionResult(
             kind="ball",
             data={
                 "found": True,
                 "x_cm": round(x_cm, 2),
                 "distance_cm": distance_cm,
+                "distance_source": dist_source,
                 "bbox": [int(x), int(y), int(w), int(h)],
                 "center_px": [int(cx), int(cy)],
             },
@@ -175,27 +202,26 @@ class OpenCVPerception(PerceptionBackend):
             raw=best,
         )
 
-    def detect_object(self, frame: Any = None) -> PerceptionResult:
-        self._require_frame(frame)
-        blob = self._largest_hsv_blob(frame, self.object_hsv_ranges)
+    def detect_object(self, frame: Any = None, target: Optional[str] = None) -> PerceptionResult:
+        frame = self._require_frame(frame)
+        name = target or self.object_target
+        ranges = self.OBJECT_HSV.get(name, self.object_hsv_ranges)
+        blob = self._largest_hsv_blob(frame, ranges)
         if blob is None:
-            return PerceptionResult(kind="object", data={"found": False}, confidence=0.0)
+            return PerceptionResult(kind="object", data={"found": False, "target": name}, confidence=0.0)
         best, x, y, w, h, cx, cy = blob
         width = self._frame_width(frame)
         x_cm = (cx - width / 2.0) / self.pixels_per_cm
         diameter_px = max(w, h)
-        distance_cm: Optional[float] = None
-        if self.focal_px and diameter_px > 0:
-            distance_cm = round(
-                self.ball_diameter_cm * self.focal_px / float(diameter_px), 2
-            )
+        distance_cm, dist_source = self._estimate_distance_cm(diameter_px, self.object_size_cm)
         return PerceptionResult(
             kind="object",
             data={
                 "found": True,
-                "target": "红块",
+                "target": name,
                 "x_cm": round(x_cm, 2),
                 "distance_cm": distance_cm,
+                "distance_source": dist_source,
                 "bbox": [int(x), int(y), int(w), int(h)],
                 "center_px": [int(cx), int(cy)],
             },

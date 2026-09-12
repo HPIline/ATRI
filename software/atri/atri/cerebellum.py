@@ -11,6 +11,7 @@ from .config import (
     JOINTS,
     MAX_BARS,
     MAX_STEPS,
+    MAX_TURN_DEG,
     clamp_angle,
     rest_pose,
 )
@@ -258,6 +259,41 @@ class Cerebellum:
         frames = self.generate_gait(steps=steps, **kwargs)
         return self.execute_trajectory(frames)
 
+    def turn(self, deg: float, **kwargs: Any) -> Dict[str, Any]:
+        """踩步转体：若干步正弦步态，每步叠加左右髋偏航，而不是只拧髋角。
+
+        桌面尺度下约 30°/步；符号与 ``deg`` 同向。这是 T-02「按指示路径行走」
+        的转向实现，开环关键帧，不是动力学平衡。
+        """
+        if isinstance(deg, bool):
+            raise ValueError(f"deg 必须是有限数值，收到 {deg!r}")
+        try:
+            angle = float(deg)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"deg 必须是有限数值，收到 {deg!r}") from exc
+        if not math.isfinite(angle):
+            raise ValueError(f"deg 必须是有限数值，收到 {deg!r}")
+
+        if abs(angle) > MAX_TURN_DEG:
+            raise ValueError(f"deg={angle:g} 超出 ±{MAX_TURN_DEG:g}")
+
+        steps = max(1, int(math.ceil(abs(angle) / 30.0)))
+        yaw_per_step = angle / steps
+        frames = self.generate_gait(steps=steps, **kwargs)
+        frames_per_step = max(1, len(frames) // steps)
+        applied = []
+        for i, frame in enumerate(frames):
+            progress = min(1.0, (i + 1) / max(1, len(frames)))
+            yaw = yaw_per_step * math.ceil(progress * steps)
+            # 左右髋同向偏航 = 原地扭转；限位由 clamp_angle 收住。
+            frame["left_hip_yaw"] = clamp_angle("left_hip_yaw", yaw)
+            frame["right_hip_yaw"] = clamp_angle("right_hip_yaw", yaw)
+            applied.append(frame)
+        result = self.execute_trajectory(applied)
+        result.update({"action": "turn", "deg": angle, "steps": steps,
+                       "frames_per_step": frames_per_step})
+        return result
+
     def kick(self, foot: str = "right") -> Dict[str, Any]:
         """预标定踢球动作（仿真迁移用）。"""
         side = "right" if foot == "right" else "left"
@@ -382,7 +418,16 @@ class Cerebellum:
         if any(k in ins for k in ("走", "walk", "前", "循迹")):
             return self.walk(steps=4)
         if any(k in ins for k in ("转", "turn")):
-            return self.set_pose({"left_hip_yaw": 8.0, "right_hip_yaw": 8.0})
+            deg = 30.0
+            if isinstance(observation, dict):
+                raw = observation.get("deg", observation.get("turn_deg", 30.0))
+                try:
+                    number = float(raw)
+                except (TypeError, ValueError, OverflowError):
+                    number = 30.0
+                if math.isfinite(number):
+                    deg = number
+            return self.turn(deg)
         # 显式对齐：用目标横向偏移动手臂，不是写死髋角
         if any(k in ins for k in ("对齐", "微调", "align", "视觉")):
             return self._align_arm(observation)

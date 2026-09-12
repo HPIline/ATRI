@@ -1,7 +1,8 @@
 """视觉感知模块：人脸 / 二维码 / 球 / 搬运目标检测。
 
 - MockPerception：无硬件/无 OpenCV 时使用，返回确定性观测
-- OpenCVPerception：真实摄像头检测实现（可选依赖 opencv-python）
+- ServoMockPerception：把 body yaw 反馈进观测，供踢球/搬运闭环在无硬件下收敛
+- OpenCVPerception：真实摄像头检测实现（可选依赖 opencv-python；可注入 frame_source）
 - PerceptionResult：统一返回结构
 - FrameSource 系列（sources）：摄像头 / 图片文件 / 噪声帧，把"从哪取帧"独立出来
 
@@ -18,7 +19,7 @@ from __future__ import annotations
 from typing import Any
 
 from .base import PerceptionBackend, PerceptionError, PerceptionResult
-from .mock import MockPerception
+from .mock import MockPerception, ServoMockPerception
 from .opencv import OpenCVPerception
 from .sources import CameraSource, FrameSource, ImageFileSource, MockFrameSource
 
@@ -27,6 +28,7 @@ __all__ = [
     "PerceptionError",
     "PerceptionResult",
     "MockPerception",
+    "ServoMockPerception",
     "OpenCVPerception",
     "FrameSource",
     "ImageFileSource",

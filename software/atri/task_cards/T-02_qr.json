@@ -3,7 +3,13 @@
   "name": "二维码循迹",
   "skills": ["qr"],
   "params": {
-    "default_payload": {"action": "walk", "steps": 3}
+    "default_payload": {
+      "path": [
+        {"action": "walk", "steps": 2},
+        {"action": "turn", "deg": 90},
+        {"action": "walk", "steps": 2}
+      ]
+    }
   },
   "timeout_s": 60
 }

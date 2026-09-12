@@ -47,7 +47,7 @@ python3 -m unittest discover -s tests
 python3 run_demo.py --fast
 ```
 
-当前单元测试套件包含 **427** 项测试（以 `python3 -m unittest discover -s tests` 当场输出为准），覆盖状态机流转、技能成败、总线限位、NaN/Inf 拒绝、感知容错及任务卡解析。
+当前单元测试套件包含 **508** 项测试（零依赖环境下人脸相关 38 项自动 skip；以 `python3 -m unittest discover -s tests` 当场输出为准），覆盖状态机流转、技能成败、总线限位、NaN/Inf 拒绝、感知容错、T-01 真识别/拒识、T-02 路径序列与踩步转体、T-03/T-04 多轮横向伺服及任务卡解析。
 
 ## 视觉感知模块
 

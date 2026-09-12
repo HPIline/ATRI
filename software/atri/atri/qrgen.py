@@ -97,6 +97,10 @@ class QRCodeGenerator:
         """生成二维码图片并保存到 output_path，返回保存路径。"""
         validate_params(action, params)
         payload = build_qr_payload(action, **params)
+        return self.write_payload(payload, output_path)
+
+    def write_payload(self, payload: str, output_path: str | Path) -> str:
+        """把已经校验过的 JSON 字符串写成二维码图。"""
         qr = self._get_qrcode()
         img = qr.make(payload)
         img.save(str(output_path))
@@ -124,6 +128,24 @@ def main(argv: Optional[list[str]] = None) -> int:
         if not isinstance(data, dict):
             print("错误：--json 必须是 JSON 对象", file=sys.stderr)
             return 2
+        if "path" in data:
+            from .skills.qr import parse_qr_payload
+            steps, err = parse_qr_payload(data)
+            if err:
+                print(f"错误：{err}", file=sys.stderr)
+                return 2
+            assert steps is not None
+            for item in steps:
+                validate_params(str(item.get("action", "")), {k: v for k, v in item.items() if k != "action"})
+            payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+            gen = QRCodeGenerator()
+            try:
+                path = gen.write_payload(payload, args.output)
+            except QRGeneratorError as exc:
+                print(f"错误：{exc}", file=sys.stderr)
+                return 2
+            print(f"二维码已生成: {path}")
+            return 0
         action = str(data.get("action", ""))
         params: Dict[str, Any] = {k: v for k, v in data.items() if k != "action"}
     else:

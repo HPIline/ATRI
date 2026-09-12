@@ -112,6 +112,11 @@ class TestSimFast(unittest.TestCase):
         robot = build_robot({}, sleeper=_no_sleep)
         self.assertIsInstance(robot["perception"], MockPerception)
 
+    def test_build_robot_servo_backend(self):
+        from atri.perception import ServoMockPerception
+        robot = build_robot({"perception": {"backend": "servo"}}, sleeper=_no_sleep)
+        self.assertIsInstance(robot["perception"], ServoMockPerception)
+
     def test_build_robot_uses_opencv_when_available(self):
         with mock.patch("atri.sim.OpenCVPerception") as fake:
             fake.return_value.available.return_value = True

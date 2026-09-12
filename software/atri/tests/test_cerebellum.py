@@ -159,6 +159,24 @@ class TestCerebellum(unittest.TestCase):
         gripper_id = JOINTS["right_gripper"]["id"]
         self.assertTrue(any(entry["id"] == gripper_id for entry in self.bus.command_log))
 
+    def test_turn_emits_gait_frames_with_matching_yaw(self):
+        result = self.cere.turn(90)
+        self.assertEqual(result["action"], "turn")
+        self.assertGreaterEqual(result["frames"], 2)
+        self.assertEqual(result["steps"], 3)
+        pose = self.cere.get_pose()
+        self.assertGreater(abs(pose["left_hip_yaw"]), 0.0)
+        self.assertEqual(pose["left_hip_yaw"], pose["right_hip_yaw"])
+
+    def test_turn_rejects_non_finite(self):
+        with self.assertRaises(ValueError):
+            self.cere.turn(float("nan"))
+
+    def test_execute_motion_turn_uses_stepping(self):
+        result = self.cere.execute_motion("转", {"deg": 60})
+        self.assertEqual(result.get("action"), "turn")
+        self.assertGreaterEqual(result.get("frames", 0), 2)
+
     def test_execute_motion_unknown_raises(self):
         with self.assertRaises(ValueError) as ctx:
             self.cere.execute_motion("后空翻", {})
