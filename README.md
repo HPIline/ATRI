@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/License-Pending-lightgrey.svg)](#开源声明与许可证-notice--license)
 
 ```
-22 DOF (双腿 10 · 双臂 8 · 躯干 2 · 头部 2)  ·  CAD 实装 407 × 268 × 160 mm（高×宽×深）  ·  437 主包测试 + 40 仿真测试 + 17 CAD 门禁  ·  5/5 赛题闭环  ·  Python 3.14
+22 DOF (双腿 10 · 双臂 8 · 躯干 2 · 头部 2)  ·  CAD 实装 407 × 268 × 160 mm（高×宽×深）  ·  579 主包测试 + 41 仿真测试 + 17 CAD 门禁  ·  5/5 赛题闭环  ·  Python 3.14
 ```
 
 A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人形组）及高校具身智能实验教学场景，直面阻碍双足进课堂与赛场的三大痛点：
@@ -57,9 +57,10 @@ T-01 现在是一条**真识别链路**：YuNet 检测 → 5 关键点对齐 →
 全离线、CPU、无 GPU。原「Haar 检测 + 参数兜底」路径**保留可用**，真识别通路优先。
 
 ```bash
-# 一次性环境（仓库根目录）
-python3 -m venv .venv-face
-.venv-face/bin/pip install "opencv-contrib-python==4.11.0.86" "numpy<2" pyarrow
+# 一次性环境（仓库根目录）—— 用仓库内自带的 Python 3.14，见 docs/process/工程说明.md §1.1b
+./.python/bin/python3 -m venv .venv-face
+.venv-face/bin/pip install "opencv-contrib-python==4.11.0.86" numpy pyarrow
+#   ⚠ numpy 不要 pin 到 <2：numpy 1.x 没有 3.14 的 wheel
 
 # 拉模型（约 37 MB，带 sha256 校验；模型不入库）
 .venv-face/bin/python software/atri/tools/fetch_models.py
@@ -318,7 +319,10 @@ graph TD
 - 整机包络重测为 **407（高）× 268（宽）× 160（深）mm**（合入前记录的 263 宽 / 146 深作废）；内部 270 mm 宽度门禁**只剩 2 mm**。
 - 结构件实算 **1383.8 g / 81 件**（合入前 1490 g，−7%）；整机纸面推算 **≈3029.8 g**；URDF 冻结口径 3.0367 kg（回灌于 09:06，见 `design/handoff/交接档案-新会话入口.md` §十四）。
 - 力矩力臂口径修正：`trunk_roll` 由 187–194% 回落至 **41.1%（零姿态）/ 45.1%（最不利）**，超额定关节由 11 个收敛为 **10 个腿部关节**。
-- 测试规模 **432 → 437 → 508**（主包，含 T-01 人脸 51 项中零依赖 skip 38 项 + T-02/03/04/05 软件补强）+ Webots 离线桩 41 项 + CAD 布局门禁 17 项，本机全绿。
+- 测试规模 **432 → 437 → 508 → 579**（主包）+ Webots 离线桩 **41 项** + CAD 布局门禁 17 项。
+  **2026-09-13 实测（Python 3.14.7）**：零依赖环境 `Ran 579 tests OK (skipped=44)`；
+  装齐可选依赖（numpy 2.5.3 + opencv-contrib 4.11）后 `Ran 579 tests OK`（0 跳过）；Webots 41 项 OK。
+  复现：`cd software/atri && ../../.python/bin/python3 -m unittest discover -s tests`（解释器来源见 `.python/VERSION.txt`）。
 
 > 待回灌项：`design/robot_model.json` 的 `installed_envelope_mm` 与 `overall.mass_kg` 两字段仍是过期值，需要一次"包络/质量回灌"提交把它对齐到 `design/cad/out/report.md`。
 

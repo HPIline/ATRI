@@ -8,13 +8,18 @@ opencv-python-headless>=4.8
 #
 # 两者是同一个 cv2 包，**互斥**，按机器情况二选一装（不要同时装）：
 #   有显示器：
-#     pip install "opencv-contrib-python==4.11.0.86" "numpy<2"
+#     pip install "opencv-contrib-python==4.11.0.86" numpy
 #   无显示器 / 树莓派：
-#     pip install "opencv-contrib-python-headless==4.11.0.86" "numpy<2"
+#     pip install "opencv-contrib-python-headless==4.11.0.86" numpy
+#
+# numpy **不要 pin 到 <2**：本项目标定 Python 3.14，而 numpy 1.x 没有 3.14 的 wheel。
+# 2026-09-13 实测：Python 3.14.7 + numpy 2.5.3 + opencv-contrib-python 4.11.0.86 组合可用，
+# 人脸/二维码全部测试与两份评测数字均与旧版本逐项一致。
 #
 # 锁 4.11.0.86 的理由（实测）：aarch64 有官方 wheel（4.10.0.84 / 4.11.0.86 均在），
 # 且该版本实测能加载 YuNet 与 SFace 两个官方 ONNX 模型；5.0.x 的 DNN 新引擎
 # 对同一份 SFace ONNX 报解析失败（macOS 实测），部署路上没必要埋这个雷。
+# 它同时在 Python 3.14 上可用（cp37-abi3 wheel）。
 #
 # 跑 LFW 评测（software/atri/tools/face_eval.py）另需：
 #   pip install pyarrow

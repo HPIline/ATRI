@@ -379,6 +379,7 @@ def render_report(
     ecc: str,
     card_info: Dict[str, Any],
     model_dir: Path,
+    platform_info: Optional[Dict[str, str]] = None,
 ) -> str:
     def pct(x: float) -> str:
         return f"{x * 100:.1f}%"
@@ -401,6 +402,8 @@ def render_report(
     lines.append("")
     lines.append("| 项 | 值 |")
     lines.append("|---|---|")
+    for key, value in (platform_info or {}).items():
+        lines.append(f"| {key} | {value} |")
     lines.append(f"| 测试 payload | 路径格式（`atri.path.v1`），{payload_bytes} 字节 |")
     lines.append(f"| 纠错级别 | {ecc} |")
     lines.append(f"| 二维码版本 / 模块数 | {card_info.get('version')} / {card_info.get('modules')} |")
@@ -597,7 +600,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     replay = evaluate_replay(model_dir, replay_decoder)
     print(f"  执行正确率 {replay.rate*100:.1f}%  ({replay.correct}/{len(replay.cases)})")
 
-    report = render_report(scores, scenarios, replay, len(expected.encode("utf-8")), args.ecc, card_info, model_dir)
+    import platform as _platform
+
+    import cv2 as _cv2
+
+    platform_info = {
+        "开发机": f"{_platform.system()} {_platform.machine()} / Python {_platform.python_version()}",
+        "OpenCV": _cv2.__version__,
+        "numpy": np.__version__,
+        "目标平台": "树莓派 4B（**未实测**，本报告数字与之无关）",
+    }
+    report = render_report(
+        scores, scenarios, replay, len(expected.encode("utf-8")), args.ecc, card_info,
+        model_dir, platform_info,
+    )
 
     if args.report:
         out = Path(args.report)
@@ -610,6 +626,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         out_json.write_text(
             json.dumps(
                 {
+                    "platform": platform_info,
                     "payload_bytes": len(expected.encode("utf-8")),
                     "ecc": args.ecc,
                     "card": card_info,

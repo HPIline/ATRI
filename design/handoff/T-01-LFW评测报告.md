@@ -14,9 +14,9 @@ software/atri/tools/face_eval.py --dataset 本地数据/faces/lfw_data.parquet -
 | 项 | 值 |
 |---|---|
 | 数据集 | LFW（lfw_data.parquet），3595 张 / 96 人（≥15 张/人） |
-| 开发机 | Darwin arm64 / Python 3.9.6 |
+| 开发机 | Darwin arm64 / Python 3.14.7 |
 | OpenCV | 4.11.0 |
-| numpy | 1.26.4 |
+| numpy | 2.5.3 |
 | 目标平台 | 树莓派 4B 4GB（**未实测**，本报告数字与之无关） |
 | 检测器 | yunet |
 | 特征提取 | SFace（128 维，L2 归一化，余弦相似度） |
@@ -108,8 +108,8 @@ software/atri/tools/face_eval.py --dataset 本地数据/faces/lfw_data.parquet -
 
 ## 7. 性能（本机，非目标平台）
 
-- 检测：均值 6.2 ms，中位 6.3 ms（n=50）
-- 特征提取：均值 20.2 ms，中位 19.8 ms（n=50）
+- 检测：均值 6.3 ms，中位 6.7 ms（n=50）
+- 特征提取：均值 20.8 ms，中位 22.8 ms（n=50）
 
 > ⚠️ 这是**开发机**数字，**不是**树莓派 4B 的数字。目标平台帧率**未测**。
 

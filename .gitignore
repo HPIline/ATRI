@@ -66,3 +66,8 @@ models/
 
 # 人脸开发环境（opencv-contrib + pyarrow）
 .venv-face/
+
+# ── 统一 Python 版本（2026-09-13）────────────────────────────
+# 项目标定 Python 3.14；本机没有系统级 3.14，故用 python-build-standalone 的
+# 预编译包解压到仓库内（自包含、不动系统）。版本与来源记在 .python/VERSION.txt
+.python/

@@ -43,16 +43,15 @@ git add .github/workflows/ci.yml && git commit -m "ci(face): T-01 人脸模块 j
   #   ② 装 opencv-contrib：全部人脸单测（含检测/识别管线逻辑）
   #   ③ 拉真模型（带 sha256 校验）后跑真模型烟雾测试 —— 证明模型真能加载并出 128 维特征
   #
-  # ⚠ Python 版本口径：主 job 是 3.14，这里用 3.9/3.11。原因见
-  # design/handoff/T-01-口径差异清单.md §4：opencv-contrib-python 4.11 与 numpy<2
-  # 这套组合在 3.9/3.11 上实测可用，3.14 上 numpy<2 没有 wheel。
-  # 要统一到 3.14，需先验证 numpy 2.x + opencv-contrib 4.11 在 3.14 上可用。
+  # Python 版本：与主 job 一致，统一 3.14（2026-09-13 实测通过）。
+  # numpy **不 pin <2**：numpy 1.x 没有 3.14 的 wheel。实测 3.14.7 + numpy 2.5.3 +
+  # opencv-contrib-python 4.11.0.86 可用，人脸/二维码全部测试与评测数字均逐项一致。
   face-module:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.11"]
+        python-version: ["3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +61,7 @@ git add .github/workflows/ci.yml && git commit -m "ci(face): T-01 人脸模块 j
           python-version: ${{ matrix.python-version }}
 
       - name: Install numpy only
-        run: python -m pip install --upgrade pip && pip install "numpy<2"
+        run: python -m pip install --upgrade pip && pip install numpy
 
       - name: Face logic tests (no OpenCV, no models)
         working-directory: software/atri
@@ -96,13 +95,15 @@ git add .github/workflows/ci.yml && git commit -m "ci(face): T-01 人脸模块 j
 **为什么单独一个 job**：要装 opencv-contrib（约 55 MB）与 37 MB 模型。
 主 `test` job 保持"不装任何第三方依赖"才有意义，混在一起就测不准了。
 
-**⚠ Python 版本口径**：主 job 是 `3.14`，这个 job 用 `3.9/3.11`。原因：
-`opencv-contrib-python 4.11` + `numpy<2` 这套组合在 3.9/3.11 上实测可用，
-而 `numpy<2` 在 3.14 上没有 wheel。要统一到 3.14，需先验证 numpy 2.x + opencv-contrib 4.11
-在 3.14 上可用（本机无 3.14，未验证）。
+**✅ Python 版本口径（2026-09-13 已统一）**：本 job 与主 job 一样用 `3.14`。
 
-> 补充事实：现有 437 项测试在本机 **Python 3.9.6 上全绿**（实测 86 秒），
-> 说明"仅支持 3.14"目前是 CI 口径，而不是代码约束。
+原先担心 3.14 上装不了 numpy（`numpy<2` 没有 3.14 的 wheel），故本 job 曾用 3.9/3.11。
+本机装上 **Python 3.14.7** 后实测：**不要 pin `numpy<2`**，直接装 `numpy`（实测 2.5.3）
+配合 `opencv-contrib-python==4.11.0.86` 即可 —— 人脸 + 二维码全部测试通过
+（**579 项、0 跳过**），两份评测数字与 3.9.6 下逐项一致。
+
+解释器来源与校验和：`.python/VERSION.txt`（python-build-standalone 预编译包，装在仓库内、
+不动系统，因此不需要管理员权限也不影响其它工程）。
 
 ## 附：不加这个 job 会怎样
 
