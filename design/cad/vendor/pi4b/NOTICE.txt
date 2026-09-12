@@ -1,0 +1,4 @@
+raspberry_pi_4_model_b.stl
+Source: pollen-robotics/grabette (Apache-2.0)
+https://github.com/pollen-robotics/grabette
+packages/grabette/urdf/grabette_left/assets/raspberry_pi_4_model_b.stl

@@ -1,0 +1,26 @@
+{
+  "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+  "same_link_checked": true,
+  "narrow_phase_pairs": 537,
+  "purchased_internal_pairs_excluded": 262,
+  "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+  "intersections": [],
+  "ok": true,
+  "n_items": 942,
+  "invalid_solids": [],
+  "mass_g_by_kind": {
+    "fastener": 365.02,
+    "al": 430.08,
+    "tpu": 39.03,
+    "standoff": 9.29,
+    "petg": 180.06
+  },
+  "mass_scope": "Geometric modeled components only. Electronics use purchased-part masses; this is not whole robot mass.",
+  "release_ready": false,
+  "release_blockers": [
+    "C018 connector revision and sample mating still unverified",
+    "Complete harness, power distribution and all BOM audio/IMU parts not modeled",
+    "Whole-robot mass and G0 shopping cart not closed",
+    "Continuous combined motion, assembly access and clamp strength remain unqualified"
+  ]
+}

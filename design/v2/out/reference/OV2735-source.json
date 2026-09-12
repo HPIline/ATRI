@@ -1,0 +1,23 @@
+{
+  "model": "Waveshare OV2735 2MP USB Camera (A)",
+  "sku": "33122",
+  "page": "https://www.waveshare.com/ov2735-2mp-usb-camera-a.htm",
+  "drawing": "https://www.waveshare.com/img/devkit/accBoard/OV2735-2MP-USB-Camera-A/OV2735-2MP-USB-Camera-A-details-size.jpg",
+  "verified_visually": true,
+  "pcb_mm": [
+    25,
+    25,
+    1.6
+  ],
+  "pcb_tolerance_mm": 0.2,
+  "mount_hole_pitch_mm": [
+    21,
+    21
+  ],
+  "mount_hole_d_mm": 2,
+  "total_depth_mm": 22.1,
+  "lens_front_to_pcb_mm": 16,
+  "lens_d_mm": 14,
+  "fov_deg": 96,
+  "connector": "SH1.0 4-pin at bottom in drawing; use USB cable down neck, not CSI"
+}

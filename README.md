@@ -1,5 +1,11 @@
 # A.T.R.I. (Autonomous Tabletop Robotic Intelligence)
 
+> **ATRI-v2 A路线实装审查分支**：20×STS3215-C018 12V，开放骨盆与铝/PETG结构重建。当前有同源CAD、定向3MF和HIP光追图，**完整线束、质量、采购和G0–G4尚未闭合，不可直接整机下单**。现机22DOF软件保持原状。进入 [A路线工程目录](design/v2/README.md) / [加工说明](design/v2/MANUFACTURING-NOTES.md)。
+
+![ATRI-v2 CAD光追审查图，非实物照片](design/v2/out/blender/renders/product_iso.png)
+
+以下保留现机22DOF项目说明；不代表v2机构已经完成真机验证。
+
 > **全称**：AUTONOMOUS TABLETOP ROBOTIC INTELLIGENCE（桌面自主人形智能）  
 > **一句话定位**：一台能自己看、自己想、自己走的桌面双足机器人。  
 > **项目团队**：何浩睿 · 周柏宇 · 胡晟瑞 · 王旭琪 · 张景昆；**指导教师**：陈妍 · 李璐

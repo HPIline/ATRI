@@ -1,0 +1,37 @@
+# Preserve sources, current review records, preview and render evidence.
+# Full raw STEP/STL/manufacturing data is distributed as verified archives.
+out/*
+!out/*.md
+!out/*.json
+!out/*.csv
+!out/reference/
+!out/reference/**
+!out/preview/
+!out/preview/ATRI-v2.html
+!out/preview/index.html
+!out/packages/
+!out/packages/**
+!out/blender/
+out/blender/*
+!out/blender/ATRI-v2-assembly-review.blend
+!out/blender/renders/
+out/blender/renders/*
+!out/blender/renders/product_iso.png
+!out/blender/renders/product_front.png
+!out/blender/renders/product_rear.png
+!out/blender/renders/detail_horn.png
+!out/blender/renders/detail_pelvis.png
+!out/blender/renders/detail_camera.png
+!out/blender/renders/service_exploded.png
+!out/blender/renders/render-report.json
+!out/manufacturing/
+!out/manufacturing/**
+out/manufacturing/review/
+!out/sim/
+!out/sim/README.md
+!out/sim/atri_v2.urdf
+!out/sim/parts.json
+out/sim/*
+!out/sim/README.md
+!out/sim/atri_v2.urdf
+!out/sim/parts.json

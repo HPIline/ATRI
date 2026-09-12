@@ -1,0 +1,69 @@
+{
+  "source_url": "https://www.feetechrc.com/Data/feetechrc/upload/file/20240507/6385067068652648096680943.pdf",
+  "model_on_cover_and_pages": "ST-3215-C018",
+  "edition": "A/0",
+  "document_date": "2023-07-20",
+  "sha256": "3f1dc84e470ac89cbd7b7244183fcc62b7f7a5345aa41a62120280a9b7b26f5e",
+  "visually_checked_pages": [
+    6,
+    7
+  ],
+  "confirmed": {
+    "rated_torque_kg_cm": {
+      "value": 10,
+      "page": 3
+    },
+    "body_mm": {
+      "value": [
+        45.23,
+        24.73,
+        35
+      ],
+      "page": 6
+    },
+    "shaft_offset_mm": {
+      "value": 12.5,
+      "page": 6
+    },
+    "rear_shaft_diameter_mm": {
+      "value": 6,
+      "page": 6
+    },
+    "rear_shaft_protrusion_mm": {
+      "value": 4.1,
+      "page": 6
+    },
+    "output_centre_screw": {
+      "value": "M3x6",
+      "page": 6
+    }
+  },
+  "not_resolved": [
+    "Supplier C018 revision and plug housing full drawing",
+    "Effective thread depth and purchased fastener/head tolerances",
+    "External case-clamp preload, slip and creep qualification",
+    "Whether nominal 55g includes discs and supplied cable"
+  ],
+  "accessories_page_7": {
+    "verified_by": "rendered official drawing, visual inspection",
+    "front_horn": {
+      "pcd_mm": 14,
+      "thread": "4-M3",
+      "od_mm": 19.95,
+      "overall_thickness_mm": 4.5,
+      "flange_thickness_mm": 2.5,
+      "spline": "25T 5.9",
+      "center_clearance_mm": 3.2
+    },
+    "rear_disc": {
+      "pcd_mm": 14,
+      "thread": "4-M3",
+      "od_mm": 19.95,
+      "bore_mm": 6.05,
+      "flange_thickness_mm": 2.1,
+      "overall_thickness_mm": 3.1
+    },
+    "warning": "Supersedes assumed M2.5 interfaces; rear disc geometry does not prove it is fixed to servo housing."
+  },
+  "rear_disc_interpretation": "Round 6.05 mm bore on nominal 6 mm passive pivot; modeled as free support disc retained by PA3x5, not a torque-driving flange. Sample fit required."
+}
