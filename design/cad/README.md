@@ -65,6 +65,32 @@ bash design/cad/build.sh --fast
 .venv-cad/bin/python design/cad/build_all.py --all
 ```
 
+## 交互式预览（`preview.py`，答辩现场用）
+
+```bash
+# 出预览：首次会建几何缓存（约 70 s），之后只重出 HTML（0.1 s）
+.venv-cad/bin/python design/cad/preview.py --all
+# 改过零件/装配（skeleton.py、assembly.py、atri.urdf、placements.json）后强制重建几何
+.venv-cad/bin/python design/cad/preview.py --all --rebuild
+# 打开时停在机械零位（默认停在展示姿态）
+.venv-cad/bin/python design/cad/preview.py --all --zero
+# 只改本文件的 HTML/JS 反复出预览时：不校验指纹直接用缓存，躲开别人的重 CAD 线程（几何可能过期）
+.venv-cad/bin/python design/cad/preview.py --all --stale-ok
+# 自检：外部依赖 0 / 22 条滑条 / 配合件 / **JS 与 Python 的 FK 数值对拍**
+.venv-cad/bin/python design/cad/preview.py --check
+```
+
+- **打开**：双击 `design/cad/out/preview/ATRI-preview.html`——自包含（几何 base64 内嵌、无 CDN、
+  断网可用），不需要任何插件或本地服务器。约 6.4 MB。
+- **操作**：左键拖拽旋转 · 滚轮缩放 · 右键/Shift 平移 · 右侧 **22 条关节滑条**（范围就是
+  `design/atri.urdf` 的限位）· **5 个姿势预设**（机械零位/展示姿态/招手/踢球/抓取，快捷键 `1`–`5`）·
+  点关节名 = 只看该关节的配合件 · `R` 重置视角 · `W` 线框 · `T` 配合件半透明 · `空格` 自动旋转。
+- **截图进 PPT**：拖到目标姿态 → `⌘⇧4` 框选（面板在右侧，要干净画面就先全屏再截图）；
+  也可以用 `复制角度` 按钮拿到 `#pose=…` 深链，下次打开直接回到同一姿态。
+- **不卡的原因**：几何**只在机械零位三角化一次**并缓存到 `out/preview/ATRI-geometry-cache.json`，
+  拖滑条只重算 4×4 矩阵（FK 用 URDF 的 origin/axis 在 JS 里现算），**任何操作都不重建几何**。
+  缓存按几何源文件指纹失效；改了 `preview.py` 里的 HTML/JS 不会让缓存失效。
+
 ## 现行零件（`skeleton.py`，不是早期的 `parts.py` 三件套）
 
 **18 种 / 81 件（实算 1490 g）**，质量按 PETG 1.27 g/cm³ + 外壁/填充估算。
