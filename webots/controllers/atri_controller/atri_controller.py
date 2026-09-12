@@ -14,6 +14,10 @@
 7. 任务卡调度改为复用 ``atri.sim.run_task_cards``，与无硬件闭环演示跑**同一条链路**，
    不再各自维护一份 Mock 观测；
 8. 找不到 ``controller`` 模块时以非零码退出，避免"看起来跑成功了"。
+9. **可选的扭矩上限**（``--max-torque`` / ``ATRI_WEBOTS_MAX_TORQUE``）：默认 ``None`` = 一个字都不改；
+   给了值就对全部绑定的电机调 ``setAvailableTorque()``——**做扭矩校核必须给**，
+   因为 Webots 不设 ``maxTorque`` 时默认是 **10 N·m**，而 STS3215 堵转只有 2.94 N·m，
+   等于把舵机权限放宽 3.4 倍，"要多少扭矩有多少"，S2 结论直接作废。
 
 用法（GUI 演示）::
 
@@ -89,10 +93,16 @@ class WebotsServoBus(ServoBus):
         timestep_ms: int,
         velocity: float = DEFAULT_VELOCITY,
         alive: Optional[Callable[[], bool]] = None,
+        max_torque: Optional[float] = None,
     ) -> None:
         self.robot = robot
         self.timestep_ms = int(timestep_ms)
         self.velocity = float(velocity)
+        # None = 不改行为（沿用世界文件里的 maxTorque，没写就是 Webots 默认 10 N·m）
+        self.max_torque = None if max_torque is None else float(max_torque)
+        # 真正被设上上限的电机数。桩没有 setAvailableTorque 时会是 0，报告里看得出来。
+        self.torque_limited = 0
+        self._torque_warned = False
         # 仿真存活判据：robot.step 返回 -1 后 alive() 变 False，之后不得再下发角度
         self._is_alive = alive or (lambda: True)
         self.motors: Dict[str, Any] = {}
@@ -112,10 +122,36 @@ class WebotsServoBus(ServoBus):
                 print(f"  [WebotsServoBus] 找不到电机: {webots_name} (ATRI: {atri_name})，已跳过")
                 continue
             motor.setVelocity(self.velocity)
+            self._limit_torque(motor)
             self.motors[atri_name] = motor
             print(f"  [WebotsServoBus] 已绑定: {atri_name} -> {webots_name}")
 
         self._enable_sensors()
+
+    def _limit_torque(self, motor: Any) -> None:
+        """给电机设可用扭矩上限（N·m），等价于世界文件里的 ``RotationalMotor.maxTorque``。
+
+        Webots 不写 ``maxTorque`` 时默认 **10 N·m**（不是无限大，但比 STS3215 堵转
+        2.94 N·m 宽 3.4 倍）；不收紧这一项，仿真里扭矩"要多少有多少"，S2 结论作废。
+
+        桩（``webots/tests/webots_api_stub.py``）是个最小替身，没有
+        ``setAvailableTorque``：这里**提示一次后跳过**而不是崩掉——离线测试不该因为一个
+        可选开关挂掉，但也绝不能假装设上了（报告里的 ``torque_limited_joints`` 会露出来）。
+        """
+        if self.max_torque is None:
+            return
+        setter = getattr(motor, "setAvailableTorque", None)
+        if setter is None:
+            if not self._torque_warned:
+                print(
+                    "  [WebotsServoBus] 电机对象没有 setAvailableTorque()，"
+                    f"maxTorque={self.max_torque} N·m 未生效（离线桩？）",
+                    file=sys.stderr,
+                )
+                self._torque_warned = True
+            return
+        setter(self.max_torque)
+        self.torque_limited += 1
 
     def _enable_sensors(self) -> None:
         """使能位置传感器。
@@ -173,7 +209,13 @@ class WebotsServoBus(ServoBus):
         return len(self.motors)
 
     def summary(self) -> str:
-        return f"已绑定 {self.bound_count}/{len(JOINTS)} 个关节，未绑定 {len(self.missing)} 个"
+        text = f"已绑定 {self.bound_count}/{len(JOINTS)} 个关节，未绑定 {len(self.missing)} 个"
+        if self.max_torque is not None:
+            text += (
+                f"；扭矩上限 {self.max_torque} N·m 已设 "
+                f"{self.torque_limited}/{self.bound_count} 个"
+            )
+        return text
 
 
 def load_mapping(path: Path) -> Dict[str, str]:
@@ -208,6 +250,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="A.T.R.I. Webots 控制器")
     parser.add_argument("--mapping", default=None, help="关节映射 JSON（默认同目录 joint_mapping.json）")
     parser.add_argument("--velocity", type=float, default=DEFAULT_VELOCITY, help="关节最大角速度 rad/s")
+    parser.add_argument(
+        "--max-torque", type=float, default=None,
+        help="统一设置各电机的可用扭矩上限 N·m（默认 None = 不改，Webots 默认 10 N·m；"
+             "扭矩校核请给 2.94 = STS3215 堵转）",
+    )
     parser.add_argument("--settle-s", type=float, default=DEFAULT_SETTLE_S, help="回零后稳定等待（仿真秒）")
     parser.add_argument("--exit-on-done", action="store_true", help="任务跑完后退出（批量验证用）")
     parser.add_argument("--report", default=None, help="把联调结果写入 JSON 文件")
@@ -221,6 +268,10 @@ def resolve_options(args: argparse.Namespace) -> argparse.Namespace:
 
     Webots 本身没有把参数透传给控制器的机制（``webots --help`` 里没有 ``--``），
     从命令行跑 ``--batch`` 时只能靠环境变量把配置传进来。
+
+    这里对 ``--max-torque`` / ``ATRI_WEBOTS_MAX_TORQUE`` 的非法值是**报错退出**，
+    不像 ``ATRI_WEBOTS_VELOCITY`` 那样"提示后忽略"：静默退回默认 10 N·m 时，
+    仿真照样跑得完、报告照样全绿，只是扭矩数字全错——这种失败必须在启动时就拦住。
     """
     if args.mapping is None:
         args.mapping = os.environ.get("ATRI_WEBOTS_MAPPING") or None
@@ -238,6 +289,18 @@ def resolve_options(args: argparse.Namespace) -> argparse.Namespace:
             args.velocity = float(env_velocity)
         except ValueError:
             print(f"  [控制器] 忽略无效的 ATRI_WEBOTS_VELOCITY={env_velocity!r}")
+    env_max_torque = os.environ.get("ATRI_WEBOTS_MAX_TORQUE")
+    if env_max_torque and args.max_torque is None:
+        try:
+            args.max_torque = float(env_max_torque)
+        except ValueError:
+            raise ValueError(
+                f"环境变量 ATRI_WEBOTS_MAX_TORQUE={env_max_torque!r} 不是合法数字"
+            ) from None
+    if args.max_torque is not None and args.max_torque <= 0:
+        raise ValueError(
+            f"max-torque 必须 > 0，实际 {args.max_torque}（0 或负数 = 电机没有力矩）"
+        )
     return args
 
 
@@ -307,7 +370,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args, unknown = build_arg_parser().parse_known_args(argv)
     if unknown:
         print(f"  [控制器] 忽略未知参数: {unknown}")
-    args = resolve_options(args)
+    try:
+        args = resolve_options(args)
+    except ValueError as exc:
+        # 参数非法时直接失败：带着默认 10 N·m 跑完一轮，扭矩数字全是错的，比跑不起来更糟
+        print(f"  [控制器] 参数错误：{exc}", file=sys.stderr)
+        return 2
     console_log = install_console_log(args.log)
 
     robot = Robot()
@@ -324,6 +392,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"  basicTimeStep = {timestep} ms")
     print(f"  关节映射      = {mapping_path.name}")
     print(f"  关节角速度    = {args.velocity} rad/s")
+    torque_text = (
+        "未设置（沿用世界文件/Webots 默认 10 N·m）"
+        if args.max_torque is None
+        else f"{args.max_torque} N·m（逐个电机 setAvailableTorque）"
+    )
+    print(f"  可用扭矩上限  = {torque_text}")
     print("=" * 64)
 
     # 用 robot.step 推进仿真时间，而不是 time.sleep；alive 与总线共享，
@@ -332,7 +406,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     bus = WebotsServoBus(
         robot, mapping, timestep, velocity=args.velocity,
-        alive=lambda: state["alive"],
+        alive=lambda: state["alive"], max_torque=args.max_torque,
     )
     print(f"  [WebotsServoBus] {bus.summary()}")
     if bus.bound_count == 0:
@@ -427,6 +501,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "mapping": mapping_path.name,
         "basic_time_step_ms": timestep,
         "velocity_rad_s": args.velocity,
+        # None = 本次没改扭矩上限（世界文件说了算）；扭矩校核场景必须不是 None
+        "max_torque_nm": args.max_torque,
+        "torque_limited_joints": bus.torque_limited,
         "sim_seconds": round(sim_seconds, 3),
         "sim_steps": state["sim_ms"] // timestep,
         "wall_seconds": round(wall, 3),

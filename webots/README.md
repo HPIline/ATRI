@@ -34,7 +34,8 @@ webots/
 ├── worlds/
 │   └── atri_22dof.wbt                     # 自包含 22 DOF 世界（可直接打开就跑）
 ├── tools/
-│   ├── generate_atri_world.py             # 世界文件生成脚本（**从 design/robot_model.json 派生**，改模型后重跑）
+│   ├── generate_atri_world.py             # 世界文件生成脚本（**从 design/robot_model.json 派生**，改模型后重跑；
+│   │                                      #   可选开关 ATRI_WORLD_GRAVITY / _MAX_TORQUE / _GROUND 与 --out，见「带重力/带地面的校核跑法」）
 │   ├── run_webots_batch.ps1               # 无人值守批量联调（推荐用这个）
 │   └── run_webots_batch.sh                # 同上（Linux）
 ├── tests/
@@ -140,6 +141,7 @@ bash webots/tools/run_webots_batch.sh
 | `ATRI_WEBOTS_LOG=<路径>` | 控制器控制台输出另存一份（Webots 的 `--stdout` 要等它自己退出才 flush） |
 | `ATRI_WEBOTS_MAPPING=<路径>` | 关节映射 JSON |
 | `ATRI_WEBOTS_VELOCITY=<rad/s>` | 关节最大角速度，默认 2.0 |
+| `ATRI_WEBOTS_MAX_TORQUE=<N·m>` | 统一设置各电机的可用扭矩上限，默认**不设**（沿用世界文件 / Webots 默认 10 N·m）。做扭矩校核请给 `2.94`；值非法时控制器**退出码 2**，不会静默放宽 |
 | `ATRI_WEBOTS_TASK_CARD_DIR=<路径>` | 任务卡目录 |
 
 直接调试控制器时也可以照常用命令行参数（`--exit-on-done` / `--report` 等），
@@ -190,6 +192,10 @@ CI 会重新生成一次并 `git diff --exit-code`，保证 `.wbt` 和生成脚�
 生成器另有一条断言：世界里的关节名必须与 `robot_model.json` **逐一对应**，
 所以"世界漏掉/多出关节"这类问题会在生成时就报错。
 
+> 生成器还有一行"可选覆盖"：`ATRI_WORLD_GRAVITY` / `ATRI_WORLD_MAX_TORQUE` /
+> `ATRI_WORLD_GROUND` / `--out`，**都不给时行为与以前一字不差**。
+> 带重力的校核世界怎么生成、怎么跑，见上面「带重力/带地面的校核跑法」。
+
 > 每个关节的 `minStop`/`maxStop`（弧度）与 `maxVelocity`（rad/s）同样派生自模型：
 > 前者来自 `limit_deg`，后者来自 `velocity_dps`（腿 180 dps = 3.1416 rad/s、
 > 头/臂 240 dps = 4.1888 rad/s）。世界里不再有"统一 2 rad/s"这种与模型无关的常量。
@@ -212,6 +218,132 @@ CI 会重新生成一次并 `git diff --exit-code`，保证 `.wbt` 和生成脚�
 左腿 5  : left_hip_yaw, left_hip_roll, left_hip_pitch, left_knee_pitch, left_ankle_pitch
 右腿 5  : right_hip_yaw, right_hip_roll, right_hip_pitch, right_knee_pitch, right_ankle_pitch
 ```
+
+## 带重力/带地面的校核跑法
+
+默认世界是**零重力运动学联调**世界（`gravity 0`、无地面、电机不写 `maxTorque`），
+它只回答"22 个关节角有没有被正确下发与跟随"；**回答不了**静立与站立扭矩——
+零重力下机器人悬浮不下垂，电机的静力矩 ≈ 0。S1（静立、支撑多边形）与
+S2（逐关节站立扭矩）必须换成**带重力 + 带地面 + 显式扭矩上限**的派生世界。
+
+> 派生世界是**生成产物**：写到 `docs/process/sim/` 之类的临时目录或仓库外，
+> **不要覆盖 `webots/worlds/atri_22dof.wbt`**——CI 会重跑生成器并 `git diff --exit-code` 对账。
+>
+> **默认模式（不带任何开关）产出的世界仍与仓库里那份逐字节一致**，
+> 零重力模式继续用于**纯运动学演示**（22 个关节角下发/回读/行程，见上文「实测结果」）。
+
+### 1. 生成带重力世界（仓库根目录执行）
+
+```bash
+# 带重力 + 地面 + 舵机扭矩上限（2.94 N·m = STS3215 堵转）
+ATRI_WORLD_GRAVITY=-9.81 ATRI_WORLD_MAX_TORQUE=2.94 ATRI_WORLD_GROUND=1 \
+  python3 webots/tools/generate_atri_world.py \
+  --out docs/process/sim/worlds/atri_22dof_gravity.wbt
+```
+
+等价的命令行写法（Windows PowerShell 建议用 `--gravity=-9.81` 这种 `=` 形式，
+否则 `-9.81` 可能被当成参数名）：
+
+```powershell
+python webots\tools\generate_atri_world.py --gravity=-9.81 --max-torque=2.94 --ground `
+  --out docs\process\sim\worlds\atri_22dof_gravity.wbt
+```
+
+| 开关 | 环境变量 | 默认 | 语义 |
+|---|---|---|---|
+| `--gravity` | `ATRI_WORLD_GRAVITY` | `0.0` | `WorldInfo.gravity`（m/s²，**沿 Z 轴的有符号标量**，向下为负）；正值直接报错退出 |
+| `--max-torque` | `ATRI_WORLD_MAX_TORQUE` | 不写该字段 | 逐 `RotationalMotor` 的 `maxTorque`（N·m）。**不写 ≠ 无限大，而是 Webots 默认 10 N·m** |
+| `--ground` | `ATRI_WORLD_GROUND` | 不生成 | 生成 `Plane` 地面（4 m × 4 m，z = 0）。**重力非 0 时自动强制打开** |
+| `--out` | — | `webots/worlds/atri_22dof.wbt` | 输出路径 |
+
+三条硬约束（生成器里已经卡住，不用记）：
+
+1. **重力非 0 ⇒ 必须带地面**：没有地面就是自由落体，静立/站立数字全是废的。
+   少写 `ATRI_WORLD_GROUND` 不会报错，而是**自动补上地面**并在控制台说明原因；
+2. **重力为正 ⇒ 报错退出（2）**：`gravity` 是沿 Z 轴的有符号标量，正值等于让机器人往上飞；
+3. **`ATRI_WORLD_GRAVITY=-9,81` 这类笔误 ⇒ 报错退出（2）**：绝不悄悄退回零重力，
+   否则跑出来的还是一份"悬浮世界"，而数字看着像真的。
+
+**地面为什么用 `Plane`、为什么取 4 m × 4 m**：`Floor` / `Ground` 都是 Webots 的 **PROTO**，
+引用必须配 `EXTERNPROTO`，会破坏本世界"自包含、不引任何外部 PROTO"的约束
+（见下文「世界文件怎么改」），所以用内置几何节点 `Plane`（同时兼作 `boundingObject`）。
+尺寸取 4 m：机器人高 0.407 m、脚盒 0.11 m，静止站立与五张任务卡场景的位移都在 0.5 m 量级，
+4 m 给出 ±2 m（≈ 5 倍机高）余量；`Plane` 作接触面在 Webots 里按无限平面处理，
+机器人即便被推出去也不会掉出世界边界。
+
+生成后**先自检三条，三条都过**再拿这个世界跑 S1/S2：
+
+```bash
+W=docs/process/sim/worlds/atri_22dof_gravity.wbt
+grep -c "gravity -9.81" $W     # 期望 1
+grep -c "maxTorque 2.94" $W    # 期望恰好 22：漏一个，那个关节就还是 Webots 默认 10 N·m
+grep -cE "Floor|Plane" $W      # 期望 ≥1（地面）
+```
+
+### 2. 跑 S1/S2（都用这一份带重力世界）
+
+控制器侧的扭矩上限用 `--max-torque`（等价环境变量 `ATRI_WEBOTS_MAX_TORQUE`）在**运行时**再设一遍：
+与世界文件里的 `maxTorque` 是同一件事的两道保险，报告里的 `max_torque_nm` 会记下本次用的值。
+
+```bash
+# Linux / macOS：批量无人值守（调用方 shell 里的环境变量会被继承到 Webots 进程）
+ATRI_WEBOTS_MAX_TORQUE=2.94 bash webots/tools/run_webots_batch.sh \
+  -World   docs/process/sim/worlds/atri_22dof_gravity.wbt \
+  -Report  docs/process/sim/s1_report.json \
+  -Log     docs/process/sim/s1_console.log \
+  -TimeoutSec 600
+```
+
+```powershell
+# Windows PowerShell
+$env:ATRI_WEBOTS_MAX_TORQUE = "2.94"
+powershell -File webots\tools\run_webots_batch.ps1 `
+  -World  docs\process\sim\worlds\atri_22dof_gravity.wbt `
+  -Report docs\process\sim\s1_report.json `
+  -Log    docs\process\sim\s1_console.log `
+  -TimeoutSec 600
+```
+
+不用脚本、直接起 Webots 看原始输出：
+
+```bash
+ATRI_WEBOTS_MAX_TORQUE=2.94 ATRI_WEBOTS_EXIT_ON_DONE=1 \
+ATRI_WEBOTS_REPORT=docs/process/sim/s1_report.json \
+ATRI_WEBOTS_LOG=docs/process/sim/s1_console.log \
+webots --batch --mode=fast --no-rendering --minimize --stdout --stderr \
+  docs/process/sim/worlds/atri_22dof_gravity.wbt
+```
+
+看 GUI / 录屏（**不要**用 `--mode=fast` 录，会跑成加速看不清）：
+
+```bash
+webots --mode=realtime docs/process/sim/worlds/atri_22dof_gravity.wbt
+```
+
+> ⚠ **派生世界放在 `webots/worlds/` 之外时，Webots 可能找不到控制器**
+> （**本机没装 Webots，这一条没实测**，请先按下面办法之一确认）。
+> 原因：Webots 是在"世界文件所在 project 的 `controllers/` 目录"里找 `atri_controller`
+> 的；世界一旦放在 `docs/process/sim/worlds/`，project 就变成 `docs/process/sim/`，
+> 那里并没有 `controllers/atri_controller`——控制器起不来时**表现是报告 JSON 一直不出现**
+> （`run_webots_batch` 会超时退出 2 并打印日志尾部）。两个稳妥办法，任选：
+>
+> 1. **把世界放到 `webots/worlds/` 下再跑**（project 不变，控制器一定找得到）：
+>    `python3 webots/tools/generate_atri_world.py --gravity=-9.81 --max-torque=2.94 --ground --out webots/worlds/atri_22dof_gravity.wbt`
+>    ——这个派生文件**不要提交**（生成产物）；要回传的副本再复制到 `docs/process/sim/worlds/`。
+> 2. **保持 `docs/process/sim/worlds/` 不动**，把 `webots/controllers/atri_controller/`
+>    整个复制成 `docs/process/sim/controllers/atri_controller/`，Webots 就会在派生 project 里找到它。
+
+### 3. 回退（恢复默认行为）
+
+不生成派生世界即可，仓库里的默认世界**不受任何影响**：
+
+```bash
+python3 webots/tools/generate_atri_world.py     # 不带开关 = gravity 0、无地面、不写 maxTorque
+git diff --stat webots/worlds/atri_22dof.wbt    # 期望：空输出（逐字节一致）
+```
+
+控制器侧同理：不传 `--max-torque`、不设 `ATRI_WEBOTS_MAX_TORQUE` 时**一个电机都不碰**
+（报告里 `max_torque_nm: null`、`torque_limited_joints: 0`，其余字段与以前完全一致）。
 
 ## 没有 Webots 也能验（CI 用的就是这条）
 
@@ -245,3 +377,6 @@ Nao 留空仍判通过、`--velocity 0`（零行程）必须判失败、软钳�
 - 关节限位在 `ServoBus.set_angle`（模板方法）里统一钳制，`WebotsServoBus` 只实现
   `_write_angle` 下发；世界里另有 `minStop`/`maxStop` 硬限位，两层都来自
   `design/robot_model.json`。
+- 做扭矩校核时，**世界文件的 `maxTorque` 与控制器 `--max-torque` 都要设成 2.94**
+  （STS3215 堵转）：前者决定 Webots 里的物理上限，后者是运行时再设一遍并记进报告。
+  只做纯运动学演示时两者都不用管，默认行为不变。
