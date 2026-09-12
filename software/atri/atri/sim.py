@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 
 from .brain import Brain
 from .cerebellum import Cerebellum, MockServoBus
-from .perception import MockPerception, OpenCVPerception
+from .perception import MockPerception, OpenCVPerception, ServoMockPerception
 from .task_card import TaskCard, TaskCardError
 from .voice import build_tts
 
@@ -27,9 +27,16 @@ def load_robot_config() -> Dict[str, Any]:
     return {}
 
 
-def build_perception(config: Dict[str, Any]) -> Any:
-    """按配置选择视觉后端；请求 OpenCV 但不可用时降级并给出可见告警。"""
+def build_perception(config: Dict[str, Any], servo_bus: Any = None) -> Any:
+    """按配置选择视觉后端；请求 OpenCV 但不可用时降级并给出可见告警。
+
+    ``backend="servo"`` 时构造 ServoMockPerception：它把机器人当前 body yaw
+    反馈进观测，让踢球/搬运的闭环在无硬件仿真里真正收敛。servo_bus 必须是与
+    小脑同一只 MockServoBus（否则读不到机器人实际 yaw）。
+    """
     backend = (config.get("perception") or {}).get("backend", "mock")
+    if backend == "servo":
+        return ServoMockPerception(bus=servo_bus or MockServoBus())
     if backend in ("auto", "opencv"):
         candidate = OpenCVPerception()
         if candidate.available():
@@ -51,7 +58,7 @@ def _fsm_verbose(config: Dict[str, Any]) -> bool:
 def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
     servo_bus = MockServoBus()
     cerebellum = Cerebellum(servo_bus=servo_bus, sleeper=sleeper)
-    perception = build_perception(config)
+    perception = build_perception(config, servo_bus=servo_bus)
     tts = build_tts()
 
     motion_cfg = config.get("motion") or {}

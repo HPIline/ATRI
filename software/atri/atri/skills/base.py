@@ -118,6 +118,57 @@ def perception_data(
     return data, None
 
 
+def _positive_param(params: Dict[str, Any], key: str, default: float) -> float:
+    """取任务卡参数里的正数；非法/缺失回落到默认值，不因参数笔误把任务卡炸掉。"""
+    value = as_finite_float(params.get(key, default))
+    return value if value is not None and value > 0.0 else default
+
+
+def _int_param(params: Dict[str, Any], key: str, default: int) -> int:
+    """取任务卡参数里 1..100 的整数；非法/缺失回落到默认值。"""
+    value = as_int_in_range(params.get(key, default), 1, 100)
+    return value if value is not None else default
+
+
+def lateral_servo(
+    ctx: SkillContext,
+    kind: str,
+    x0: float,
+    deadband_cm: float,
+    max_iters: int,
+    step_gain: float,
+    step_clamp_deg: float,
+) -> Tuple[float, int, bool, Optional[str]]:
+    """多轮横向视觉伺服：沿 hip_yaw 做增量偏航修正，直到 |x| 进死区或达到上限。
+
+    每轮：把本轮测到的横向偏差换算成一步偏航（``step = clamp(x * step_gain)``），
+    **累加**进身体 yaw 并下发，然后重新感知。只有「增量累加」才能让
+    ``x_cm = x_true - gain*yaw`` 的一维几何收敛；绝对定位会来回震荡。
+
+    返回 ``(最终 x_cm, 迭代次数, 是否收敛, 失败原因)``。中途感知失败时返回
+    失败原因，机器人停在当前 yaw，由技能决定是否放弃。``x0`` 是技能已校验过
+    的首轮横向偏差。
+    """
+    yaw = 0.0
+    x = x0
+    iterations = 0
+    while abs(x) > deadband_cm and iterations < max_iters:
+        step = max(-step_clamp_deg, min(step_clamp_deg, x * step_gain))
+        yaw += step
+        ctx.cerebellum.set_pose({"left_hip_yaw": yaw, "right_hip_yaw": yaw})
+        iterations += 1
+        obs, reason = perception_data(ctx, kind)
+        if reason:
+            return x, iterations, False, reason
+        # 与技能首轮读取同一兜底口径：观测缺 x_cm 时回落到任务卡参数，避免
+        # 「首轮能用 params 兜底、闭环内却因缺键判失败」的不一致。
+        new_x = as_finite_float(obs.get("x_cm", ctx.params.get("x_cm", 0.0)))
+        if new_x is None:
+            return x, iterations, False, f"第 {iterations} 轮重新感知 {kind} 横向偏移缺失"
+        x = new_x
+    return x, iterations, abs(x) <= deadband_cm, None
+
+
 class Skill:
     name = "base"
 

@@ -5,7 +5,7 @@
 - PerceptionResult：统一返回结构
 """
 from .base import PerceptionBackend, PerceptionError, PerceptionResult
-from .mock import MockPerception
+from .mock import MockPerception, ServoMockPerception
 from .opencv import OpenCVPerception
 
 __all__ = [
@@ -13,5 +13,6 @@ __all__ = [
     "PerceptionError",
     "PerceptionResult",
     "MockPerception",
+    "ServoMockPerception",
     "OpenCVPerception",
 ]

@@ -4,7 +4,7 @@ import unittest
 
 from atri.brain import Brain
 from atri.cerebellum import Cerebellum, MockServoBus
-from atri.config import MAX_STEPS, VALID_ACTIONS
+from atri.config import JOINTS, MAX_STEPS, VALID_ACTIONS
 from atri.perception import PerceptionError
 from atri.skills import Skill
 from atri.task_card import TaskCard
@@ -28,6 +28,10 @@ class SpyCerebellum(Cerebellum):
         result = super().execute_trajectory(frames, dt_s)
         self.trajectories.append(result)
         return result
+
+    def set_pose(self, targets):
+        self._tick("set_pose")
+        return super().set_pose(targets)
 
     def home(self):
         self._tick("home")
@@ -394,7 +398,7 @@ class TestCarryAndDanceLimits(unittest.TestCase):
         self.assertEqual(cere.calls.get("release", 0), 0)
 
     def test_carry_misaligned_does_not_grasp(self):
-        """看见目标但横向偏差过大：对齐后仍偏，不下发抓取。"""
+        """看见目标但横向偏差过大：闭环后仍偏，不下发抓取。"""
         cere = SpyCerebellum()
         brain = Brain(cere)
         result = brain.execute_task(
@@ -404,7 +408,9 @@ class TestCarryAndDanceLimits(unittest.TestCase):
         )
         self.assertFalse(result["ok"])
         self.assertEqual(cere.calls.get("grasp", 0), 0)
-        self.assertGreaterEqual(cere.calls.get("execute_motion", 0), 1)
+        self.assertEqual(cere.calls.get("walk", 0), 0)
+        self.assertEqual(cere.calls.get("release", 0), 0)
+        self.assertGreaterEqual(cere.calls.get("set_pose", 0), 1)
 
     def test_dance_bars_param_out_of_range(self):
         cere = SpyCerebellum()
@@ -593,6 +599,75 @@ class TestTimeoutDeadlineBasis(unittest.TestCase):
         self.assertFalse(result["ok"])
         # 进入任务回零 1 次 + 超时复位 1 次
         self.assertEqual(cere.calls.get("home"), 2)
+
+
+class TestServoClosedLoop(unittest.TestCase):
+    """闭环：ServoMockPerception 把机器人 body yaw 反馈进观测，踢球/搬运应真正收敛。"""
+
+    def _brain(self, ball_x_true=3.0, object_x_true=3.0):
+        from atri.perception import ServoMockPerception
+        cere = SpyCerebellum()
+        perception = ServoMockPerception(
+            bus=cere.bus,
+            ball_x_true=ball_x_true,
+            object_x_true=object_x_true,
+        )
+        return Brain(cere, perception=perception), cere
+
+    def test_kick_converges_in_simulation(self):
+        brain, cere = self._brain(ball_x_true=3.0)
+        result = brain.execute_task(_card(["kick"]), observation=None)
+        self.assertTrue(result["ok"], result.get("error"))
+        payload = result["result"]["results"][0]
+        self.assertTrue(payload["converged"])
+        self.assertGreaterEqual(payload["iterations"], 1)
+        self.assertLess(payload["iterations"], 5)
+        self.assertEqual(cere.calls.get("kick"), 1)
+
+    def test_carry_converges_then_acts_once(self):
+        brain, cere = self._brain(object_x_true=3.0)
+        result = brain.execute_task(_card(["carry"]), observation=None)
+        self.assertTrue(result["ok"], result.get("error"))
+        payload = result["result"]["results"][0]
+        self.assertTrue(payload["aligned"])
+        self.assertEqual(cere.calls.get("grasp"), 1)
+        self.assertEqual(cere.calls.get("walk"), 1)
+        self.assertEqual(cere.calls.get("release"), 1)
+
+    def test_servo_perception_reflects_yaw(self):
+        from atri.perception import ServoMockPerception
+        bus = MockServoBus()
+        perception = ServoMockPerception(bus=bus, ball_x_true=4.0, gain_cm_per_deg=1.0)
+        self.assertEqual(perception.detect_ball().data["x_cm"], 4.0)
+        bus.angles[JOINTS["left_hip_yaw"]["id"]] = 2.0
+        bus.angles[JOINTS["right_hip_yaw"]["id"]] = 2.0
+        self.assertAlmostEqual(perception.detect_ball().data["x_cm"], 2.0)
+
+    def test_static_observation_hits_iteration_cap_and_still_kicks(self):
+        """静态观测恒偏离：必须在上限处停下（不空转死循环），并仍尽力踢。"""
+        cere = SpyCerebellum()
+        brain = Brain(cere)
+        result = brain.execute_task(
+            _card(["kick"]), observation={"ball": {"x_cm": 5.0, "distance_cm": 12.0}}
+        )
+        self.assertTrue(result["ok"], result.get("error"))
+        payload = result["result"]["results"][0]
+        self.assertFalse(payload["converged"])
+        self.assertEqual(payload["iterations"], 5)
+        self.assertEqual(cere.calls.get("kick"), 1)
+
+    def test_carry_static_misaligned_gives_up_without_acting(self):
+        """静态观测恒偏离且超放弃阈值：不下发抓/走/放。"""
+        cere = SpyCerebellum()
+        brain = Brain(cere)
+        result = brain.execute_task(
+            _card(["carry"]),
+            observation={"object": {"target": "红块", "x_cm": 12.0, "distance_cm": 8.0}},
+        )
+        self.assertFalse(result["ok"])
+        self.assertEqual(cere.calls.get("grasp", 0), 0)
+        self.assertEqual(cere.calls.get("walk", 0), 0)
+        self.assertEqual(cere.calls.get("release", 0), 0)
 
 
 if __name__ == "__main__":

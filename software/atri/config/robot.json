@@ -19,8 +19,8 @@
     }
   },
   "perception": {
-    "backend": "mock",
-    "backend_note": "mock=确定性观测（默认）；opencv 或 auto=真实摄像头，OpenCV 不可用时自动降级为 mock 并告警"
+    "backend": "servo",
+    "backend_note": "servo=有状态伺服感知（把机器人 body yaw 反馈进观测，让踢球/搬运的闭环在无硬件仿真里真收敛）；mock=确定性观测；opencv 或 auto=真实摄像头，OpenCV 不可用时自动降级为 mock 并告警"
   },
   "brain": {
     "fsm_verbosity": 1
