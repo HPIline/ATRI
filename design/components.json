@@ -5,8 +5,8 @@
   "cavity_wall_mm": 2.5,
   "cable_mass_g": 80.0,
   "fastener_mass_g": 40.0,
-  "structure_mass_estimate_g": 1490.0,
-  "structure_mass_note": "v3：按协作者 CAD 实装实算 1490 g（81 个件，真实体积 × PETG 1.27 g/cm³）。v2 的 500 g 是合成预算，已弃用。三条减重路径见 robot_model.json 的 reduction_paths。",
+  "structure_mass_estimate_g": 1390.4,
+  "structure_mass_note": "v3：按协作者 CAD 实装实算 1390 g（81 个件，真实体积 × PETG 1.27 g/cm³）。v2 的 500 g 是合成预算，已弃用。三条减重路径见 robot_model.json 的 reduction_paths。",
   "components": [
     {
       "role": "servo_s",

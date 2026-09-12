@@ -9,15 +9,15 @@
       "height_mm": 372.8,
       "width_mm": 190.0,
       "depth_mm": 123.0,
-      "mass_kg": 3.136,
+      "mass_kg": 3.036,
       "note": "v3：结构件按 CAD 实装实算 1790 g（v2 合成预算为 500 g），整机 3.437 kg。**实装包络见 installed_envelope_mm（418 mm 高）**，overall 里的包络是基元/运动学口径。"
     },
     "installed_envelope_mm": {
       "height_mm": 407.0,
-      "width_mm": 263.0,
-      "depth_mm": 146.0,
-      "source": "CAD 实装装配体（6d4b077 → 2026-09-12 重测 / design/cad/out/report.md（2026-09-12 00:01，自动生成）；历史过程见 项目文档/骨架结构与集成方案.md §6–§7）",
-      "measured_by": "design/cad/assembly.py --all --no-export + design/cad/audit_assembly.py（2026-09-12，第 5 轮之后）",
+      "width_mm": 268.0,
+      "depth_mm": 160.0,
+      "source": "CAD 实装装配体（6d4b077 → 2026-09-12 09:06 重测（第 6–10 轮合入后） / design/cad/out/report.md（2026-09-12 09:06，自动生成））",
+      "measured_by": "design/cad/build_all.py（2026-09-12 09:06 落盘：out/report.md + out/skeleton_parts.json）；本文件由『模型质量回灌』线程按落盘产物转录，未重跑 CAD",
       "kinematic_envelope_mm": {
         "height_mm": 372.8,
         "width_mm": 190.0,
@@ -25,8 +25,8 @@
       },
       "delta_mm": {
         "height": 34.2,
-        "width": 73.0,
-        "depth": 23.0
+        "width": 78.0,
+        "depth": 37.0
       },
       "why_different": "基元模型的 link 包围盒是占位值，舵机笼与支架的实际突出量没进门；实装包络才是报名材料该用的口径。",
       "competition_limit_mm": [
@@ -41,7 +41,7 @@
       "structure_source": "实算",
       "total_source": "纸面推算",
       "state": "整机重量方案未定案",
-      "note": "结构件 1490 g / 81 件为 CAD 实算；整机 3136 g 为「结构实算 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120」的纸面推算（≈3.136 kg），**重量方案尚未定案**（减重 / 换工艺 / 减件三选一），定案后须重测回填。",
+      "note": "结构件 1390 g / 81 件为 CAD 实算；整机 3036 g 为「结构实算 + 舵机 1210 + 电子件与电池 316 + 线束紧固件 120」的纸面推算（≈3.036 kg），**重量方案尚未定案**（减重 / 换工艺 / 减件三选一），定案后须重测回填。",
       "history": [
         {
           "caliber": "v3 虚高值",
@@ -57,24 +57,24 @@
         },
         {
           "caliber": "第 5 轮后（当前）",
-          "structure_g": 1490.0,
-          "total_g": 3136.0,
+          "structure_g": 1390.4,
+          "total_g": 3036.4,
           "why": "第 5 轮新零件族 +86 g；包络再变，见 装配一致性修正记录.md §8.3"
         }
       ]
     },
-    "mass_kg": 3.136,
+    "mass_kg": 3.036,
     "mass_budget_g": {
-      "structure": 1490.0,
+      "structure": 1390.4,
       "servos": 1210.0,
       "electronics": 316.0,
       "harness_fasteners": 120.0,
-      "total": 3136.0,
+      "total": 3036.4,
       "part_count": 81,
       "status": "结构件实算；整机纸面推算，重量方案未定案"
     },
     "mass_breakdown_kg": {
-      "links_total": 3.137,
+      "links_total": 3.037,
       "cables": 0.0,
       "fasteners": 0.0
     },
@@ -118,7 +118,7 @@
         90
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.2348,
+      "distal_mass_kg": 0.2248,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
       "gravity_torque_nm": 0.0,
@@ -139,12 +139,12 @@
       "detail": [
         {
           "link": "head_yaw_link",
-          "mass_kg": 0.1012,
+          "mass_kg": 0.0984,
           "arm_mm": 0.0
         },
         {
           "link": "head",
-          "mass_kg": 0.1336,
+          "mass_kg": 0.1264,
           "arm_mm": 0.0
         }
       ]
@@ -162,7 +162,7 @@
         45
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.1336,
+      "distal_mass_kg": 0.1264,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
       "gravity_torque_nm": 0.0,
@@ -183,7 +183,7 @@
       "detail": [
         {
           "link": "head",
-          "mass_kg": 0.1336,
+          "mass_kg": 0.1264,
           "arm_mm": 0.0
         }
       ]
@@ -201,20 +201,20 @@
         10
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 1.6881,
+      "distal_mass_kg": 1.6413,
       "max_arm_mm": 137.4,
-      "distal_inertia_kgm2": 0.009295,
-      "gravity_torque_nm": 1.055,
-      "inertia_torque_nm": 0.2324,
+      "distal_inertia_kgm2": 0.008944,
+      "gravity_torque_nm": 1.0194,
+      "inertia_torque_nm": 0.2236,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
-      "required_torque_nm": 1.899,
+      "required_torque_nm": 1.8349,
       "requirements_driver": "gravity",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.938,
-      "margin_vs_peak": 1.292,
+      "margin_vs_continuous_rated": 1.872,
+      "margin_vs_peak": 1.248,
       "exceeds_continuous_rated": true,
       "exceeds_peak": true,
       "torque_tier": "M",
@@ -222,62 +222,62 @@
       "detail": [
         {
           "link": "trunk_roll_link",
-          "mass_kg": 0.0848,
+          "mass_kg": 0.0831,
           "arm_mm": 0.0
         },
         {
           "link": "torso_upper",
-          "mass_kg": 0.6603,
+          "mass_kg": 0.6486,
           "arm_mm": 27.5
         },
         {
           "link": "head_yaw_link",
-          "mass_kg": 0.1012,
+          "mass_kg": 0.0984,
           "arm_mm": 85.4
         },
         {
           "link": "head",
-          "mass_kg": 0.1336,
+          "mass_kg": 0.1264,
           "arm_mm": 137.4
         },
         {
           "link": "left_shoulder_pitch_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 84.67
         },
         {
           "link": "left_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 97.88
         },
         {
           "link": "left_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 79.85
         },
         {
           "link": "left_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 88.51
         },
         {
           "link": "right_shoulder_pitch_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 84.67
         },
         {
           "link": "right_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 97.88
         },
         {
           "link": "right_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 79.85
         },
         {
           "link": "right_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 88.51
         }
       ]
@@ -295,20 +295,20 @@
         15
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 1.6033,
+      "distal_mass_kg": 1.5582,
       "max_arm_mm": 109.9,
-      "distal_inertia_kgm2": 0.003249,
-      "gravity_torque_nm": 0.4655,
-      "inertia_torque_nm": 0.0812,
+      "distal_inertia_kgm2": 0.003102,
+      "gravity_torque_nm": 0.4466,
+      "inertia_torque_nm": 0.0776,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
-      "required_torque_nm": 0.8379,
+      "required_torque_nm": 0.8039,
       "requirements_driver": "gravity",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.855,
-      "margin_vs_peak": 0.57,
+      "margin_vs_continuous_rated": 0.82,
+      "margin_vs_peak": 0.547,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
       "torque_tier": "S",
@@ -316,57 +316,57 @@
       "detail": [
         {
           "link": "torso_upper",
-          "mass_kg": 0.6603,
+          "mass_kg": 0.6486,
           "arm_mm": 0.0
         },
         {
           "link": "head_yaw_link",
-          "mass_kg": 0.1012,
+          "mass_kg": 0.0984,
           "arm_mm": 57.9
         },
         {
           "link": "head",
-          "mass_kg": 0.1336,
+          "mass_kg": 0.1264,
           "arm_mm": 109.9
         },
         {
           "link": "left_shoulder_pitch_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 11.8
         },
         {
           "link": "left_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 35.4
         },
         {
           "link": "left_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 54.9
         },
         {
           "link": "left_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 74.5
         },
         {
           "link": "right_shoulder_pitch_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 11.8
         },
         {
           "link": "right_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 35.4
         },
         {
           "link": "right_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 54.9
         },
         {
           "link": "right_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 74.5
         }
       ]
@@ -384,20 +384,20 @@
         45
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.5678,
+      "distal_mass_kg": 0.5457,
       "max_arm_mm": 18.0,
-      "distal_inertia_kgm2": 3.1e-05,
-      "gravity_torque_nm": 0.0169,
-      "inertia_torque_nm": 0.0008,
-      "stance_torque_nm": 1.26,
-      "stance_mass_above_kg": 2.5688,
-      "required_torque_nm": 1.26,
+      "distal_inertia_kgm2": 2.9e-05,
+      "gravity_torque_nm": 0.0158,
+      "inertia_torque_nm": 0.0007,
+      "stance_torque_nm": 1.2218,
+      "stance_mass_above_kg": 2.491,
+      "required_torque_nm": 1.2218,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.286,
-      "margin_vs_peak": 0.857,
+      "margin_vs_continuous_rated": 1.247,
+      "margin_vs_peak": 0.831,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -405,27 +405,27 @@
       "detail": [
         {
           "link": "left_hip_yaw_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "left_hip_roll_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "left_thigh",
-          "mass_kg": 0.1461,
+          "mass_kg": 0.1403,
           "arm_mm": 0.0
         },
         {
           "link": "left_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 0.0
         },
         {
           "link": "left_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 18.0
         }
       ]
@@ -443,20 +443,20 @@
         25
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.4706,
+      "distal_mass_kg": 0.4511,
       "max_arm_mm": 145.2,
-      "distal_inertia_kgm2": 0.0041,
-      "gravity_torque_nm": 0.3563,
-      "inertia_torque_nm": 0.1025,
-      "stance_torque_nm": 1.3077,
-      "stance_mass_above_kg": 2.666,
-      "required_torque_nm": 1.3077,
+      "distal_inertia_kgm2": 0.00389,
+      "gravity_torque_nm": 0.339,
+      "inertia_torque_nm": 0.0973,
+      "stance_torque_nm": 1.2682,
+      "stance_mass_above_kg": 2.5856,
+      "required_torque_nm": 1.2682,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.334,
-      "margin_vs_peak": 0.89,
+      "margin_vs_continuous_rated": 1.294,
+      "margin_vs_peak": 0.863,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -464,22 +464,22 @@
       "detail": [
         {
           "link": "left_hip_roll_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "left_thigh",
-          "mass_kg": 0.1461,
+          "mass_kg": 0.1403,
           "arm_mm": 51.0
         },
         {
           "link": "left_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 113.8
         },
         {
           "link": "left_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 145.2
         }
       ]
@@ -497,20 +497,20 @@
         60
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.3734,
+      "distal_mass_kg": 0.3565,
       "max_arm_mm": 126.88,
-      "distal_inertia_kgm2": 0.002851,
-      "gravity_torque_nm": 0.2857,
-      "inertia_torque_nm": 0.0713,
-      "stance_torque_nm": 1.3553,
-      "stance_mass_above_kg": 2.7632,
-      "required_torque_nm": 1.3553,
+      "distal_inertia_kgm2": 0.002701,
+      "gravity_torque_nm": 0.2716,
+      "inertia_torque_nm": 0.0675,
+      "stance_torque_nm": 1.3146,
+      "stance_mass_above_kg": 2.6802,
+      "required_torque_nm": 1.3146,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.383,
-      "margin_vs_peak": 0.922,
+      "margin_vs_continuous_rated": 1.341,
+      "margin_vs_peak": 0.894,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -518,17 +518,17 @@
       "detail": [
         {
           "link": "left_thigh",
-          "mass_kg": 0.1461,
+          "mass_kg": 0.1403,
           "arm_mm": 31.4
         },
         {
           "link": "left_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 94.2
         },
         {
           "link": "left_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 126.88
         }
       ]
@@ -546,20 +546,20 @@
         90
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.2273,
+      "distal_mass_kg": 0.2162,
       "max_arm_mm": 65.33,
-      "distal_inertia_kgm2": 0.000538,
-      "gravity_torque_nm": 0.1018,
-      "inertia_torque_nm": 0.0134,
-      "stance_torque_nm": 1.427,
-      "stance_mass_above_kg": 2.9093,
-      "required_torque_nm": 1.427,
+      "distal_inertia_kgm2": 0.000506,
+      "gravity_torque_nm": 0.0963,
+      "inertia_torque_nm": 0.0126,
+      "stance_torque_nm": 1.3835,
+      "stance_mass_above_kg": 2.8205,
+      "required_torque_nm": 1.3835,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.456,
-      "margin_vs_peak": 0.971,
+      "margin_vs_continuous_rated": 1.412,
+      "margin_vs_peak": 0.941,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -567,12 +567,12 @@
       "detail": [
         {
           "link": "left_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 31.4
         },
         {
           "link": "left_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 65.33
         }
       ]
@@ -590,28 +590,28 @@
         40
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.0955,
+      "distal_mass_kg": 0.0892,
       "max_arm_mm": 18.0,
-      "distal_inertia_kgm2": 3.1e-05,
-      "gravity_torque_nm": 0.0169,
-      "inertia_torque_nm": 0.0008,
-      "stance_torque_nm": 1.4917,
-      "stance_mass_above_kg": 3.0411,
-      "required_torque_nm": 1.4917,
+      "distal_inertia_kgm2": 2.9e-05,
+      "gravity_torque_nm": 0.0158,
+      "inertia_torque_nm": 0.0007,
+      "stance_torque_nm": 1.4457,
+      "stance_mass_above_kg": 2.9475,
+      "required_torque_nm": 1.4457,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.522,
-      "margin_vs_peak": 1.015,
+      "margin_vs_continuous_rated": 1.475,
+      "margin_vs_peak": 0.984,
       "exceeds_continuous_rated": true,
-      "exceeds_peak": true,
+      "exceeds_peak": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
       "detail": [
         {
           "link": "left_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 18.0
         }
       ]
@@ -629,20 +629,20 @@
         45
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.5678,
+      "distal_mass_kg": 0.5457,
       "max_arm_mm": 18.0,
-      "distal_inertia_kgm2": 3.1e-05,
-      "gravity_torque_nm": 0.0169,
-      "inertia_torque_nm": 0.0008,
-      "stance_torque_nm": 1.26,
-      "stance_mass_above_kg": 2.5688,
-      "required_torque_nm": 1.26,
+      "distal_inertia_kgm2": 2.9e-05,
+      "gravity_torque_nm": 0.0158,
+      "inertia_torque_nm": 0.0007,
+      "stance_torque_nm": 1.2218,
+      "stance_mass_above_kg": 2.491,
+      "required_torque_nm": 1.2218,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.286,
-      "margin_vs_peak": 0.857,
+      "margin_vs_continuous_rated": 1.247,
+      "margin_vs_peak": 0.831,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -650,27 +650,27 @@
       "detail": [
         {
           "link": "right_hip_yaw_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "right_hip_roll_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "right_thigh",
-          "mass_kg": 0.1461,
+          "mass_kg": 0.1403,
           "arm_mm": 0.0
         },
         {
           "link": "right_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 0.0
         },
         {
           "link": "right_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 18.0
         }
       ]
@@ -688,20 +688,20 @@
         25
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.4706,
+      "distal_mass_kg": 0.4511,
       "max_arm_mm": 145.2,
-      "distal_inertia_kgm2": 0.0041,
-      "gravity_torque_nm": 0.3563,
-      "inertia_torque_nm": 0.1025,
-      "stance_torque_nm": 1.3077,
-      "stance_mass_above_kg": 2.666,
-      "required_torque_nm": 1.3077,
+      "distal_inertia_kgm2": 0.00389,
+      "gravity_torque_nm": 0.339,
+      "inertia_torque_nm": 0.0973,
+      "stance_torque_nm": 1.2682,
+      "stance_mass_above_kg": 2.5856,
+      "required_torque_nm": 1.2682,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.334,
-      "margin_vs_peak": 0.89,
+      "margin_vs_continuous_rated": 1.294,
+      "margin_vs_peak": 0.863,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -709,22 +709,22 @@
       "detail": [
         {
           "link": "right_hip_roll_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "right_thigh",
-          "mass_kg": 0.1461,
+          "mass_kg": 0.1403,
           "arm_mm": 51.0
         },
         {
           "link": "right_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 113.8
         },
         {
           "link": "right_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 145.2
         }
       ]
@@ -742,20 +742,20 @@
         60
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.3734,
+      "distal_mass_kg": 0.3565,
       "max_arm_mm": 126.88,
-      "distal_inertia_kgm2": 0.002851,
-      "gravity_torque_nm": 0.2857,
-      "inertia_torque_nm": 0.0713,
-      "stance_torque_nm": 1.3553,
-      "stance_mass_above_kg": 2.7632,
-      "required_torque_nm": 1.3553,
+      "distal_inertia_kgm2": 0.002701,
+      "gravity_torque_nm": 0.2716,
+      "inertia_torque_nm": 0.0675,
+      "stance_torque_nm": 1.3146,
+      "stance_mass_above_kg": 2.6802,
+      "required_torque_nm": 1.3146,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.383,
-      "margin_vs_peak": 0.922,
+      "margin_vs_continuous_rated": 1.341,
+      "margin_vs_peak": 0.894,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -763,17 +763,17 @@
       "detail": [
         {
           "link": "right_thigh",
-          "mass_kg": 0.1461,
+          "mass_kg": 0.1403,
           "arm_mm": 31.4
         },
         {
           "link": "right_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 94.2
         },
         {
           "link": "right_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 126.88
         }
       ]
@@ -791,20 +791,20 @@
         90
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.2273,
+      "distal_mass_kg": 0.2162,
       "max_arm_mm": 65.33,
-      "distal_inertia_kgm2": 0.000538,
-      "gravity_torque_nm": 0.1018,
-      "inertia_torque_nm": 0.0134,
-      "stance_torque_nm": 1.427,
-      "stance_mass_above_kg": 2.9093,
-      "required_torque_nm": 1.427,
+      "distal_inertia_kgm2": 0.000506,
+      "gravity_torque_nm": 0.0963,
+      "inertia_torque_nm": 0.0126,
+      "stance_torque_nm": 1.3835,
+      "stance_mass_above_kg": 2.8205,
+      "required_torque_nm": 1.3835,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.456,
-      "margin_vs_peak": 0.971,
+      "margin_vs_continuous_rated": 1.412,
+      "margin_vs_peak": 0.941,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
       "torque_tier": "M",
@@ -812,12 +812,12 @@
       "detail": [
         {
           "link": "right_shank",
-          "mass_kg": 0.1318,
+          "mass_kg": 0.127,
           "arm_mm": 31.4
         },
         {
           "link": "right_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 65.33
         }
       ]
@@ -835,28 +835,28 @@
         40
       ],
       "max_speed_dps": 180,
-      "distal_mass_kg": 0.0955,
+      "distal_mass_kg": 0.0892,
       "max_arm_mm": 18.0,
-      "distal_inertia_kgm2": 3.1e-05,
-      "gravity_torque_nm": 0.0169,
-      "inertia_torque_nm": 0.0008,
-      "stance_torque_nm": 1.4917,
-      "stance_mass_above_kg": 3.0411,
-      "required_torque_nm": 1.4917,
+      "distal_inertia_kgm2": 2.9e-05,
+      "gravity_torque_nm": 0.0158,
+      "inertia_torque_nm": 0.0007,
+      "stance_torque_nm": 1.4457,
+      "stance_mass_above_kg": 2.9475,
+      "required_torque_nm": 1.4457,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.522,
-      "margin_vs_peak": 1.015,
+      "margin_vs_continuous_rated": 1.475,
+      "margin_vs_peak": 0.984,
       "exceeds_continuous_rated": true,
-      "exceeds_peak": true,
+      "exceeds_peak": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
       "detail": [
         {
           "link": "right_foot",
-          "mass_kg": 0.0955,
+          "mass_kg": 0.0892,
           "arm_mm": 18.0
         }
       ]
@@ -874,11 +874,11 @@
         90
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.3541,
+      "distal_mass_kg": 0.3424,
       "max_arm_mm": 86.3,
-      "distal_inertia_kgm2": 0.000757,
-      "gravity_torque_nm": 0.1223,
-      "inertia_torque_nm": 0.0189,
+      "distal_inertia_kgm2": 0.000728,
+      "gravity_torque_nm": 0.1177,
+      "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
@@ -895,22 +895,22 @@
       "detail": [
         {
           "link": "left_shoulder_pitch_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "left_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 23.6
         },
         {
           "link": "left_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 66.7
         },
         {
           "link": "left_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 86.3
         }
       ]
@@ -928,11 +928,11 @@
         90
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.2569,
+      "distal_mass_kg": 0.2478,
       "max_arm_mm": 86.3,
-      "distal_inertia_kgm2": 0.000757,
-      "gravity_torque_nm": 0.1223,
-      "inertia_torque_nm": 0.0189,
+      "distal_inertia_kgm2": 0.000728,
+      "gravity_torque_nm": 0.1177,
+      "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
@@ -949,17 +949,17 @@
       "detail": [
         {
           "link": "left_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 23.6
         },
         {
           "link": "left_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 66.7
         },
         {
           "link": "left_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 86.3
         }
       ]
@@ -977,11 +977,11 @@
         0
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.1352,
+      "distal_mass_kg": 0.1303,
       "max_arm_mm": 39.2,
-      "distal_inertia_kgm2": 8.6e-05,
-      "gravity_torque_nm": 0.0316,
-      "inertia_torque_nm": 0.0021,
+      "distal_inertia_kgm2": 8.2e-05,
+      "gravity_torque_nm": 0.0303,
+      "inertia_torque_nm": 0.002,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
@@ -998,12 +998,12 @@
       "detail": [
         {
           "link": "left_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 19.6
         },
         {
           "link": "left_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 39.2
         }
       ]
@@ -1021,7 +1021,7 @@
         60
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.0294,
+      "distal_mass_kg": 0.0275,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
       "gravity_torque_nm": 0.0,
@@ -1042,7 +1042,7 @@
       "detail": [
         {
           "link": "left_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 0.0
         }
       ]
@@ -1060,11 +1060,11 @@
         90
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.3541,
+      "distal_mass_kg": 0.3424,
       "max_arm_mm": 86.3,
-      "distal_inertia_kgm2": 0.000757,
-      "gravity_torque_nm": 0.1223,
-      "inertia_torque_nm": 0.0189,
+      "distal_inertia_kgm2": 0.000728,
+      "gravity_torque_nm": 0.1177,
+      "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
@@ -1081,22 +1081,22 @@
       "detail": [
         {
           "link": "right_shoulder_pitch_link",
-          "mass_kg": 0.0972,
+          "mass_kg": 0.0946,
           "arm_mm": 0.0
         },
         {
           "link": "right_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 23.6
         },
         {
           "link": "right_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 66.7
         },
         {
           "link": "right_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 86.3
         }
       ]
@@ -1114,11 +1114,11 @@
         90
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.2569,
+      "distal_mass_kg": 0.2478,
       "max_arm_mm": 86.3,
-      "distal_inertia_kgm2": 0.000757,
-      "gravity_torque_nm": 0.1223,
-      "inertia_torque_nm": 0.0189,
+      "distal_inertia_kgm2": 0.000728,
+      "gravity_torque_nm": 0.1177,
+      "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
@@ -1135,17 +1135,17 @@
       "detail": [
         {
           "link": "right_upper_arm",
-          "mass_kg": 0.1217,
+          "mass_kg": 0.1175,
           "arm_mm": 23.6
         },
         {
           "link": "right_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 66.7
         },
         {
           "link": "right_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 86.3
         }
       ]
@@ -1163,11 +1163,11 @@
         0
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.1352,
+      "distal_mass_kg": 0.1303,
       "max_arm_mm": 39.2,
-      "distal_inertia_kgm2": 8.6e-05,
-      "gravity_torque_nm": 0.0316,
-      "inertia_torque_nm": 0.0021,
+      "distal_inertia_kgm2": 8.2e-05,
+      "gravity_torque_nm": 0.0303,
+      "inertia_torque_nm": 0.002,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
@@ -1184,12 +1184,12 @@
       "detail": [
         {
           "link": "right_forearm",
-          "mass_kg": 0.1058,
+          "mass_kg": 0.1028,
           "arm_mm": 19.6
         },
         {
           "link": "right_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 39.2
         }
       ]
@@ -1207,7 +1207,7 @@
         60
       ],
       "max_speed_dps": 240,
-      "distal_mass_kg": 0.0294,
+      "distal_mass_kg": 0.0275,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
       "gravity_torque_nm": 0.0,
@@ -1228,7 +1228,7 @@
       "detail": [
         {
           "link": "right_gripper",
-          "mass_kg": 0.0294,
+          "mass_kg": 0.0275,
           "arm_mm": 0.0
         }
       ]
@@ -1237,7 +1237,7 @@
   "summary_by_tier": {
     "S": {
       "count": 11,
-      "max_torque_nm": 0.838,
+      "max_torque_nm": 0.804,
       "joints": [
         "head_yaw",
         "head_pitch",
@@ -1254,7 +1254,7 @@
     },
     "M": {
       "count": 11,
-      "max_torque_nm": 1.899,
+      "max_torque_nm": 1.835,
       "joints": [
         "trunk_roll",
         "left_hip_yaw",
@@ -1326,18 +1326,18 @@
     "rated_torque_source": "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书）",
     "stall_torque_nm": 2.94,
     "stall_current_a": 2.7,
-    "avg_servo_current_a": 18.24,
+    "avg_servo_current_a": 17.75,
     "logic_rail_v": 5.0,
     "logic_current_at_5v_a": 1.5,
     "logic_current_at_pack_a": 0.68,
-    "total_avg_current_at_pack_a": 18.92,
+    "total_avg_current_at_pack_a": 18.42,
     "mission_min": 30.0,
-    "consumed_ah": 9.46,
-    "consumed_wh": 105.0,
+    "consumed_ah": 9.21,
+    "consumed_wh": 102.3,
     "usable_fraction": 0.8,
-    "required_nameplate_ah": 11.83,
-    "required_nameplate_wh": 131.3,
-    "estimated_battery_mass_kg": 1.19,
+    "required_nameplate_ah": 11.52,
+    "required_nameplate_wh": 127.8,
+    "estimated_battery_mass_kg": 1.16,
     "per_joint_current": [
       {
         "joint": "head_yaw",
@@ -1351,63 +1351,63 @@
       },
       {
         "joint": "trunk_roll",
-        "operating_torque_nm": 0.6646,
-        "current_a": 1.831
+        "operating_torque_nm": 0.6422,
+        "current_a": 1.769
       },
       {
         "joint": "trunk_pitch",
-        "operating_torque_nm": 0.2933,
-        "current_a": 0.808
+        "operating_torque_nm": 0.2814,
+        "current_a": 0.775
       },
       {
         "joint": "left_hip_yaw",
-        "operating_torque_nm": 0.441,
-        "current_a": 1.215
+        "operating_torque_nm": 0.4276,
+        "current_a": 1.178
       },
       {
         "joint": "left_hip_roll",
-        "operating_torque_nm": 0.4577,
-        "current_a": 1.261
+        "operating_torque_nm": 0.4439,
+        "current_a": 1.223
       },
       {
         "joint": "left_hip_pitch",
-        "operating_torque_nm": 0.4744,
-        "current_a": 1.307
+        "operating_torque_nm": 0.4601,
+        "current_a": 1.268
       },
       {
         "joint": "left_knee_pitch",
-        "operating_torque_nm": 0.4995,
-        "current_a": 1.376
+        "operating_torque_nm": 0.4842,
+        "current_a": 1.334
       },
       {
         "joint": "left_ankle_pitch",
-        "operating_torque_nm": 0.5221,
-        "current_a": 1.438
+        "operating_torque_nm": 0.506,
+        "current_a": 1.394
       },
       {
         "joint": "right_hip_yaw",
-        "operating_torque_nm": 0.441,
-        "current_a": 1.215
+        "operating_torque_nm": 0.4276,
+        "current_a": 1.178
       },
       {
         "joint": "right_hip_roll",
-        "operating_torque_nm": 0.4577,
-        "current_a": 1.261
+        "operating_torque_nm": 0.4439,
+        "current_a": 1.223
       },
       {
         "joint": "right_hip_pitch",
-        "operating_torque_nm": 0.4744,
-        "current_a": 1.307
+        "operating_torque_nm": 0.4601,
+        "current_a": 1.268
       },
       {
         "joint": "right_knee_pitch",
-        "operating_torque_nm": 0.4995,
-        "current_a": 1.376
+        "operating_torque_nm": 0.4842,
+        "current_a": 1.334
       },
       {
         "joint": "right_ankle_pitch",
-        "operating_torque_nm": 0.5221,
-        "current_a": 1.438
+        "operating_torque_nm": 0.506,
+        "current_a": 1.394
       },
       {
         "joint": "left_shoulder_pitch",
@@ -1547,8 +1547,6 @@
       "trunk_roll"
     ],
     "joints_exceeding_peak": [
-      "left_ankle_pitch",
-      "right_ankle_pitch",
       "trunk_roll"
     ]
   }

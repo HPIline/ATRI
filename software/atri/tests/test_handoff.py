@@ -304,7 +304,7 @@ class TestSpecSheetConsistency(unittest.TestCase):
         self.assertNotIn(
             "| `pelvis` | trunk | rounded_box | 100 × 80 × 35 | 45 | 225 |",
             text)
-        self.assertIn("3.136", text)
+        self.assertIn("3.036", text)
         self.assertNotIn("2146", text)
 
     def test_sheet_states_dual_criterion(self):
@@ -325,10 +325,27 @@ class TestBatteryAndServoPresentation(unittest.TestCase):
             encoding="utf-8")
 
     def test_battery_requirement_is_current(self):
+        """续航需求必须与**自身口径**自洽，而不是钉死在某个历史数值上。
+
+        ⚠️ 2026-09-12：模型质量回灌（结构 1490→1390 g、整机 3136→3036 g）后，
+        `required_nameplate_ah` 由 11.83 降到 **11.52**、`consumed_ah` 由 9.46 降到 9.21 —
+        这是"同一口径联动"的正常结果，不是回归。原断言硬编码 11.83/9.46，一改质量就红。
+        现在改为交叉验证（电流 × 时长 ÷ 可用放电深度），并对量级做区间约束；
+        同时仍要求文档里写明"2000 mAh 不够"这件事（缺口不能被悄悄抹掉）。
+        """
         pb = self.data["power_budget"]
-        self.assertAlmostEqual(pb["required_nameplate_ah"], 11.83, places=2)
-        self.assertAlmostEqual(pb["consumed_ah"], 9.46, places=2)
-        self.assertTrue("11.83" in self.md or "不够" in self.md)
+        consumed = pb["consumed_ah"]
+        # consumed_ah = 总电流 × 时长
+        self.assertAlmostEqual(
+            consumed, pb["total_avg_current_at_pack_a"] * pb["mission_min"] / 60.0,
+            places=1)
+        # required_nameplate_ah = consumed / 可用放电深度（现取 0.8）
+        self.assertAlmostEqual(pb["required_nameplate_ah"], consumed / 0.8, places=1)
+        # 量级约束：换过舵机口径/质量口径后若跑到这个区间外，说明模型坏了
+        self.assertTrue(8.0 <= pb["required_nameplate_ah"] <= 15.0,
+                        f"需求 {pb['required_nameplate_ah']} Ah 超出合理量级")
+        # 缺口必须写在文档里（"不够"或具体 Ah 数），且不得回退到旧口径
+        self.assertTrue("不够" in self.md or f"{pb['required_nameplate_ah']:.2f}" in self.md)
         self.assertNotIn("2.89", self.md)
 
     def test_servo_size_is_model_size(self):

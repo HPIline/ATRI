@@ -1,66 +1,287 @@
 {
   "schema_version": "1.0",
-  "source_commit": "6d4b077 → 2026-09-12 重测",
-  "source_doc": "design/cad/out/report.md（2026-09-12 00:01，自动生成）；历史过程见 项目文档/骨架结构与集成方案.md §6–§7",
+  "source_commit": "6d4b077 → 2026-09-12 09:06 重测（第 6–10 轮合入后）",
+  "source_doc": "design/cad/out/report.md（2026-09-12 09:06，自动生成）",
   "source_author": "Junko-233",
-  "measured_by": "design/cad/assembly.py --all --no-export + design/cad/audit_assembly.py（2026-09-12，第 5 轮之后）",
-  "superseded_by": "design/handoff/装配一致性修正记录.md §4.4 / §8.3 —— v3 虚高值 1790 g / 3435 g / 418×223×129 mm 已作废",
+  "measured_by": "design/cad/build_all.py（2026-09-12 09:06 落盘：out/report.md + out/skeleton_parts.json）；本文件由『模型质量回灌』线程按落盘产物转录，未重跑 CAD",
+  "superseded_by": "design/handoff/装配一致性修正记录.md §4.4 / §8.3 —— v3 虚高值 1790 g / 3435 g / 418×223×129 mm、第 5 轮值 1490 g / 3136 g / 407×263×146 mm 均已作废",
   "generated_from": "design/cad/assembly.py + build_all.py 的真实 CAD 体积 × PETG 1.27 g/cm³",
-  "note": "CAD 实装测量结果。与基元模型（robot_model.json 的 primitives）的差异是真实的：基元模型里 link 包围盒是占位值，舵机笼与支架的突出量没进门。结构件为实算，整机为纸面推算（重量方案未定案）。",
+  "note": "CAD 实装测量结果。与基元模型（robot_model.json 的 primitives）的差异是真实的：基元模型里 link 包围盒是占位值，舵机笼与支架的突出量没进门。结构件为**实算**（1390.4 g / 81 件，18 类零件族，真实 B-rep 体积 × PETG 1.27 g/cm³，头壳为 PLA）；整机为**纸面推算**（重量方案未定案）。",
   "installed_envelope_mm": {
-    "x_depth": 146.0,
-    "y_width": 263.0,
+    "x_depth": 160.0,
+    "y_width": 268.0,
     "z_height": 407.0,
     "order_note": "X×Y×Z = 深×宽×高（与 robot_model.json 的 [高, 宽, 深] 顺序不同）",
-    "kinematic_envelope_mm": [372.8, 190.0, 123.0],
-    "delta_mm": {"height": 34.2, "width": 73.0, "depth": 23.0},
-    "limit_check": "赛题上限 600×300×300 → 407/263/146 全部安全",
+    "kinematic_envelope_mm": [
+      372.8,
+      190.0,
+      123.0
+    ],
+    "delta_mm": {
+      "height": 34.2,
+      "width": 78.0,
+      "depth": 37.0
+    },
+    "limit_check": "赛题上限 600×300×300 → 407/268/160 全部安全（宽余 +32 mm）；但**内部布局门禁 270 mm 只剩 2 mm**（design/cad/test_layout.py 的 ENVELOPE_WIDTH_MAX_MM，自设门槛，非赛题红线）",
     "history": [
-      {"caliber": "v3 虚高值（6d4b077）", "x_depth": 129.0, "y_width": 223.0, "z_height": 418.0,
-       "why": "『舵机 35 与 24.7 用反』时期，已作废（装配一致性修正记录.md §4.4）"},
-      {"caliber": "第 4 轮修正后", "x_depth": 129.0, "y_width": 204.0, "z_height": 407.0,
-       "why": "装配一致性修正，见装配一致性修正记录.md §4.4"},
-      {"caliber": "第 5 轮后（当前）", "x_depth": 146.0, "y_width": 263.0, "z_height": 407.0,
-       "why": "背挂板 + 肩簇外甩 + 背包链路再变；本轮 assembly.py --all --no-export 实测"}
+      {
+        "caliber": "v3 虚高值（6d4b077）",
+        "x_depth": 129.0,
+        "y_width": 223.0,
+        "z_height": 418.0,
+        "why": "『舵机 35 与 24.7 用反』时期，已作废（装配一致性修正记录.md §4.4）"
+      },
+      {
+        "caliber": "第 4 轮修正后",
+        "x_depth": 129.0,
+        "y_width": 204.0,
+        "z_height": 407.0,
+        "why": "装配一致性修正，见装配一致性修正记录.md §4.4"
+      },
+      {
+        "caliber": "第 5 轮后（已被下一行取代）",
+        "x_depth": 146.0,
+        "y_width": 263.0,
+        "z_height": 407.0,
+        "why": "背挂板 + 肩簇外甩 + 背包链路再变；本轮 assembly.py --all --no-export 实测"
+      },
+      {
+        "caliber": "第 6–10 轮合入后（当前）",
+        "x_depth": 160.0,
+        "y_width": 268.0,
+        "z_height": 407.0,
+        "why": "髋肩错轴 30–35 mm：cluster_horn_arm + cluster_outrigger + backpack_plate；宽 263 → 268、深 146 → 160；build_all.py 09:06 落盘（本轮按落盘产物转录，未重跑 CAD）"
+      }
     ]
   },
   "structure_parts_g": {
-    "joint_cage": {"qty": 13, "each": 22.1, "subtotal": 286.9},
-    "limb_tube": {"qty": 8, "each": 24.5, "subtotal": 195.7},
-    "torso_frame": {"qty": 1, "each": 164.9, "subtotal": 164.9},
-    "limb_fork": {"qty": 12, "each": 13.2, "subtotal": 158.5},
-    "cluster_outrigger": {"qty": 8, "each": 17.2, "subtotal": 137.4},
-    "pelvis_frame": {"qty": 1, "each": 97.9, "subtotal": 97.9},
-    "joint_cage_yaw": {"qty": 3, "each": 27.5, "subtotal": 82.4},
-    "head_shell": {"qty": 1, "each": 67.9, "subtotal": 67.9},
-    "foot_plate": {"qty": 2, "each": 32.1, "subtotal": 64.2},
-    "compact_adapter": {"qty": 2, "each": 20.7, "subtotal": 41.4},
-    "backpack_plate": {"qty": 1, "each": 40.4, "subtotal": 40.4},
-    "gripper_body": {"qty": 2, "each": 18.2, "subtotal": 36.5},
-    "cluster_horn_arm": {"qty": 6, "each": 5.4, "subtotal": 32.5},
-    "battery_tray": {"qty": 1, "each": 30.8, "subtotal": 30.8},
-    "electronics_deck": {"qty": 1, "each": 23.7, "subtotal": 23.7},
-    "cable_clip": {"qty": 16, "each": 0.9, "subtotal": 14.6},
-    "gripper_jaw": {"qty": 2, "each": 4.5, "subtotal": 9.0},
-    "pdb_mount": {"qty": 1, "each": 5.2, "subtotal": 5.2}
+    "joint_cage": {
+      "qty": 13,
+      "each": 22.1,
+      "subtotal": 286.9,
+      "material": "PETG",
+      "infill": 0.55,
+      "mass_printed_g": 22.07,
+      "delta_vs_prev_g": 0.0
+    },
+    "limb_tube": {
+      "qty": 8,
+      "each": 24.5,
+      "subtotal": 195.7,
+      "material": "PETG",
+      "infill": 0.5,
+      "mass_printed_g": 24.46,
+      "delta_vs_prev_g": 0.0
+    },
+    "limb_fork": {
+      "qty": 12,
+      "each": 13.2,
+      "subtotal": 158.5,
+      "material": "PETG",
+      "infill": 0.55,
+      "mass_printed_g": 13.21,
+      "delta_vs_prev_g": 0.0
+    },
+    "torso_frame": {
+      "qty": 1,
+      "each": 137.6,
+      "subtotal": 137.6,
+      "material": "PETG",
+      "infill": 0.45,
+      "mass_printed_g": 137.56,
+      "delta_vs_prev_g": -27.3
+    },
+    "cluster_outrigger": {
+      "qty": 8,
+      "each": 17.1,
+      "subtotal": 137.2,
+      "material": "PETG",
+      "infill": 0.55,
+      "mass_printed_g": 17.15,
+      "delta_vs_prev_g": -0.2
+    },
+    "joint_cage_yaw": {
+      "qty": 3,
+      "each": 27.5,
+      "subtotal": 82.4,
+      "material": "PETG",
+      "infill": 0.55,
+      "mass_printed_g": 27.47,
+      "delta_vs_prev_g": 0.0
+    },
+    "head_shell": {
+      "qty": 1,
+      "each": 53.9,
+      "subtotal": 53.9,
+      "material": "PLA",
+      "infill": 0.2,
+      "mass_printed_g": 53.94,
+      "delta_vs_prev_g": -14.0
+    },
+    "foot_plate": {
+      "qty": 2,
+      "each": 26.7,
+      "subtotal": 53.4,
+      "material": "PETG",
+      "infill": 0.4,
+      "mass_printed_g": 26.68,
+      "delta_vs_prev_g": -10.8
+    },
+    "pelvis_frame": {
+      "qty": 1,
+      "each": 50.4,
+      "subtotal": 50.4,
+      "material": "PETG",
+      "infill": 0.45,
+      "mass_printed_g": 50.36,
+      "delta_vs_prev_g": -47.5
+    },
+    "compact_adapter": {
+      "qty": 2,
+      "each": 20.7,
+      "subtotal": 41.4,
+      "material": "PETG",
+      "infill": 0.6,
+      "mass_printed_g": 20.71,
+      "delta_vs_prev_g": 0.0
+    },
+    "backpack_plate": {
+      "qty": 1,
+      "each": 40.4,
+      "subtotal": 40.4,
+      "material": "PETG",
+      "infill": 0.35,
+      "mass_printed_g": 40.36,
+      "delta_vs_prev_g": 0.0
+    },
+    "gripper_body": {
+      "qty": 2,
+      "each": 18.2,
+      "subtotal": 36.5,
+      "material": "PETG",
+      "infill": 0.5,
+      "mass_printed_g": 18.23,
+      "delta_vs_prev_g": 0.0
+    },
+    "cluster_horn_arm": {
+      "qty": 6,
+      "each": 5.4,
+      "subtotal": 32.5,
+      "material": "PETG",
+      "infill": 0.55,
+      "mass_printed_g": 5.41,
+      "delta_vs_prev_g": 0.0
+    },
+    "battery_tray": {
+      "qty": 1,
+      "each": 30.8,
+      "subtotal": 30.8,
+      "material": "PETG",
+      "infill": 0.35,
+      "mass_printed_g": 30.81,
+      "delta_vs_prev_g": 0.0
+    },
+    "electronics_deck": {
+      "qty": 1,
+      "each": 23.7,
+      "subtotal": 23.7,
+      "material": "PETG",
+      "infill": 0.35,
+      "mass_printed_g": 23.66,
+      "delta_vs_prev_g": 0.0
+    },
+    "cable_clip": {
+      "qty": 16,
+      "each": 0.9,
+      "subtotal": 14.6,
+      "material": "PETG",
+      "infill": 0.3,
+      "mass_printed_g": 0.91,
+      "delta_vs_prev_g": 0.0
+    },
+    "gripper_jaw": {
+      "qty": 2,
+      "each": 4.7,
+      "subtotal": 9.3,
+      "material": "PETG",
+      "infill": 0.5,
+      "mass_printed_g": 4.67,
+      "delta_vs_prev_g": 0.3
+    },
+    "pdb_mount": {
+      "qty": 1,
+      "each": 5.2,
+      "subtotal": 5.2,
+      "material": "PETG",
+      "infill": 0.35,
+      "mass_printed_g": 5.22,
+      "delta_vs_prev_g": 0.0
+    }
   },
-  "parts_source": "design/cad/out/report.md（2026-09-12 00:01，自动生成）",
-  "structure_total_g": 1490.0,
+  "parts_source": "design/cad/out/skeleton_parts.json + out/report.md（2026-09-12 09:06，build_all.py 自动生成）",
+  "structure_total_g": 1390.4,
   "part_count": 81,
-  "total_mass_g": 3136.0,
-  "total_mass_status": "纸面推算（1490 结构实算 + 1210 舵机 + 316 电子件电池 + 120 线束紧固件）≈3.136 kg；整机重量方案未定案",
-  "total_mass_history_g": [3435.0, 3050.0],
+  "total_mass_g": 3036.4,
+  "total_mass_status": "纸面推算（1390.4 结构实算 + 1210 舵机 + 316 电子件电池 + 120 线束紧固件）= 3036.4 g ≈ 3.036 kg；**整机重量方案未定案**（减重 / 换工艺 / 减件三选一），定案后须重测回填。out/report.md 取整显示 3036 g，二者同源。",
+  "total_mass_history_g": [
+    3435.0,
+    3050.0,
+    3136.0
+  ],
   "reduction_paths": [
-    {"id": "A", "name": "拓扑减重", "method": "关节笼/叉挖成桁架、托盘改镂空网格、躯干框架砍掉 1/3 材料",
-     "structure_g": [900, 1100], "total_kg": [2.5, 2.7], "ankle_pct": [84, 90],
-     "cost": "需 2–3 轮迭代 + 强度校核；余量仍薄"},
-    {"id": "B", "name": "买金属件", "method": "关节笼/叉改用市售铝合金 U 型架（3–6 元/件），只自打印框架与托盘",
-     "structure_g": [550, 700], "total_kg": [2.2, 2.4], "ankle_pct": [73, 80],
-     "cost": "单价上升约 300 元，但省 20+ 小时打印"},
-    {"id": "C", "name": "减自由度/换舵机", "method": "躯干 2 自由度改 1；或换 40 g 级舵机",
-     "structure_g": null, "total_kg": 3.0, "ankle_pct": 100,
-     "cost": "违背赛题『上肢+躯干 ≥10』或牺牲力矩余量"}
+    {
+      "id": "A",
+      "name": "拓扑减重",
+      "method": "关节笼/叉挖成桁架、托盘改镂空网格、躯干框架砍掉 1/3 材料",
+      "structure_g": [
+        900,
+        1100
+      ],
+      "total_kg": [
+        2.5,
+        2.7
+      ],
+      "ankle_pct": [
+        84,
+        90
+      ],
+      "cost": "需 2–3 轮迭代 + 强度校核；余量仍薄"
+    },
+    {
+      "id": "B",
+      "name": "买金属件",
+      "method": "关节笼/叉改用市售铝合金 U 型架（3–6 元/件），只自打印框架与托盘",
+      "structure_g": [
+        550,
+        700
+      ],
+      "total_kg": [
+        2.2,
+        2.4
+      ],
+      "ankle_pct": [
+        73,
+        80
+      ],
+      "cost": "单价上升约 300 元，但省 20+ 小时打印"
+    },
+    {
+      "id": "C",
+      "name": "减自由度/换舵机",
+      "method": "躯干 2 自由度改 1；或换 40 g 级舵机",
+      "structure_g": null,
+      "total_kg": 3.0,
+      "ankle_pct": 100,
+      "cost": "违背赛题『上肢+躯干 ≥10』或牺牲力矩余量"
+    }
   ],
   "recommendation": "A + B 组合：大件（骨盆/躯干/头壳）自打印并做拓扑减重，22 个关节模块优先买市售铝合金 U 型架。",
-  "pending": "采购前必须按 §7 表重算一次质量，再决定舵机型号 —— 本文件采用『CAD 实装』作为当前口径（未执行减重）。"
+  "pending": "采购前必须按 §7 表重算一次质量，再决定舵机型号 —— 本文件采用『CAD 实装』作为当前口径（未执行减重）。　〔2026-09-12 更新：结构件口径已回灌为 1390.4 g / 81 件；逐 link 质量由 gen_v3_baseline.py --refresh 按统一比例重摊，见 link_mass_allocation_note。〕",
+  "structure_total_history_g": [
+    1790.0,
+    1404.0,
+    1490.0
+  ],
+  "link_mass_allocation_note": "本文件只落盘**整机/结构件总量与零件族明细**；逐 link 分摊由 gen_v3_baseline.py --refresh 完成：统一比例 k = 1390.4 / 1490.0 = 0.933154，逐 link 的 structure 项 ×k 后四舍五入到 0.1 g，线束/紧固件 120 g 按各 link 的 (structure+servos+electronics) 占比重摊，mass_kg = 四项之和 / 1000（保留 5 位小数）。**已知局限**：统一比例不区分零件族，逐 link 质量只保证**总量正确（1390.4 g / 81 件）**，不保证逐 link 精确——误差 = 该 link 的族构成偏离全局平均（−6.69%）的程度。极端情形：若某 link 全由 pelvis_frame（真实 −48.5%）构成，统一比例会把 97.9 g 记成 91.3 g，偏差 +40.9 g（+81%）；head_shell（真实 −20.6%）同量级。本轮实际被抹平的族差：pelvis_frame −47.5 g、torso_frame −27.3 g、head_shell −14.0 g（PLA）、foot_plate −10.8 g、joint_cage_yaw −0.1 g、cluster_outrigger −0.2 g、gripper_jaw +0.3 g。要逐 link 精确，需在生成器里加『零件族 → link』映射（本轮未做，见线程报告）。",
+  "reduction_paths_caliber_note": "reduction_paths 的 structure_g / total_kg / ankle_pct 仍按**回灌前口径**写成，未随本次质量回灌重算（它们描述的是三条减重路径的目标区间，非当前实测值）——引用 ankle_pct 前须按新口径重算。"
 }

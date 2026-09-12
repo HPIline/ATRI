@@ -132,9 +132,13 @@ def _mass_status(cad: Dict[str, Any]) -> Dict[str, Any]:
                      "why": "『舵机 35 与 24.7 用反』时期，见 装配一致性修正记录.md §4.4"},
                     {"caliber": "第 4 轮修正后", "structure_g": 1404.0, "total_g": 3050.0,
                      "why": "装配一致性修正，见 装配一致性修正记录.md §4.4"},
-                    {"caliber": "第 5 轮后（当前）", "structure_g": float(cad["structure_total_g"]),
+                    {"caliber": "第 5 轮后", "structure_g": 1490.0, "total_g": 3136.0,
+                     "why": "第 5 轮新零件族 +86 g，见 装配一致性修正记录.md §8.3"},
+                    {"caliber": "第 6–10 轮合入后（当前）", "structure_g": float(cad["structure_total_g"]),
                      "total_g": float(total) if total else None,
-                     "why": "第 5 轮新零件族 +86 g；包络再变，见 装配一致性修正记录.md §8.3"}],
+                     "why": "atri-next 十轮 CAD 改造（骨盆 U 架/头壳封顶/足垫/背挂外移），"
+                            "结构件 1490 → 1390 g；at 2026-09-12 模型质量已回灌 URDF，"
+                            "见 design/handoff/线程报告-模型质量回灌.md"}],
     }
 
 def _sync_components(cad: Dict[str, Any]) -> None:

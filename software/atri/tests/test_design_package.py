@@ -100,7 +100,7 @@ class TestRobotModel(unittest.TestCase):
                                sd["stall_torque_nm"], places=3)
 
     def test_structure_mass_matches_cad_measurement(self):
-        """D-4：结构件质量与件数以 CAD 实算（81 件 / 1490 g）为事实源。"""
+        """D-4：结构件质量与件数以 CAD 实算（81 件 / 1390 g）为事实源。"""
         cad = json.loads(
             (DESIGN / "reference" / "cad_assembly_measurements.json")
             .read_text(encoding="utf-8"))

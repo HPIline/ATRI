@@ -221,7 +221,7 @@ def main(argv: List[str] | None = None) -> int:
     A("## 6. 力矩包络与判据")
     A("")
     A(f"单腿支撑工况：`τ ≈ 0.49 × 整机总质量`（CoP 偏移 25 mm × 动载系数 2.0，见 `gen_handoff.py`）。")
-    A(f"整机 {total_headline_kg:.3f} kg（结构实算 1490 g / 整机为纸面推算，重量方案未定案） → 腿部关节需求 ≈ {0.4905 * total_headline_kg:.2f} N·m。")
+    A(f"整机 {total_headline_kg:.3f} kg（结构实算 1390 g / 整机为纸面推算，重量方案未定案） → 腿部关节需求 ≈ {0.4905 * total_headline_kg:.2f} N·m。")
     A("")
     A("| 关节 | 需求 (N·m) | 占**官方额定** {:.2f} | 占历史判据『堵转×50%』{:.2f} | 主导因素 |".format(
         rated_vendor, rated_half_stall))
