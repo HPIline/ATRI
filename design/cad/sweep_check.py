@@ -49,10 +49,30 @@ TIMEOUT_FULL = 1800   # 30 min
 
 
 def set_global_timeout(seconds: int) -> None:
-    def _handler(signum, frame):
-        raise TimeoutError(f"脚本运行超过 {seconds} 秒，主动终止")
-    signal.signal(signal.SIGALRM, _handler)
-    signal.alarm(seconds)
+    """全局超时（快速失败）。
+
+    POSIX：SIGALRM 在主线程抛 TimeoutError。
+    Windows：没有 SIGALRM / signal.alarm，退化为守护线程看门狗——线程无法向主线程
+    抛异常，只能直接终止进程（退出码 3），语义与 POSIX 侧"超时即终止、不出报告"一致。
+    """
+    if hasattr(signal, "SIGALRM"):
+        def _handler(signum, frame):
+            raise TimeoutError(f"脚本运行超过 {seconds} 秒，主动终止")
+        signal.signal(signal.SIGALRM, _handler)
+        signal.alarm(seconds)
+        return
+
+    import os
+    import threading
+
+    def _watchdog() -> None:
+        print(f"\n[超时] 扫掠超过 {seconds} 秒仍未结束，主动终止（Windows 看门狗）",
+              flush=True)
+        os._exit(3)
+
+    timer = threading.Timer(seconds, _watchdog)
+    timer.daemon = True
+    timer.start()
 
 
 # --------------------------------------------------------------------------
