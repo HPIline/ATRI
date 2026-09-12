@@ -73,15 +73,25 @@ class TestQRCodeGenerator(unittest.TestCase):
                 gen.generate("fly", Path(tmp) / "x.png")
 
     def test_missing_qrcode_raises(self):
+        """qrcode 缺失时必须报可读错误——**与环境无关**地模拟"缺依赖"。
+
+        ⚠️ 2026-09-12 修：原写法用 `sys.modules.pop("qrcode")` 隐藏模块，但**包真装在
+        site-packages 里时，下一次 import 会重新从磁盘导入**，于是这条测试在
+        "环境里恰好装了 qrcode"时假失败（本机 09:23 被装上 qrcode 8.2 后即触发）。
+        正确做法是往 `sys.modules` 里塞 `None`：Python 见到 None 会直接抛 ImportError，
+        与磁盘上有没有这个包无关。
+        """
         gen = QRCodeGenerator(qrcode_module=None)
-        # Force import failure by temporarily hiding qrcode in sys.modules if present.
         import sys
-        saved = sys.modules.pop("qrcode", None)
+        saved = sys.modules.get("qrcode", "__ABSENT__")
+        sys.modules["qrcode"] = None
         try:
             with self.assertRaises(QRGeneratorError):
                 gen.generate("walk", Path("/tmp/x.png"))
         finally:
-            if saved is not None:
+            if saved == "__ABSENT__":
+                sys.modules.pop("qrcode", None)
+            else:
                 sys.modules["qrcode"] = saved
 
     def test_default_actions_removed(self):
