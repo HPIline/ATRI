@@ -38,7 +38,7 @@ A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人
 # 1. 进入软件核心目录
 cd software/atri
 
-# 2. 运行主软件栈单元测试（437 项）
+# 2. 运行主软件栈单元测试（488 项；零依赖环境下人脸相关 38 项自动跳过）
 python3 -m unittest discover -s tests
 
 # 3. 运行赛题五项任务无硬件闭环演练（--fast 跳过动作等待，秒级自检）
@@ -48,6 +48,45 @@ python3 run_demo.py --fast
 cd ../..
 python3 -m unittest discover -s webots/tests
 ```
+
+---
+
+## 人脸识别 T-01（2026-09-12 做实）
+
+T-01 现在是一条**真识别链路**：YuNet 检测 → 5 关键点对齐 → SFace 128 维特征 → 人脸库余弦比对 → 显式拒识。
+全离线、CPU、无 GPU。原「Haar 检测 + 参数兜底」路径**保留可用**，真识别通路优先。
+
+```bash
+# 一次性环境（仓库根目录）
+python3 -m venv .venv-face
+.venv-face/bin/pip install "opencv-contrib-python==4.11.0.86" "numpy<2" pyarrow
+
+# 拉模型（约 37 MB，带 sha256 校验；模型不入库）
+.venv-face/bin/python software/atri/tools/fetch_models.py
+
+# 注册人脸（只写特征向量与姓名，原图不入库）
+.venv-face/bin/python software/atri/tools/face_enroll.py \
+    --from-dir 本地数据/faces/team --db software/atri/config/face_db.json --append
+
+# 用一张图真跑 T-01（没有摄像头也能验证）
+cd software/atri && ../../.venv-face/bin/python run_demo.py --fast \
+    --face-image ../../本地数据/faces/e2e/Tony_Blair_0040.jpg \
+    --face-db ../../本地数据/faces/demo_face_db.json
+
+# LFW 评测（出成功率 / 混淆矩阵 / EER 曲线）
+.venv-face/bin/python software/atri/tools/face_eval.py --hard --compare-haar \
+    --report design/handoff/T-01-LFW评测报告.md
+```
+
+**LFW 实测**（`design/handoff/T-01-LFW评测报告.md`）：检测 100%；rank-1 5 人 100%、
+困难协议（末位选人 + 单张注册 + 随机划分）20 人 99.5% / 50 人 98.6%；
+阈值在**不重叠的 20 人身份池**上标定，EER 1.06%。
+
+> ⚠️ 数字来自 **LFW 公开数据集**，**不是实机摄像头实测**；距离档与现场光照未测。
+> 人脸库为空时对所有脸只会说「不认识」，这是刻意行为。
+
+> 📌 **T-01 的对外口径（检测 / 识别）与退化通路兜底是否保留，待团队确认**：
+> 差异逐条列在 `design/handoff/T-01-口径差异清单.md`。
 
 ---
 

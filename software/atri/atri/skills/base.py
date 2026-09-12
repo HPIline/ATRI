@@ -19,10 +19,23 @@ class SkillContext:
     perception: Any = None
     tts_engine: Any = None
     gait: Dict[str, Any] = field(default_factory=dict)
+    # 真识别通路（T-01）：两者都给出时才走真识别，否则退回感知接口
+    face_recognizer: Any = None
+    frame_source: Any = None
 
     def __post_init__(self) -> None:
         if self.log is None:
             self.log = []
+
+    def grab_frame(self) -> Any:
+        """取一帧 BGR 图像；没有取帧来源时返回 None（调用方必须据此判失败，不能假装看见了）。"""
+        if self.frame_source is None:
+            return None
+        return self.frame_source.grab()
+
+    def perception_is_real(self) -> bool:
+        """感知接口是不是真的：mock 后端返回的是常量，不是"看"出来的。"""
+        return str(getattr(self.perception, "name", "mock")) != "mock"
 
     def perceive(self, key: str) -> Dict[str, Any]:
         """读取感知项数据。

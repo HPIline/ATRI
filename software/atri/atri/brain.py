@@ -17,12 +17,17 @@ class Brain:
         tts: Any = None,
         gait: Optional[Dict[str, Any]] = None,
         fsm_verbose: bool = True,
+        face_recognizer: Any = None,
+        frame_source: Any = None,
     ) -> None:
         self.cerebellum = cerebellum
         self.perception = perception
         self.tts = tts
         self.gait = dict(gait or {})
         self.fsm_verbose = fsm_verbose
+        # 真识别通路（T-01）：两者都非空时 face 技能走真识别而不是 Mock 观测
+        self.face_recognizer = face_recognizer
+        self.frame_source = frame_source
         self.skills = {name: cls() for name, cls in DEFAULT_SKILLS.items()}
 
     def register_skill(self, skill: Any) -> None:
@@ -72,6 +77,8 @@ class Brain:
                     perception=self.perception,
                     tts_engine=self.tts,
                     gait=self.gait,
+                    face_recognizer=self.face_recognizer,
+                    frame_source=self.frame_source,
                 )
                 result = skill.run(ctx)
                 results.append(result)

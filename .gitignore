@@ -54,3 +54,15 @@ ppt/out/
 # 忽略整个 ppt/ 生成流水线与脚本，仅保留成品 PPTX
 ppt/*
 !ppt/ATRI-答辩PPT-v4.pptx
+
+# ── T-01 人脸识别（2026-09-12） ──────────────────────────────
+# 人脸模型（约 37 MB 二进制，按需拉取而不是入库；拉取带 sha256 校验）
+#   python software/atri/tools/fetch_models.py
+models/
+
+# 本地数据：人脸数据集与采集原图。**含生物特征，绝不入库。**
+# 人脸库里只存 128 维特征向量与姓名（software/atri/config/face_db.json），原图一律留在本地。
+本地数据/
+
+# 人脸开发环境（opencv-contrib + pyarrow）
+.venv-face/

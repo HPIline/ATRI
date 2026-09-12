@@ -1,3 +1,23 @@
 # 主包不需要这些。板上或开发机按需安装。
 # OpenCV 走 headless，适合无显示器的 Linux / ARM。
 opencv-python-headless>=4.8
+
+# ── 人脸识别（T-01，atri/perception/faces/）──────────────────────────────
+# SFace（cv2.FaceRecognizerSF）与 cv2.face **只在 contrib 包里**，
+# 上面的 opencv-python / opencv-python-headless 都不含它。
+#
+# 两者是同一个 cv2 包，**互斥**，按机器情况二选一装（不要同时装）：
+#   有显示器：
+#     pip install "opencv-contrib-python==4.11.0.86" "numpy<2"
+#   无显示器 / 树莓派：
+#     pip install "opencv-contrib-python-headless==4.11.0.86" "numpy<2"
+#
+# 锁 4.11.0.86 的理由（实测）：aarch64 有官方 wheel（4.10.0.84 / 4.11.0.86 均在），
+# 且该版本实测能加载 YuNet 与 SFace 两个官方 ONNX 模型；5.0.x 的 DNN 新引擎
+# 对同一份 SFace ONNX 报解析失败（macOS 实测），部署路上没必要埋这个雷。
+#
+# 跑 LFW 评测（software/atri/tools/face_eval.py）另需：
+#   pip install pyarrow
+#
+# 模型文件（约 37 MB）不入库，用脚本按需拉取并校验 sha256：
+#   python software/atri/tools/fetch_models.py

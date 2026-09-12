@@ -1,4 +1,18 @@
 {
-  "测试员A": [0.12, 0.34, 0.56, 0.78],
-  "测试员B": [0.21, 0.43, 0.65, 0.87]
+  "schema_version": 1,
+  "embedder": "sface",
+  "dim": 128,
+  "threshold": 0.278,
+  "created_at": "2026-09-12T00:00:00+08:00",
+  "meta": {
+    "status": "empty",
+    "note": "空库。没有注册任何人时，机器人对所有脸都只会说『不认识』—— 这是刻意行为，不是故障。",
+    "previous_content": "旧版是 4 维占位假数据 {\"测试员A\": [0.12,0.34,0.56,0.78]}，无出处、无算法、也无任何代码加载。已作废。",
+    "threshold_source": "software/atri/tools/face_eval.py 在 LFW 独立身份池（20 人 / 900 genuine + 900 impostor 配对）上标定：EER = 1.06%，阈值取 EER 点 0.2780。",
+    "threshold_caveat": "该阈值来自 LFW（公开人物、网图、分辨率一致）。换成自采摄像头画面后必须**重新标定**，不要直接沿用。",
+    "privacy": "本库只存 128 维特征向量与姓名，不存人脸原图。但请注意：特征向量本身也是生物特征，可用于比对，不属于脱敏数据。",
+    "enroll_hint": "注册见 software/atri/tools/face_enroll.py；评测见 design/handoff/T-01-LFW评测报告.md",
+    "scope_note": "T-01 的对外口径（检测 vs 识别）待团队确认，见 design/handoff/T-01-口径差异清单.md"
+  },
+  "people": []
 }

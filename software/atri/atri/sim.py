@@ -48,7 +48,56 @@ def _fsm_verbose(config: Dict[str, Any]) -> bool:
         return True
 
 
-def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
+def build_face_recognizer(models_dir: str | Path, db_path: str | Path) -> tuple[Any, Any]:
+    """构造真识别链路（T-01）；任何一环缺失都**说清缺什么并返回 (None, None)**，不静默降级。
+
+    返回 ``(recognizer, None)``；第二个元素留给调用方接取帧来源。
+    """
+    try:
+        from .perception.faces import FaceDB, FaceRecognizer, SFaceEmbedder, YuNetDetector
+    except ImportError as exc:
+        print(f"  ⚠ 未启用真识别：缺少依赖（{exc}）")
+        print(
+            '    请执行： pip install "opencv-contrib-python==4.11.0.86" "numpy<2"'
+            "（见 requirements-optional.txt）"
+        )
+        return None, None
+
+    models = Path(models_dir)
+    yunet = models / "face_detection_yunet_2023mar.onnx"
+    sface = models / "face_recognition_sface_2021dec.onnx"
+    missing = [str(p) for p in (yunet, sface) if not p.exists()]
+    if missing:
+        print("  ⚠ 未启用真识别：缺少模型 " + "、".join(missing))
+        print("    先运行： python tools/fetch_models.py")
+        return None, None
+
+    db_file = Path(db_path)
+    if not db_file.exists():
+        print(f"  ⚠ 未启用真识别：找不到人脸库 {db_file}")
+        return None, None
+
+    db = FaceDB.load(db_file)
+    if len(db) == 0:
+        print(f"  ⚠ 人脸库 {db_file} 里没有任何人（0 条向量），T-01 将对所有脸都判不认识")
+        print("    注册： python tools/face_enroll.py --help")
+        return None, None
+
+    recognizer = FaceRecognizer(
+        detector=YuNetDetector(str(yunet)),
+        embedder=SFaceEmbedder(str(sface)),
+        db=db,
+    )
+    print(f"  ✓ 真识别已启用：{len(db)} 条向量 / {len(db.names)} 人，阈值 {db.threshold}")
+    return recognizer, None
+
+
+def build_robot(
+    config: Dict[str, Any],
+    sleeper: Any = None,
+    face_recognizer: Any = None,
+    frame_source: Any = None,
+) -> Dict[str, Any]:
     servo_bus = MockServoBus()
     cerebellum = Cerebellum(servo_bus=servo_bus, sleeper=sleeper)
     perception = build_perception(config)
@@ -73,6 +122,8 @@ def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
         tts=tts,
         gait=gait,
         fsm_verbose=_fsm_verbose(config),
+        face_recognizer=face_recognizer,
+        frame_source=frame_source,
     )
 
     return {
@@ -83,6 +134,8 @@ def build_robot(config: Dict[str, Any], sleeper: Any = None) -> Dict[str, Any]:
         "tts": tts,
         "motion_backend": motion_backend,
         "gait": gait,
+        "face_recognizer": face_recognizer,
+        "frame_source": frame_source,
     }
 
 
@@ -120,12 +173,14 @@ def run_task_cards(
     task_card_dir: str | Path | None = None,
     observation: Dict[str, Any] | None = None,
     verbose: bool = True,
+    param_overrides: Dict[str, Dict[str, Any]] | None = None,
 ) -> tuple[List[Dict[str, Any]], int, int]:
     """顺序执行任务卡目录下的全部任务。
 
     仿真（Webots / 无硬件）与命令行入口共用这一段调度逻辑，避免各自复制一份。
     ``observation=None`` 时由 Brain 上注入的感知接口（MockPerception 等）提供观测。
     加载失败的任务卡记为 ``ok=False`` 并继续跑其余卡。
+    ``param_overrides`` 按 ``{task_id: {参数: 值}}`` 覆盖任务卡参数（演示/联调用，默认不影响任何行为）。
 
     返回 ``(results, passed, total)``。
     """
@@ -140,14 +195,28 @@ def run_task_cards(
             continue
 
         card = entry["card"]
+        if param_overrides and card.task_id in param_overrides:
+            # 演示/联调用：覆盖任务卡参数（例如把 T-01 的 expect_names 换成现场要认的人）
+            card.params.update(param_overrides[card.task_id])
         if verbose:
             print(f"--- 任务卡 {card.task_id} | {card.name} ---")
         result = brain.execute_task(card, observation=observation)
         ok = bool(result.get("ok", False))
         if verbose:
+            # 用词要准：ok 的含义是"流程走完且技能报 ok"，**不是**"任务目标达成"的另一种说法。
+            # 技能自己的业务结论在 status 字段里（ok / rejected / no_face / failed …）。
             print(f"    执行结果: {'成功' if ok else '失败'}")
             if not ok:
                 print(f"    错误: {result.get('error')}")
+            for item in (result.get("result") or {}).get("results", []):
+                detail = [f"skill={item.get('skill')}", f"status={item.get('status')}"]
+                if "source" in item:
+                    detail.append(f"source={item['source']}")
+                if item.get("name") is not None:
+                    detail.append(f"name={item['name']}")
+                if item.get("similarity") is not None:
+                    detail.append(f"sim={item['similarity']}")
+                print("    " + "  ".join(detail))
             print(f"    FSM: {' -> '.join(result.get('history', []))}")
             print()
         results.append({"task_id": card.task_id, "ok": ok, **result})
@@ -158,6 +227,18 @@ def run_task_cards(
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="无硬件闭环演示")
     parser.add_argument("--fast", action="store_true", help="跳过 time.sleep，快速跑完闭环")
+    parser.add_argument(
+        "--face-image",
+        default=None,
+        help="用这张图片作为 T-01 的取帧来源（没有摄像头也能真跑人脸识别）",
+    )
+    parser.add_argument("--face-db", default=None, help="人脸库路径（默认 config/face_db.json）")
+    parser.add_argument("--models", default=None, help="模型目录（默认 <仓库>/models）")
+    parser.add_argument(
+        "--face-expect",
+        default=None,
+        help="逗号分隔：临时覆盖 T-01 的 expect_names（现场要认的人；不认名单外的人）",
+    )
     args = parser.parse_args(argv)
 
     print("=" * 64)
@@ -166,11 +247,33 @@ def main(argv: List[str] | None = None) -> int:
 
     config = load_robot_config()
     sleeper = (lambda dt: None) if args.fast else None
-    robot = build_robot(config, sleeper=sleeper)
+
+    repo_root = ROOT.parent.parent
+    models_dir = Path(args.models) if args.models else repo_root / "models"
+    db_path = Path(args.face_db) if args.face_db else CONFIG_PATH.parent / "face_db.json"
+
+    face_recognizer = None
+    frame_source = None
+    if args.face_image:
+        print(f"人脸取帧来源: {args.face_image}")
+        face_recognizer, _ = build_face_recognizer(models_dir, db_path)
+        if face_recognizer is not None:
+            from .perception.sources import ImageFileSource
+
+            frame_source = ImageFileSource(args.face_image)
+            print("  → T-01 走**真识别**通路")
+        else:
+            print("  → T-01 退回感知接口通路（上面的原因说了缺什么）")
+
+    robot = build_robot(
+        config, sleeper=sleeper, face_recognizer=face_recognizer, frame_source=frame_source
+    )
     brain = robot["brain"]
 
     print(f"运动控制后端: {robot['motion_backend']}（脚本动作库 + 步态生成，无 VLA）")
     print(f"视觉后端: {robot['perception'].name}")
+    if face_recognizer is None:
+        print("人脸识别通路: 未启用真识别（T-01 结果不代表真实识别能力）")
     print(f"任务卡目录: {TASK_CARD_DIR}")
     print()
 
@@ -179,12 +282,22 @@ def main(argv: List[str] | None = None) -> int:
         print("未找到任务卡")
         return 1
 
+    param_overrides: Dict[str, Dict[str, Any]] = {}
+    if args.face_expect:
+        names = [n.strip() for n in args.face_expect.split(",") if n.strip()]
+        if names:
+            param_overrides["T-01"] = {"expect_names": names}
+            print(f"T-01 预期名单（--face-expect 覆盖）: {names}")
+            print()
+
     # 演示不预填观测：由 MockPerception 提供 face/qr/ball 感知，
     # object/speech 使用技能默认参数，验证感知接口已串入技能链。
-    overall, passed, total = run_task_cards(brain, observation=None)
+    overall, passed, total = run_task_cards(
+        brain, observation=None, param_overrides=param_overrides or None
+    )
 
     print("=" * 64)
-    print(f"闭环演示完成: {passed}/{total} 项任务通过")
+    print(f"闭环演示完成: {passed}/{total} 项任务通过（流程指标，不是识别/抓取成功率）")
     print("=" * 64)
     return 0 if passed == total else 2
 
