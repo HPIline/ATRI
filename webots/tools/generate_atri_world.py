@@ -90,6 +90,20 @@ GROUND_SIZE = 4.0
 _TRUE_WORDS = {"1", "true", "yes", "on", "y"}
 _FALSE_WORDS = {"0", "false", "no", "off", "n", ""}
 
+# 关节阻尼（HingeJointParameters.dampingConstant，单位 N·m·s/rad）。
+#
+# 必须显式写、且必须 > 0：Webots 不给关节写阻尼时，这个"零重力 + 22 个轻质连杆"
+# 世界对约束求解器是不稳定的。2026-09-12 在 Windows + Webots R2025a 上实测：
+#   * 不写阻尼：trunk_pitch / hip_pitch / knee_pitch / shoulder_pitch /
+#     elbow_pitch / gripper 在**启动 4 个物理步（128 ms）内**被弹到 -1309°、-1976°、
+#     -2937°、+4138°、+17636° 后卡死；位置传感器从此读数恒定在几千度、且不再跟随
+#     任何指令 —— 控制器测到的"有行程关节"因此从 18/22 掉到 11/22，动作链路看起来
+#     "没动"，实际是世界坏了。对照组（只加这一行）三个被观测关节全部精确到位
+#     （膝 20.0°、肘 -40.0°、夹爪 20.0°）。
+#   * 0.5 是实测稳定且不掩盖运动的取值；太小（< 0.05）仍会有启动瞬态。
+# 这条与 minStop/maxStop 一样属于"不写就是错的默认值"，所以由生成器统一写死。
+JOINT_DAMPING = 0.5
+
 
 def num(value: float) -> str:
     """把数字格式化成 WBT 里好看的形式。"""
@@ -337,6 +351,8 @@ def render_joint(node: Dict[str, Any], indent: int, max_torque: Optional[float] 
         # Webots 不写 minStop/maxStop 就是无限位，控制器钳制再严也只是软件层
         f"{pad}    minStop {num(math.radians(lo))}",
         f"{pad}    maxStop {num(math.radians(hi))}",
+        # 不写阻尼这一行，世界会在启动瞬间把若干关节弹飞（见 JOINT_DAMPING 注释）
+        f"{pad}    dampingConstant {num(JOINT_DAMPING)}",
         f"{pad}  }}",
         f"{pad}  device [",
         *motor,

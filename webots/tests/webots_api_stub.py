@@ -67,6 +67,7 @@ def parse_world_actuators(world_path: Path = WORLD_PATH) -> Dict[str, Dict[str, 
             "maxVelocity": _numeric_field(motor, "maxVelocity"),
             "minStop": _numeric_field(params, "minStop"),
             "maxStop": _numeric_field(params, "maxStop"),
+            "dampingConstant": _numeric_field(params, "dampingConstant"),
         }
     return specs
 

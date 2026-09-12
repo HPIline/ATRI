@@ -549,6 +549,21 @@ class TestAtriWorldFile(unittest.TestCase):
             with self.subTest(joint=name):
                 self.assertAlmostEqual(spec["maxVelocity"], expected, places=4)
 
+    def test_joint_damping_is_set(self):
+        """每个关节必须写 dampingConstant > 0（不写 = 世界在启动瞬间被弹飞）。
+
+        实测（2026-09-12，Windows + Webots R2025a）：不写阻尼时 trunk_pitch /
+        hip_pitch / knee_pitch / shoulder_pitch / elbow_pitch / gripper 会在启动
+        4 个物理步内被弹到上千度后卡死，位置传感器读数不再是关节角——控制器据此
+        测出的"有行程关节"从 18/22 掉到 11/22，看起来像动作没下发。
+        """
+        specs = parse_world_actuators()
+        for name, spec in specs.items():
+            with self.subTest(joint=name):
+                damping = spec.get("dampingConstant")
+                self.assertIsNotNone(damping, f"{name} 没有 dampingConstant")
+                self.assertGreater(damping, 0.0, f"{name} 的阻尼必须 > 0，实际 {damping}")
+
     def test_leg_and_head_velocities_differ(self):
         specs = parse_world_actuators()
         self.assertNotEqual(

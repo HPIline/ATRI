@@ -37,6 +37,7 @@ Robot {
         anchor 0 0 0.0196
         minStop -0.1745
         maxStop 0.1745
+        dampingConstant 0.5
       }
       device [
         RotationalMotor {
@@ -63,6 +64,7 @@ Robot {
               anchor 0 0 0.0275
               minStop -0.2618
               maxStop 0.2618
+              dampingConstant 0.5
             }
             device [
               RotationalMotor {
@@ -89,6 +91,7 @@ Robot {
                     anchor 0 0 0.0824
                     minStop -1.5708
                     maxStop 1.5708
+                    dampingConstant 0.5
                   }
                   device [
                     RotationalMotor {
@@ -115,6 +118,7 @@ Robot {
                           anchor 0 0 0.0275
                           minStop -0.7854
                           maxStop 0.7854
+                          dampingConstant 0.5
                         }
                         device [
                           RotationalMotor {
@@ -145,6 +149,7 @@ Robot {
                     anchor 0 0.075 0.0118
                     minStop -1.5708
                     maxStop 1.5708
+                    dampingConstant 0.5
                   }
                   device [
                     RotationalMotor {
@@ -171,6 +176,7 @@ Robot {
                           anchor 0 0 0
                           minStop -1.5708
                           maxStop 1.5708
+                          dampingConstant 0.5
                         }
                         device [
                           RotationalMotor {
@@ -197,6 +203,7 @@ Robot {
                                 anchor 0 0 -0.0471
                                 minStop -2.0944
                                 maxStop 0
+                                dampingConstant 0.5
                               }
                               device [
                                 RotationalMotor {
@@ -223,6 +230,7 @@ Robot {
                                       anchor 0 0 -0.0392
                                       minStop 0
                                       maxStop 1.0472
+                                      dampingConstant 0.5
                                     }
                                     device [
                                       RotationalMotor {
@@ -259,6 +267,7 @@ Robot {
                     anchor 0 -0.075 0.0118
                     minStop -1.5708
                     maxStop 1.5708
+                    dampingConstant 0.5
                   }
                   device [
                     RotationalMotor {
@@ -285,6 +294,7 @@ Robot {
                           anchor 0 0 0
                           minStop -1.5708
                           maxStop 1.5708
+                          dampingConstant 0.5
                         }
                         device [
                           RotationalMotor {
@@ -311,6 +321,7 @@ Robot {
                                 anchor 0 0 -0.0471
                                 minStop -2.0944
                                 maxStop 0
+                                dampingConstant 0.5
                               }
                               device [
                                 RotationalMotor {
@@ -337,6 +348,7 @@ Robot {
                                       anchor 0 0 -0.0392
                                       minStop 0
                                       maxStop 1.0472
+                                      dampingConstant 0.5
                                     }
                                     device [
                                       RotationalMotor {
@@ -379,6 +391,7 @@ Robot {
         anchor 0 0.045 -0.0196
         minStop -0.7854
         maxStop 0.7854
+        dampingConstant 0.5
       }
       device [
         RotationalMotor {
@@ -405,6 +418,7 @@ Robot {
               anchor 0 0 -0.0196
               minStop -0.4363
               maxStop 0.4363
+              dampingConstant 0.5
             }
             device [
               RotationalMotor {
@@ -431,6 +445,7 @@ Robot {
                     anchor 0 0 -0.0196
                     minStop -1.0472
                     maxStop 1.0472
+                    dampingConstant 0.5
                   }
                   device [
                     RotationalMotor {
@@ -457,6 +472,7 @@ Robot {
                           anchor 0 0 -0.0628
                           minStop 0
                           maxStop 1.5708
+                          dampingConstant 0.5
                         }
                         device [
                           RotationalMotor {
@@ -483,6 +499,7 @@ Robot {
                                 anchor 0 0 -0.0628
                                 minStop -0.6981
                                 maxStop 0.6981
+                                dampingConstant 0.5
                               }
                               device [
                                 RotationalMotor {
@@ -522,6 +539,7 @@ Robot {
         anchor 0 -0.045 -0.0196
         minStop -0.7854
         maxStop 0.7854
+        dampingConstant 0.5
       }
       device [
         RotationalMotor {
@@ -548,6 +566,7 @@ Robot {
               anchor 0 0 -0.0196
               minStop -0.4363
               maxStop 0.4363
+              dampingConstant 0.5
             }
             device [
               RotationalMotor {
@@ -574,6 +593,7 @@ Robot {
                     anchor 0 0 -0.0196
                     minStop -1.0472
                     maxStop 1.0472
+                    dampingConstant 0.5
                   }
                   device [
                     RotationalMotor {
@@ -600,6 +620,7 @@ Robot {
                           anchor 0 0 -0.0628
                           minStop 0
                           maxStop 1.5708
+                          dampingConstant 0.5
                         }
                         device [
                           RotationalMotor {
@@ -626,6 +647,7 @@ Robot {
                                 anchor 0 0 -0.0628
                                 minStop -0.6981
                                 maxStop 0.6981
+                                dampingConstant 0.5
                               }
                               device [
                                 RotationalMotor {
