@@ -31,6 +31,9 @@ class OpenCVPerception(PerceptionBackend):
         object_hsv_ranges: Optional[Tuple[Tuple[Tuple[int, int, int], Tuple[int, int, int]], ...]] = None,
         ball_diameter_cm: float = 4.0,
         object_size_cm: float = 4.0,
+        place_target: str = "蓝块",
+        place_hsv_ranges: Optional[Tuple[Tuple[Tuple[int, int, int], Tuple[int, int, int]], ...]] = None,
+        place_size_cm: float = 6.0,
         focal_px: Optional[float] = None,
         pixels_per_cm: float = 10.0,
         frame_source: Any = None,
@@ -56,6 +59,12 @@ class OpenCVPerception(PerceptionBackend):
         )
         self.ball_diameter_cm = ball_diameter_cm
         self.object_size_cm = object_size_cm
+        # 放置区（T-03）：现场一般铺一块与目标物**不同色**的地标；默认用蓝块色域。
+        self.place_target = place_target
+        self.place_hsv_ranges = place_hsv_ranges or self.OBJECT_HSV.get(
+            place_target, self.OBJECT_HSV["蓝块"]
+        )
+        self.place_size_cm = place_size_cm
         self.focal_px = self._checked_positive("focal_px", focal_px, allow_none=True)
         self.pixels_per_cm = self._checked_positive("pixels_per_cm", pixels_per_cm, allow_none=False)
         self.frame_source = frame_source
@@ -236,6 +245,40 @@ class OpenCVPerception(PerceptionBackend):
             data={
                 "found": True,
                 "target": name,
+                "x_cm": round(x_cm, 2),
+                "distance_cm": distance_cm,
+                "distance_source": dist_source,
+                "bbox": [int(x), int(y), int(w), int(h)],
+                "center_px": [int(cx), int(cy)],
+            },
+            confidence=0.8,
+            raw=best,
+        )
+
+    def detect_place(self, frame: Any = None) -> PerceptionResult:
+        """放置区地标（T-03 第二步：走到放置区、对准后再释放）。
+
+        现场做法未定（赛题没规定用不用地标），所以这里只提供**可替换的默认**：
+        与目标物异色的色块，默认蓝。找不到即 ``found=False``，由技能决定
+        "停住不释放"还是"按任务卡参数盲放"——**不允许**把没看见当成看见了。
+
+        距离与 ``detect_object`` 同口径：有焦距才是针孔估算，否则标 ``uncalibrated``。
+        """
+        frame = self._require_frame(frame)
+        blob = self._largest_hsv_blob(frame, self.place_hsv_ranges)
+        if blob is None:
+            return PerceptionResult(
+                kind="place", data={"found": False, "target": self.place_target}, confidence=0.0
+            )
+        best, x, y, w, h, cx, cy = blob
+        width = self._frame_width(frame)
+        x_cm = (cx - width / 2.0) / self.pixels_per_cm
+        distance_cm, dist_source = self._estimate_distance_cm(max(w, h), self.place_size_cm)
+        return PerceptionResult(
+            kind="place",
+            data={
+                "found": True,
+                "target": self.place_target,
                 "x_cm": round(x_cm, 2),
                 "distance_cm": distance_cm,
                 "distance_source": dist_source,

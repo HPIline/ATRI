@@ -4,7 +4,10 @@
   "skills": ["carry"],
   "params": {
     "target": "红块",
-    "distance_cm": 8.0
+    "distance_cm": 8.0,
+    "_note": "params 只写这次任务要什么（目标物、距离）。控制常数（死区/迭代上限/步长增益/夹取容差/放置区）不写在这里，否则会盖掉 config/carry.json 的标定值——优先级是 任务卡 params > config/carry.json > 代码默认值。",
+    "_tunable": "可临时覆盖的键见 software/atri/config/carry.json 的 _keys；例：\"max_iters\": 15, \"step_gain\": 1.0（实机标定前的推荐值，依据 design/handoff/T-03-搬运-方案与评测报告.md §4.1）",
+    "_evidence": "闭环与色块检测评测：python software/atri/tools/carry_eval.py（合成图 + 几何模型，非实机）"
   },
   "timeout_s": 90
 }

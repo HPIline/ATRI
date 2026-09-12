@@ -103,6 +103,7 @@ class ServoMockPerception(MockPerception):
         bus: Any,
         ball_x_true: float = 3.0,
         object_x_true: float = 3.0,
+        place_x_true: float = 5.0,
         gain_cm_per_deg: float = 1.5,
         **kwargs: Any,
     ) -> None:
@@ -110,6 +111,7 @@ class ServoMockPerception(MockPerception):
         self._bus = bus
         self._ball_x_true = float(ball_x_true)
         self._object_x_true = float(object_x_true)
+        self._place_x_true = float(place_x_true)
         self._gain = float(gain_cm_per_deg)
 
     def _body_yaw_deg(self) -> float:
@@ -130,3 +132,17 @@ class ServoMockPerception(MockPerception):
         data["x_cm"] = round(x_cm, 2)
         data["found"] = True
         return PerceptionResult(kind="object", data=data, confidence=self.object_confidence)
+
+    def detect_place(self, frame: Any = None) -> PerceptionResult:
+        """放置区（T-03 的第二目标）：同一套一维几何，用于验证"对准后才释放"。
+
+        只有本类提供该通道；纯 ``MockPerception`` 不给 ``detect_place``，
+        于是 T-03 在纯 Mock 下会明确回报"放置区通道未接入"（而不是假装看见）。
+        """
+        x_cm = self._place_x_true - self._gain * self._body_yaw_deg()
+        data = {
+            "found": True,
+            "x_cm": round(x_cm, 2),
+            "distance_source": "mock-geometry",
+        }
+        return PerceptionResult(kind="place", data=data, confidence=self.object_confidence)
