@@ -71,9 +71,16 @@ python3 -m unittest discover -s webots/tests
 **口径纪律**（细节见 `design/handoff/交接档案-新会话入口.md` 第四节、《答辩材料口径核对清单》）：
 
 1. 包络顺序一律写 **高 × 宽 × 深**，与 `size_cm = [14.6, 26.3, 40.7]` 的深×宽×高顺序不同，引用时别混。
-2. `❌ 摆放错误 = 0` **不等于"没有穿模"**——总量里绝大多数是同关节配合面与 ⚠️ 级让位不足。
+2. `❌ 摆放错误 = 0` **不等于"没有穿模"**——**实测 189 对干涉里只有 5 对**是同关节配合面（`fitcheck.is_joint_mate` 判定），
+   其余 184 对是 ⚠️ 级让位不足 / 局部干涉（含 12 对管-舵机族，`right_forearm__limb_tube` 有 80% 自身体积被舵机占掉）。
+   `❌ = 0` 的准确含义是"**没有任何一对达到『被指派到同一块空间』的程度**（判据：重合率 ≥30% 或体积 ≥5000 mm³）"。
 3. `design/cad/out/report.md` 里印的踝 1.49 N·m / 152% 是 `build_all.py` 自带的**旧简算式**；**权威力矩只认 `hardware_requirements.json` 的 `torque_check`**。
-4. `design/robot_model.json` 的 `installed_envelope_mm` 仍是旧值 **407 × 263 × 146**、`overall.mass_kg` 仍是 **3.136**，**该文件这两个字段本身已过期、待回灌**，引用请改用上表与 `design/cad/out/report.md`。
+4. `design/robot_model.json` 的 **字段值已是现行值**：`installed_envelope_mm` = 407 × 268 × 160、`overall.mass_kg` = 3.036
+   （`mass_budget.total_g` = 3036.4，`sum(links.mass_kg)` = 3.0367）。
+   **过期的是散落在该文件里的说明文本**：`installed_envelope_mm.source`（仍称"第 6–10 轮合入后 09:06 重测"）、
+   `overall.note`（仍写"实装包络见 installed_envelope_mm（**418 mm 高**）""整机 3.437 kg"）、
+   以及 `changelog` 条目（`407 × 263 × 146`、`1490 g`、`3.136 kg` —— 那是 v3.0-refresh 那次变更的**历史记录**，不是现值）。
+   ⇒ **字段可引，文本不可引**。
 
 ---
 
