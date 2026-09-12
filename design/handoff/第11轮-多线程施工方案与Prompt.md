@@ -18,6 +18,7 @@
 | **T2** | 姿态扫掠与关节限位（动态校核） | `opencode-go/kimi-k2.7-code` | `design/cad/sweep_check.py`、`design/handoff/姿态扫掠报告.md` | 姿态碰撞图谱 + 限位建议 + 答辩用图 | 见 §三 prompt T2 |
 | **T3** | 交互式预览窗口（关节滑条/预设/半透明配合） | `opencode-go/minimax-m3` 或 `kimi-k2.7-code` | `design/cad/preview.py` | 可交互自包含 HTML + 用法说明 | 见 §三 prompt T3 |
 | **T4** | 参赛材料口径核对（只读+清单） | `opencode-go/glm-5.3-flash` | `design/handoff/答辩材料口径核对清单.md` | 逐条核对表（PPT 说法 → 现行实测 → 建议文案） | 见 §三 prompt T4 |
+| **T7** | 计划书成文 + PPT 重生成 + 知产/财务数据 | 我（主会话） | `docs/contest/参赛计划书.md`、`ppt/**`（重生成） | 计划书 PDF + 修正后的 pptx/PDF + 两张表的数据 | 见 `docs/contest/提交材料清单.md` |
 | **T5** | 仿真对接（队友机器，非本仓库线程） | — | `docs/process/sim/**`（队友） | 仿真报告 + 短视频 | 见 `design/handoff/仿真请求-Webots验证清单.md` |
 | **T6** | **Webots 世界补重力/地面/扭矩上限（关键路径）** | `opencode-go/kimi-k2.7-code` 或 `deepseek-v4-pro` | `webots/tools/generate_atri_world.py`、`webots/controllers/atri_controller/atri_controller.py`、`webots/README.md` | 生成器加 `ATRI_WORLD_GRAVITY` / `ATRI_WORLD_MAX_TORQUE` / `--out`；控制器加 `--max-torque`；重生成世界并核实 | 见 §三 prompt T6 |
 
