@@ -78,6 +78,18 @@ INSERT_PLATE_T = 3.0
 TORSO_BAY_LOAD_Z = TORSO_BAY_TOP_Z + INSERT_PLATE_T     # 23.6：电池坐在这个面上
 TORSO_DECK_LOAD_Z = TORSO_DECK_TOP_Z + INSERT_PLATE_T   # 47.6：树莓派坐在这个面上
 
+# --------------------------------------------------------------------------
+# 躯干主舱立柱 / 背挂板安装接口 —— **唯一真值来源**
+#   `torso_frame()`（母端结构）与 `backpack_plate()`（安装耳 + 螺钉孔）共用这几个数，
+#   禁止任何一边另写一套（过去背板贴板位置与框架后立柱脱节，整簇背挂因此悬空）。
+# --------------------------------------------------------------------------
+TORSO_TL, TORSO_TW = 108.0, 104.0                 # 躯干主舱外框（x/y）
+TORSO_POST_W = 8.0                                # 主舱立柱截面 8×8
+TORSO_POST_X = TORSO_TL / 2.0 - TORSO_POST_W / 2.0    # 50.0：立柱中心 |x|
+TORSO_POST_Y = TORSO_TW / 2.0 - TORSO_POST_W / 2.0    # 48.0：立柱中心 |y|
+TORSO_REAR_FACE_X = -(TORSO_POST_X + TORSO_POST_W / 2.0)   # −54.0：后立柱后表面
+TORSO_POST_CHANNEL_Z0 = 16.0                      # Ø5 走线孔起点：z < 16 为实心立柱
+
 
 # --------------------------------------------------------------------------
 # 零件 1：关节笼（母端）—— 夹住舵机机体，坐在上一级结构上
@@ -196,7 +208,13 @@ def joint_cage_yaw(parent: str = "+z", shaft: str = "+z",
     # ⚠️ 2026-09-11 订正：两端面位置必须按**真实轴向尺寸链**取
     #    输出侧板内表面 = −(机壳半厚 17.5 + 凸台 2.5) = −20.0（让开 Φ20 凸台）
     #    副轴侧板内表面 = +机壳半厚 17.5（贴住舵机副轴端面，4×M2.5 就拧在这里）
-    z_out = -BOSS_FACE              # −20.0：输出面（−Z）
+    # ⚠️ 2026-09-12 第 11 轮（全机 Top1 干涉让位）：−Z 那块板的内表面该贴**哪个面**，
+    #    取决于输出凸台在哪一侧。凸台在 +Z 时（head_yaw，输出朝上）−Z 侧只剩 Φ6 副轴，
+    #    板应贴机体端面 −Y_HALF 并把副轴放进中央 Ø21 避空里；沿用"凸台面 −BOSS_FACE"
+    #    会让整块笼子凭空多下沉 2.5 mm，压到躯干上方的 RPi 4B 顶面（世界 z 108.7）：
+    #    实测 `cage__head_yaw ↔ elec__Raspberry Pi 4B (4GB)` = **4224 mm³（全机 Top1）**。
+    #    hip_yaw 的 shaft=="-z"（凸台朝下）⇒ 取值与旧版逐字节相同，不受影响。
+    z_out = -BOSS_FACE if shaft != "+z" else -Y_HALF
     z_sec = +Y_HALF                 # +17.5：副轴面（+Z）
 
     plate_t = wall
@@ -518,17 +536,74 @@ def cluster_outrigger(shaft: str = "+y", parent: str = "+z",
     return sanitize(part)
 
 
-def backpack_plate(wall: float = 3.0) -> cq.Workplane:
-    """背挂板：5 件电子件的公共座（选项 A，接受整机深度 ~198 mm）。
+BACKPACK_X_OUT = -60.0        # 背板外表面（背挂电子件贴这一面；assembly.BACK_X 从这里起算）
+BACKPACK_Y_HALF = 36.0        # 板宽 72（y ±36）
+BACKPACK_Z0, BACKPACK_Z1 = -50.0, 90.0          # 板高 140
+BACKPACK_LUG_LAP_POST_MM = 1.5    # 安装耳压进后立柱后表面的深度（≥1 mm：union 后必须真重合）
+BACKPACK_LUG_LAP_BOARD_MM = 1.5   # 安装耳与板体的搭接（同一零件，避免面-面相切）
+BACKPACK_LUG_Z0, BACKPACK_LUG_Z1 = 2.0, TORSO_POST_CHANNEL_Z0   # 耳高区间 = 立柱实心段
+BACKPACK_LUG_SCREW_Z = (6.0, 12.0)   # 每只耳的 2×M3 落点 z（离耳端面各 4 mm）
+BACKPACK_LUG_Y_IN = BACKPACK_Y_HALF - BACKPACK_LUG_LAP_BOARD_MM   # 34.0：耳内侧（搭板 2 mm）
+BACKPACK_WINDOW_Y_HALF, BACKPACK_WINDOW_Z1 = 22.0, -20.0   # 板尾减重窗（y ±22，上沿 z=−20）
 
-    板面在躯干局部 x = −60，z 从约 −10 到 +90，与 assembly.ELEC_BACKPACK 对齐。
+
+def backpack_plate(wall: float = 3.0) -> cq.Workplane:
+    """背挂板：背挂电子件（XL4015 / 喇叭）的公共座 + **与躯干框后立柱的安装耳**。
+
+    板体：外表面 x=−60、内表面 x=−57（厚 3），z 从 −50 到 +90；
+    电子件贴**外**表面（assembly.ELEC_BACKPACK，留 0.5 mm 气隙，不穿板）。
+
+    ⚠️ 2026-09-12 修复「背挂整簇悬空」（体检 `audit_assembly.py` 连通分量 2 个，
+    孤件 = 本件 + XL4015 + 喇叭）：
+      第 6–10 轮把背挂电子件从"穿进 3 mm 板"改成"贴板外表面"（assembly.BACK_X=60.5），
+      板子随之整体外移到 x=−60…−57，**却没有任何安装柱/凸台/搭接面把它与躯干框连起来**
+      （实测板内侧到躯干框后表面 x=−54 的净空 3.00 mm；实物可以用铜柱垫片解决，
+      但模型里必须表达出来）。本函数现在把这份安装结构建出来：
+
+      · 内侧 2 只安装耳（左右各 1，共 4×M3）：
+        x 从 −58.5（与板体搭 1.5 mm）到 −52.5（**压进后立柱后表面 1.5 mm**）；
+        跨过 3.0 mm 净空 + 1.5 mm 搭接 ⇒ 保证 union 后是**体积重合**，
+        而不是"恰好相切"（0.6 mm 是体检判据的下限，不做设计目标）；
+      · 耳高 z ∈ [2, 16]，正好取在后立柱 Ø5 走线孔（z ≥ 16）**以下**的 8×8 实心段，
+        两颗 M3 的落点 z=6 / 12 因此各有 8 mm 实心啮合（与 `torso_frame()` 的
+        4×M3 自攻底孔同轴一一对应）；耳宽 y ∈ [±34, ±52] 与立柱外侧面齐平；
+      · 孔用 `standards.fastener("M3")` 的间隙孔直径，不硬编码；
+      · 板尾（z ≤ −20，最低挂件 z=−6.5 以下）开 1 个 44×26 减重窗，把安装耳的
+        质量赚回来还有富余（见 handoff《减重与材料强度整合方案》背板一条）。
+
+    为什么不用「把板整体前移贴到框架上」这条路：板宽只有 72（y ±36），够不到后立柱
+    （y=±48），前移只能贴到 2.6 mm 厚的层板后缘；而且要贴实就得把板体埋进框架
+    （"塞进别的零件"），同时把背挂电子件整体前移，波及包络/预览/placement 口径，
+    收益却没有——安装耳方案不动板体外形与电子件位置。
     """
+    t = float(wall)
+    x_in = BACKPACK_X_OUT + t                       # −57.0：板内表面
     part = cq.Workplane("XY")
-    # 板在电子件 +X 面（x=−60）与躯干（x≥−48）之间，电子件坐在板的 −X 面
-    part = part.union(box(3.0, 72.0, 140.0, at=(-58.5, 0.0, -50.0)))
+    # --- 板体（外表面 x=−60）---
+    part = part.union(box(t, 2.0 * BACKPACK_Y_HALF, BACKPACK_Z1 - BACKPACK_Z0,
+                          at=((BACKPACK_X_OUT + x_in) / 2.0, 0.0, BACKPACK_Z0)))
+
+    # --- 安装耳（跨 3.0 mm 净空 + 压进后立柱 1.5 mm）---
+    lug_x0 = x_in - BACKPACK_LUG_LAP_BOARD_MM                   # −58.5
+    lug_x1 = TORSO_REAR_FACE_X + BACKPACK_LUG_LAP_POST_MM       # −52.5
+    lug_y_out = TORSO_POST_Y + TORSO_POST_W / 2.0               # 52.0
     for sy in (-1, 1):
-        for sz in (-40.0, 80.0):
-            part = part.union(box(8.0, 8.0, 6.0, at=(-53.0, sy * 28.0, sz)))
+        part = part.union(box(lug_x1 - lug_x0, lug_y_out - BACKPACK_LUG_Y_IN,
+                              BACKPACK_LUG_Z1 - BACKPACK_LUG_Z0,
+                              at=((lug_x0 + lug_x1) / 2.0,
+                                  sy * (BACKPACK_LUG_Y_IN + lug_y_out) / 2.0,
+                                  BACKPACK_LUG_Z0)))
+        # 每只耳 2×M3 间隙孔（沿 X 打通，与 torso_frame 的自攻底孔同轴）
+        for bz in BACKPACK_LUG_SCREW_Z:
+            part = part.cut(cyl(fastener("M3")["clearance_hole_mm"],
+                                (lug_x1 - lug_x0) + 2.0,
+                                at=(lug_x0 - 1.0, sy * TORSO_POST_Y, bz), axis="X"))
+
+    # --- 板尾减重窗（空区：最低挂件 z=−6.5，窗上沿 −20 仍留 13.5 mm 安装余量）---
+    win_z0 = BACKPACK_Z0 + 4.0
+    part = part.cut(box(t + 4.0, 2.0 * BACKPACK_WINDOW_Y_HALF,
+                        BACKPACK_WINDOW_Z1 - win_z0,
+                        at=((BACKPACK_X_OUT + x_in) / 2.0, 0.0, win_z0)))
     return sanitize(part)
 
 
@@ -606,8 +681,8 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
     part = cq.Workplane("XY")
     # ⚠️ 2026-09-11 加宽：净距 80×70 装不下长边 88 的电池与 85 的树莓派（实测）。
     #    整机宽度由手臂决定（y=±75），躯干加宽**不改整机包络**；代价只是这一件重约 20 g。
-    tl, tw = 108.0, 104.0
-    post_x, post_y = tl / 2 - 4.0, tw / 2 - 4.0     # 立柱中心（8×8 → 内表面 ±(半宽−8)）
+    tl, tw = TORSO_TL, TORSO_TW
+    post_x, post_y = TORSO_POST_X, TORSO_POST_Y   # 立柱中心（模块级唯一真值，见文件头）
 
     # --- 1. trunk_pitch 舵盘叉（自带，子端朝上）---
     part = part.union(limb_fork(shaft="+y", parent="-z", compact=True,
@@ -634,8 +709,12 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
     # --- 4. 主舱四立柱（8×8 + Ø5 走线孔）---
     for sx in (-1, 1):
         for sy in (-1, 1):
-            post = box(8.0, 8.0, 48.0, at=(sx * post_x, sy * post_y, 18.0))
-            post = post.cut(cyl(5.0, 54.0, at=(sx * post_x, sy * post_y, 16.0)))
+            post = box(TORSO_POST_W, TORSO_POST_W, 48.0,
+                       at=(sx * post_x, sy * post_y, 18.0))
+            # Ø5 走线孔：z ≥ TORSO_POST_CHANNEL_Z0 才有；以下（含背挂安装耳的落点）
+            # 是 8×8 实心段 —— 背板 M3 螺钉靠这一段吃啮合深度。
+            post = post.cut(cyl(5.0, 54.0,
+                                at=(sx * post_x, sy * post_y, TORSO_POST_CHANNEL_Z0)))
             part = part.union(post)
     # 后立柱向下接到俯仰叉，零位与骨盆 U 后柱连成一条
     for sy in (-1, 1):
@@ -692,6 +771,16 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
         part = part.cut(box(38.5, 20.4, 30.2, at=(-0.2, sign * 71.3, 0.1)))
 
     part = safe_fillet(part, FDM["fillet_min_mm"], "|Z")
+
+    # --- 背挂板安装底孔（与 `backpack_plate()` 的安装耳一一对应）---
+    # 4×M3 自攻底孔：从后立柱后表面 x=−54 钻向 +X，深 6；与背板耳的 Ø3.2 间隙孔同轴。
+    # 落点 y=±48（立柱中心）、z 取 BACKPACK_LUG_SCREW_Z —— 全在 Ø5 走线孔以下的实心段。
+    # 底孔直径取 `standards.fastener("M3")["tap_drill_mm"]`，不硬编码。
+    for sy in (-1, 1):
+        for bz in BACKPACK_LUG_SCREW_Z:
+            part = part.cut(cyl(fastener("M3")["tap_drill_mm"], 6.0,
+                                at=(TORSO_REAR_FACE_X, sy * TORSO_POST_Y, bz),
+                                axis="X"))
     return sanitize(part)
 
 
