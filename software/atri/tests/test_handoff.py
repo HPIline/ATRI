@@ -6,8 +6,15 @@
   - 分档数量之和 = 22
   - 假设值全部显式写出，不被当成实测
   - 扭矩双口径：主判据连续额定 0.98 N·m，超限关节必须显式列出
+  - **重力矩两种口径（零姿态 / 限位内最不利）必须同时给出且口径自洽**
   - 参数总表/交接包等生成物不得回落 v2 或旧口径
   - 交接文档包含必要章节
+
+⚠️ 2026-09-12 力臂口径修正后的判据纪律：本文件**不钉死任何历史常数**
+（曾写死过 trunk_roll 是最大关节、超限清单必须包含 trunk_roll），
+改为断言"由产物自身复算得出来的关系"，例如
+`margin == required_torque_nm / 0.98`、`最不利 ≥ 零姿态`、
+`需求 = max(重力×1.8, 惯性×1.8, 支撑, 工程下限)`。
 
 运行：
     cd software/atri && python3 -m unittest tests.test_handoff -v
@@ -15,6 +22,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 import unittest
@@ -73,27 +81,122 @@ class TestTorqueRequirements(unittest.TestCase):
                 with self.subTest(joint=t["joint"]):
                     self.assertEqual(t["stance_torque_nm"], 0.0)
 
-    def test_trunk_roll_is_the_heaviest_joint(self):
-        """腰部横滚要托起整个上半身，应是需求最大的关节。"""
+    def test_trunk_roll_is_not_the_heaviest_joint(self):
+        """腰部横滚**不是**最大需求关节——最大的一定是单腿支撑主导的腿部关节。
+
+        ⚠️ 2026-09-12 力臂口径修正前，`trunk_roll` 因"把竖直偏移也算进力臂"
+        被高估到 1.835 N·m（187%），曾是最大关节；修正后重力力臂必须只取
+        水平面内垂直于关节轴的分量，躯干质心基本正对横滚轴，其中枢值远小于腿部支撑项。
+        本判据不钉死任何数值，只断言结构关系：需求最大者必须由 stance 主导。
+        """
         top = max(self.joints, key=lambda t: t["required_torque_nm"])
-        self.assertEqual(top["joint"], "trunk_roll")
+        self.assertEqual(top["requirements_driver"], "stance",
+                         f"最大需求关节 {top['joint']} 不是单腿支撑主导："
+                         f"{top['requirements_driver']}")
+        self.assertTrue(top["joint"].startswith(("left_", "right_")),
+                        f"最大需求关节 {top['joint']} 不在腿链上")
+        # 并且最大需求确实等于它的支撑项（而不是某个被高估的重力项）
+        self.assertAlmostEqual(top["required_torque_nm"],
+                               top["stance_torque_nm"], places=4)
 
-    def test_gravity_torque_formula(self):
-        """人工复核一个关节：τ = Σ m·g·r（骨盆中心相对位移已排除自身 origin）。"""
-        t = next(x for x in self.joints if x["joint"] == "trunk_roll")
-        manual = sum(d["mass_kg"] * gen_handoff.G * d["arm_mm"] / 1000.0
-                     for d in t["detail"])
-        self.assertAlmostEqual(t["gravity_torque_nm"], manual, places=4)
+    def test_gravity_torque_zero_pose_formula(self):
+        """零姿态重力矩必须能由逐 link 明细精确复算（两种对账方式）。
 
-    def test_vertical_axis_joints_have_near_zero_gravity(self):
-        """竖直轴关节（髋 yaw）在零姿态下重力力臂≈0——这是对的物理。"""
-        yaw = next(t for t in self.joints if t["joint"] == "left_hip_yaw")
-        self.assertLess(yaw["gravity_torque_nm"], 0.05)
-        # 但需求不能是 0（要能摆动），落到工程下限
-        self.assertGreaterEqual(
-            yaw["required_torque_nm"],
-            gen_handoff.ASSUMPTIONS["min_practical_torque_nm"] - 1e-9,
-        )
+        ① Σ m·signed_arm·g/1000 == τ（带符号求和，逐项符号可相消——躯干横滚
+           的质心几乎正对轴线，正是靠相消才得到 ~0，这一点必须能被复现）；
+        ② Σ m·|arm|·g/1000 ≥ |τ|（绝对值求和是上界）。
+        容差 1e-4 来自 `detail` 里力臂按 2 位小数、力矩按 4 位小数发布。
+        """
+        for t in self.joints:
+            with self.subTest(joint=t["joint"]):
+                signed_sum = sum(d["mass_kg"] * gen_handoff.G
+                                 * d["signed_gravity_arm_mm"] / 1000.0
+                                 for d in t["detail"])
+                self.assertAlmostEqual(abs(signed_sum),
+                                       t["gravity_torque_nm_zero_pose"],
+                                       delta=1e-4)
+                moment_sum = sum(d["moment_kgmm"] for d in t["detail"])
+                self.assertAlmostEqual(abs(moment_sum) / 1000.0 * gen_handoff.G,
+                                       t["gravity_torque_nm_zero_pose"],
+                                       delta=1e-4)
+                abs_sum = sum(d["mass_kg"] * gen_handoff.G
+                              * d["gravity_arm_mm"] / 1000.0
+                              for d in t["detail"])
+                self.assertGreaterEqual(abs_sum + 1e-4,
+                                        t["gravity_torque_nm_zero_pose"])
+
+    def test_two_gravity_calibers_present_and_ordered(self):
+        """两种口径必须都在，且 最不利 ≥ 零姿态 ≥ 0（最不利是包络上界）。"""
+        for t in self.joints:
+            with self.subTest(joint=t["joint"]):
+                self.assertIn("gravity_torque_nm_zero_pose", t)
+                self.assertIn("gravity_torque_nm_worst_case", t)
+                self.assertGreaterEqual(t["gravity_torque_nm_worst_case"],
+                                        t["gravity_torque_nm_zero_pose"] - 1e-6)
+                self.assertGreaterEqual(t["gravity_torque_nm_zero_pose"], 0.0)
+                self.assertGreaterEqual(t["required_torque_nm"],
+                                        t["required_torque_nm_zero_pose"] - 1e-6)
+
+    def test_required_torque_is_envelope_of_three_cases(self):
+        """需求 = max(重力×安全系数, 惯性×安全系数, 支撑, 工程下限)，两种口径各自成立。"""
+        sf = gen_handoff.ASSUMPTIONS["safety_factor_static"]
+        floor = gen_handoff.ASSUMPTIONS["min_practical_torque_nm"]
+        for t in self.joints:
+            with self.subTest(joint=t["joint"]):
+                for req_key, g_key in (
+                        ("required_torque_nm", "gravity_torque_nm_worst_case"),
+                        ("required_torque_nm_zero_pose",
+                         "gravity_torque_nm_zero_pose")):
+                    expect = max(t[g_key] * sf, t["inertia_torque_nm"] * sf,
+                                 t["stance_torque_nm"], floor)
+                    self.assertAlmostEqual(t[req_key], expect, places=4)
+
+    def test_vertical_axis_joints_have_exactly_zero_gravity(self):
+        """竖直轴关节（髋 yaw）的重力矩**恒为 0**——这是对的物理，不是漏算。
+
+        重力与该轴平行 ⇒ (r × g ẑ)·â ≡ 0，任何姿态都是 0（含最不利口径）。
+        注意"质心到轴线的水平距离"不是重力力臂：那是水平外力的力臂，
+        只有转动惯量 I = Σ m·r⊥² 才用它。
+        """
+        for name in ("left_hip_yaw", "right_hip_yaw"):
+            t = next(x for x in self.joints if x["joint"] == name)
+            with self.subTest(joint=name):
+                self.assertEqual(t["gravity_torque_nm_zero_pose"], 0.0)
+                self.assertEqual(t["gravity_torque_nm_worst_case"], 0.0)
+                # 但需求不能是 0（要能摆动），落到单腿支撑/工程下限
+                self.assertGreaterEqual(
+                    t["required_torque_nm"],
+                    gen_handoff.ASSUMPTIONS["min_practical_torque_nm"] - 1e-9)
+
+    def test_gravity_moment_arm_excludes_vertical_component(self):
+        """力臂口径的最小复现（这是本次修正的核心）：
+
+        绕水平轴（x）的重力力臂只取 y 分量——质心正对轴线上方时力臂为 0；
+        而"到轴线的垂直距离"（径向臂）此时是 100 mm，两者**不是同一个量**。
+        """
+        arm_g = gen_handoff.gravity_moment_arm
+        arm_r = gen_handoff.perpendicular_arm
+        # 质心在轴的正上方 → 重力力臂 0；径向臂（到轴线的垂直距离）是 100
+        self.assertAlmostEqual(arm_g((0.0, 0.0, 100.0), [1, 0, 0]), 0.0, places=9)
+        self.assertAlmostEqual(arm_r((0.0, 0.0, 100.0), [1, 0, 0]), 100.0,
+                               places=9)
+        # 同时有沿轴分量与垂直分量：绕 x 轴的重力力臂只取 y=40，
+        # 而不是到轴线的距离 sqrt(40²+100²)=107.7
+        self.assertAlmostEqual(arm_g((30.0, 40.0, 100.0), [1, 0, 0]), 40.0,
+                               places=9)
+        self.assertAlmostEqual(arm_r((30.0, 40.0, 100.0), [1, 0, 0]),
+                               math.hypot(40.0, 100.0), places=9)
+        # 竖直轴：任何水平偏移都不产生重力矩（径向臂却非零）
+        self.assertAlmostEqual(arm_g((60.0, 80.0, 0.0), [0, 0, 1]), 0.0,
+                               places=9)
+        self.assertAlmostEqual(arm_r((60.0, 80.0, 0.0), [0, 0, 1]), 100.0,
+                               places=9)
+        # 轴不必是单位向量，结果要一致
+        self.assertAlmostEqual(arm_g((30.0, 40.0, 100.0), [2, 0, 0]), 40.0,
+                               places=9)
+        # 绕 y 轴的俯仰：只认 x 分量
+        self.assertAlmostEqual(arm_g((30.0, 40.0, 100.0), [0, 1, 0]), 30.0,
+                               places=9)
 
     def test_tier_counts_sum_to_22(self):
         tiers: dict = {}
@@ -256,8 +359,11 @@ class TestTorqueCriterion(unittest.TestCase):
         self.assertAlmostEqual(crit["continuous_rated_torque_nm"], 0.98,
                                places=3)
         self.assertAlmostEqual(crit["peak_torque_nm"], 1.47, places=3)
+        # 主判据用的重力口径必须显式声明，并是两种口径之一
+        self.assertIn(crit["primary_gravity_caliber"], crit["gravity_calibers"])
 
     def test_margins_computed_against_continuous_rated(self):
+        """裕度必须与**发布出去的**需求自洽（两种口径都查），不钉历史常数。"""
         for t in self.joints:
             with self.subTest(joint=t["joint"]):
                 self.assertAlmostEqual(
@@ -266,24 +372,80 @@ class TestTorqueCriterion(unittest.TestCase):
                 self.assertEqual(
                     t["exceeds_continuous_rated"],
                     t["required_torque_nm"] / 0.98 > 1.0 + 1e-9)
+                self.assertAlmostEqual(
+                    t["margin_vs_continuous_rated_zero_pose"],
+                    t["required_torque_nm_zero_pose"] / 0.98, places=3)
+                self.assertEqual(
+                    t["exceeds_continuous_rated_zero_pose"],
+                    t["required_torque_nm_zero_pose"] / 0.98 > 1.0 + 1e-9)
 
     def test_over_limit_joints_are_explicitly_listed(self):
+        """超限清单必须由产物自身复算得出，两种口径各列一份。"""
         expected = sorted(t["joint"] for t in self.joints
                           if t["required_torque_nm"] / 0.98 > 1.0 + 1e-9)
-        self.assertTrue(expected, "当前质量下应有超连续额定的关节")
         listed = sorted(self.data["torque_criterion"]
                         ["joints_exceeding_continuous"])
         self.assertEqual(listed, expected)
-        # 关键结论：腿链与腰部横滚确实超标，且必须出现在清单里
-        for joint in ("trunk_roll", "left_ankle_pitch", "right_ankle_pitch",
-                      "left_knee_pitch", "right_knee_pitch"):
+        expected_zero = sorted(t["joint"] for t in self.joints
+                               if t["required_torque_nm_zero_pose"] / 0.98
+                               > 1.0 + 1e-9)
+        listed_zero = sorted(self.data["torque_criterion"]
+                             ["joints_exceeding_continuous_zero_pose"])
+        self.assertEqual(listed_zero, expected_zero)
+        # 结论：腿链（单腿支撑主导）在两种口径下都超额定——这是当前真正的缺口
+        for joint in ("left_ankle_pitch", "right_ankle_pitch",
+                      "left_knee_pitch", "right_knee_pitch",
+                      "left_hip_yaw", "right_hip_yaw"):
             self.assertIn(joint, listed)
+            self.assertIn(joint, listed_zero)
+        # 而 trunk_roll 在两种口径下都**不再**超额定（力臂口径修正的直接后果）
+        self.assertNotIn("trunk_roll", listed)
+        self.assertNotIn("trunk_roll", listed_zero)
+        trunk = next(t for t in self.joints if t["joint"] == "trunk_roll")
+        self.assertLess(trunk["required_torque_nm"], 0.98)
+        self.assertLess(trunk["gravity_torque_nm_zero_pose"], 0.05)
+
+    def test_document_states_both_calibers(self):
+        """交接文档必须把两种重力口径都写出来，不能被"选一种"悄悄抹掉。"""
+        text = (DESIGN / "handoff" / "设计交接包-硬件选型需求.md").read_text(
+            encoding="utf-8")
+        self.assertIn("零姿态", text)
+        self.assertIn("最不利", text)
+        # 力臂的定义必须写明是"水平面内垂直于关节轴的分量"（而不是到轴线的距离）
+        self.assertIn("重力力臂", text)
+        self.assertIn("垂直于关节轴", text)
 
     def test_document_flags_over_limit_joints(self):
         text = (DESIGN / "handoff" / "设计交接包-硬件选型需求.md").read_text(
             encoding="utf-8")
         self.assertTrue("超连续额定" in text or "官方额定" in text)
         self.assertIn("trunk_roll", text)
+
+    def test_torque_check_block_matches_joints(self):
+        """`torque_check`（给人工快速核对用的紧凑块）必须与逐关节数据一致。"""
+        tc = self.data["torque_check"]
+        self.assertIn("zero_pose_static", tc["calibers"])
+        self.assertIn("worst_case_within_limits", tc["calibers"])
+        pct = {x["joint"]: x for x in tc["joints_pct_of_continuous_rated"]}
+        self.assertEqual(len(pct), len(self.joints))
+        for t in self.joints:
+            with self.subTest(joint=t["joint"]):
+                row = pct[t["joint"]]
+                self.assertAlmostEqual(row["zero_pose_pct"],
+                                       t["pct_continuous_rated_zero_pose"],
+                                       places=1)
+                self.assertAlmostEqual(row["worst_case_pct"],
+                                       t["pct_continuous_rated"], places=1)
+                self.assertEqual(row["exceeds_rated"],
+                                 t["exceeds_continuous_rated"])
+                self.assertEqual(row["exceeds_rated_zero_pose"],
+                                 t["exceeds_continuous_rated_zero_pose"])
+        self.assertEqual(sorted(tc["exceeding_worst_case"]),
+                         sorted(self.data["torque_criterion"]
+                                ["joints_exceeding_continuous"]))
+        self.assertEqual(tc["same_set"],
+                         sorted(tc["exceeding_worst_case"])
+                         == sorted(tc["exceeding_zero_pose"]))
 
 
 class TestSpecSheetConsistency(unittest.TestCase):

@@ -82,7 +82,14 @@
   },
   "assumptions": {
     "safety_factor_static": 1.8,
-    "note_safety_factor_static": "静力保持力矩 × 1.8：覆盖加减速动态载荷、地面冲击、以及舵机个体差异。工业做法通常 1.5–2.0，取中值偏高。",
+    "note_safety_factor_static": "**静力计算安全系数**（不是动力学系数）：乘在**静力算出的保持力矩**上的一次总裕度，用来覆盖 ①步态加减速的动态载荷 ②落脚冲击 ③舵机个体差异与电压跌落。名字里的 static 指『它作用在静力计算值上』，不代表被覆盖的载荷是静态的；工业做法通常 1.5–2.0，取中值偏高。⚠️ 它 ≠ 动载系数，别与 stance_dynamic_factor（单腿支撑工况的 2.0）混用或相乘。",
+    "gravity_torque_calibers": [
+      "zero_pose_static",
+      "worst_case_within_limits"
+    ],
+    "note_gravity_torque_calibers": "重力矩的**两种口径**，产物里分列、不互相替代：(a) `zero_pose_static` = 当前 URDF 零位（站立不动、各关节 0°）下的真实重力矩，读作『站着不动时关节实际要扛多少』；(b) `worst_case_within_limits` = 在该关节限位范围内、连同其祖先与后代关节一起搜索出的**最大重力矩**（方法见 worst_case_search），读作『这个关节在自身运动范围内可能遇到的最坏静力』，是选型用的保守上界。两者相差可达数倍（例如躯干俯仰、髋/膝），**引用时必须写明用的是哪一种**。",
+    "worst_case_search": "coordinate_ascent_with_exact_per_axis_extremum",
+    "note_worst_case_search": "最不利姿态的搜索方法：在『该关节 + 其祖先关节 + 其后代关节』这组相关自由度上做坐标上升，每个自由度按**解析极值**取值——固定其余关节、只转第 k 个关节时，τ_k(θ) 恒为 C + A·cosθ + B·sinθ（刚体绕定轴转动、重力方向固定），用 θ = 0/π/2/π 三点定出系数后在限位区间上闭式取 |τ| 最大；从零位、全下限、全上限三个起点各收敛一次取最大。只搜索运动学限位，不含地面接触/平衡约束，故是**上界**（真实步态里未必能摆到该姿态）。",
     "servo_efficiency": 0.75,
     "note_servo_efficiency": "舵机从电功率到机械功率的效率，含减速箱损耗。",
     "cable_mass_kg": 0.0,
@@ -96,11 +103,11 @@
     "walking_duty_cycle": 0.35,
     "note_walking_duty_cycle": "行走时舵机平均输出占『最大静力保持』的比例。",
     "angular_accel_rad_s2": 25.0,
-    "note_angular_accel_rad_s2": "摆腿/摆臂的典型角加速度。用于估算惯性扭矩——竖直轴关节（如髋 yaw、头 yaw）重力力臂≈0，必须靠惯性项才能给出有意义的选型下限。",
+    "note_angular_accel_rad_s2": "摆腿/摆臂的典型角加速度。用于估算惯性扭矩——**竖直轴关节（髋 yaw、头 yaw）的重力力矩恒为 0**（重力与该轴平行），必须靠惯性项才能给出有意义的选型下限。惯性项用的半径是 I = Σ m·r⊥²（含沿轴分量的垂直距离），与重力力臂不是同一个量。",
     "gait_cop_offset_mm": 25.0,
     "note_gait_cop_offset_mm": "行走时的地面反力作用点（CoP）相对关节轴线的最大水平偏移。站立时 CoP 在足心附近，行走/加减速时会前后移动；取 25mm 作为中等步幅下的估算值。",
     "stance_dynamic_factor": 2.0,
-    "note_stance_dynamic_factor": "单腿支撑期的动载系数：落脚冲击、重心起伏、加减速惯性都会放大关节力矩。静力分析无法覆盖，按 2.0 估算。",
+    "note_stance_dynamic_factor": "单腿支撑期的动载系数：落脚冲击、重心起伏、加减速惯性都会放大关节力矩。静力分析无法覆盖，按 2.0 估算。⚠️ 这是**单独一项工况**的系数（与 safety_factor_static 各自独立、不叠加），作用在『全身重量 × CoP 偏移』的静力项上。",
     "min_practical_torque_nm": 0.25,
     "note_min_practical_torque_nm": "工程下限：低于此值的舵机在齿轮刚度、回程间隙、摩擦与抗扰上都不可用，即使算出来需求更小。"
   },
@@ -119,33 +126,54 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.2248,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 0.0,
+      "max_radial_arm_mm": 0.0,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0,
       "gravity_torque_nm": 0.0,
       "inertia_torque_nm": 0.0,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
+      "worst_case_posture_deg": {},
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "head_yaw_link",
           "mass_kg": 0.0984,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "head",
           "mass_kg": 0.1264,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         }
       ]
     },
@@ -163,28 +191,46 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.1264,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 0.0,
+      "max_radial_arm_mm": 0.0,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0,
       "gravity_torque_nm": 0.0,
       "inertia_torque_nm": 0.0,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
+      "worst_case_posture_deg": {},
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "head",
           "mass_kg": 0.1264,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         }
       ]
     },
@@ -202,83 +248,144 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 1.6413,
+      "max_gravity_arm_zero_pose_mm": 75.0,
+      "max_gravity_arm_worst_case_mm": 166.27,
+      "max_radial_arm_mm": 137.4,
       "max_arm_mm": 137.4,
       "distal_inertia_kgm2": 0.008944,
-      "gravity_torque_nm": 1.0194,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.2458,
+      "gravity_torque_nm": 0.2458,
       "inertia_torque_nm": 0.2236,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
-      "required_torque_nm": 1.8349,
+      "required_torque_nm": 0.4424,
+      "required_torque_nm_zero_pose": 0.4025,
+      "required_torque_nm_worst_case": 0.4424,
       "requirements_driver": "gravity",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.872,
-      "margin_vs_peak": 1.248,
-      "exceeds_continuous_rated": true,
-      "exceeds_peak": true,
-      "torque_tier": "M",
+      "margin_vs_continuous_rated": 0.451429,
+      "margin_vs_peak": 0.300952,
+      "margin_vs_continuous_rated_zero_pose": 0.410714,
+      "margin_vs_peak_zero_pose": 0.27381,
+      "pct_continuous_rated": 45.1,
+      "pct_continuous_rated_zero_pose": 41.1,
+      "exceeds_continuous_rated": false,
+      "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
+      "torque_tier": "S",
       "design_placeholder_nm": 2.0,
+      "worst_case_posture_deg": {
+        "head_yaw": -90.0,
+        "head_pitch": -45.0,
+        "trunk_roll": 10.0,
+        "left_shoulder_pitch": -90.0,
+        "left_shoulder_roll": -90.0,
+        "left_elbow_pitch": -10.0,
+        "right_shoulder_pitch": -90.0,
+        "right_shoulder_roll": -90.0,
+        "right_elbow_pitch": -10.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "trunk_roll_link",
           "mass_kg": 0.0831,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "torso_upper",
           "mass_kg": 0.6486,
-          "arm_mm": 27.5
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 27.5
         },
         {
           "link": "head_yaw_link",
           "mass_kg": 0.0984,
-          "arm_mm": 85.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 85.4
         },
         {
           "link": "head",
           "mass_kg": 0.1264,
-          "arm_mm": 137.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 137.4
         },
         {
           "link": "left_shoulder_pitch_link",
           "mass_kg": 0.0946,
-          "arm_mm": 84.67
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": -75.0,
+          "moment_kgmm": -7.095,
+          "radial_arm_mm": 84.67
         },
         {
           "link": "left_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 97.88
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": -75.0,
+          "moment_kgmm": -8.8125,
+          "radial_arm_mm": 97.88
         },
         {
           "link": "left_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 79.85
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": -75.0,
+          "moment_kgmm": -7.71,
+          "radial_arm_mm": 79.85
         },
         {
           "link": "left_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 88.51
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": -75.0,
+          "moment_kgmm": -2.0625,
+          "radial_arm_mm": 88.51
         },
         {
           "link": "right_shoulder_pitch_link",
           "mass_kg": 0.0946,
-          "arm_mm": 84.67
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": 75.0,
+          "moment_kgmm": 7.095,
+          "radial_arm_mm": 84.67
         },
         {
           "link": "right_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 97.88
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": 75.0,
+          "moment_kgmm": 8.8125,
+          "radial_arm_mm": 97.88
         },
         {
           "link": "right_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 79.85
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": 75.0,
+          "moment_kgmm": 7.71,
+          "radial_arm_mm": 79.85
         },
         {
           "link": "right_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 88.51
+          "gravity_arm_mm": 75.0,
+          "signed_gravity_arm_mm": 75.0,
+          "moment_kgmm": 2.0625,
+          "radial_arm_mm": 88.51
         }
       ]
     },
@@ -296,78 +403,134 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 1.5582,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 87.75,
+      "max_radial_arm_mm": 109.9,
       "max_arm_mm": 109.9,
       "distal_inertia_kgm2": 0.003102,
-      "gravity_torque_nm": 0.4466,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.1947,
+      "gravity_torque_nm": 0.1947,
       "inertia_torque_nm": 0.0776,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
-      "required_torque_nm": 0.8039,
+      "required_torque_nm": 0.3505,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.3505,
       "requirements_driver": "gravity",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.82,
-      "margin_vs_peak": 0.547,
+      "margin_vs_continuous_rated": 0.357653,
+      "margin_vs_peak": 0.238435,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 35.8,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 2.0,
+      "worst_case_posture_deg": {
+        "head_yaw": -90.0,
+        "head_pitch": -45.0,
+        "trunk_pitch": 15.0,
+        "left_shoulder_pitch": -90.0,
+        "left_elbow_pitch": -15.0,
+        "right_shoulder_pitch": -90.0,
+        "right_elbow_pitch": -15.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "torso_upper",
           "mass_kg": 0.6486,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "head_yaw_link",
           "mass_kg": 0.0984,
-          "arm_mm": 57.9
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 57.9
         },
         {
           "link": "head",
           "mass_kg": 0.1264,
-          "arm_mm": 109.9
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 109.9
         },
         {
           "link": "left_shoulder_pitch_link",
           "mass_kg": 0.0946,
-          "arm_mm": 11.8
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 11.8
         },
         {
           "link": "left_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 35.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 35.4
         },
         {
           "link": "left_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 54.9
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 54.9
         },
         {
           "link": "left_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 74.5
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 74.5
         },
         {
           "link": "right_shoulder_pitch_link",
           "mass_kg": 0.0946,
-          "arm_mm": 11.8
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 11.8
         },
         {
           "link": "right_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 35.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 35.4
         },
         {
           "link": "right_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 54.9
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 54.9
         },
         {
           "link": "right_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 74.5
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 74.5
         }
       ]
     },
@@ -385,48 +548,78 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.5457,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 0.0,
+      "max_radial_arm_mm": 18.0,
       "max_arm_mm": 18.0,
       "distal_inertia_kgm2": 2.9e-05,
-      "gravity_torque_nm": 0.0158,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0,
+      "gravity_torque_nm": 0.0,
       "inertia_torque_nm": 0.0007,
       "stance_torque_nm": 1.2218,
       "stance_mass_above_kg": 2.491,
       "required_torque_nm": 1.2218,
+      "required_torque_nm_zero_pose": 1.2218,
+      "required_torque_nm_worst_case": 1.2218,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.247,
-      "margin_vs_peak": 0.831,
+      "margin_vs_continuous_rated": 1.246735,
+      "margin_vs_peak": 0.831156,
+      "margin_vs_continuous_rated_zero_pose": 1.246735,
+      "margin_vs_peak_zero_pose": 0.831156,
+      "pct_continuous_rated": 124.7,
+      "pct_continuous_rated_zero_pose": 124.7,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
+      "worst_case_posture_deg": {},
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_hip_yaw_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "left_hip_roll_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "left_thigh",
           "mass_kg": 0.1403,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "left_shank",
           "mass_kg": 0.127,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "left_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 18.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 18.0
         }
       ]
     },
@@ -444,43 +637,76 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.4511,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 66.72,
+      "max_radial_arm_mm": 145.2,
       "max_arm_mm": 145.2,
       "distal_inertia_kgm2": 0.00389,
-      "gravity_torque_nm": 0.339,
-      "inertia_torque_nm": 0.0973,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.1479,
+      "gravity_torque_nm": 0.1479,
+      "inertia_torque_nm": 0.0972,
       "stance_torque_nm": 1.2682,
       "stance_mass_above_kg": 2.5856,
       "required_torque_nm": 1.2682,
+      "required_torque_nm_zero_pose": 1.2682,
+      "required_torque_nm_worst_case": 1.2682,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.294,
-      "margin_vs_peak": 0.863,
+      "margin_vs_continuous_rated": 1.294082,
+      "margin_vs_peak": 0.862721,
+      "margin_vs_continuous_rated_zero_pose": 1.294082,
+      "margin_vs_peak_zero_pose": 0.862721,
+      "pct_continuous_rated": 129.4,
+      "pct_continuous_rated_zero_pose": 129.4,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
+      "worst_case_posture_deg": {
+        "left_hip_yaw": -45.0,
+        "left_hip_roll": 25.0,
+        "left_hip_pitch": 0.0,
+        "left_knee_pitch": 6.6,
+        "left_ankle_pitch": 40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_hip_roll_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "left_thigh",
           "mass_kg": 0.1403,
-          "arm_mm": 51.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 51.0
         },
         {
           "link": "left_shank",
           "mass_kg": 0.127,
-          "arm_mm": 113.8
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 113.8
         },
         {
           "link": "left_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 145.2
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 145.2
         }
       ]
     },
@@ -498,38 +724,67 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.3565,
+      "max_gravity_arm_zero_pose_mm": 18.0,
+      "max_gravity_arm_worst_case_mm": 129.85,
+      "max_radial_arm_mm": 126.88,
       "max_arm_mm": 126.88,
       "distal_inertia_kgm2": 0.002701,
-      "gravity_torque_nm": 0.2716,
+      "gravity_torque_nm_zero_pose": 0.0158,
+      "gravity_torque_nm_worst_case": 0.2577,
+      "gravity_torque_nm": 0.2577,
       "inertia_torque_nm": 0.0675,
       "stance_torque_nm": 1.3146,
       "stance_mass_above_kg": 2.6802,
       "required_torque_nm": 1.3146,
+      "required_torque_nm_zero_pose": 1.3146,
+      "required_torque_nm_worst_case": 1.3146,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.341,
-      "margin_vs_peak": 0.894,
+      "margin_vs_continuous_rated": 1.341429,
+      "margin_vs_peak": 0.894286,
+      "margin_vs_continuous_rated_zero_pose": 1.341429,
+      "margin_vs_peak_zero_pose": 0.894286,
+      "pct_continuous_rated": 134.1,
+      "pct_continuous_rated_zero_pose": 134.1,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
+      "worst_case_posture_deg": {
+        "left_hip_yaw": -45.0,
+        "left_hip_pitch": 60.0,
+        "left_knee_pitch": 36.6,
+        "left_ankle_pitch": 40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_thigh",
           "mass_kg": 0.1403,
-          "arm_mm": 31.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 31.4
         },
         {
           "link": "left_shank",
           "mass_kg": 0.127,
-          "arm_mm": 94.2
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 94.2
         },
         {
           "link": "left_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 126.88
+          "gravity_arm_mm": 18.0,
+          "signed_gravity_arm_mm": 18.0,
+          "moment_kgmm": 1.6056,
+          "radial_arm_mm": 126.88
         }
       ]
     },
@@ -547,33 +802,59 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.2162,
+      "max_gravity_arm_zero_pose_mm": 18.0,
+      "max_gravity_arm_worst_case_mm": 75.46,
+      "max_radial_arm_mm": 65.33,
       "max_arm_mm": 65.33,
       "distal_inertia_kgm2": 0.000506,
-      "gravity_torque_nm": 0.0963,
-      "inertia_torque_nm": 0.0126,
+      "gravity_torque_nm_zero_pose": 0.0158,
+      "gravity_torque_nm_worst_case": 0.1049,
+      "gravity_torque_nm": 0.1049,
+      "inertia_torque_nm": 0.0127,
       "stance_torque_nm": 1.3835,
       "stance_mass_above_kg": 2.8205,
       "required_torque_nm": 1.3835,
+      "required_torque_nm_zero_pose": 1.3835,
+      "required_torque_nm_worst_case": 1.3835,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.412,
-      "margin_vs_peak": 0.941,
+      "margin_vs_continuous_rated": 1.411735,
+      "margin_vs_peak": 0.941156,
+      "margin_vs_continuous_rated_zero_pose": 1.411735,
+      "margin_vs_peak_zero_pose": 0.941156,
+      "pct_continuous_rated": 141.2,
+      "pct_continuous_rated_zero_pose": 141.2,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
+      "worst_case_posture_deg": {
+        "left_hip_yaw": -45.0,
+        "left_hip_pitch": 6.6,
+        "left_knee_pitch": 90.0,
+        "left_ankle_pitch": 40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_shank",
           "mass_kg": 0.127,
-          "arm_mm": 31.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 31.4
         },
         {
           "link": "left_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 65.33
+          "gravity_arm_mm": 18.0,
+          "signed_gravity_arm_mm": 18.0,
+          "moment_kgmm": 1.6056,
+          "radial_arm_mm": 65.33
         }
       ]
     },
@@ -591,28 +872,50 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.0892,
+      "max_gravity_arm_zero_pose_mm": 18.0,
+      "max_gravity_arm_worst_case_mm": 18.0,
+      "max_radial_arm_mm": 18.0,
       "max_arm_mm": 18.0,
       "distal_inertia_kgm2": 2.9e-05,
+      "gravity_torque_nm_zero_pose": 0.0158,
+      "gravity_torque_nm_worst_case": 0.0158,
       "gravity_torque_nm": 0.0158,
       "inertia_torque_nm": 0.0007,
       "stance_torque_nm": 1.4457,
       "stance_mass_above_kg": 2.9475,
       "required_torque_nm": 1.4457,
+      "required_torque_nm_zero_pose": 1.4457,
+      "required_torque_nm_worst_case": 1.4457,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.475,
-      "margin_vs_peak": 0.984,
+      "margin_vs_continuous_rated": 1.475204,
+      "margin_vs_peak": 0.983469,
+      "margin_vs_continuous_rated_zero_pose": 1.475204,
+      "margin_vs_peak_zero_pose": 0.983469,
+      "pct_continuous_rated": 147.5,
+      "pct_continuous_rated_zero_pose": 147.5,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
+      "worst_case_posture_deg": {
+        "left_hip_yaw": -45.0,
+        "left_hip_pitch": 40.0,
+        "left_ankle_pitch": -40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 18.0
+          "gravity_arm_mm": 18.0,
+          "signed_gravity_arm_mm": 18.0,
+          "moment_kgmm": 1.6056,
+          "radial_arm_mm": 18.0
         }
       ]
     },
@@ -630,48 +933,78 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.5457,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 0.0,
+      "max_radial_arm_mm": 18.0,
       "max_arm_mm": 18.0,
       "distal_inertia_kgm2": 2.9e-05,
-      "gravity_torque_nm": 0.0158,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0,
+      "gravity_torque_nm": 0.0,
       "inertia_torque_nm": 0.0007,
       "stance_torque_nm": 1.2218,
       "stance_mass_above_kg": 2.491,
       "required_torque_nm": 1.2218,
+      "required_torque_nm_zero_pose": 1.2218,
+      "required_torque_nm_worst_case": 1.2218,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.247,
-      "margin_vs_peak": 0.831,
+      "margin_vs_continuous_rated": 1.246735,
+      "margin_vs_peak": 0.831156,
+      "margin_vs_continuous_rated_zero_pose": 1.246735,
+      "margin_vs_peak_zero_pose": 0.831156,
+      "pct_continuous_rated": 124.7,
+      "pct_continuous_rated_zero_pose": 124.7,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
+      "worst_case_posture_deg": {},
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_hip_yaw_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "right_hip_roll_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "right_thigh",
           "mass_kg": 0.1403,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "right_shank",
           "mass_kg": 0.127,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "right_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 18.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 18.0
         }
       ]
     },
@@ -689,43 +1022,76 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.4511,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 66.72,
+      "max_radial_arm_mm": 145.2,
       "max_arm_mm": 145.2,
       "distal_inertia_kgm2": 0.00389,
-      "gravity_torque_nm": 0.339,
-      "inertia_torque_nm": 0.0973,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.1479,
+      "gravity_torque_nm": 0.1479,
+      "inertia_torque_nm": 0.0972,
       "stance_torque_nm": 1.2682,
       "stance_mass_above_kg": 2.5856,
       "required_torque_nm": 1.2682,
+      "required_torque_nm_zero_pose": 1.2682,
+      "required_torque_nm_worst_case": 1.2682,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.294,
-      "margin_vs_peak": 0.863,
+      "margin_vs_continuous_rated": 1.294082,
+      "margin_vs_peak": 0.862721,
+      "margin_vs_continuous_rated_zero_pose": 1.294082,
+      "margin_vs_peak_zero_pose": 0.862721,
+      "pct_continuous_rated": 129.4,
+      "pct_continuous_rated_zero_pose": 129.4,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.5,
+      "worst_case_posture_deg": {
+        "right_hip_yaw": -45.0,
+        "right_hip_roll": 25.0,
+        "right_hip_pitch": 0.0,
+        "right_knee_pitch": 6.6,
+        "right_ankle_pitch": 40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_hip_roll_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "right_thigh",
           "mass_kg": 0.1403,
-          "arm_mm": 51.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 51.0
         },
         {
           "link": "right_shank",
           "mass_kg": 0.127,
-          "arm_mm": 113.8
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 113.8
         },
         {
           "link": "right_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 145.2
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 145.2
         }
       ]
     },
@@ -743,38 +1109,67 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.3565,
+      "max_gravity_arm_zero_pose_mm": 18.0,
+      "max_gravity_arm_worst_case_mm": 129.85,
+      "max_radial_arm_mm": 126.88,
       "max_arm_mm": 126.88,
       "distal_inertia_kgm2": 0.002701,
-      "gravity_torque_nm": 0.2716,
+      "gravity_torque_nm_zero_pose": 0.0158,
+      "gravity_torque_nm_worst_case": 0.2577,
+      "gravity_torque_nm": 0.2577,
       "inertia_torque_nm": 0.0675,
       "stance_torque_nm": 1.3146,
       "stance_mass_above_kg": 2.6802,
       "required_torque_nm": 1.3146,
+      "required_torque_nm_zero_pose": 1.3146,
+      "required_torque_nm_worst_case": 1.3146,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.341,
-      "margin_vs_peak": 0.894,
+      "margin_vs_continuous_rated": 1.341429,
+      "margin_vs_peak": 0.894286,
+      "margin_vs_continuous_rated_zero_pose": 1.341429,
+      "margin_vs_peak_zero_pose": 0.894286,
+      "pct_continuous_rated": 134.1,
+      "pct_continuous_rated_zero_pose": 134.1,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
+      "worst_case_posture_deg": {
+        "right_hip_yaw": -45.0,
+        "right_hip_pitch": 60.0,
+        "right_knee_pitch": 36.6,
+        "right_ankle_pitch": 40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_thigh",
           "mass_kg": 0.1403,
-          "arm_mm": 31.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 31.4
         },
         {
           "link": "right_shank",
           "mass_kg": 0.127,
-          "arm_mm": 94.2
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 94.2
         },
         {
           "link": "right_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 126.88
+          "gravity_arm_mm": 18.0,
+          "signed_gravity_arm_mm": 18.0,
+          "moment_kgmm": 1.6056,
+          "radial_arm_mm": 126.88
         }
       ]
     },
@@ -792,33 +1187,59 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.2162,
+      "max_gravity_arm_zero_pose_mm": 18.0,
+      "max_gravity_arm_worst_case_mm": 75.46,
+      "max_radial_arm_mm": 65.33,
       "max_arm_mm": 65.33,
       "distal_inertia_kgm2": 0.000506,
-      "gravity_torque_nm": 0.0963,
-      "inertia_torque_nm": 0.0126,
+      "gravity_torque_nm_zero_pose": 0.0158,
+      "gravity_torque_nm_worst_case": 0.1049,
+      "gravity_torque_nm": 0.1049,
+      "inertia_torque_nm": 0.0127,
       "stance_torque_nm": 1.3835,
       "stance_mass_above_kg": 2.8205,
       "required_torque_nm": 1.3835,
+      "required_torque_nm_zero_pose": 1.3835,
+      "required_torque_nm_worst_case": 1.3835,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.412,
-      "margin_vs_peak": 0.941,
+      "margin_vs_continuous_rated": 1.411735,
+      "margin_vs_peak": 0.941156,
+      "margin_vs_continuous_rated_zero_pose": 1.411735,
+      "margin_vs_peak_zero_pose": 0.941156,
+      "pct_continuous_rated": 141.2,
+      "pct_continuous_rated_zero_pose": 141.2,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 3.0,
+      "worst_case_posture_deg": {
+        "right_hip_yaw": 45.0,
+        "right_hip_pitch": 6.6,
+        "right_knee_pitch": 90.0,
+        "right_ankle_pitch": 40.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_shank",
           "mass_kg": 0.127,
-          "arm_mm": 31.4
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 31.4
         },
         {
           "link": "right_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 65.33
+          "gravity_arm_mm": 18.0,
+          "signed_gravity_arm_mm": 18.0,
+          "moment_kgmm": 1.6056,
+          "radial_arm_mm": 65.33
         }
       ]
     },
@@ -836,28 +1257,48 @@
       ],
       "max_speed_dps": 180,
       "distal_mass_kg": 0.0892,
+      "max_gravity_arm_zero_pose_mm": 18.0,
+      "max_gravity_arm_worst_case_mm": 18.0,
+      "max_radial_arm_mm": 18.0,
       "max_arm_mm": 18.0,
       "distal_inertia_kgm2": 2.9e-05,
+      "gravity_torque_nm_zero_pose": 0.0158,
+      "gravity_torque_nm_worst_case": 0.0158,
       "gravity_torque_nm": 0.0158,
       "inertia_torque_nm": 0.0007,
       "stance_torque_nm": 1.4457,
       "stance_mass_above_kg": 2.9475,
       "required_torque_nm": 1.4457,
+      "required_torque_nm_zero_pose": 1.4457,
+      "required_torque_nm_worst_case": 1.4457,
       "requirements_driver": "stance",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 1.475,
-      "margin_vs_peak": 0.984,
+      "margin_vs_continuous_rated": 1.475204,
+      "margin_vs_peak": 0.983469,
+      "margin_vs_continuous_rated_zero_pose": 1.475204,
+      "margin_vs_peak_zero_pose": 0.983469,
+      "pct_continuous_rated": 147.5,
+      "pct_continuous_rated_zero_pose": 147.5,
       "exceeds_continuous_rated": true,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": true,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "M",
       "design_placeholder_nm": 2.0,
+      "worst_case_posture_deg": {
+        "right_hip_yaw": -45.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_foot",
           "mass_kg": 0.0892,
-          "arm_mm": 18.0
+          "gravity_arm_mm": 18.0,
+          "signed_gravity_arm_mm": 18.0,
+          "moment_kgmm": 1.6056,
+          "radial_arm_mm": 18.0
         }
       ]
     },
@@ -875,43 +1316,73 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.3424,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 86.3,
+      "max_radial_arm_mm": 86.3,
       "max_arm_mm": 86.3,
       "distal_inertia_kgm2": 0.000728,
-      "gravity_torque_nm": 0.1177,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0633,
+      "gravity_torque_nm": 0.0633,
       "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
+      "worst_case_posture_deg": {
+        "trunk_pitch": -15.0,
+        "left_shoulder_pitch": -75.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_shoulder_pitch_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "left_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 23.6
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 23.6
         },
         {
           "link": "left_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 66.7
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 66.7
         },
         {
           "link": "left_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 86.3
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 86.3
         }
       ]
     },
@@ -929,38 +1400,66 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.2478,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 86.3,
+      "max_radial_arm_mm": 86.3,
       "max_arm_mm": 86.3,
       "distal_inertia_kgm2": 0.000728,
-      "gravity_torque_nm": 0.1177,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0633,
+      "gravity_torque_nm": 0.0633,
       "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
+      "worst_case_posture_deg": {
+        "trunk_pitch": -15.0,
+        "left_shoulder_pitch": 15.0,
+        "left_shoulder_roll": -90.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 23.6
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 23.6
         },
         {
           "link": "left_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 66.7
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 66.7
         },
         {
           "link": "left_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 86.3
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 86.3
         }
       ]
     },
@@ -978,33 +1477,57 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.1303,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 39.2,
+      "max_radial_arm_mm": 39.2,
       "max_arm_mm": 39.2,
       "distal_inertia_kgm2": 8.2e-05,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0303,
       "gravity_torque_nm": 0.0303,
-      "inertia_torque_nm": 0.002,
+      "inertia_torque_nm": 0.0021,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
+      "worst_case_posture_deg": {
+        "left_shoulder_pitch": 90.0,
+        "left_shoulder_roll": -90.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 19.6
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 19.6
         },
         {
           "link": "left_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 39.2
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 39.2
         }
       ]
     },
@@ -1022,28 +1545,46 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.0275,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 0.0,
+      "max_radial_arm_mm": 0.0,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0,
       "gravity_torque_nm": 0.0,
       "inertia_torque_nm": 0.0,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 0.4,
+      "worst_case_posture_deg": {},
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "left_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         }
       ]
     },
@@ -1061,43 +1602,73 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.3424,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 86.3,
+      "max_radial_arm_mm": 86.3,
       "max_arm_mm": 86.3,
       "distal_inertia_kgm2": 0.000728,
-      "gravity_torque_nm": 0.1177,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0633,
+      "gravity_torque_nm": 0.0633,
       "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
+      "worst_case_posture_deg": {
+        "trunk_pitch": -15.0,
+        "right_shoulder_pitch": -75.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_shoulder_pitch_link",
           "mass_kg": 0.0946,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         },
         {
           "link": "right_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 23.6
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 23.6
         },
         {
           "link": "right_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 66.7
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 66.7
         },
         {
           "link": "right_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 86.3
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 86.3
         }
       ]
     },
@@ -1115,38 +1686,67 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.2478,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 86.3,
+      "max_radial_arm_mm": 86.3,
       "max_arm_mm": 86.3,
       "distal_inertia_kgm2": 0.000728,
-      "gravity_torque_nm": 0.1177,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0633,
+      "gravity_torque_nm": 0.0633,
       "inertia_torque_nm": 0.0182,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.5,
+      "worst_case_posture_deg": {
+        "trunk_roll": -10.0,
+        "trunk_pitch": 15.0,
+        "right_shoulder_pitch": -15.0,
+        "right_shoulder_roll": -80.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_upper_arm",
           "mass_kg": 0.1175,
-          "arm_mm": 23.6
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 23.6
         },
         {
           "link": "right_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 66.7
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 66.7
         },
         {
           "link": "right_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 86.3
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 86.3
         }
       ]
     },
@@ -1164,33 +1764,57 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.1303,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 39.2,
+      "max_radial_arm_mm": 39.2,
       "max_arm_mm": 39.2,
       "distal_inertia_kgm2": 8.2e-05,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0303,
       "gravity_torque_nm": 0.0303,
-      "inertia_torque_nm": 0.002,
+      "inertia_torque_nm": 0.0021,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 1.0,
+      "worst_case_posture_deg": {
+        "right_shoulder_pitch": 90.0,
+        "right_shoulder_roll": -90.0
+      },
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_forearm",
           "mass_kg": 0.1028,
-          "arm_mm": 19.6
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 19.6
         },
         {
           "link": "right_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 39.2
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 39.2
         }
       ]
     },
@@ -1208,39 +1832,58 @@
       ],
       "max_speed_dps": 240,
       "distal_mass_kg": 0.0275,
+      "max_gravity_arm_zero_pose_mm": 0.0,
+      "max_gravity_arm_worst_case_mm": 0.0,
+      "max_radial_arm_mm": 0.0,
       "max_arm_mm": 0.0,
       "distal_inertia_kgm2": 0.0,
+      "gravity_torque_nm_zero_pose": 0.0,
+      "gravity_torque_nm_worst_case": 0.0,
       "gravity_torque_nm": 0.0,
       "inertia_torque_nm": 0.0,
       "stance_torque_nm": 0.0,
       "stance_mass_above_kg": 0.0,
       "required_torque_nm": 0.25,
+      "required_torque_nm_zero_pose": 0.25,
+      "required_torque_nm_worst_case": 0.25,
       "requirements_driver": "practical_floor",
       "safety_factor": 1.8,
       "continuous_rated_torque_nm": 0.98,
       "peak_torque_nm": 1.47,
-      "margin_vs_continuous_rated": 0.255,
-      "margin_vs_peak": 0.17,
+      "margin_vs_continuous_rated": 0.255102,
+      "margin_vs_peak": 0.170068,
+      "margin_vs_continuous_rated_zero_pose": 0.255102,
+      "margin_vs_peak_zero_pose": 0.170068,
+      "pct_continuous_rated": 25.5,
+      "pct_continuous_rated_zero_pose": 25.5,
       "exceeds_continuous_rated": false,
       "exceeds_peak": false,
+      "exceeds_continuous_rated_zero_pose": false,
+      "exceeds_peak_zero_pose": false,
       "torque_tier": "S",
       "design_placeholder_nm": 0.4,
+      "worst_case_posture_deg": {},
+      "gravity_caliber_note": "gravity_torque_nm_zero_pose = 零位真实重力矩；gravity_torque_nm_worst_case = 限位内最不利姿态的最大重力矩；required_torque_nm 取后者（保守口径），required_torque_nm_zero_pose 为前者。",
       "detail": [
         {
           "link": "right_gripper",
           "mass_kg": 0.0275,
-          "arm_mm": 0.0
+          "gravity_arm_mm": 0.0,
+          "signed_gravity_arm_mm": 0.0,
+          "moment_kgmm": 0.0,
+          "radial_arm_mm": 0.0
         }
       ]
     }
   ],
   "summary_by_tier": {
     "S": {
-      "count": 11,
-      "max_torque_nm": 0.804,
+      "count": 12,
+      "max_torque_nm": 0.442,
       "joints": [
         "head_yaw",
         "head_pitch",
+        "trunk_roll",
         "trunk_pitch",
         "left_shoulder_pitch",
         "left_shoulder_roll",
@@ -1253,10 +1896,9 @@
       ]
     },
     "M": {
-      "count": 11,
-      "max_torque_nm": 1.835,
+      "count": 10,
+      "max_torque_nm": 1.446,
       "joints": [
-        "trunk_roll",
         "left_hip_yaw",
         "left_hip_roll",
         "left_hip_pitch",
@@ -1326,18 +1968,18 @@
     "rated_torque_source": "【官方】额定负载 10 kg·cm = 0.98 N·m @12V（DFRobot SER0070 + 飞特 STS3235 规格书）",
     "stall_torque_nm": 2.94,
     "stall_current_a": 2.7,
-    "avg_servo_current_a": 17.75,
+    "avg_servo_current_a": 15.97,
     "logic_rail_v": 5.0,
     "logic_current_at_5v_a": 1.5,
     "logic_current_at_pack_a": 0.68,
-    "total_avg_current_at_pack_a": 18.42,
+    "total_avg_current_at_pack_a": 16.64,
     "mission_min": 30.0,
-    "consumed_ah": 9.21,
-    "consumed_wh": 102.3,
+    "consumed_ah": 8.32,
+    "consumed_wh": 92.4,
     "usable_fraction": 0.8,
-    "required_nameplate_ah": 11.52,
-    "required_nameplate_wh": 127.8,
-    "estimated_battery_mass_kg": 1.16,
+    "required_nameplate_ah": 10.4,
+    "required_nameplate_wh": 115.5,
+    "estimated_battery_mass_kg": 1.05,
     "per_joint_current": [
       {
         "joint": "head_yaw",
@@ -1351,13 +1993,13 @@
       },
       {
         "joint": "trunk_roll",
-        "operating_torque_nm": 0.6422,
-        "current_a": 1.769
+        "operating_torque_nm": 0.1548,
+        "current_a": 0.427
       },
       {
         "joint": "trunk_pitch",
-        "operating_torque_nm": 0.2814,
-        "current_a": 0.775
+        "operating_torque_nm": 0.1227,
+        "current_a": 0.338
       },
       {
         "joint": "left_hip_yaw",
@@ -1510,7 +2152,7 @@
       }
     },
     "power": {
-      "battery": "3S 11.1V 锂聚合物；30 min 任务按额定 0.98 口径需标称 ≥11.83 Ah（现选 2000 mAh 不够）",
+      "battery": "3S 11.1V 锂聚合物；30 min 任务按额定 0.98 口径需标称 ≥10.4 Ah（现选 2000 mAh 不够）",
       "regulation": "独立 BEC 给舵机供电，与逻辑电源隔离",
       "connector": "XT60 主接口"
     }
@@ -1520,16 +2162,21 @@
     "舵机外形（45.2×24.7×35.0 mm）取 STS3215 实测包络，轴心不在长度中点。",
     "未建模：舵机支架、轴承、走线槽、螺钉柱、拔模与圆角。",
     "未建模：电池与电路板的实际安装位置与固定方式。",
-    "力矩需求为**静力估算**，未做动力学仿真。"
+    "力矩需求为**静力估算**（零姿态 + 限位内最不利姿态两种口径），未做刚体动力学仿真；最不利姿态不含地面接触与平衡约束，是上界。"
   ],
   "what_is_real": [
     "关节数量、编号、名称、轴向、角度限位 —— 与固件 config.py 同源。",
     "运动学树（父子关系与关节原点）—— 可直接加载 URDF 验证。",
     "整机包络尺寸与质量预算 —— 由几何推导，与声明值一致。",
-    "力矩需求的**推导方法**与量级 —— 基于质量分布与力臂计算。"
+    "力矩需求的**推导方法**与量级 —— 基于质量分布与重力力臂计算；重力力臂由 URDF 轴向量正解得到（不硬编码方向）。"
   ],
   "torque_criterion": {
     "primary": "continuous_rated",
+    "primary_gravity_caliber": "worst_case_within_limits",
+    "gravity_calibers": [
+      "zero_pose_static",
+      "worst_case_within_limits"
+    ],
     "continuous_rated_torque_nm": 0.98,
     "peak_torque_nm": 1.47,
     "stall_torque_nm": 2.94,
@@ -1543,11 +2190,210 @@
       "right_hip_pitch",
       "right_hip_roll",
       "right_hip_yaw",
-      "right_knee_pitch",
-      "trunk_roll"
+      "right_knee_pitch"
     ],
-    "joints_exceeding_peak": [
-      "trunk_roll"
-    ]
+    "joints_exceeding_peak": [],
+    "joints_exceeding_continuous_zero_pose": [
+      "left_ankle_pitch",
+      "left_hip_pitch",
+      "left_hip_roll",
+      "left_hip_yaw",
+      "left_knee_pitch",
+      "right_ankle_pitch",
+      "right_hip_pitch",
+      "right_hip_roll",
+      "right_hip_yaw",
+      "right_knee_pitch"
+    ],
+    "joints_exceeding_peak_zero_pose": [],
+    "note": "两种口径并列报出：*_zero_pose = 零位站立不动的真实重力矩口径；无后缀 = 限位内最不利姿态口径（主判据/选型用）。"
+  },
+  "torque_check": {
+    "criterion": "舵机【官方】连续额定 0.98 N·m（堵转 2.94 仅作参考）",
+    "calibers": {
+      "zero_pose_static": "零姿态静力：URDF 零位（站立不动）的真实重力矩口径",
+      "worst_case_within_limits": "限位内最不利姿态：该关节限位内搜索出的最大重力矩口径（主判据）"
+    },
+    "joints_pct_of_continuous_rated": [
+      {
+        "joint": "left_ankle_pitch",
+        "zero_pose_pct": 147.5,
+        "worst_case_pct": 147.5,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "right_ankle_pitch",
+        "zero_pose_pct": 147.5,
+        "worst_case_pct": 147.5,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "left_knee_pitch",
+        "zero_pose_pct": 141.2,
+        "worst_case_pct": 141.2,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "right_knee_pitch",
+        "zero_pose_pct": 141.2,
+        "worst_case_pct": 141.2,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "left_hip_pitch",
+        "zero_pose_pct": 134.1,
+        "worst_case_pct": 134.1,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "right_hip_pitch",
+        "zero_pose_pct": 134.1,
+        "worst_case_pct": 134.1,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "left_hip_roll",
+        "zero_pose_pct": 129.4,
+        "worst_case_pct": 129.4,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "right_hip_roll",
+        "zero_pose_pct": 129.4,
+        "worst_case_pct": 129.4,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "left_hip_yaw",
+        "zero_pose_pct": 124.7,
+        "worst_case_pct": 124.7,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "right_hip_yaw",
+        "zero_pose_pct": 124.7,
+        "worst_case_pct": 124.7,
+        "exceeds_rated": true,
+        "exceeds_rated_zero_pose": true
+      },
+      {
+        "joint": "trunk_roll",
+        "zero_pose_pct": 41.1,
+        "worst_case_pct": 45.1,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "trunk_pitch",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 35.8,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "head_yaw",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "head_pitch",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "left_shoulder_pitch",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "left_shoulder_roll",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "left_elbow_pitch",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "left_gripper",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "right_shoulder_pitch",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "right_shoulder_roll",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "right_elbow_pitch",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      },
+      {
+        "joint": "right_gripper",
+        "zero_pose_pct": 25.5,
+        "worst_case_pct": 25.5,
+        "exceeds_rated": false,
+        "exceeds_rated_zero_pose": false
+      }
+    ],
+    "exceeding_worst_case": [
+      "left_ankle_pitch",
+      "left_hip_pitch",
+      "left_hip_roll",
+      "left_hip_yaw",
+      "left_knee_pitch",
+      "right_ankle_pitch",
+      "right_hip_pitch",
+      "right_hip_roll",
+      "right_hip_yaw",
+      "right_knee_pitch"
+    ],
+    "exceeding_zero_pose": [
+      "left_ankle_pitch",
+      "left_hip_pitch",
+      "left_hip_roll",
+      "left_hip_yaw",
+      "left_knee_pitch",
+      "right_ankle_pitch",
+      "right_hip_pitch",
+      "right_hip_roll",
+      "right_hip_yaw",
+      "right_knee_pitch"
+    ],
+    "same_set": true
   }
 }
