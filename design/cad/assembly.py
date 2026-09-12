@@ -259,6 +259,15 @@ def servo_placeholder(name: str = SERVO_NAME) -> cq.Workplane:
                           at=(0.0, f["y_half"], 0.0), axis="Y"))
     part = part.union(cyl(f["spline_d"], f["spline_h"],
                           at=(0.0, f["boss_face"], 0.0), axis="Y"))
+    # ⚠️ 2026-09-12 补：**金属舵盘 Φ20 × 4.0**（y ∈ [boss_face, horn_face]）。
+    #    STS3215 出厂即带 25T 金属舵盘（standards.horn_disc_*，horn_verify=verified），
+    #    而 `servo_frame()` 的 horn_face 就是"凸台面 + 舵盘厚"。占位体原来只建了
+    #    凸台 + 花键、漏掉舵盘，于是所有以 HORN_FACE 为基准面的打印件
+    #    （gripper_jaw / limb_fork / cluster_horn_arm）在连通性体检里全部"悬空"
+    #    （与最近实体差 2.55 mm），同时也看不见与舵盘轮缘的真实冲突。
+    s = servo(name)
+    part = part.union(cyl(s["horn_disc_od_mm"], s["horn_disc_thickness_mm"],
+                          at=(0.0, f["boss_face"], 0.0), axis="Y"))
     # 副轴端：Φ6 副轴（伸向 −Y）
     part = part.union(cyl(f["stub_dia"], f["stub_len"],
                           at=(0.0, -f["y_half"] - f["stub_len"], 0.0), axis="Y"))
@@ -369,7 +378,15 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
             continue
         for pname, kw in parts:
             try:
-                add(f"{link}__{pname}", _place(sk.build(pname, **kw),
+                kw2 = dict(kw)
+                # 舵机标准姿态件（gripper_jaw）：link 位姿是"零位关节系"，
+                # 而右臂的输出轴是 −y。姿态口径**取自 JOINT_SCHEME**（不另写一套），
+                # 与下面 `servo__*` 的 orient 完全同源。
+                if pname == "gripper_jaw":
+                    sc = JOINT_SCHEME[kin.parent_of[link]]
+                    kw2.setdefault("shaft", sc["shaft"])
+                    kw2.setdefault("parent", sc["parent"])
+                add(f"{link}__{pname}", _place(sk.build(pname, **kw2),
                                                kin.world[link]), "bulk")
             except Exception as exc:  # noqa: BLE001
                 fail(f"{link}/{pname}", "bulk", exc)

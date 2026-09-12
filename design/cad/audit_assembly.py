@@ -28,6 +28,7 @@ import cadquery as cq
 import assembly as A
 from fitcheck import (bbox_of, boxes_overlap, common_volume, distance,
                       verdict)
+from kit import servo_frame
 
 
 def kind_of(name: str) -> str:
@@ -60,8 +61,15 @@ def main(argv: Sequence[str]) -> int:
     boxes = [bbox_of(w) for w in shapes]
 
     # ---- ⓪ 关节轴对齐：每个舵机的"沿轴厚度"必须落在该关节的轴上 ----
-    #     舵机包络 45.2(长) × 43.1(沿轴含凸台/花键/副轴) × 24.7(宽)；
-    #     若沿关节轴方向的尺寸不是 43.1，说明这个关节的舵机转向错了 90°。
+    #     舵机包络 = 45.2(机壳长) × 沿轴总厚 × 24.7(机壳宽)。
+    #     ⚠️ 2026-09-12：沿轴总厚**不再硬编码**——占位体补上了金属舵盘 Φ20×4.0
+    #     （`servo_placeholder`，以前只有凸台+花键），旧的 43.1 是"不含舵盘"的值，
+    #     于是 22 只全被判成轴错。现按唯一真值 `kit.servo_frame()` 现算：
+    #         机壳 35.0 + 凸台 2.5 + 舵盘 4.0 + 副轴 4.1 = 45.6
+    #     判据：关节轴方向上必须是这个"沿轴总厚"，否则说明舵机转向错了 90°。
+    f = servo_frame()
+    axial_expect = (f["y_half"] * 2.0 + f["boss_t"]
+                    + (f["horn_face"] - f["boss_face"]) + f["stub_len"])
     item_map = dict(items)
     mis = []
     for j, sc in A.JOINT_SCHEME.items():
@@ -72,10 +80,10 @@ def main(argv: Sequence[str]) -> int:
         dims = (b.xlen, b.ylen, b.zlen)
         w = kin.axis_world(j)
         idx = max(range(3), key=lambda i: abs(w[i]))
-        if abs(dims[idx] - 43.1) > 1.0:
+        if abs(dims[idx] - axial_expect) > 1.0:
             mis.append((j, sc["shaft"], sc["parent"],
                         [round(x, 1) for x in dims]))
-    print(f"\n## 关节轴对齐\n\n舵机轴向与关节轴一致："
+    print(f"\n## 关节轴对齐（沿轴总厚应为 {axial_expect:.1f} mm）\n\n舵机轴向与关节轴一致："
           f"**{len(A.JOINT_SCHEME) - len(mis)}/{len(A.JOINT_SCHEME)}**")
     for j, sh, pa, dims in mis:
         print(f"  ✗ `{j}` shaft={sh} parent={pa} 包络 {dims}")

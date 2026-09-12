@@ -422,7 +422,19 @@ def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
     """
     horn = servo_horn_interface(SERVO_NAME)
     horn_t = wall + 1.0
-    z_flange = parent_stagger
+    # ⚠️ 2026-09-12 订正：法兰原来放在 `z_flange = parent_stagger`，即**父舵机的机壳
+    #    厚度中点**（轴心），于是 24 mm 厚的"舵盘外表面"那一截正好把法兰埋进机壳里：
+    #    hip_yaw 两臂 1342 mm³（重合率 31% → ❌ 摆放错误）、另外 4 个臂 1323 mm³（⚠️）。
+    #    唯一真值：舵盘外表面 = 父舵机轴心 + HORN_FACE（kit.servo_frame），
+    #    父舵机机体沿自身轴偏置 parent_stagger（assembly.py 的 stagger），故
+    #       舵盘外表面在本件建模系 = horn_sign × (parent_stagger + HORN_FACE + 0.05)
+    #    `horn_sign` 由 orient() 决定：局部 +Z 映到 parent_dir，parent_dir == in_shaft
+    #    时舵盘在 +Z；被 {±z 反向} 规则翻转后（hip_yaw 两臂）舵盘在 −Z。
+    #    法兰"内表面贴舵盘、板身朝远离舵机的方向长"。
+    parent_dir = {"+z": "-z", "-z": "+z"}.get(in_shaft, in_shaft)
+    horn_sign = 1.0 if parent_dir == in_shaft else -1.0
+    z_horn = horn_sign * (parent_stagger + HORN_FACE + 0.05)
+    z_flange = z_horn + horn_t if horn_sign > 0 else z_horn
     z_bot = -max(drop, 12.0) - 8.0
     z_height = (z_flange + horn_t) - z_bot
     # 子级机体 x ∈ [x_min, x_max] = [-35, +10.2]，立柱必须在其外侧
@@ -450,7 +462,6 @@ def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
     # drop≈0 时立板与法兰几乎共面，圆角会把实体打成 Compound
     if drop >= 8.0:
         part = safe_fillet(part, FDM["fillet_min_mm"], "|Y")
-    parent_dir = {"+z": "-z", "-z": "+z"}.get(in_shaft, in_shaft)
     part = orient(part, out_shaft, parent_dir)
     return sanitize(part)
 
@@ -845,16 +856,50 @@ def gripper_body(wall: float = PLATE_T) -> cq.Workplane:
     return sanitize(part)
 
 
-def gripper_jaw() -> cq.Workplane:
-    """夹爪动指：直接锁在舵盘上，随舵机开合（0–60°）。"""
+def gripper_jaw(shaft: str = "+y", parent: str = "+z") -> cq.Workplane:
+    """夹爪动指：直接锁在舵盘上，随舵机开合（0–60°）。
+
+    ⚠️ 2026-09-12 按**标准姿态**重写（原实现穿模 2316 mm³ / 重合率 66%，❌ 摆放错误）：
+        原件把**舵盘外表面当原点、局部 +Z 指向舵机内部**，与全库唯一真值
+        `kit.servo_frame()`（+Y = 输出轴、原点在轴心）差一个绕 X 的 +90° 旋转
+        加 24 mm 平移；装配按 `world[link]` 直放 → 整只爪子埋进机壳。
+        而且原几何**本身自相矛盾**，单靠坐标变换救不回来：
+          ① 法兰在局部 Z∈[0,10]（映到舵机 y∈[14,24]，即"伸进舵机内部"的方向）；
+          ② 让位坑 Φ22（r=11）与 4×M2.5 孔阵（PCD14 → r=7，孔缘 r=8.35）**互斥**——
+             坑把四个孔整个吃掉；
+          ③ 法兰只有 8 mm 宽，装不下 PCD14（孔心 r=7 > 4）。
+        尺寸链核对（`standards.STS3215`，horn_verify=verified）：
+          舵盘 Φ20 × 4.0（`horn_disc_od_mm` / `horn_disc_thickness_mm`）坐在
+          Φ20 × 2.5 输出凸台（`boss_face` = +20）上，4×M2.5 攻在舵盘**外表面**
+          （`horn_face` = +24，深 2.5）。⇒ 打印件必须**贴在 horn_face 上、只往外长**，
+          让位靠"抬高"而不是"掏坑"；Φ22 ≥ 舵盘 Φ20 + 2，本身就是把让位圈画大了。
+        本版：法兰 30×20（板面 ≥ Φ17 才留得住 PCD14 孔）+ 指身沿用原件 24×8×16，
+        中心留 Φ7×2.45 让开舵盘中心 M3×6 的盘头（Φ5.5，凸出舵盘面约 2 mm）。
+    """
+    horn = servo_horn_interface(SERVO_NAME)
+    face = HORN_FACE + 0.05            # 24.05：法兰内表面（贴舵盘外表面，同 limb_fork 口径）
+    plate_t = 3.6                      # 法兰厚：留出盘头让位后仍剩 1.15 mm 实体
+    finger_l = 16.0                    # 指身长度（沿用原件）
+
     part = cq.Workplane("XY")
-    part = part.union(box(24.0, 8.0, 16.0, at=(0, 0, -16.0)))
-    part = part.union(box(30.0, 8.0, 10.0, at=(0, 0, 0)))
-    part = drill(part, bolt_circle(IF["horn"]["pcd_mm"], 4),
-                 dia=IF["horn"]["hole_dia_mm"], depth=30.0, z0=-1.0)
-    part = part.cut(cyl(22.0, 12.0, at=(0, 0, -1.0)))
-    part = part.cut(cyl(S["secondary_shaft_dia_mm"] / 2.0, 12.0,
-                        at=(0, 0, -8.0)))
+    # 法兰：30(X) × 3.6(Y) × 20(Z)，XZ 面盖住 PCD14 孔阵
+    part = part.union(box(30.0, plate_t, 20.0,
+                          at=(0.0, face + plate_t / 2.0, -10.0)))
+    # 动指：24(X) × 16(Y) × 8(Z)，从法兰外表面继续往 +Y 伸
+    part = part.union(box(24.0, finger_l, 8.0,
+                          at=(0.0, face + plate_t + finger_l / 2.0, -4.0)))
+    # 4×M2.5 通孔：PCD14、相位 45°（与舵盘孔阵同相位）；axis="Y" 时 z0 是孔顶。
+    # 贯穿法兰 + 指身（孔心 r=7 落在指身 8 mm 宽之外，只有 0.4 mm 边料被扫掉），
+    # 这样 M2.5 盘头（Φ4.5）能坐在法兰外表面上。
+    part = drill(part, bolt_circle(horn["pcd_mm"], horn["hole_count"]),
+                 dia=IF["horn"]["hole_dia_mm"], depth=plate_t + finger_l + 4.0,
+                 z0=face + plate_t + 1.0, axis="Y")
+    # Φ7 × 2.45 让位坑：舵盘中心 M3×6 内六角盘头（Φ5.5）凸出舵盘面
+    part = part.cut(cyl(7.0, 2.45, at=(0.0, face, 0.0), axis="Y"))
+    # ⚠️ 本件在**舵机标准姿态**下建模（+Y = 输出轴），而 link 位姿是"零位关节系"：
+    #    右臂 shaft=-y（左臂 +y）时，不 orient 的话爪子会长到机体反侧去
+    #    （实测右爪 ↔ servo__right_hip_yaw 4239 mm³）。与 `servo__*` 同源定向。
+    part = orient(part, shaft, parent)
     return sanitize(part)
 
 
