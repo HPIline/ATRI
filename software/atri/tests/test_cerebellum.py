@@ -132,10 +132,26 @@ class TestCerebellum(unittest.TestCase):
         self.assertIn("action", self.cere.dance(bars=1))
 
     def test_execute_motion(self):
-        result = self.cere.execute_motion("align", {})
+        result = self.cere.execute_motion("align", {"object": {"x_cm": 0.0}})
         self.assertIsInstance(result, dict)
-        self.assertIn("left_hip_pitch", result)
+        self.assertEqual(result.get("action"), "align")
         self.assertIn("action", self.cere.execute_motion("kick", {}))
+
+    def test_execute_motion_align_uses_object_offset(self):
+        """align 用目标横向偏移动手臂，不再写死髋俯仰。"""
+        centered = self.cere.execute_motion("align", {"object": {"x_cm": 0.0}})
+        offset = self.cere.execute_motion("align", {"object": {"x_cm": 6.0}})
+        self.assertEqual(centered.get("action"), "align")
+        self.assertEqual(offset.get("action"), "align")
+        self.assertNotEqual(centered.get("right_shoulder_roll"), offset.get("right_shoulder_roll"))
+        self.assertNotIn("left_hip_pitch", offset)
+        self.assertNotEqual(offset.get("left_hip_pitch"), 4.0)
+
+    def test_execute_motion_align_without_offset_not_aligned(self):
+        result = self.cere.execute_motion("align", {})
+        self.assertEqual(result.get("action"), "align")
+        self.assertIs(result.get("aligned"), False)
+        self.assertNotIn("left_hip_pitch", result)
 
     def test_execute_motion_release(self):
         result = self.cere.execute_motion("release", {})

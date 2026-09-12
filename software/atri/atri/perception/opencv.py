@@ -21,6 +21,7 @@ class OpenCVPerception(PerceptionBackend):
         face_cascade_path: Optional[str] = None,
         ball_hsv_lower: Tuple[int, int, int] = (35, 80, 80),
         ball_hsv_upper: Tuple[int, int, int] = (85, 255, 255),
+        object_hsv_ranges: Optional[Tuple[Tuple[Tuple[int, int, int], Tuple[int, int, int]], ...]] = None,
         ball_diameter_cm: float = 4.0,
         focal_px: Optional[float] = None,
         pixels_per_cm: float = 10.0,
@@ -33,6 +34,11 @@ class OpenCVPerception(PerceptionBackend):
         self.face_cascade_path = face_cascade_path
         self.ball_hsv_lower = ball_hsv_lower
         self.ball_hsv_upper = ball_hsv_upper
+        # 红块色相绕 0 断开，两段并起来。
+        self.object_hsv_ranges = object_hsv_ranges or (
+            ((0, 80, 80), (10, 255, 255)),
+            ((170, 80, 80), (180, 255, 255)),
+        )
         self.ball_diameter_cm = ball_diameter_cm
         self.focal_px = self._checked_positive("focal_px", focal_px, allow_none=True)
         self.pixels_per_cm = self._checked_positive("pixels_per_cm", pixels_per_cm, allow_none=False)
@@ -115,46 +121,84 @@ class OpenCVPerception(PerceptionBackend):
             raw=points,
         )
 
-    def detect_ball(self, frame: Any = None) -> PerceptionResult:
-        self._require_frame(frame)
+    def _largest_hsv_blob(
+        self, frame: Any, ranges: Tuple[Tuple[Tuple[int, int, int], Tuple[int, int, int]], ...]
+    ) -> Optional[Tuple[Any, int, int, int, int, float, float]]:
         cv = self._get_cv2()
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-        mask = cv.inRange(hsv, self.ball_hsv_lower, self.ball_hsv_upper)
+        mask = None
+        for lower, upper in ranges:
+            part = cv.inRange(hsv, lower, upper)
+            mask = part if mask is None else cv.bitwise_or(mask, part)
         contours, _ = cv.findContours(
             mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
         )
         if not contours:
-            return PerceptionResult(kind="ball", data={"found": False}, confidence=0.0)
-
+            return None
         areas = [cv.contourArea(c) for c in contours]
         best = contours[max(range(len(areas)), key=areas.__getitem__)]
         x, y, w, h = cv.boundingRect(best)
         cx = x + w / 2.0
         cy = y + h / 2.0
-        if hasattr(frame, "shape") and len(frame.shape) >= 2:
-            height, width = frame.shape[:2]
-        else:
-            height = len(frame)
-            width = len(frame[0]) if height else 0
-        x_cm = (cx - width / 2.0) / self.pixels_per_cm
+        return best, x, y, w, h, cx, cy
 
+    def _frame_width(self, frame: Any) -> int:
+        if hasattr(frame, "shape") and len(frame.shape) >= 2:
+            return int(frame.shape[1])
+        height = len(frame)
+        return len(frame[0]) if height else 0
+
+    def detect_ball(self, frame: Any = None) -> PerceptionResult:
+        self._require_frame(frame)
+        blob = self._largest_hsv_blob(frame, ((self.ball_hsv_lower, self.ball_hsv_upper),))
+        if blob is None:
+            return PerceptionResult(kind="ball", data={"found": False}, confidence=0.0)
+        best, x, y, w, h, cx, cy = blob
+        width = self._frame_width(frame)
+        x_cm = (cx - width / 2.0) / self.pixels_per_cm
         ball_diameter_px = max(w, h)
         distance_cm: Optional[float] = None
         if self.focal_px and ball_diameter_px > 0:
             distance_cm = round(
                 self.ball_diameter_cm * self.focal_px / float(ball_diameter_px), 2
             )
-
         return PerceptionResult(
             kind="ball",
             data={
                 "found": True,
                 "x_cm": round(x_cm, 2),
-                # 焦距未标定时返回 None，让搬运技能判空而不是把缺测距当成 0cm
                 "distance_cm": distance_cm,
                 "bbox": [int(x), int(y), int(w), int(h)],
                 "center_px": [int(cx), int(cy)],
             },
             confidence=0.85,
+            raw=best,
+        )
+
+    def detect_object(self, frame: Any = None) -> PerceptionResult:
+        self._require_frame(frame)
+        blob = self._largest_hsv_blob(frame, self.object_hsv_ranges)
+        if blob is None:
+            return PerceptionResult(kind="object", data={"found": False}, confidence=0.0)
+        best, x, y, w, h, cx, cy = blob
+        width = self._frame_width(frame)
+        x_cm = (cx - width / 2.0) / self.pixels_per_cm
+        diameter_px = max(w, h)
+        distance_cm: Optional[float] = None
+        if self.focal_px and diameter_px > 0:
+            distance_cm = round(
+                self.ball_diameter_cm * self.focal_px / float(diameter_px), 2
+            )
+        return PerceptionResult(
+            kind="object",
+            data={
+                "found": True,
+                "target": "红块",
+                "x_cm": round(x_cm, 2),
+                "distance_cm": distance_cm,
+                "bbox": [int(x), int(y), int(w), int(h)],
+                "center_px": [int(cx), int(cy)],
+            },
+            confidence=0.8,
             raw=best,
         )

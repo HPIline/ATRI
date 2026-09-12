@@ -383,11 +383,43 @@ class Cerebellum:
             return self.walk(steps=4)
         if any(k in ins for k in ("转", "turn")):
             return self.set_pose({"left_hip_yaw": 8.0, "right_hip_yaw": 8.0})
-        # 显式对齐分支：搬运技能会先做视觉伺服微调，这里不是未识别指令的兜底
+        # 显式对齐：用目标横向偏移动手臂，不是写死髋角
         if any(k in ins for k in ("对齐", "微调", "align", "视觉")):
-            return self.set_pose({
-                "trunk_pitch": 1.0,
-                "left_hip_pitch": 4.0,
-                "right_hip_pitch": -4.0,
-            })
+            return self._align_arm(observation)
         raise ValueError(f"未知指令: {instruction!r}")
+
+    def _align_arm(self, observation: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        obs = observation or {}
+        blob = obs.get("object") if isinstance(obs.get("object"), dict) else obs
+        x_cm = None
+        if isinstance(blob, dict):
+            raw = blob.get("x_cm")
+            if raw is not None and not isinstance(raw, bool):
+                try:
+                    number = float(raw)
+                except (TypeError, ValueError, OverflowError):
+                    number = None
+                if number is not None and math.isfinite(number):
+                    x_cm = number
+        if x_cm is None:
+            return {"action": "align", "aligned": False}
+        yaw = max(-15.0, min(15.0, x_cm * 1.5))
+        reach = max(-15.0, min(15.0, -abs(x_cm)))
+        elbow = max(-120.0, min(0.0, -10.0 - abs(x_cm)))
+        if x_cm >= 0.0:
+            targets = {
+                "right_shoulder_roll": yaw,
+                "right_shoulder_pitch": reach,
+                "right_elbow_pitch": elbow,
+            }
+        else:
+            targets = {
+                "left_shoulder_roll": yaw,
+                "left_shoulder_pitch": reach,
+                "left_elbow_pitch": elbow,
+            }
+        applied = self.set_pose(targets)
+        applied["action"] = "align"
+        applied["aligned"] = abs(x_cm) <= 2.0
+        applied["x_cm"] = x_cm
+        return applied

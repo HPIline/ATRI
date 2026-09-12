@@ -45,6 +45,14 @@ class SpyCerebellum(Cerebellum):
         self._tick("walk")
         return super().walk(*args, **kwargs)
 
+    def grasp(self, *args, **kwargs):
+        self._tick("grasp")
+        return super().grasp(*args, **kwargs)
+
+    def release(self, *args, **kwargs):
+        self._tick("release")
+        return super().release(*args, **kwargs)
+
     def execute_motion(self, *args, **kwargs):
         self._tick("execute_motion")
         return super().execute_motion(*args, **kwargs)
@@ -376,11 +384,27 @@ class TestCarryAndDanceLimits(unittest.TestCase):
         self.assertEqual(cere.calls.get("grasp", 0), 0)
 
     def test_carry_params_fallback_without_channel(self):
+        """无 object 通道不得靠任务卡参数兜底抓取（T-03 fail-fast）。"""
         cere = SpyCerebellum()
         brain = Brain(cere)
         result = brain.execute_task(_card(["carry"], params={"distance_cm": 8.0}), observation={})
-        self.assertTrue(result["ok"])
-        self.assertEqual(cere.calls.get("walk"), 1)
+        self.assertFalse(result["ok"])
+        self.assertEqual(cere.calls.get("grasp", 0), 0)
+        self.assertEqual(cere.calls.get("walk", 0), 0)
+        self.assertEqual(cere.calls.get("release", 0), 0)
+
+    def test_carry_misaligned_does_not_grasp(self):
+        """看见目标但横向偏差过大：对齐后仍偏，不下发抓取。"""
+        cere = SpyCerebellum()
+        brain = Brain(cere)
+        result = brain.execute_task(
+            _card(["carry"]),
+            observation={"object": {"found": True, "target": "红块",
+                                    "x_cm": 12.0, "distance_cm": 8.0}},
+        )
+        self.assertFalse(result["ok"])
+        self.assertEqual(cere.calls.get("grasp", 0), 0)
+        self.assertGreaterEqual(cere.calls.get("execute_motion", 0), 1)
 
     def test_dance_bars_param_out_of_range(self):
         cere = SpyCerebellum()

@@ -48,7 +48,9 @@ class FakeCV2:
     def __init__(self, faces=((10, 20, 30, 40),), qr_data='{"action":"walk","steps":3}', contours=None):
         self.faces = faces
         self.qr_data = qr_data
-        self.contours = contours or [FakeContour(100, 50, 60, 20, 20)]
+        self.contours = (
+            [FakeContour(100, 50, 60, 20, 20)] if contours is None else list(contours)
+        )
 
     def cvtColor(self, img, code):
         return img
@@ -64,6 +66,9 @@ class FakeCV2:
 
     def inRange(self, img, lower, upper):
         return img
+
+    def bitwise_or(self, a, b):
+        return a
 
     def findContours(self, mask, mode, method):
         return self.contours, None
@@ -95,6 +100,11 @@ class TestMockPerception(unittest.TestCase):
         self.assertIs(qr.data["found"], True)
         self.assertEqual(ball.data["distance_cm"], 12.0)
         self.assertIs(ball.data["found"], True)
+        obj = p.detect_object()
+        self.assertEqual(obj.kind, "object")
+        self.assertIs(obj.data["found"], True)
+        self.assertEqual(obj.data["target"], "红块")
+        self.assertEqual(obj.data["x_cm"], 0.5)
 
     def test_custom(self):
         p = MockPerception(
@@ -139,6 +149,20 @@ class TestOpenCVPerception(unittest.TestCase):
         self.assertTrue(result.data["found"])
         self.assertEqual(result.data["x_cm"], 0.0)
         self.assertGreater(result.data["distance_cm"], 0.0)
+
+    def test_object_detected(self):
+        p = OpenCVPerception(cv2_module=FakeCV2(), pixels_per_cm=10.0)
+        result = p.detect_object(frame=[[[0, 0, 0]] * 120 for _ in range(100)])
+        self.assertTrue(result.data["found"])
+        self.assertEqual(result.kind, "object")
+        self.assertEqual(result.data["target"], "红块")
+        self.assertIn("x_cm", result.data)
+        self.assertIn("center_px", result.data)
+
+    def test_object_not_detected_without_contours(self):
+        p = OpenCVPerception(cv2_module=FakeCV2(contours=[]), pixels_per_cm=10.0)
+        result = p.detect_object(frame=[[[0, 0, 0]] * 120 for _ in range(100)])
+        self.assertFalse(result.data["found"])
 
     def test_ball_distance_none_without_focal(self):
         p = OpenCVPerception(cv2_module=FakeCV2(), focal_px=None, pixels_per_cm=10.0)

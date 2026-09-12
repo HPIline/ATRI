@@ -52,3 +52,7 @@ class PerceptionBackend(ABC):
     @abstractmethod
     def detect_ball(self, frame: Any = None) -> PerceptionResult:
         """检测场地中的球。"""
+
+    def detect_object(self, frame: Any = None) -> PerceptionResult:
+        """检测搬运目标（默认红块色块）。未实现的后端视为未命中。"""
+        return PerceptionResult(kind="object", data={"found": False}, confidence=0.0)

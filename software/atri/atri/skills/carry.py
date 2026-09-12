@@ -14,15 +14,15 @@ class CarrySkill(Skill):
     name = "carry"
 
     def run(self, ctx: SkillContext) -> Dict[str, Any]:
-        obs, reason = perception_data(ctx, "object", optional=True)
+        obs, reason = perception_data(ctx, "object")
         if reason:
             return failed(self.name, reason)
 
         target = obs.get("target") or ctx.params.get("target") or "红块"
-        raw_distance = obs.get("distance_cm", ctx.params.get("distance_cm", 8.0))
+        raw_distance = obs.get("distance_cm", ctx.params.get("distance_cm"))
         distance_cm = as_finite_float(raw_distance)
         if distance_cm is None or distance_cm <= 0.0:
-            return failed(self.name, f"搬运距离非法: {raw_distance!r}")
+            return failed(self.name, f"搬运距离非法或缺测距: {raw_distance!r}")
         if distance_cm > MAX_CARRY_DISTANCE_CM:
             return failed(
                 self.name,
@@ -30,8 +30,14 @@ class CarrySkill(Skill):
             )
         steps = max(2, int(distance_cm // 2.0))
 
-        print(f"  [Carry] 目标={target}, 距离={distance_cm}cm, 视觉对齐中...")
-        ctx.cerebellum.execute_motion("align", obs)
+        x_cm = as_finite_float(obs.get("x_cm"))
+        if x_cm is None:
+            x_cm = 0.0
+        print(f"  [Carry] 目标={target}, 距离={distance_cm}cm, 横向={x_cm}cm")
+        if abs(x_cm) > 2.0:
+            ctx.cerebellum.execute_motion("align", {"object": obs})
+        if abs(x_cm) > 4.0:
+            return failed(self.name, f"目标横向偏差 {x_cm:g}cm 过大，放弃抓取")
 
         grasp_result = ctx.cerebellum.grasp()
         walk_result = ctx.cerebellum.walk(steps=steps, **ctx.gait)

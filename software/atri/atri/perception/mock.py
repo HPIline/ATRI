@@ -8,6 +8,7 @@ from .base import PerceptionBackend, PerceptionResult
 DEFAULT_FACE = {"name": "测试员A", "found": True}
 DEFAULT_QR = {"payload": {"action": "walk", "steps": 3}, "found": True}
 DEFAULT_BALL = {"x_cm": 1.5, "distance_cm": 12.0, "found": True}
+DEFAULT_OBJECT = {"target": "红块", "x_cm": 0.5, "distance_cm": 8.0, "found": True}
 
 
 class MockPerception(PerceptionBackend):
@@ -18,22 +19,28 @@ class MockPerception(PerceptionBackend):
         face: Optional[Dict[str, Any]] = None,
         qr: Optional[Dict[str, Any]] = None,
         ball: Optional[Dict[str, Any]] = None,
+        obj: Optional[Dict[str, Any]] = None,
         face_confidence: float = 0.93,
         qr_confidence: float = 0.99,
         ball_confidence: float = 0.9,
+        object_confidence: float = 0.9,
     ) -> None:
         self.face = dict(DEFAULT_FACE)
         self.qr = dict(DEFAULT_QR)
         self.ball = dict(DEFAULT_BALL)
+        self.object = dict(DEFAULT_OBJECT)
         if face is not None:
             self.face.update(face)
         if qr is not None:
             self.qr.update(qr)
         if ball is not None:
             self.ball.update(ball)
+        if obj is not None:
+            self.object.update(obj)
         self.face_confidence = face_confidence
         self.qr_confidence = qr_confidence
         self.ball_confidence = ball_confidence
+        self.object_confidence = object_confidence
 
     def detect_face(self, frame: Any = None) -> PerceptionResult:
         return PerceptionResult(
@@ -54,4 +61,11 @@ class MockPerception(PerceptionBackend):
             kind="ball",
             data=dict(self.ball),
             confidence=self.ball_confidence,
+        )
+
+    def detect_object(self, frame: Any = None) -> PerceptionResult:
+        return PerceptionResult(
+            kind="object",
+            data=dict(self.object),
+            confidence=self.object_confidence,
         )
