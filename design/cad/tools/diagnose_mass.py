@@ -40,7 +40,10 @@ def measure(name: str, shape: cq.Workplane) -> Tuple[float, float]:
 def breakdown_joint_cage() -> List[Dict[str, Any]]:
     """按特征拆关节笼（标准姿态，未旋转）。"""
     from kit import FDM, IF, bolt_circle, box, cyl, drill, fastener, bearing
-    from skeleton import (AXIS_DZ, GAP, PLATE_T, PLATE_Y, SERVO_NAME, SPAN_X,
+    # ⚠️ 2026-09-12 修：原 import 含 `AXIS_DZ`，该常量在第 6–10 轮骨架重构里已删除，
+    #    导致本工具 ImportError（工具随重构一起坏了，没人发现）。该名字在本函数里
+    #    本来就没被用到，直接去掉。
+    from skeleton import (GAP, PLATE_T, PLATE_Y, SERVO_NAME, SPAN_X,
                           SPIGOT_BORE, SPIGOT_D, SPIGOT_H, X_HALF, Y_HALF,
                           Z_BOT, Z_TOP, S)
     rows = []

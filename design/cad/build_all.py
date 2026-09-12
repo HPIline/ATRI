@@ -36,8 +36,12 @@ OUT = HERE / "out"
 SERVO_G = 55.0 * 22
 ELEC_G = 316.0
 HARNESS_G = 120.0
-BUDGET_STRUCT_G = 1790.0    # v3：CAD 实装实算（74 件）；v2 的合成预算 500 g 已弃用
-BUDGET_TOTAL_G = 3437.0     # = 1790 + 1210 + 316 + 120
+# ⚠️ 2026-09-12 订正：这两个"预算"曾写成 v3 的 1790 / 3437 g，但那是**已作废的虚高实算值**
+#    （1790 g 是当时算出来的质量，不是预算；v2 的合成预算 500 g 更早已弃用）。
+#    拿作废值当"预算"会让报告显示"超支"，误导参赛材料。
+#    现在参照**上一版实测**（第 5 轮后 1490 g / 3136 g），报告读作"相对上一版的变化"。
+BUDGET_STRUCT_G = 1490.0    # 参照值：第 5 轮后结构件实测（81 件）；非"预算"
+BUDGET_TOTAL_G = 3136.0     # 参照值：1490 + 1210 + 316 + 120（纸面推算，重量方案未定案）
 # 扭矩双口径：主判据 = 官方连续额定（额定负载 10 kg·cm @12V）；
 # 峰值 = 堵转 × 50%，仅短时参考（与 components.json / robot_model.json 同源）
 CONTINUOUS_NM = 0.98
@@ -110,7 +114,7 @@ def write_report(reports: List[Dict[str, Any]]) -> Path:
 | 项 | 质量 (g) | 说明 |
 |---|---|---|
 | 打印结构件（实算） | **{c['struct_g']:.0f}** | 本表合计 |
-| 打印结构件（v2 预算） | {c['budget_struct_g']:.0f} | 超 **{c['struct_over_pct']:+.0f}%** |
+| 打印结构件（对比上一版实测） | {c['budget_struct_g']:.0f} | **{c['struct_over_pct']:+.0f}%** |
 | 舵机 22 × STS3215 | {c['servo_g']:.0f} | 55 g/只 |
 | 电子件 + 电池 | {c['elec_g']:.0f} | placements.json |
 | 线束 + 紧固件 | {c['harness_g']:.0f} | v2 摊派 |
@@ -184,9 +188,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     tot = sum(r["subtotal_g"] for r in reports)
     c = closure(tot)
     print("-" * 78)
-    print(f"  结构件合计        {c['struct_g']:>8.1f} g   （预算 {c['budget_struct_g']:.0f} g，"
+    print(f"  结构件合计        {c['struct_g']:>8.1f} g   （对比上一版实测 {c['budget_struct_g']:.0f} g，"
           f"{c['struct_over_pct']:+.0f}%）")
-    print(f"  整机合计          {c['total_g']:>8.1f} g   （v2 设计值 {c['budget_total_g']:.0f} g）")
+    print(f"  整机合计          {c['total_g']:>8.1f} g   （对比上一版实测 {c['budget_total_g']:.0f} g）")
     print(f"  踝关节力矩需求    {c['ankle_torque_nm']:>8.2f} N·m "
           f"（占连续额定 {CONTINUOUS_NM} 判据 {c['ankle_continuous_pct']:.0f}%，"
           f"占峰值 {PEAK_NM} {c['ankle_peak_pct']:.0f}%）")
