@@ -106,21 +106,51 @@ class BudgetExceeded(Exception):
 
 
 _ALARM_S = 0
+_ALARM_TIMER = None  # Windows 看门狗（守护线程）；POSIX 下恒为 None
 
 
 def _install_alarm(seconds: int) -> None:
-    global _ALARM_S
+    """装硬超时后备（预算 + `HARD_BACKSTOP_EXTRA`）。
+
+    POSIX：SIGALRM 在主线程抛 `BudgetExceeded`，会被主流程的 `except` 接住 ⇒ 尽力落盘。
+    Windows：没有 `SIGALRM` / `signal.alarm`。退化为守护线程看门狗——线程无法向主线程抛异常，
+    只能直接终止进程（`os._exit(3)`，与 POSIX 侧硬超时的退出码一致）。
+    语义差别如实写明：这一路**到点必停、但不落盘**；软预算 `--budget` 那条路在 Windows 上
+    照常优雅收尾并落盘，所以 Windows 上应以 `--budget` 作为主要停止手段。
+    """
+    global _ALARM_S, _ALARM_TIMER
     _ALARM_S = int(seconds)
 
-    def _handler(signum, frame):  # noqa: ANN001
-        raise BudgetExceeded(f"硬超时 {_ALARM_S} 秒到点，主动终止")
+    if hasattr(signal, "SIGALRM"):
+        def _handler(signum, frame):  # noqa: ANN001
+            raise BudgetExceeded(f"硬超时 {_ALARM_S} 秒到点，主动终止")
 
-    signal.signal(signal.SIGALRM, _handler)
-    signal.alarm(max(1, int(seconds)))
+        signal.signal(signal.SIGALRM, _handler)
+        signal.alarm(max(1, int(seconds)))
+        return
+
+    import os
+    import threading
+
+    def _watchdog() -> None:
+        print(f"\n[FATAL] 硬超时 {_ALARM_S} 秒到点，主动终止"
+              "（Windows 看门狗：此路不落盘，请用 --budget 软预算收尾）",
+              file=sys.stderr, flush=True)
+        os._exit(3)
+
+    _ALARM_TIMER = threading.Timer(max(1, int(seconds)), _watchdog)
+    _ALARM_TIMER.daemon = True
+    _ALARM_TIMER.start()
 
 
 def _clear_alarm() -> None:
-    signal.alarm(0)
+    global _ALARM_TIMER
+    if hasattr(signal, "SIGALRM"):
+        signal.alarm(0)
+        return
+    if _ALARM_TIMER is not None:
+        _ALARM_TIMER.cancel()
+        _ALARM_TIMER = None
 
 
 # --------------------------------------------------------------------------
