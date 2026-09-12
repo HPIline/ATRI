@@ -31,7 +31,7 @@ from typing import Any, Dict, List, Optional
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(REPO / "软件" / "atri"))
+sys.path.insert(0, str(REPO / "software" / "atri"))
 
 from atri.config import JOINTS, GROUP_DOF  # noqa: E402
 from realistic_sim import (  # noqa: E402

@@ -137,7 +137,7 @@ ELECTRONICS: List[Dict[str, Any]] = [
     {"id": "battery", "name": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)", "link": "torso_upper",
      "mass_g": 165.0, "size_mm": [88.0, 34.0, 19.0], "position_mm": [0.0, 0.0, -26.0],
      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；"
-             "按仓库电源模型 30 min 任务需 ≥2.89 Ah，选型时须复核"},
+             "按仓库电源模型 30 min 任务需按现行额定口径复核（v1 标称已废）"},
 ]
 
 REFERENCE_MACHINE = {
@@ -420,7 +420,7 @@ def main(argv: List[str] | None = None) -> int:
             c["name"] = "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)"
             c["mass_g"] = 165.0
             c["size_mm"] = [88.0, 34.0, 19.0]
-            c["note"] = "容量对齐参考机；按仓库电源模型 30 min 任务需 ≥2.89 Ah，选型时须复核"
+            c["note"] = "容量对齐参考机；按仓库电源模型 30 min 任务需按现行额定口径复核（v1 标称已废）"
     comps["placements"] = [
         {"component": e["name"], "link": e["link"], "size_mm": e["size_mm"],
          "mass_g": e["mass_g"], "position_mm": e["position_mm"],

@@ -24,16 +24,16 @@
 
 | 路径 | 作用 | 能不能改 |
 |---|---|---|
-| `软件/atri/atri/config.py` | **关节总表 + 角度↔脉冲契约**（22 关节 ID/限位/方向/零偏/分支） | ✅ 可改，但改 ID/限位等于改全机，必须同步固件 |
-| `软件/atri/atri/cerebellum.py` | 小脑层；`ServoBus` 抽象 + `MockServoBus` + 步态/动作 | ✅ 可扩展，**不要改坏现有 API**（186 项测试在守） |
-| `软件/atri/atri/bringup.py` | **bring-up 流程**（扫描/限位/中位/点动/标定） | ✅ 这是你的主战场之一 |
-| `软件/atri/run_bringup.py` | bring-up CLI（`--table/--mock/--bus 模块:类/--step`） | ✅ |
-| `软件/atri/tests/` | 186 项单测（CI 必绿） | ✅ 只加不改语义 |
+| `software/atri/atri/config.py` | **关节总表 + 角度↔脉冲契约**（22 关节 ID/限位/方向/零偏/分支） | ✅ 可改，但改 ID/限位等于改全机，必须同步固件 |
+| `software/atri/atri/cerebellum.py` | 小脑层；`ServoBus` 抽象 + `MockServoBus` + 步态/动作 | ✅ 可扩展，**不要改坏现有 API**（186 项测试在守） |
+| `software/atri/atri/bringup.py` | **bring-up 流程**（扫描/限位/中位/点动/标定） | ✅ 这是你的主战场之一 |
+| `software/atri/run_bringup.py` | bring-up CLI（`--table/--mock/--bus 模块:类/--step`） | ✅ |
+| `software/atri/tests/` | 186 项单测（CI 必绿） | ✅ 只加不改语义 |
 | `design/reference/sts3215/PROTOCOL.md` | **飞特协议 + 寄存器表**（双源核验过） | ⚠️ 只读；发现错误在报告里指出，别直接改结论 |
 | `design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf` | **飞特官方规格书**（8 页，含外形图） | ⚠️ 只读（官方原始文档） |
 | `design/cad/standards.py` | 机械/电气参数（舵机、轴承、紧固件、打印公差） | ❌ **不要改**（另一个 agent 在维护，改动会冲突） |
 | `design/`、`webots/`、`ppt/` | 结构设计、装配、仿真、答辩材料 | ❌ 不在你的范围 |
-| `任务卡/` `软件/atri/task_cards/` | 赛题五项任务定义 | ❌ 不改 |
+| `任务卡/` `software/atri/task_cards/` | 赛题五项任务定义 | ❌ 不改 |
 
 **生成物不要手改**：`design/placements.json`（由 `design/gen_placements.py` 生成）、
 `design/handoff/*.md` 里的自动生成部分、`design/cad/out/**`（全部可重建）。
@@ -119,10 +119,10 @@ deg   = (pulse − zero_pulse) × 360/4096 × sign
 ```
 - `sign ∈ {+1, −1}`：机械装配决定的转向（左右镜像件相反）
 - `zero_pulse`：机械零位对应脉冲（出厂 2048，装配标定后修正）
-- 实现见 `软件/atri/atri/config.py`：`deg_to_pulse / pulse_to_deg / pulse_limits / joint_table`
+- 实现见 `software/atri/atri/config.py`：`deg_to_pulse / pulse_to_deg / pulse_limits / joint_table`
 - **限位寄存器要写成"软件限位外扩 3°"**（`pulse_limits`），保证比软件宽、又比机械硬限位窄。
 
-### 3.2 `ServoBus` 语义（`软件/atri/atri/cerebellum.py`）
+### 3.2 `ServoBus` 语义（`software/atri/atri/cerebellum.py`）
 
 真机实现**必须**实现：
 
@@ -140,7 +140,7 @@ deg   = (pulse − zero_pulse) × 360/4096 × sign
 ### 3.3 bring-up 流程（已写好，用 Mock 跑通）
 
 ```bash
-cd 软件/atri
+cd software/atri
 python3 run_bringup.py --table        # 打印 22 关节总表（ID/分支/转向/零偏/脉冲限位）
 python3 run_bringup.py --mock         # 用 Mock 总线跑完整流程（自检）
 python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step scan
@@ -150,7 +150,7 @@ python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step 
 
 ### 3.4 标定文件（装配后必须回填）
 
-`软件/atri/config/calibration.json`：
+`software/atri/config/calibration.json`：
 ```json
 {"schema_version": "1.0",
  "joints": {"head_yaw": {"sign": -1, "zero_pulse": 2043}}}
@@ -164,8 +164,8 @@ python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step 
 
 ### Phase 1（**不依赖实物也能做完**，优先级最高）
 
-**D1. `软件/atri/atri/bus_sts3215.py` —— 真机总线驱动**
-- 实现 `ServoBus` 全部语义（3.2 表），可用 `pyserial`（**只允许加在 `软件/atri/requirements.txt`**，
+**D1. `software/atri/atri/bus_sts3215.py` —— 真机总线驱动**
+- 实现 `ServoBus` 全部语义（3.2 表），可用 `pyserial`（**只允许加在 `software/atri/requirements.txt`**，
   主包 `atri/` 的核心仍保持标准库可跑）。
 - 必须实现：`sync_write`（SYNC WRITE 指令）、遥测批量读、`scan`、
   超时重试、半双工换向（URT-1 自动换向的话要注明）、校验和校验失败重发。
@@ -206,12 +206,12 @@ python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step 
 
 ## 5. 纪律与红线（违反会直接返工）
 
-1. **测试必须绿**：`cd 软件/atri && python3 -m unittest discover -s tests`（现在 **186 项**）；
+1. **测试必须绿**：`cd software/atri && python3 -m unittest discover -s tests`（现在 **186 项**）；
    CI 还跑 `python3 -m compileall -q atri run_demo.py` 与 `python3 run_demo.py --fast`。
 2. **主包核心保持标准库可跑**：`atri/` 里不要 `import serial` 到顶层；
    真机依赖放进独立模块 + `requirements.txt`，用惰性导入或 try/except。
 3. **不要改** `design/cad/standards.py`、`design/**`、`webots/**`、`ppt/**`、
-   `软件/atri/atri/skills/**`、`task_cards/**`（各有归属）。
+   `software/atri/atri/skills/**`、`task_cards/**`（各有归属）。
 4. **不要手改生成物**：`design/placements.json`、`design/cad/out/**`。
 5. **中文注释/文档**；参数不要写死，一律从 `config.py` 的关节表取。
 6. 改完任何东西，先跑测试再报告；报告里给**命令 + 输出**，不要只说"已完成"。
@@ -255,7 +255,7 @@ python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step 
 
 ```bash
 # 0) 环境（树莓派或开发机）
-cd 软件/atri && python3 -m unittest discover -s tests      # 186 项应全绿（不需硬件）
+cd software/atri && python3 -m unittest discover -s tests      # 186 项应全绿（不需硬件）
 
 # 1) 无硬件：跑通 bring-up 流程与驱动单测
 python3 run_bringup.py --mock
@@ -279,9 +279,9 @@ python3 run_bringup.py --bus atri.bus_sts3215:StsBus --port /dev/ttyUSB0 --step 
 | 官方规格书（8 页，含外形图） | `design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf` |
 | 舵机 3D 模型（B-rep，可量接口） | `design/cad/vendor/so-arm100/STS3215_03a.step` |
 | 接口/CAD 现状与体检 | `design/handoff/装配一致性修正记录.md`、`design/cad/audit_assembly.py` |
-| 关节表与契约实现 | `软件/atri/atri/config.py`（`joint_table()`、`pulse_limits()`） |
-| bring-up 流程 | `软件/atri/atri/bringup.py`、`软件/atri/run_bringup.py` |
-| 上层架构（大脑/小脑/技能） | `软件/atri/README.md`、`软件/atri/atri/brain.py` |
+| 关节表与契约实现 | `software/atri/atri/config.py`（`joint_table()`、`pulse_limits()`） |
+| bring-up 流程 | `software/atri/atri/bringup.py`、`software/atri/run_bringup.py` |
+| 上层架构（大脑/小脑/技能） | `software/atri/README.md`、`software/atri/atri/brain.py` |
 | 赛题要求与合规口径 | `design/handoff/第3轮-T6-小人形组合规核对.md` |
 
 ---

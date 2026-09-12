@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "tools"))
 
 import numpy as np
 import cadquery as cq
@@ -50,12 +51,15 @@ KIND_COLORS = {
     "tube":    (115, 148, 115),
     "servo":   (64, 69, 82),
     "elec":    (217, 140, 51),
+    "ground":  (90, 140, 110),
 }
 KIND_LABEL = {
     "bulk": "结构框架/大件", "cage": "关节笼", "fork": "连杆叉",
     "adapter": "紧凑转接块", "tube": "连杆管", "servo": "舵机（占位）",
-    "elec": "电子件（占位）",
+    "elec": "电子件（占位）", "ground": "地平面（垫高）",
 }
+
+PREVIEW_POSE_DEG = A.DISPLAY_POSE_DEG
 
 
 # --------------------------------------------------------------------------
@@ -88,6 +92,21 @@ def build_batches(items: Sequence[Tuple[str, cq.Workplane]], tol: float
                       "color": KIND_COLORS[k]})
     stats.sort(key=lambda s: -s["triangles"])
     return batches, stats
+
+
+def ground_batch(bbox: Sequence[float], margin: float = 40.0) -> Dict[str, np.ndarray]:
+    """垫高处一张薄地平面，不计入装配零件。"""
+    z = float(bbox[2])
+    x0, y0 = float(bbox[0]) - margin, float(bbox[1]) - margin
+    x1, y1 = float(bbox[3]) + margin, float(bbox[4]) + margin
+    pos = np.array(
+        [[x0, y0, z], [x1, y0, z], [x1, y1, z],
+         [x0, y0, z], [x1, y1, z], [x0, y1, z]],
+        dtype=np.float32,
+    )
+    nrm = np.tile(np.array([0.0, 0.0, 1.0], dtype=np.float32), (6, 1))
+    col = np.tile(np.array(KIND_COLORS["ground"], dtype=np.uint8), (6, 1))
+    return {"pos": pos, "nrm": nrm, "col": col}
 
 
 # --------------------------------------------------------------------------
@@ -162,11 +181,11 @@ const VS=`attribute vec3 aPos;attribute vec3 aNrm;attribute vec3 aCol;
 uniform mat4 uMVP;varying vec3 vN;varying vec3 vC;varying float vD;
 void main(){vN=aNrm;vC=aCol;gl_Position=uMVP*vec4(aPos,1.0);
 vD=gl_Position.z;}`;
-const FS=`precision mediump float;varying vec3 vN;varying vec3 vC;
+const FS=`precision mediump float;varying vec3 vN;varying vec3 vC;uniform float uAlpha;
 void main(){vec3 L=normalize(vec3(0.42,-0.62,0.66));
 float d=max(dot(normalize(vN),L),0.0);
 vec3 c=vC*(0.46+0.58*d);
-gl_FragColor=vec4(c,1.0);}`;
+gl_FragColor=vec4(c,uAlpha);}`;
 function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
   if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o;}
 const prog=gl.createProgram();
@@ -174,7 +193,8 @@ gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));
 gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
 gl.linkProgram(prog);gl.useProgram(prog);
 const aPos=gl.getAttribLocation(prog,"aPos"),aNrm=gl.getAttribLocation(prog,"aNrm"),
-      aCol=gl.getAttribLocation(prog,"aCol"),uMVP=gl.getUniformLocation(prog,"uMVP");
+      aCol=gl.getAttribLocation(prog,"aCol"),uMVP=gl.getUniformLocation(prog,"uMVP"),
+      uAlpha=gl.getUniformLocation(prog,"uAlpha");
 
 // ---------- 上传几何 ----------
 const F32=new Float32Array(BUF,0,META.floatCount);
@@ -200,6 +220,7 @@ function draw(){
   gl.viewport(0,0,w,h);
   gl.clearColor(0.039,0.145,0.251,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   const eye=[target[0]+dist*Math.sin(phi)*Math.cos(theta),
              target[1]+dist*Math.sin(phi)*Math.sin(theta),
              target[2]+dist*Math.cos(phi)];
@@ -213,8 +234,12 @@ function draw(){
     gl.enableVertexAttribArray(aNrm);gl.vertexAttribPointer(aNrm,3,gl.FLOAT,false,24,12);
     gl.bindBuffer(gl.ARRAY_BUFFER,g.col);
     gl.enableVertexAttribArray(aCol);gl.vertexAttribPointer(aCol,3,gl.UNSIGNED_BYTE,true,3,0);
+    const mate=g.meta.kind==="fork"||g.meta.kind==="cage";
+    gl.uniform1f(uAlpha,mate?0.55:1.0);
+    gl.depthMask(!mate);
     gl.drawArrays(wire?gl.LINES:gl.TRIANGLES,0,g.meta.verts);
   }
+  gl.depthMask(true);
 }
 
 // ---------- 交互 ----------
@@ -328,6 +353,8 @@ def export_glb(items: Sequence[Tuple[str, cq.Workplane]], path: Path
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="生成交互式 3D 预览")
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--zero", action="store_true",
+                    help="用机械零位（默认是展示姿态；零位零件本身不得穿髋）")
     ap.add_argument("--part", type=str, default=None, help="只看单个零件")
     ap.add_argument("--tol", type=float, default=1.2, help="网格容差 mm")
     args = ap.parse_args(argv)
@@ -339,7 +366,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         title = f"ATRI · {args.part}"
         subtitle = "单件预览"
     else:
-        kin = A.Kin(A.DESIGN / "atri.urdf")
+        pose = {} if args.zero else PREVIEW_POSE_DEG
+        kin = A.Kin(A.DESIGN / "atri.urdf", pose_deg=pose)
         placements = json.loads((A.DESIGN / "placements.json").read_text(encoding="utf-8"))
         items, log = A.build_assembly(kin, placements)
         bad = [l for l in log if not l.get("ok")]
@@ -348,7 +376,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             b0 = wp.val().BoundingBox()
             bb0 = b0 if bb0 is None else bb0.add(b0)
         title = "A.T.R.I. 骨架装配预览"
-        subtitle = (f"{len(items)} 个零件 · 22 DOF · 包络 "
+        pose_label = "机械零位" if args.zero else "展示姿态"
+        subtitle = (f"{len(items)} 个零件 · 22 DOF · {pose_label} · 包络 "
                     f"{bb0.xlen:.0f}×{bb0.ylen:.0f}×{bb0.zlen:.0f} mm")
         if bad:
             print(f"  [WARN] {len(bad)} 个件装配失败")
@@ -360,6 +389,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         b = wp.val().BoundingBox()
         bb = b if bb is None else bb.add(b)
     bbox = [bb.xmin, bb.ymin, bb.zmin, bb.xmax, bb.ymax, bb.zmax]
+    if not args.part:
+        batches["ground"] = ground_batch(bbox)
+        stats.append({"kind": "ground", "label": KIND_LABEL["ground"],
+                      "triangles": 2, "color": KIND_COLORS["ground"]})
 
     html = PREVIEW / "ATRI-preview.html"
     info = write_html(batches, stats, bbox, html, title, subtitle)

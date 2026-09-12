@@ -409,6 +409,9 @@ def compact_adapter(in_shaft: str = "+z", out_shaft: str = "+x",
 def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
                      drop: float = 19.6, stagger: float = 0.0,
                      parent_stagger: float = 0.0,
+                     y_sign: float = 1.0,
+                     flange_on_horn: bool = False,
+                     spine_clear: float = 6.0,
                      wall: float = PLATE_T) -> cq.Workplane:
     """单侧臂：锁上一级金属舵盘（I2），把下一级轴线拉到 `drop`。
 
@@ -422,24 +425,17 @@ def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
     """
     horn = servo_horn_interface(SERVO_NAME)
     horn_t = wall + 1.0
-    # ⚠️ 2026-09-12 订正：法兰原来放在 `z_flange = parent_stagger`，即**父舵机的机壳
-    #    厚度中点**（轴心），于是 24 mm 厚的"舵盘外表面"那一截正好把法兰埋进机壳里：
-    #    hip_yaw 两臂 1342 mm³（重合率 31% → ❌ 摆放错误）、另外 4 个臂 1323 mm³（⚠️）。
-    #    唯一真值：舵盘外表面 = 父舵机轴心 + HORN_FACE（kit.servo_frame），
-    #    父舵机机体沿自身轴偏置 parent_stagger（assembly.py 的 stagger），故
-    #       舵盘外表面在本件建模系 = horn_sign × (parent_stagger + HORN_FACE + 0.05)
-    #    `horn_sign` 由 orient() 决定：局部 +Z 映到 parent_dir，parent_dir == in_shaft
-    #    时舵盘在 +Z；被 {±z 反向} 规则翻转后（hip_yaw 两臂）舵盘在 −Z。
-    #    法兰"内表面贴舵盘、板身朝远离舵机的方向长"。
-    parent_dir = {"+z": "-z", "-z": "+z"}.get(in_shaft, in_shaft)
-    horn_sign = 1.0 if parent_dir == in_shaft else -1.0
-    z_horn = horn_sign * (parent_stagger + HORN_FACE + 0.05)
-    z_flange = z_horn + horn_t if horn_sign > 0 else z_horn
+    # 髋 yaw 臂法兰贴舵盘外表面；肩/roll 仍用 parent_stagger（全局减 HORN 会打到 shoulder_roll）。
+    z_flange = parent_stagger - (HORN_FACE if flange_on_horn else 0.0)
     z_bot = -max(drop, 12.0) - 8.0
     z_height = (z_flange + horn_t) - z_bot
-    # 子级机体 x ∈ [x_min, x_max] = [-35, +10.2]，立柱必须在其外侧
-    x_spine = X_MIN - 6.0                 # −41：机身 −X 端面再留 6 mm
-    y_spine = -10.0                       # 躲开子级沿 +Y 甩出的机体
+    if z_height < 8.0:
+        z_bot = z_flange + horn_t - 12.0
+        z_height = 12.0
+    # 子级机体 x ∈ [x_min, x_max] = [-35, +10.2]，立柱必须在其外侧。
+    # 髋 roll 臂 spine_clear=14，躲开 yaw 笼。
+    x_spine = X_MIN - spine_clear
+    y_spine = -10.0 * y_sign              # 右髋 yaw 臂 y_sign=-1，立柱朝内不打夹爪舵机
 
     part = cq.Workplane("XY")
     # 舵盘法兰（I2）——跟父舵机 stagger 走
@@ -462,6 +458,7 @@ def cluster_horn_arm(in_shaft: str = "+z", out_shaft: str = "+x",
     # drop≈0 时立板与法兰几乎共面，圆角会把实体打成 Compound
     if drop >= 8.0:
         part = safe_fillet(part, FDM["fillet_min_mm"], "|Y")
+    parent_dir = {"+z": "-z", "-z": "+z"}.get(in_shaft, in_shaft)
     part = orient(part, out_shaft, parent_dir)
     return sanitize(part)
 
@@ -538,79 +535,51 @@ def backpack_plate(wall: float = 3.0) -> cq.Workplane:
 # --------------------------------------------------------------------------
 # 零件 5：骨盆框架（下半身中枢）
 # --------------------------------------------------------------------------
+def servo_body_clearance(shaft: str = "+y", parent: str = "+z",
+                         pad: float = 1.5) -> cq.Workplane:
+    """按 servo_frame 的机体包络挖槽，不是 pair_inspect AABB。"""
+    body = box(SF["len"] + 2.0 * pad, SF["axial"] + 2.0 * pad, SF["width"] + 2.0 * pad,
+               at=(X_CTR, 0.0, -SF["z_half"] - pad))
+    return orient(body, shaft, parent)
+
+
 def pelvis_frame(wall: float = PLATE_T) -> cq.Workplane:
-    """骨盆：**3 只舵机 + IMU + 分线板**的集中座，是整机走线拓扑的根。
+    """U 形骨盆：胯中空，材料只走髋舵机外侧和后方。
 
-    布局（pelvis link 系）：
-        trunk_roll   舵机 (0, 0, +19.6) 轴 X   → 躯干
-        左右 hip_yaw 舵机 (±45, −19.6)  轴 Z   → 大腿
-        IMU (0, 0, +8) 贴重心，避免头部摆动干扰姿态解算
-        分线板 = 4 路菊花链的物理根节点（standards.WIRING）
-
-    轻量化取舍：**不做闭合壳、不做整块底板**，用 4 根 10×10 立柱 + 上下横梁
-    ＋侧翼盒。闭合壳按 3 mm 壁算要 137 g，而骨盆预算只有 45 g。
+    hip_yaw 在 Y=±45、z=−19.6；trunk_roll 在 (0,0,+19.6)。
+    后桥 x=−36，侧梁 y=±60（yaw 机体 y≈33–57 之外），胯口朝 +X。
+    IMU 坐后桥，避开 trunk_roll。不做闭合壳，也不事后切 AABB。
     """
     part = cq.Workplane("XY")
-    body_l, body_w, body_h = 96.0, 76.0, 34.0
 
-    # --- 四立柱（7×7 + Ø4 走线孔贯通）---
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            post = box(7.0, 7.0, body_h, at=(sx * (body_l / 2 - 4.0),
-                                             sy * (body_w / 2 - 4.0), -body_h / 2))
-            post = post.cut(cyl(4.0, body_h + 6, at=(sx * (body_l / 2 - 4.0),
-                                                     sy * (body_w / 2 - 4.0),
-                                                     -body_h / 2 - 3)))
-            part = part.union(post)
-    # --- 上环改"边框 + 横梁"（整面板 31 g → 框 12 g）---
-    ring = box(body_l, body_w, wall, at=(0, 0, body_h / 2 - wall))
-    ring = ring.cut(box(body_l - 22.0, body_w - 22.0, wall * 4,
-                        at=(0, 0, body_h / 2 - wall * 2)))
-    part = part.union(ring)
-    part = part.union(box(12.0, body_w - 20.0, wall,
-                          at=(0, 0, body_h / 2 - wall)))
-    for sy in (-1, 1):
-        part = part.union(box(body_l, wall, 10.0, at=(0, sy * (body_w / 2 - 5.0),
-                                                       -body_h / 2 + 5.0)))
-    part = part.union(box(wall, body_w, 10.0, at=(body_l / 2 - wall, 0,
-                                                  -body_h / 2 + 5.0)))
-
-    # --- 上表面：trunk_roll 舵机笼的 Ø34 插接座（轴 X）---
-    part = part.union(box(34.0, 34.0, 4.0, at=(0, 0, body_h / 2)))
-    part = part.union(cyl(SPIGOT_D, 12.0, at=(0, 0, -6.0), axis="X")
-                      .translate((0, 0, 19.6 - body_h / 2 + 4.0)))
-
-    # --- 左右翼：hip_yaw 舵机笼座（两片板 + 筋，不做整块）---
+    # 后桥略瘦，省下的料接到胸框后柱（y=±48）
+    part = part.union(box(12.0, 120.0, 12.0, at=(-36.0, 0.0, -18.0)))
     for sign in (-1, 1):
-        for dx in (-17.0, 17.0):
-            part = part.union(box(6.0, 30.0, 12.0,
-                                  at=(dx, sign * 45.0, -15.0)))
-        part = part.union(box(40.0, 30.0, 5.0, at=(0, sign * 45.0, -9.0)))
-        part = part.union(cyl(SPIGOT_D, 12.0, at=(0, sign * 45.0, -21.6)))
+        # 髋外侧纵梁仍在 y=±60，只走低位，让开 yaw 机体
+        part = part.union(box(56.0, 8.0, 12.0, at=(-12.0, sign * 60.0, -18.0)))
+        # 立柱收到 y=±48，零位对齐 torso 后柱（torso 系 x=−50, y=±48）
+        post = box(10.0, 8.0, 40.0, at=(-36.0, sign * 48.0, -18.0))
+        post = post.cut(cyl(4.0, 44.0, at=(-36.0, sign * 48.0, -20.0)))
+        part = part.union(post)
+        part = part.union(box(40.0, 8.0, 6.0, at=(-16.0, sign * 48.0, 14.0)))
+        part = part.union(box(8.0, 8.0, 6.0, at=(-36.0, sign * 48.0, 14.0)))
+        # 低位横筋：60 → 48，U 臂收到胸框
+        part = part.union(box(8.0, 14.0, 12.0, at=(-12.0, sign * 54.0, -18.0)))
 
-    # --- IMU 座 ---
-    part = part.union(box(22.0, 18.0, 2.5, at=(0, 0, 6.0)))
+    flange = box(40.0, 40.0, 4.0, at=(0.0, 0.0, 16.0))
+    flange = flange.cut(cyl(14.0, 8.0, at=(0.0, 0.0, 14.0)))
+    part = part.union(flange)
+    for sign in (-1, 1):
+        # 法兰 y±20 接到 U 上梁 y=±48，必须相交否则 sanitize 会丢掉 U
+        part = part.union(box(8.0, 32.0, 4.0, at=(-16.0, sign * 32.0, 16.0)))
+
+    part = part.union(box(22.0, 18.0, 2.5, at=(-36.0, 0.0, -7.0)))
     for pt in bolt_circle(16.0, 4):
-        part = part.union(bosses([pt], od=4.5, height=5.0, bore_dia=1.6,
-                                 bore_depth=6.0, z0=5.0))
+        part = part.union(bosses([(pt[0] - 36.0, pt[1])], od=4.5, height=5.0,
+                                 bore_dia=1.6, bore_depth=6.0, z0=-7.0))
 
-    # --- 分线板座（4 路菊花链的根）---
-    part = part.union(box(42.0, 28.0, 2.5, at=(0, 0, -body_h / 2 + 6.0)))
-
-    # --- 走线与减重孔 ---
-    for sy in (-1, 1):
-        part = part.cut(cyl(8.5, 40.0, at=(18.0, sy * 28.0, -body_h / 2)))
-    for dx in (-30.0, 30.0):
-        part = part.cut(box(16.0, 40.0, 20.0, at=(dx, 0, -4.0), centered_z=True))
-
-    # --- 舵机让位切口（按 kit.servo_frame 实测包络 + 1.5 mm 单边余量，
-    #     取「框架实体 ∩ 舵机包络」的实际重叠区，不碰四根承力立柱）---
-    # kit.box 的 at=(cx, cy, z底面)：x/y 是几何中心、z 是底面。
-    #   trunk_roll（轴 X，长 45.2 沿 Y）：横穿上环/横梁/笼座顶部。
-    part = part.cut(box(38.0, 48.2, 16.8, at=(0.0, -12.4, 5.7)))
-    #   左右 hip_yaw（轴 Z，长 45.2 沿 X）：横穿左右翼座板。
-    for sign in (-1, 1):
-        part = part.cut(box(48.2, 27.7, 22.5, at=(12.4, sign * 45.0, -23.1)))
+    # trunk_roll 在骨盆系 (0,0,+19.6)，轴 +X。法兰/上梁按机体让位。
+    part = part.cut(servo_body_clearance("+x", "-z", pad=1.5).translate((0.0, 0.0, 19.6)))
 
     part = safe_fillet(part, FDM["fillet_struct_mm"], "|Z")
     return sanitize(part)
@@ -632,7 +601,7 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
     **容积是超额订阅的（实测结论）**：俯仰叉 32 + 电池 19 + 树莓派 17 = 68 mm，
     而到 head_yaw 轴线只有 82.4 mm（还要留给颈座与舵机笼）。
     因此 STM32/驱动板/XL4015/功放**塞不进躯干**，必须外挂（见
-    `项目文档/骨架结构与集成方案.md` 的集成方案章）。
+    `design/cad/README.md` 的集成约定）。
     """
     part = cq.Workplane("XY")
     # ⚠️ 2026-09-11 加宽：净距 80×70 装不下长边 88 的电池与 85 的树莓派（实测）。
@@ -668,6 +637,9 @@ def torso_frame(wall: float = PLATE_T) -> cq.Workplane:
             post = box(8.0, 8.0, 48.0, at=(sx * post_x, sy * post_y, 18.0))
             post = post.cut(cyl(5.0, 54.0, at=(sx * post_x, sy * post_y, 16.0)))
             part = part.union(post)
+    # 后立柱向下接到俯仰叉，零位与骨盆 U 后柱连成一条
+    for sy in (-1, 1):
+        part = part.union(box(8.0, 8.0, 18.5, at=(-post_x, sy * post_y, -0.3)))
 
     # --- 5. 树莓派托盘（外框 + 4×M2.5 柱，85 边沿 Y）---
     tray = box(tl, tw, TORSO_PLATE_T, at=(0, 0, TORSO_DECK_FLOOR_Z))
@@ -738,28 +710,26 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 
     # --- 壳身：前脸 + 顶 + 侧壁（后部开口散热走线）---
     base = box(hl, hw, wall, at=(0, 0, z0 - hh / 2))                     # 底
-    base = base.cut(box(32.0, 26.0, wall * 1.2,
+    # 地板大开：pitch 舵机从底下穿上来，不抬 z0。
+    base = base.cut(box(hl - 16.0, hw - 16.0, wall * 1.2,
                         at=(0, 0, z0 - hh / 2 - 0.2 * wall)))
     part = part.union(base)
     top = box(hl, hw, wall, at=(0, 0, z0 + hh / 2 - wall))               # 顶
-    top = top.cut(box(hl - 24.0, hw - 24.0, wall * 1.2,
-                      at=(0, 0, z0 + hh / 2 - 1.2 * wall)))
+    top = top.cut(cyl(16.0, wall * 2.0, at=(0, 0, z0 + hh / 2 - wall * 1.2)))
     part = part.union(top)
     part = part.union(box(wall, hw, hh, at=(hl / 2 - wall, 0, z0 - hh / 2)))
     for sign in (-1, 1):
         part = part.union(box(hl, wall, hh, at=(0, sign * (hw / 2 - wall / 2),
                                                 z0 - hh / 2)))
 
-    # --- 摄像头座：前脸 Ø38 模组，镜头 Ø18 外露 ---
-    part = part.union(box(6.0, 44.0, 44.0, at=(hl / 2 - 3.0, 0, z0 + 6.0),
+    # --- 摄像头座 + 拾音：一块前脸罩，拾音收在镜头下沿，不另探出 ---
+    part = part.union(box(6.0, 44.0, 60.0, at=(hl / 2 - 3.0, 0, z0 - 2.0),
                           centered_z=True))
     part = part.cut(cyl(18.5, 14.0, at=(hl / 2 - 6.0, 0, z0 + 6.0), axis="X"))
     part = part.cut(box(20.0, 40.0, 17.0, at=(hl / 2 - 12.0, 0, z0 + 6.0),
                         centered_z=True))
-
-    # --- 麦克风座（底部前缘）---
-    part = part.union(box(28.0, 18.0, 8.0, at=(6.0, 0, z0 - hh / 2 - 4.0)))
-    part = part.cut(box(26.0, 16.0, 3.0, at=(6.0, 0, z0 - hh / 2 - 6.0)))
+    # 拾音腔在罩内下沿，不增加 xmax
+    part = part.cut(box(4.0, 16.0, 8.0, at=(hl / 2 - 4.0, 0.0, z0 - 8.0)))
 
     # --- 扬声器孔（侧面阵列）---
     for sign in (-1, 1):
@@ -778,10 +748,11 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 
     # --- 舵机让位切口（按 kit.servo_frame 实测包络 + 1.5 mm 单边余量，
     #     取「框架实体 ∩ 舵机包络」的实际重叠区）---
-    #   head_pitch（轴 Y，长 45.2 沿 X）：穿壳底与底部叉。
-    part = part.cut(box(48.2, 46.1, 18.8, at=(12.4, -0.1, -5.0)))
-    #   head_yaw（轴 Z，长 45.2 沿 X）：在壳底下方穿过。
-    part = part.cut(box(32.2, 27.7, 18.0, at=(-4.4, 0.0, -43.3)))
+    #   head_pitch（轴 +Y，母端 −Z）：按真实 JOINT_SCHEME 挖机体，留下舵盘锁面。
+    part = part.cut(servo_body_clearance("+y", "-z", pad=2.0))
+    part = part.cut(box(50.0, 48.0, 28.0, at=(0.0, 0.0, -16.0)))
+    #   head_yaw（轴 Z）：在壳底下方穿过。
+    part = part.cut(box(36.0, 30.0, 22.0, at=(-4.4, 0.0, -44.0)))
 
     part = safe_fillet(part, 3.0, "|Z")
     return sanitize(part)
@@ -790,55 +761,60 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 # --------------------------------------------------------------------------
 # 零件 8：足板（含踝部叉）
 # --------------------------------------------------------------------------
-def foot_plate(length: float = 110.0, width: float = 60.0, sole_t: float = 3.0,
-               rib_h: float = 9.0) -> cq.Workplane:
-    """足底板：踝关节在足底后 1/3，**紧凑俯仰叉 + 薄板 + 放射筋 + 大掏空**。
+def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
+               rib_h: float = 6.0, mirror: bool = False) -> cq.Workplane:
+    """足底板：踝轴 x=0，后跟 48 mm，前掌 74 mm（整机深 ≤147）。左右脚同一零件。
 
-    实心块 181 cm³ ≈ 225 g/只，两只 450 g 直接吃掉整机结构预算的 90%。
-    v2 的足部结构预算只有 31 g/只，所以必须是"3.5 mm 薄板 + 筋 + 掏空窗"，
-    这也是唯一需要按"面接触受压"来设计、而不是按"承弯梁"设计的零件。
+    纵梁贴踝叉臂（y=±Y_HALF）。四角垫低于踝笼半高，是唯一着地点。
+    踝区按 servo_frame 挖槽，笼/舵机留在关节轴上，不平移离轴。
     """
     part = cq.Workplane("XY")
-    ankle_x = length / 3.0
-    x_rear = -ankle_x
-    x_front = length - ankle_x
+    heel = 48.0
+    x_rear = -heel
+    x_front = length - heel
+    x_mid = (x_rear + x_front) / 2.0
+    y_rib = Y_HALF + 1.5
 
-    # --- 踝部叉（锁踝舵盘 + 副轴轴承），轴线在 x=0 ---
+    part = part.union(box(length, width, sole_t, at=(x_mid, 0.0, -sole_t)))
+
+    # 纵梁接到叉臂；踝区断开，前后各一段
+    for sign in (-1, 1):
+        part = part.union(box(heel - 10.0, 5.0, rib_h,
+                              at=(x_rear + (heel - 10.0) / 2.0 + 4.0,
+                                  sign * y_rib, -0.4)))
+        part = part.union(box(x_front - 18.0, 5.0, rib_h,
+                              at=((x_front + 18.0) / 2.0, sign * y_rib, -0.4)))
+    part = part.union(box(6.0, width - 10.0, rib_h, at=(-28.0, 0.0, -0.4)))
+    part = part.union(box(6.0, width - 10.0, rib_h, at=(22.0, 0.0, -0.4)))
+
     fork = limb_fork(shaft="+y", parent="+z", compact=True, spigot=False)
     part = part.union(fork)
+    part = part.cut(box(80.0, 80.0, 20.0, at=(0.0, 0.0, -sole_t - 20.0)))
+    # 清掉叉底座在鞋面上的台阶，只留叉臂
+    part = part.cut(box(36.0, 20.0, 8.0, at=(0.0, 0.0, -0.2)))
 
-    # --- 鞋底板 ---
-    x_mid = (x_rear + x_front) / 2.0
-    part = part.union(box(length, width, sole_t, at=(x_mid, 0, -sole_t)))
+    part = part.cut(box(16.0, width + 2.0, 1.4,
+                        at=(x_front - 7.0, 0.0, -sole_t - 0.2)))
 
-    # --- 放射筋（全部落在足底轮廓内）---
-    spans = [(x_rear, -16.0), (16.0, ankle_x + 12.0), (ankle_x + 12.0, x_front)]
-    for x0, x1 in spans:
-        if x1 - x0 < 4.0:
-            continue
-        part = part.union(box(x1 - x0, 5.0, rib_h,
-                              at=(x0, 0, -sole_t - 1.0)))
-    for sign in (-1, 1):
-        part = part.union(box(length * 0.92, 4.0, rib_h * 0.8,
-                              at=(x_mid, sign * (width / 2 - 2.0), -sole_t - 1.0)))
-
-    # --- 掏空窗（足底是受压面，可以开大孔）---
-    for i in range(4):
-        x = x_rear + length * (i + 0.5) / 4.0
-        if abs(x) < 22.0:
-            continue
-        part = part.cut(box(length / 4.0 * 0.52, width * 0.34, sole_t * 3,
-                            at=(x, 0, -sole_t * 2)))
-    for sign in (-1, 1):
-        part = part.cut(box(length * 0.22, width * 0.16, sole_t * 3,
-                            at=(x_front - 18.0, sign * 15.0, -sole_t * 2)))
-
-    # --- 防滑槽 ---
-    for i in range(7):
-        x = x_rear + length * (i + 0.5) / 7.0
-        part = part.cut(box(4.0, width * 0.86, 2.0, at=(x, 0, -sole_t - 0.5)))
+    # 踝窝：舵机沿轴不对称（x_min=-35, x_max=+10.2）。右脚 mirror 只翻 Y，
+    # 必须把窝中心翻到 −X_CTR，才能让开 shaft=-y 的右踝舵机。
+    well_x = SPAN_X + 2.0
+    well_y = GAP + 2.0 * PLATE_T + 2.0
+    well_x_ctr = -X_CTR if mirror else X_CTR
+    well_shaft = "-y" if mirror else "+y"
+    part = part.cut(box(well_x, well_y, sole_t + 8.0,
+                        at=(well_x_ctr, 0.0, -sole_t - 4.0)))
+    part = part.cut(servo_body_clearance(well_shaft, "+z", pad=2.0))
 
     part = safe_fillet(part, 1.5, "|Z")
+    # 垫必须低于笼半高（约 −15.4），才能成为唯一着地点。圆角之后再加。
+    pad_h = 13.0
+    inset = 9.0
+    for sx, sy in ((x_rear + inset, 20.0), (x_rear + inset, -20.0),
+                   (x_front - inset, 20.0), (x_front - inset, -20.0)):
+        part = part.union(cyl(8.0, pad_h + 0.6, at=(sx, sy, -sole_t - pad_h)))
+    if mirror:
+        part = part.mirror("XZ")
     return sanitize(part)
 
 
@@ -857,48 +833,22 @@ def gripper_body(wall: float = PLATE_T) -> cq.Workplane:
 
 
 def gripper_jaw(shaft: str = "+y", parent: str = "+z") -> cq.Workplane:
-    """夹爪动指：直接锁在舵盘上，随舵机开合（0–60°）。
+    """夹爪动指：锁在金属舵盘**外表面**，并 orient 到关节轴。
 
-    ⚠️ 2026-09-12 按**标准姿态**重写（原实现穿模 2316 mm³ / 重合率 66%，❌ 摆放错误）：
-        原件把**舵盘外表面当原点、局部 +Z 指向舵机内部**，与全库唯一真值
-        `kit.servo_frame()`（+Y = 输出轴、原点在轴心）差一个绕 X 的 +90° 旋转
-        加 24 mm 平移；装配按 `world[link]` 直放 → 整只爪子埋进机壳。
-        而且原几何**本身自相矛盾**，单靠坐标变换救不回来：
-          ① 法兰在局部 Z∈[0,10]（映到舵机 y∈[14,24]，即"伸进舵机内部"的方向）；
-          ② 让位坑 Φ22（r=11）与 4×M2.5 孔阵（PCD14 → r=7，孔缘 r=8.35）**互斥**——
-             坑把四个孔整个吃掉；
-          ③ 法兰只有 8 mm 宽，装不下 PCD14（孔心 r=7 > 4）。
-        尺寸链核对（`standards.STS3215`，horn_verify=verified）：
-          舵盘 Φ20 × 4.0（`horn_disc_od_mm` / `horn_disc_thickness_mm`）坐在
-          Φ20 × 2.5 输出凸台（`boss_face` = +20）上，4×M2.5 攻在舵盘**外表面**
-          （`horn_face` = +24，深 2.5）。⇒ 打印件必须**贴在 horn_face 上、只往外长**，
-          让位靠"抬高"而不是"掏坑"；Φ22 ≥ 舵盘 Φ20 + 2，本身就是把让位圈画大了。
-        本版：法兰 30×20（板面 ≥ Φ17 才留得住 PCD14 孔）+ 指身沿用原件 24×8×16，
-        中心留 Φ7×2.45 让开舵盘中心 M3×6 的盘头（Φ5.5，凸出舵盘面约 2 mm）。
+    不走 orient 时零件局部 +Y 永远朝世界 +Y：左手（y=+75）朝外，
+    右手（y=−75）朝内，指根穿进 right_hip_yaw。
     """
     horn = servo_horn_interface(SERVO_NAME)
-    face = HORN_FACE + 0.05            # 24.05：法兰内表面（贴舵盘外表面，同 limb_fork 口径）
-    plate_t = 3.6                      # 法兰厚：留出盘头让位后仍剩 1.15 mm 实体
-    finger_l = 16.0                    # 指身长度（沿用原件）
-
+    t = 5.0
+    y_inner = HORN_FACE
     part = cq.Workplane("XY")
-    # 法兰：30(X) × 3.6(Y) × 20(Z)，XZ 面盖住 PCD14 孔阵
-    part = part.union(box(30.0, plate_t, 20.0,
-                          at=(0.0, face + plate_t / 2.0, -10.0)))
-    # 动指：24(X) × 16(Y) × 8(Z)，从法兰外表面继续往 +Y 伸
-    part = part.union(box(24.0, finger_l, 8.0,
-                          at=(0.0, face + plate_t + finger_l / 2.0, -4.0)))
-    # 4×M2.5 通孔：PCD14、相位 45°（与舵盘孔阵同相位）；axis="Y" 时 z0 是孔顶。
-    # 贯穿法兰 + 指身（孔心 r=7 落在指身 8 mm 宽之外，只有 0.4 mm 边料被扫掉），
-    # 这样 M2.5 盘头（Φ4.5）能坐在法兰外表面上。
+    # 薄盘贴舵盘；指尖朝 −Z（桌面方向），体积做在髋簇之外
+    part = part.union(box(22.0, t, 16.0, at=(0.0, y_inner + t / 2.0, -8.0)))
     part = drill(part, bolt_circle(horn["pcd_mm"], horn["hole_count"]),
-                 dia=IF["horn"]["hole_dia_mm"], depth=plate_t + finger_l + 4.0,
-                 z0=face + plate_t + 1.0, axis="Y")
-    # Φ7 × 2.45 让位坑：舵盘中心 M3×6 内六角盘头（Φ5.5）凸出舵盘面
-    part = part.cut(cyl(7.0, 2.45, at=(0.0, face, 0.0), axis="Y"))
-    # ⚠️ 本件在**舵机标准姿态**下建模（+Y = 输出轴），而 link 位姿是"零位关节系"：
-    #    右臂 shaft=-y（左臂 +y）时，不 orient 的话爪子会长到机体反侧去
-    #    （实测右爪 ↔ servo__right_hip_yaw 4239 mm³）。与 `servo__*` 同源定向。
+                 dia=IF["horn"]["hole_dia_mm"], depth=t * 4,
+                 z0=-(t * 2), axis="Y")
+    part = part.cut(cyl(10.0, t * 4, at=(0.0, y_inner - t, 0.0), axis="Y"))
+    part = part.union(box(12.0, t, 48.0, at=(0.0, y_inner + t / 2.0, -32.0)))
     part = orient(part, shaft, parent)
     return sanitize(part)
 

@@ -629,16 +629,16 @@
       "link": "head",
       "mass_g": 8.0,
       "size_mm": [
+        8.0,
         25.0,
-        15.0,
         8.0
       ],
       "position_mm": [
-        10.0,
+        35.0,
         0.0,
-        -10.0
+        -12.0
       ],
-      "note": ""
+      "note": "CAD 占位：厚度沿 X 收进相机罩。实物仍是 25×15×8，质量 8 g"
     },
     {
       "id": "ICM-42688-P 模块",
@@ -652,11 +652,11 @@
         3.0
       ],
       "position_mm": [
+        -36.0,
         0.0,
-        0.0,
-        9.5
+        -3.0
       ],
-      "note": "装在骨盆（重心附近），避免头部摆动干扰姿态解算"
+      "note": "坐后桥 IMU 座上表面（座 z≈−7..−4.5）；避开 trunk_roll"
     },
     {
       "id": "3S 11.1V 2000mAh 10C 锂聚合物 (XT60)",
@@ -674,7 +674,7 @@
         0.0,
         -26.0
       ],
-      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；按仓库电源模型 30 min 任务需 ≥2.89 Ah，选型时须复核"
+      "note": "容量对齐参考机（TonyPi Pro 为 11.1V 2000mAh 10C）；按 v3 电源模型 30 min 任务需标称 ≥4.53 Ah，现选 2000 mAh 仅约 13 min，**不满足 30 min 指标**，选型时须换更大容量"
     }
   ],
   "harness_fasteners": {
@@ -981,7 +981,7 @@
       "electronics_g": 316.0,
       "harness_fasteners_g": 120.0,
       "total_g": 3436.6,
-      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / 项目文档/骨架结构与集成方案.md §6–§7",
+      "structure_source": "CAD 实装实算（真实体积 × PETG 1.27 g/cm³），来源 6d4b077 / design/robot_model.json §6–§7",
       "note": "全部摊入 link 质量；gen_handoff 的 cable/fastener 假设仍为 0，避免重复计入。"
     },
     "reduction_paths": [
@@ -997,7 +997,11 @@
           2.5,
           2.7
         ],
-        "ankle_pct": [
+        "ankle_pct_continuous": [
+          125,
+          135
+        ],
+        "ankle_pct_peak": [
           84,
           90
         ],
@@ -1015,8 +1019,12 @@
           2.2,
           2.4
         ],
-        "ankle_pct": [
-          73,
+        "ankle_pct_continuous": [
+          110,
+          120
+        ],
+        "ankle_pct_peak": [
+          74,
           80
         ],
         "cost": "单价上升约 300 元，但省 20+ 小时打印"
@@ -1027,7 +1035,8 @@
         "method": "躯干 2 自由度改 1；或换 40 g 级舵机",
         "structure_g": null,
         "total_kg": 3.0,
-        "ankle_pct": 100,
+        "ankle_pct_continuous": 150,
+        "ankle_pct_peak": 100,
         "cost": "违背赛题『上肢+躯干 ≥10』或牺牲力矩余量"
       }
     ]

@@ -28,7 +28,7 @@
 
 ```
 design/
-├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义（v2）
+├── robot_model.json          # L1 单一事实来源：23 link 几何/质量 + 22 关节定义（v3）
 ├── placements.json           # ★ 配件位置总表：22 舵机 + 10 电子件 + 23 结构件（宿主/坐标/尺寸/质量）
 ├── reference/
 │   └── tonypi_pro_baseline.json  # 参考机（幻尔 TonyPi Pro）公开参数与可迁移结论
@@ -48,9 +48,10 @@ design/
 │   ├── 04_关节配色图.svg
 │   └── 05_等轴测外观-背面.svg
 ├── drawings/                 # 工程图产物 ★ 可直接用于报名材料
+│   ├── preview.html          # ★ 浏览器预览源（四张图切页）
 │   ├── 01_关节编号图.svg
 │   ├── 02_三视图.svg
-│   ├── 04_尺寸链图.svg
+│   ├── 04_尺寸链图.svg       # 编号跳过 03：原计划的"爆炸图"未实现
 │   └── 05_舵机布局图.svg
 ├── realistic_sim.py          # 非理想舵机总线 + 带噪声感知 + 域随机化采样
 ├── run_sim.py                # 仿真运行器（产出 JSON / CSV / SVG）
@@ -77,10 +78,9 @@ python3 design/gen_spec_sheet.py                   # 渲染《新架构参数总
 # 1) 校验设计并生成 URDF
 python3 design/gen_urdf.py --summary --validate --write
 
-# 2) 生成 2D 工程图（4 张）
-python3 design/gen_drawings.py
-python3 design/gen_drawings.py --only joints      # 只出关节编号图
-python3 design/gen_drawings.py --png              # 同时导出 PNG（macOS）
+# 2) 工程图：浏览器打开 HTML 预览（编号/包络/扭矩口径写在页上）
+xdg-open design/drawings/preview.html
+# 旧 SVG 生成器仍可用于测试： python3 design/gen_drawings.py
 
 # 3) 跑仿真
 python3 design/run_sim.py --list
@@ -89,10 +89,10 @@ python3 design/run_sim.py --all --episodes 10 --randomize
 python3 design/run_sim.py --sweep perception --episodes 12
 
 # 4) 测试
-cd 软件/atri && python3 -m unittest discover -s tests
+cd software/atri && python3 -m unittest discover -s tests
 ```
 
-全部脚本**仅依赖 Python 3.9+ 标准库**，无需 numpy / matplotlib。
+全部脚本**仅依赖 Python 3.14+ 标准库**，无需 numpy / matplotlib。
 
 ---
 
@@ -131,7 +131,10 @@ python3 design/gen_render.py --pose zero          # 换成零姿态
 | ATRI-DWG-004 | `04_尺寸链图.svg` | 头部链/左腿链逐级累加，总高校核 + 放置校核 | 证明尺寸自洽 |
 | ATRI-DWG-005 | `05_舵机布局图.svg` | 22 路舵机安装位置、按扭矩分档图例、汇总 | 证明"算过怎么装" |
 
-**图的读法**：SVG 是矢量图，双击用浏览器打开即可；也可用 `qlmanage -t -s 2000` 转 PNG 插进 PPT。
+**图的读法**：SVG 是矢量图，浏览器直接打开。转 PNG：`rsvg-convert` 或 `inkscape`；macOS 上才用 `qlmanage -t -s 2000`。
+
+> **关于图号**：编号 **跳过 03**——原计划第 3 张为爆炸图，未实现；`gen_drawings.DRAWINGS` 里没有 03，
+> 现有 4 张编号为 01 / 02 / 04 / 05。
 
 **关于这些图的诚实说明**：
 - 它们是**由设计模型正交投影生成的示意图**，不是 CAD 出图，也不是渲染图
@@ -168,7 +171,7 @@ python3 design/gen_render.py --pose zero          # 换成零姿态
 |---|---|---|
 | **L1 几何** | link 基元几何、质量、22 关节（名称/编号/轴向/限位） | `robot_model.json` → `atri.urdf` + `drawings/` |
 | **L2 物理** | 舵机非理想特性、域随机化、感知噪声、场景 | `packages/*.json` |
-| **L3 行为** | 动作库、任务卡（复用 `软件/atri/`） | `action_library/`、`task_cards/` |
+| **L3 行为** | 动作库、任务卡（复用 `software/atri/`） | `action_library/`、`task_cards/` |
 
 **关键原则：L1 是唯一来源。** URDF、图纸、仿真都从它生成，改一处即全局同步。
 

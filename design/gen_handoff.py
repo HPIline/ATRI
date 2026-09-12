@@ -217,6 +217,12 @@ def joint_torque(model: Dict[str, Any], joint: Dict[str, Any]) -> Dict[str, Any]
     if cands[driver] <= floor + 1e-9:
         driver = "practical_floor"
 
+    crit = torque_criteria(model)
+    rated = crit["continuous_rated_torque_nm"]
+    peak = crit["peak_torque_nm"]
+    margin_continuous = tau_req / rated if rated else 0.0
+    margin_peak = tau_req / peak if peak else 0.0
+
     return {
         "joint": joint["name"],
         "id": joint["id"],
@@ -233,9 +239,33 @@ def joint_torque(model: Dict[str, Any], joint: Dict[str, Any]) -> Dict[str, Any]
         "required_torque_nm": round(tau_req, 4),
         "requirements_driver": driver,
         "safety_factor": sf,
+        "continuous_rated_torque_nm": rated,
+        "peak_torque_nm": peak,
+        "margin_vs_continuous_rated": round(margin_continuous, 3),
+        "margin_vs_peak": round(margin_peak, 3),
+        "exceeds_continuous_rated": bool(margin_continuous > 1.0 + 1e-9),
+        "exceeds_peak": bool(margin_peak > 1.0 + 1e-9),
         "torque_tier": _tier(tau_req),
         "design_placeholder_nm": joint.get("effort_nm"),
         "detail": detail,
+    }
+
+
+def torque_criteria(model: Dict[str, Any]) -> Dict[str, Any]:
+    """舵机扭矩两个口径。字段名兼容 main 的 rated_torque_nm 与本分支的 continuous_rated。"""
+    ts = model.get("servo_defaults", {})
+    rated = float(ts.get("rated_torque_nm")
+                  or ts.get("continuous_rated_torque_nm")
+                  or 0.98)
+    peak = float(ts.get("rated_torque_nm_half_stall_deprecated")
+                 or ts.get("peak_torque_nm")
+                 or 1.47)
+    stall = float(ts.get("stall_torque_nm") or 2.94)
+    return {
+        "primary": "continuous_rated",
+        "continuous_rated_torque_nm": rated,
+        "peak_torque_nm": peak,
+        "stall_torque_nm": stall,
     }
 
 
@@ -588,10 +618,8 @@ def emit_markdown(data: Dict[str, Any],
 
 ## 七、后续轮次
 
-| 文件 | 用途 |
-|---|---|
-| `下一轮-给Gemini的提示词.md` | 第 2 轮：索取机械接口数据（当前阻塞项） |
-| `下一轮-本仓库执行提示词.md` | 第 2 轮：CAD 化改造与零件建模 |
+扭矩主判据为【官方额定】0.98 N·m；超标关节见 `torque_criterion.joints_exceeding_continuous`。
+过程提示词已迁到 `design/handoff/prompt-*.md` 与 `docs/process/`，不再把不存在的「下一轮」文件写进附件表。
 
 ---
 
@@ -745,7 +773,7 @@ def main() -> int:
                 "speaker": {"type": "3W 喇叭 + 功放", "purpose": "TTS 播报"},
             },
             "power": {
-                "battery": "3S 11.1V 锂聚合物，≥2200 mAh",
+                "battery": "3S 11.1V 锂聚合物；30 min 任务按额定 0.98 口径需标称 ≥11.83 Ah（现选 2000 mAh 不够）",
                 "regulation": "独立 BEC 给舵机供电，与逻辑电源隔离",
                 "connector": "XT60 主接口",
             },
@@ -753,7 +781,7 @@ def main() -> int:
         "what_is_placeholder": [
             "所有 link 的几何是**基元占位**（长方体/圆柱/球/胶囊），"
             "只表达包络与连接关系，不是可加工零件。",
-            "舵机外形（40×20×40.5 mm）为同级别产品典型值，非实测。",
+            "舵机外形（45.2×24.7×35.0 mm）取 STS3215 实测包络，轴心不在长度中点。",
             "未建模：舵机支架、轴承、走线槽、螺钉柱、拔模与圆角。",
             "未建模：电池与电路板的实际安装位置与固定方式。",
             "力矩需求为**静力估算**，未做动力学仿真。",
@@ -779,6 +807,18 @@ def main() -> int:
     for k, v in tier_acc.items():
         v["max_torque_nm"] = round(v["max_torque_nm"], 3)
     out["summary_by_tier"] = tier_acc
+
+    crit = torque_criteria(model)
+    exceeding = sorted(t["joint"] for t in torques if t.get("exceeds_continuous_rated"))
+    exceeding_peak = sorted(t["joint"] for t in torques if t.get("exceeds_peak"))
+    out["torque_criterion"] = {
+        "primary": crit["primary"],
+        "continuous_rated_torque_nm": crit["continuous_rated_torque_nm"],
+        "peak_torque_nm": crit["peak_torque_nm"],
+        "stall_torque_nm": crit["stall_torque_nm"],
+        "joints_exceeding_continuous": exceeding,
+        "joints_exceeding_peak": exceeding_peak,
+    }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     path = OUT_DIR / "hardware_requirements.json"

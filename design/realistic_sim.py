@@ -27,10 +27,10 @@ from typing import Any, Dict, List, Optional
 
 import sys
 
-# 允许以脚本方式运行（design/ 与 软件/atri 不在同一包内）
+# 允许以脚本方式运行（design/ 与 software/atri 不在同一包内）
 _DESIGN_DIR = Path(__file__).resolve().parent
 _REPO = _DESIGN_DIR.parent
-_ATRI_ROOT = _REPO / "软件" / "atri"
+_ATRI_ROOT = _REPO / "software" / "atri"
 if str(_ATRI_ROOT) not in sys.path:
     sys.path.insert(0, str(_ATRI_ROOT))
 
@@ -79,7 +79,8 @@ class RealisticServoBus(ServoBus):
         self.backlash = float(self.spec.get("backlash_deg", 0.0))
         self.speed_dps = float(self.spec.get("no_load_speed_dps", 1e9))
         self.latency_ms = float(self.spec.get("control_latency_ms", 0.0))
-        self.rated_torque = float(self.spec.get("rated_torque_nm", 1e9))
+        self.rated_torque = float(
+            self.spec.get("continuous_rated_torque_nm", 1e9))
 
         # 每个关节的仿真状态
         self.angles: Dict[int, float] = {
@@ -96,21 +97,23 @@ class RealisticServoBus(ServoBus):
         self.elapsed_s = 0.0
 
     # ---- ServoBus 接口 -------------------------------------------------
-    def set_angle(self, joint_id: int, deg: float) -> None:
-        name = ID_TO_NAME.get(joint_id)
-        if name is None:
-            return
-        # 应用域随机化里的零位偏差（如果调用方设置了）
-        clamped = clamp_angle(name, deg + self._offset.get(joint_id, 0.0))
+    def _write_angle(self, joint_id: int, deg: float) -> None:
+        """写入已由 ``ServoBus.set_angle`` 模板钳制的角度，再叠加域随机化零位偏差。
+
+        限位由基类模板方法统一保证（本类不再覆写 ``set_angle``），这里只负责
+        死区/回程间隙/转速限制/控制延迟/扭矩饱和等非理想特性。
+        """
+        name = ID_TO_NAME[joint_id]
+        # 应用域随机化里的零位偏差（如果调用方设置了），加偏差后重新钳制
+        target = clamp_angle(name, deg + self._offset.get(joint_id, 0.0))
 
         if not self.enable_imperfections:
-            self.angles[joint_id] = clamped
-            self._targets[joint_id] = clamped
-            self.command_log.append({"id": joint_id, "deg": clamped, "t": self.elapsed_s})
+            self.angles[joint_id] = target
+            self._targets[joint_id] = target
+            self.command_log.append({"id": joint_id, "deg": target, "t": self.elapsed_s})
             return
 
-        target = clamped
-        current = self._targets.get(joint_id, clamped)
+        current = self._targets.get(joint_id, target)
 
         # 死区：目标变化太小则忽略
         if abs(target - current) < self.deadband:

@@ -1,7 +1,7 @@
 # 厂商 / 第三方参考件（vendor）
 
 > 这里放**外部世界的一手几何与文档**，是 `standards.py` 中接口数据的证据基础。
-> 配套工具：`design/cad/measure_vendor.py`、`probe_assembly.py`、`check_mate.py`、
+> 配套工具：`design/cad/tools/measure_vendor.py`、`probe_assembly.py`、`check_mate.py`、
 > `render_vendor.py`、`read_vendor_pdf.py`（都走 `.venv-cad`）。
 
 ---
@@ -12,6 +12,9 @@
 |---|---|---|
 | `STS3215_7.4V_19kg_spec.pdf` | 飞特《产品规格书》STS3215 A/0，8 页，2020-04-10；**第 6 页＝外形尺寸图**（8-PA2.0 自攻、25T 输出齿、M3X6 机牙螺丝、Φ6 副轴、4.1 副轴伸出、45.23/24.73/35/36.5/3.4/29/32、5264/2.54 3P 端子） | `feetechrc.com` 产品页附件 |
 | `STS3235_12V_30kg_spec.pdf` | 飞特《产品规格书》STS3235 A/0，8 页，2021-11-19；**同尺寸（45.22×24.72×35）铝壳钢齿版**：70.5±1 g、额定负载 10 kg·cm、堵转 30 kg·cm、工作电压 6–12V | `feetechrc.com` 产品页附件 |
+
+> **许可**：以上 PDF 为厂商官方文档，**未授予再分发授权**，仅作项目内部技术核验参考；
+> 归属与公开分发处理见仓库根 `NOTICE`。
 
 抓取方式（**注意 `--max-time` 必须给足：首字节约 8 秒**）：
 
@@ -29,6 +32,9 @@ curl -sL --max-time 120 -o design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf 
 ## 2. `so-arm100/` —— 开源整机参考（Apache-2.0）
 
 来源：<https://github.com/TheRobotStudio/SO-ARM100>（★7426，LeRobot 生态标准机械臂，整机就用 STS3215）
+
+> **许可**：**Apache-2.0**；许可副本见 `design/cad/vendor/LICENSE-Apache-2.0.txt`，
+> 归属见仓库根 `NOTICE`。
 
 | 文件 | 用途 |
 |---|---|
@@ -56,24 +62,24 @@ curl -sL --max-time 120 -o design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf 
 ## 3. 复现命令
 
 ```bash
-cd /Users/zhangjingkun/Projects/github/ATRI
+cd <repo>   # 仓库根目录（本 README 位于 design/cad/vendor/）；以下路径均相对仓库根
 
 # 接口几何（包络 / 圆柱面按轴分组 / 孔与轴判别）
-.venv-cad/bin/python design/cad/measure_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
+.venv-cad/bin/python design/cad/tools/measure_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
 
 # 整机里"谁是谁"（按体积分组，找舵机实例与螺钉）
-.venv-cad/bin/python design/cad/probe_assembly.py \
+.venv-cad/bin/python design/cad/tools/probe_assembly.py \
   design/cad/vendor/so-arm100/SO100_Follower_Assembly.step --min-volume 20
 
 # 孔位语义反查（同轴孔对）
-.venv-cad/bin/python design/cad/check_mate.py \
+.venv-cad/bin/python design/cad/tools/check_mate.py \
   design/cad/vendor/so-arm100/SO100_Follower_Assembly.step --target-volume 36217 --tol 0.4 --detail
 
 # 目视核验（多视角 PNG，输出到 design/cad/out/vendor_render/，out/ 已 gitignore）
-.venv-cad/bin/python design/cad/render_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
+.venv-cad/bin/python design/cad/tools/render_vendor.py design/cad/vendor/so-arm100/STS3215_03a.step
 
 # 官方 PDF 逐页转图 + 抽文字
-.venv-cad/bin/python design/cad/read_vendor_pdf.py \
+.venv-cad/bin/python design/cad/tools/read_vendor_pdf.py \
   design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf --scale 2.2
 ```
 
@@ -83,6 +89,8 @@ cd /Users/zhangjingkun/Projects/github/ATRI
 
 - 这些文件**入 git**（单文件最大 7 MB < 50 MB 上限），因为验收标准要求
   "核验过程可复现（保留脚本与原始 STEP/STL）"。
+- ⚠️ **公开分发前**：`feetech/` 下的厂商 PDF 无再分发授权，须按仓库根 `NOTICE` 处理
+  （移除这些 PDF，或改为仅保留官网下载链接与页码引用）。
 - `.stl` 是二进制网格，只在做"含/不含舵盘"顶点比对时用；如体积敏感可只留 STEP。
 - `design/cad/out/`（渲染图、PDF 页面 PNG）**不入 git**，均可由上述命令重新生成。
 - 读 PDF 需要 `pypdf` + `pypdfium2`，已装入 `.venv-cad`：

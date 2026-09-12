@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -389,7 +390,7 @@ def render_view(model: Dict[str, Any], key: str, pose: Dict[str, float],
 
 
 def export_png(svg: Path, size: int = 1800) -> Optional[Path]:
-    """用 macOS qlmanage 把 SVG 转成 PNG（先补成正方避免被裁切）。"""
+    """SVG 转 PNG：rsvg-convert → inkscape → qlmanage（先补成正方避免被裁切）。"""
     import re
     src = svg.read_text(encoding="utf-8")
     m = re.search(r'width="(\d+)" height="(\d+)"', src)
@@ -400,6 +401,7 @@ def export_png(svg: Path, size: int = 1800) -> Optional[Path]:
     pad = (side - h) // 2
     body = src.split(">", 1)[1].rsplit("</svg>", 1)[0]
     tmp = svg.with_name("_tmp_square.svg")
+    dest = svg.with_suffix(".png")
     tmp.write_text(
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{side}" '
         f'height="{side}" viewBox="0 0 {side} {side}">'
@@ -408,19 +410,58 @@ def export_png(svg: Path, size: int = 1800) -> Optional[Path]:
         encoding="utf-8",
     )
     try:
-        subprocess.run(["qlmanage", "-t", "-s", str(size), "-o",
-                        str(svg.parent), str(tmp)],
-                       check=True, capture_output=True, timeout=120)
-        produced = svg.parent / (tmp.name + ".png")
-        if produced.exists():
-            final = svg.with_suffix(".png")
-            produced.replace(final)
-            return final
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return None
+        if _svg_to_png(tmp, dest, size=size):
+            return dest
     finally:
         tmp.unlink(missing_ok=True)
     return None
+
+
+def _svg_to_png(svg: Path, dest: Path, size: int, timeout: int = 120) -> bool:
+    rsvg = shutil.which("rsvg-convert")
+    if rsvg:
+        try:
+            subprocess.run(
+                [rsvg, "-w", str(size), "-o", str(dest), str(svg)],
+                check=True, capture_output=True, timeout=timeout,
+            )
+            if dest.is_file() and dest.stat().st_size > 0:
+                return True
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
+            pass
+
+    inkscape = shutil.which("inkscape")
+    if inkscape:
+        cmds = [
+            [inkscape, str(svg), "--export-type=png",
+             f"--export-filename={dest}", f"--export-width={size}"],
+            [inkscape, "-z", str(svg), f"--export-png={dest}",
+             f"--export-width={size}"],
+        ]
+        for cmd in cmds:
+            try:
+                subprocess.run(
+                    cmd, check=True, capture_output=True, timeout=timeout,
+                )
+                if dest.is_file() and dest.stat().st_size > 0:
+                    return True
+            except (subprocess.SubprocessError, FileNotFoundError, OSError):
+                continue
+
+    ql = shutil.which("qlmanage")
+    if ql:
+        try:
+            subprocess.run(
+                [ql, "-t", "-s", str(size), "-o", str(svg.parent), str(svg)],
+                check=True, capture_output=True, timeout=timeout,
+            )
+            produced = svg.parent / (svg.name + ".png")
+            if produced.exists():
+                produced.replace(dest)
+                return dest.is_file() and dest.stat().st_size > 0
+        except (subprocess.SubprocessError, FileNotFoundError, OSError):
+            pass
+    return False
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -444,7 +485,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"已生成 {path}  ({path.stat().st_size} bytes)")
         if args.png:
             png = export_png(path, args.size)
-            print(f"   PNG -> {png}" if png else "   PNG 转换失败")
+            print(
+                f"   PNG -> {png}"
+                if png
+                else "   未找到 rsvg-convert / inkscape / qlmanage，已保留 SVG"
+            )
     return 0
 
 

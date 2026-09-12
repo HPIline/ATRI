@@ -259,7 +259,7 @@ def main(argv: List[str] | None = None) -> int:
     A("| 用途 | 用哪个文件 | 说明 |")
     A("|---|---|---|")
     A("| 刚体动力学（PyBullet / MuJoCo / Webots） | `design/atri.urdf`（交接包内同名副本） | "
-      "23 link / 22 joint，**质量已含舵机与电子件**（合计 2146 g），舵机体积已进 collision |")
+      f"23 link / 22 joint，**质量已含舵机与电子件**（合计 {total_headline_kg*1000:.0f} g），舵机体积已进 collision |")
     A("| 零件位置与参数（程序读） | `design/placements.json` | 22 舵机 + 10 电子件 + 23 结构件的宿主/坐标/尺寸/质量 |")
     A("| CAD / 装配建模 | 本表第 4、5 节 | 含关节原点与配件坐标，可直接作为装配基准 |")
     A("| 舵机非理想特性 | `design/packages/servo_spec.json` | 死区/间隙/延迟/扭矩饱和；额定口径已更新 |")
@@ -269,7 +269,7 @@ def main(argv: List[str] | None = None) -> int:
     A('import pybullet as p')
     A('p.connect(p.GUI); p.setGravity(0, 0, -9.81)')
     A('robot = p.loadURDF("design/atri.urdf", useFixedBase=False)')
-    A("# 质量核对：sum(link mass) 应等于 2.146 kg（v2 实测口径）")
+    A(f"# 质量核对：sum(link mass) 应等于 {total_headline_kg:.3f} kg（现行口径，重量方案未定案）")
     A("```")
     A("")
     A("**两个已知的仿真保真度限制（别当没看见）：**")
@@ -289,7 +289,7 @@ def main(argv: List[str] | None = None) -> int:
     A("python3 design/check_fit.py                  # 配合与质量闭合")
     A("python3 design/gen_spec_sheet.py             # 本表")
     A("python3 design/gen_drawings.py && python3 design/gen_render.py")
-    A("cd 软件/atri && python3 -m unittest discover -s tests")
+    A("cd software/atri && python3 -m unittest discover -s tests")
     A("```")
     A("")
 

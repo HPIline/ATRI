@@ -143,7 +143,7 @@
 
 ## 5. 对 ATRI 固件的落地建议
 
-现状：`软件/atri/atri/cerebellum.py` 的 `ServoBus` 是**纯抽象接口**
+现状：`software/atri/atri/cerebellum.py` 的 `ServoBus` 是**纯抽象接口**
 （`set_angle(joint_id, deg)` / `read_angle(joint_id)`），没有寄存器级假设 —— **这个设计是对的**，
 真实实现只需补一个 `RealServoBus` 适配层：
 

@@ -38,6 +38,18 @@ OUT = HERE / "out"
 DESIGN = REPO / "design"
 SERVO_NAME = "STS3215"
 
+# 展示姿态（度）。零位夹爪已随轴朝外，不再穿髋；预览仍把臂抬到身前好看。
+# 不加 shoulder_roll（外展会超宽）。校核脚本继续用全 0。
+DISPLAY_POSE_DEG = {
+    "left_shoulder_pitch": -40.0,
+    "right_shoulder_pitch": -40.0,
+    "left_elbow_pitch": -55.0,
+    "right_elbow_pitch": -55.0,
+    "left_gripper": 20.0,
+    "right_gripper": 20.0,
+    "head_pitch": 8.0,
+}
+
 # --------------------------------------------------------------------------
 # 矩阵工具（4×4，行主序；纯 Python，避免为装配引入 numpy 依赖）
 # --------------------------------------------------------------------------
@@ -57,6 +69,21 @@ def mat_trans(x: float, y: float, z: float) -> Mat:
     m = mat_identity()
     m[0][3], m[1][3], m[2][3] = x, y, z
     return m
+
+
+def mat_axis_angle(axis: Sequence[float], theta: float) -> Mat:
+    """绕任意轴旋转（Rodrigues）。theta 为弧度。"""
+    x, y, z = axis
+    n = math.sqrt(x * x + y * y + z * z) or 1.0
+    x, y, z = x / n, y / n, z / n
+    c, s = math.cos(theta), math.sin(theta)
+    C = 1.0 - c
+    return [
+        [x * x * C + c, x * y * C - z * s, x * z * C + y * s, 0.0],
+        [y * x * C + z * s, y * y * C + c, y * z * C - x * s, 0.0],
+        [z * x * C - y * s, z * y * C + x * s, z * z * C + c, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]
 
 
 def mat_rpy(r: float, p: float, yw: float) -> Mat:
@@ -87,7 +114,9 @@ def rot3(m: Mat) -> List[List[float]]:
 # URDF 运动学
 # --------------------------------------------------------------------------
 class Kin:
-    def __init__(self, urdf: Path):
+    def __init__(self, urdf: Path, pose_deg: Optional[Dict[str, float]] = None):
+        """pose_deg：关节角（度）。默认全 0，与 URDF 零位一致。预览可传入展示姿态。"""
+        self.pose_deg: Dict[str, float] = dict(pose_deg or {})
         root = ET.parse(urdf).getroot()
         self.joints: Dict[str, Dict[str, Any]] = {}
         self.parent_of: Dict[str, str] = {}
@@ -118,9 +147,13 @@ class Kin:
     def _fk(self, link: str, m: Mat) -> None:
         self.world[link] = m
         for child in self.children[link]:
-            j = self.joints[self.parent_of[child]]
-            self._fk(child, mat_mul(m, mat_mul(mat_trans(*j["xyz"]),
-                                               mat_rpy(*j["rpy"]))))
+            jname = self.parent_of[child]
+            j = self.joints[jname]
+            origin = mat_mul(mat_trans(*j["xyz"]), mat_rpy(*j["rpy"]))
+            theta = math.radians(self.pose_deg.get(jname, 0.0))
+            if abs(theta) > 1e-12:
+                origin = mat_mul(origin, mat_axis_angle(j["axis"], theta))
+            self._fk(child, mat_mul(m, origin))
 
     def joint_world(self, joint: str) -> Mat:
         """关节坐标系的世界位姿（= 父 link 位姿 × 关节 origin）。"""
@@ -195,9 +228,9 @@ LINK_BULK: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
     "left_forearm": [("limb_tube", {"length": 39.2, "z0": -39.2})],
     "right_forearm": [("limb_tube", {"length": 39.2, "z0": -39.2})],
     "left_foot": [("foot_plate", {})],
-    "right_foot": [("foot_plate", {})],
-    "left_gripper": [("gripper_jaw", {})],
-    "right_gripper": [("gripper_jaw", {})],
+    "right_foot": [("foot_plate", {"mirror": True})],
+    "left_gripper": [("gripper_jaw", {"shaft": "+y", "parent": "+z"})],
+    "right_gripper": [("gripper_jaw", {"shaft": "-y", "parent": "+z"})],
 }
 
 # 紧凑转接块：只留给颈/腰短链（轴距 27.5，不走错轴）
@@ -210,13 +243,14 @@ ADAPTERS: Dict[str, Dict[str, Any]] = {
 # stagger 取被托住的那只舵机（fit_stagger.py 的数，禁止在这里另写一套）。
 CLUSTER_ARMS: Dict[str, Dict[str, Any]] = {
     "left_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6,
-                          "stagger_of": "left_hip_roll"},
+                          "stagger_of": "left_hip_roll", "flange_on_horn": True},
     "right_hip_yaw_link": {"in_shaft": "-z", "out_shaft": "-x", "drop": 19.6,
-                           "stagger_of": "right_hip_roll"},
+                           "stagger_of": "right_hip_roll", "y_sign": -1.0,
+                           "flange_on_horn": True},
     "left_hip_roll_link": {"in_shaft": "-x", "out_shaft": "+y", "drop": 19.6,
-                           "stagger_of": "left_hip_pitch"},
+                           "stagger_of": "left_hip_pitch", "spine_clear": 14.0},
     "right_hip_roll_link": {"in_shaft": "-x", "out_shaft": "-y", "drop": 19.6,
-                            "stagger_of": "right_hip_pitch"},
+                            "stagger_of": "right_hip_pitch", "spine_clear": 14.0},
     "left_shoulder_pitch_link": {"in_shaft": "+y", "out_shaft": "-x", "drop": 0.0,
                                  "stagger_of": "left_shoulder_roll"},
     "right_shoulder_pitch_link": {"in_shaft": "-y", "out_shaft": "+x", "drop": 0.0,
@@ -287,6 +321,8 @@ def electronics_placeholder(size: Sequence[float]) -> cq.Workplane:
 
 # 电子件的摆放姿态（placements.json 只给位置与尺寸，姿态在这里定）
 ELEC_ROT_DEG = {"compute": 90.0}      # 树莓派 85 mm 边沿 Y 向（躯干内净空 90）
+# 头壳前脸 visor x≈32–38。占位体 8×25×8，厚度沿 X，收在罩内下沿。
+ELEC_HEAD = {"mic": (35.0, 0.0, -12.0)}
 # 躯干骨架重排（给俯仰叉让位）后，舱内件要落在**各自的那块托盘/仓底**上。
 # 托盘上表面（torso 局部坐标，见 skeleton.torso_frame）：
 # 托盘上表面（torso 局部坐标，见 skeleton.torso_frame 的绝对布局）
@@ -298,7 +334,7 @@ ELEC_DECK_TOP = {
 }
 
 # 容积超额订阅：STM32 / URT-1 / XL4015 / 功放 / 喇叭塞不进躯干（见
-# 项目文档/骨架结构与集成方案.md §3.1），改挂到躯干背面（背挂模块）。
+# 电子件背挂模块，改挂到躯干背面。
 # 这不是"随便挪一下"：躯干内 俯仰叉 32 + 电池 19 + 树莓派 17 = 68 mm，
 # 而到 head_yaw 轴线只有 82.4 mm，还要留给颈座与偏转舵机笼。
 # 舱内实测（2026-09-11）：下层净高 21.4、上层净高 18.4，7 件里只有两件真塞不下：
@@ -316,7 +352,8 @@ ELEC_BAY_SIDE = {
 }
 # 背挂件的贴板位置（y 错开，避免 90° 装法下长边互相重叠）
 BACKPACK_YZ = {"bec": (0.0, 26.0), "speaker": (-32.0, 10.0)}
-BACK_X = 48.0               # 躯干背面（躯干本体 x ∈ [−48, +48]）
+# 背板 3 mm 在 x=−58.5（外表面 x=−60）。贴板外侧，留 0.5 mm 气隙，不穿进板。
+BACK_X = 60.5
 BACKPACK_PITCH = 16.0
 
 # 显式声明"就按 placements.json 原始坐标摆、不需要规则"的躯干件（目前为空）。
@@ -417,7 +454,10 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                                 out_shaft=cfg["out_shaft"],
                                 drop=cfg["drop"],
                                 stagger=stagger,
-                                parent_stagger=parent_stagger),
+                                parent_stagger=parent_stagger,
+                                y_sign=float(cfg.get("y_sign", 1.0)),
+                                flange_on_horn=bool(cfg.get("flange_on_horn", False)),
+                                spine_clear=float(cfg.get("spine_clear", 6.0))),
                        kin.world[link]),
                 "cluster_arm")
         except Exception as cop:  # noqa: BLE001
@@ -462,9 +502,13 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
                 fail(f"outrigger/{jname}", "cluster", cop)
         if sc["fork"] == "fork":
             try:
+                # 肘叉用紧凑型：前臂只有 39.2 mm，标准叉芯棒会顶进夹爪舵机。
+                compact = "elbow" in jname
                 add(f"fork__{jname}",
                     _place(sk.build("limb_fork", shaft=sc["shaft"],
-                                    parent=sc["parent"]), m), "fork")
+                                    parent=sc["parent"],
+                                    compact=compact,
+                                    spigot=not compact), m), "fork")
             except Exception as exc:  # noqa: BLE001
                 fail(f"fork/{jname}", "fork", exc)
 
@@ -518,6 +562,8 @@ def build_assembly(kin: Kin, placements: Dict[str, Any],
         try:
             pos = list(e["position_mm"])
             rot_y = 0.0
+            if link == "head" and kind in ELEC_HEAD:
+                pos = list(ELEC_HEAD[kind])
             if kind in ELEC_DECK_TOP:
                 # 底面坐在托盘上表面：中心 z = 盘面 + 自身高/2
                 pos[2] = ELEC_DECK_TOP[kind] + e["size_mm"][2] / 2.0

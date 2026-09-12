@@ -36,7 +36,7 @@
 ```bash
 git log --oneline --grep='\[真机总线\]'          # 按线程名找提交
 git show <sha> --stat                            # 看这次改了哪些文件
-git diff <base_sha>..HEAD -- 软件/atri/          # 只看某条线的净变化
+git diff <base_sha>..HEAD -- software/atri/          # 只看某条线的净变化
 cat design/handoff/线程报告-<线程名>.md          # 人可读报告（命令 + 输出）
 ```
 
@@ -44,9 +44,14 @@ cat design/handoff/线程报告-<线程名>.md          # 人可读报告（命�
 
 ## 4. 本轮文件领地（只写清单）
 
-| 线程 | 模型 | 只写 |
+> ⛔ **2026-09-12 作废**：下表点名的 `opencode-go/kimi-k2.7-code` 等路由**本机不存在**
+> （实际注册的是 `kimi-k3`），且用户已决定**只用 `opencode-go-v41/deepseek-v4.1-flash`
+> 与 `xbcl/grok-4.6` 两条路由**。现行分工与领地表见 `分工重整-两模型制.md`（第 4 节）。
+> 本表仅作历史留档，**不要再照此招募线程**。
+
+| 线程 | 模型（已作废） | 只写 |
 |---|---|---|
-| 真机总线驱动 | `xbcl/grok-4.6` | `软件/atri/atri/bus_sts3215.py`、`软件/atri/tests/test_bus_sts3215.py`、`design/handoff/线程报告-真机总线.md` |
+| 真机总线驱动 | `xbcl/grok-4.6` | `software/atri/atri/bus_sts3215.py`、`software/atri/tests/test_bus_sts3215.py`、`design/handoff/线程报告-真机总线.md` |
 | 扫掠自碰撞 | `opencode-go/kimi-k2.7-code` | `design/cad/sweep_check.py`、`design/cad/out/sweep_report.md`、`design/handoff/线程报告-扫掠校核.md` |
 | 工具可达性 | `opencode-go/minimax-m3` | `design/cad/tool_access.py`、`design/cad/out/tool_access_report.md`、`design/handoff/线程报告-工具可达.md` |
 | 参考件配合反查 | `opencode-go/deepseek-v4-flash` | `design/cad/reference_fits.py`、`design/handoff/线程报告-参考件配合.md` |
@@ -57,9 +62,9 @@ cat design/handoff/线程报告-<线程名>.md          # 人可读报告（命�
 ## 5. 通用红线（所有线程）
 
 - **不改**：别人领地的文件、`design/cad/standards.py` 里已验证的官方数值、
-  `ppt/**`、`webots/**`、`软件/atri/atri/skills/**`、`task_cards/**`。
+  `ppt/**`、`webots/**`、`software/atri/atri/skills/**`、`task_cards/**`。
 - **不手改生成物**：`design/placements.json`、`design/cad/out/**`（可重建）。
-- 主包 `软件/atri/atri/` 核心保持**标准库可跑**；第三方依赖只进 `requirements.txt` 且惰性导入。
+- 主包 `software/atri/atri/` 核心保持**标准库可跑**；第三方依赖只进 `requirements.txt` 且惰性导入。
 - 中文回复；报告给**命令 + 输出**；找不到就写"未找到"，**禁止编造数字**。
 - 每项做完先自检（`python3 -m unittest discover -s tests`、`.venv-cad/bin/python -m compileall` 等），
   不合格不许收工。

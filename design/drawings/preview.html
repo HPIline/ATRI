@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A.T.R.I. 工程图纸系统</title>
+<style>
+  :root {
+    --bg-workspace: #1a1e24;
+    --paper-bg: #ffffff;
+    --blueprint-grid: #edf2f7;
+    --ink-primary: #0f172a;
+    --ink-secondary: #475569;
+    --ink-muted: #94a3b8;
+    --border-main: #0f172a;
+    --border-subtle: #cbd5e1;
+    --border-light: #e2e8f0;
+    
+    /* 语义色标 */
+    --accent-orange: #ea580c;
+    --accent-orange-bg: #fff7ed;
+    --accent-orange-border: #fdba74;
+    --accent-blue: #0284c7;
+    --accent-blue-bg: #f0f9ff;
+    --accent-blue-border: #7dd3fc;
+    --accent-green: #16a34a;
+    --accent-green-bg: #f0fdf4;
+    --accent-green-border: #86efac;
+    --panel-bg: #f8fafc;
+    
+    /* 打印与图纸画幅 A3 横向规范比例: 1684 x 1191 (1.414) */
+    --w: 1684px;
+    --h: 1191px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-workspace);
+    color: var(--ink-primary);
+    font-family: "Noto Sans CJK SC", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 顶部切换栏（工程调试模式） */
+  header.toolbar {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; gap: 12px; align-items: center;
+    padding: 10px 24px;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+    color: #f8fafc;
+  }
+  .brand-badge {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    padding: 4px 10px; background: #1e293b; border: 1px solid #475569;
+    border-radius: 2px;
+  }
+  .brand-badge span { color: var(--accent-orange); }
+  .nav-tabs { display: flex; gap: 6px; }
+  .nav-btn {
+    border: 1px solid #334155; padding: 6px 14px;
+    border-radius: 2px; cursor: pointer;
+    background: #1e293b; color: #94a3b8;
+    font-size: 13px; font-weight: 600;
+    transition: all 0.15s ease;
+  }
+  .nav-btn:hover { background: #334155; color: #fff; }
+  .nav-btn.active {
+    background: #f8fafc; color: #0f172a; border-color: #f8fafc;
+  }
+  .toolbar-hint {
+    margin-left: auto; font-size: 12px; color: #64748b; font-family: monospace;
+  }
+
+  .stage-container {
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* 图纸主视区 */
+  .drawing-sheet {
+    width: var(--w);
+    height: var(--h);
+    background: var(--paper-bg);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+  .drawing-sheet.active { display: block; }
+
+  /* 外边框与内外图框（标准工程图图框） */
+  .sheet-border-outer {
+    position: absolute;
+    inset: 16px;
+    border: 2px solid var(--border-main);
+    pointer-events: none;
+  }
+  .sheet-border-inner {
+    position: absolute;
+    inset: 22px;
+    border: 1px solid var(--border-main);
+    pointer-events: none;
+  }
+  /* 图框刻度标尺点 */
+  .corner-mark {
+    position: absolute; width: 10px; height: 10px; border-color: var(--border-main);
+  }
+
+  /* 标准工程图纸标题区 */
+  .sheet-header {
+    position: absolute;
+    top: 36px;
+    left: 42px;
+    right: 42px;
+    height: 72px;
+    border-bottom: 2px solid var(--border-main);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .title-group h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--ink-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .title-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--accent-orange-bg);
+    border: 1px solid var(--accent-orange-border);
+    color: var(--accent-orange);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-radius: 2px;
+  }
+  .title-group p {
+    margin: 6px 0 0 0;
+    font-size: 12.5px;
+    color: var(--ink-secondary);
+    font-family: "Noto Sans CJK SC", monospace;
+  }
+  .meta-badges {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    font-family: monospace;
+  }
+  .meta-item {
+    text-align: right;
+    border-left: 1px solid var(--border-light);
+    padding-left: 12px;
+  }
+  .meta-label { color: var(--ink-muted); font-size: 10px; text-transform: uppercase; }
+  .meta-val { font-weight: 700; color: var(--ink-primary); margin-top: 2px; }
+
+  /* 右下角工业标题栏 Title Block (GB/T 规范风格紧凑排版) */
+  .title-block-table {
+    position: absolute;
+    right: 22px;
+    bottom: 22px;
+    width: 380px;
+    border-collapse: collapse;
+    background: #fff;
+    border-top: 2px solid var(--border-main);
+    border-left: 2px solid var(--border-main);
+    font-size: 11px;
+    z-index: 10;
+  }
+  .title-block-table td {
+    border: 1px solid var(--border-subtle);
+    padding: 4px 8px;
+    height: 24px;
+  }
+  .title-block-table .lbl {
+    background: #f1f5f9;
+    color: var(--ink-secondary);
+    width: 72px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .title-block-table .val {
+    color: var(--ink-primary);
+    font-weight: 600;
+  }
+  .title-block-table .val-strong {
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* 结构化卡片与图表容器 */
+  .card-panel {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-top: 3px solid var(--ink-primary);
+    display: flex;
+    flex-direction: column;
+  }
+  .card-panel.orange-accent { border-top-color: var(--accent-orange); }
+  .card-panel.blue-accent { border-top-color: var(--accent-blue); }
+  
+  .card-panel-header {
+    padding: 8px 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-panel-header h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-primary);
+    letter-spacing: 0.02em;
+  }
+  .card-panel-header .sub-badge {
+    font-size: 11px;
+    color: var(--ink-muted);
+    font-family: monospace;
+  }
+  .card-panel-body {
+    padding: 12px 14px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* 紧凑工程数据表 */
+  table.eng-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+  table.eng-table th {
+    background: #f1f5f9;
+    color: var(--ink-secondary);
+    text-align: left;
+    padding: 5px 8px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 11px;
+  }
+  table.eng-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--ink-primary);
+  }
+  table.eng-table tr:last-child td { border-bottom: none; }
+  .hl-trunk { color: var(--accent-orange); font-weight: 700; }
+  .hl-ok { color: var(--accent-green); font-weight: 700; }
+  .hl-blue { color: var(--accent-blue); font-weight: 700; }
+
+  /* 视图线框容器 */
+  .cad-viewport {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid var(--border-light);
+  }
+  .cad-viewport-header {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    z-index: 5;
+  }
+  .viewport-name {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--ink-primary);
+  }
+  .viewport-scale {
+    font-size: 11px;
+    color: var(--ink-muted);
+    font-family: monospace;
+  }
+
+  /* 截屏隐藏控制 */
+  html.shot header.toolbar { display: none; }
+  html.shot body, html.shot .stage-container { background: #fff; padding: 0; }
+  html.shot .drawing-sheet { box-shadow: none; }
+  @media print {
+    header.toolbar { display: none; }
+    body, .stage-container { background: #fff; padding: 0; }
+    .drawing-sheet { display: none !important; box-shadow: none; }
+    .drawing-sheet.active { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <div class="brand-badge">
+    <span>A.T.R.I.</span> ROBOTICS ENGINEERING
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-btn active" data-tab="joints">01 关节编号图 (ATRI-DWG-001)</button>
+    <button class="nav-btn" data-tab="views">02 三视图总装 (ATRI-DWG-002)</button>
+    <button class="nav-btn" data-tab="chain">04 尺寸链校核 (ATRI-DWG-004)</button>
+    <button class="nav-btn" data-tab="servo">05 舵机布局图 (ATRI-DWG-005)</button>
+  </div>
+  <div class="toolbar-hint">
+    [22 DOF SYSTEM] · SINGLE SOURCE: config.py · 1684×1191 px
+  </div>
+</header>
+
+<div class="stage-container">
+
+<!-- ======================================================================
+     01 关节编号图 (ATRI-DWG-001)
+     ====================================================================== -->
+<section class="drawing-sheet active" id="joints">
+  <div class="sheet-border-outer"></div>
+  <div class="sheet-border-inner"></div>
+
+  <!-- 头部信息 -->
+  <div class="sheet-header">
+    <div class="title-group">
+      <h1>
+        A.T.R.I. 22 自由度关节编号拓扑图
+        <span class="title-tag">22 DOF TOPOLOGY</span>
+      </h1>
+      <p>正视图全自由度避让标注 + 侧视图中线投影 · 编号与 software/atri/atri/config.py 同源 · 橙色为躯干 2 DOF</p>
+    </div>
+    <div class="meta-badges">
+      <div class="meta-item">
+        <div class="meta-label">DRAWING NO.</div>
+        <div class="meta-val">ATRI-DWG-001</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">SYSTEM DOF</div>
+        <div class="meta-val">22 AXES (00-21)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">STAGE</div>
+        <div class="meta-val">DETAILED DESIGN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 左侧主图：正视 + 侧视 (宽 960px) -->
+  <div class="cad-viewport" style="left: 42px; top: 122px; width: 938px; height: 698px;">
+    <!-- 标尺与微网格底纹由 SVG 绘制 -->
+    <svg id="svg-joints" viewBox="0 0 938 698" width="938" height="698" style="overflow: visible;">
+      <defs>
+        <pattern id="grid-pattern-joints" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="12" cy="12" r="0.75" fill="#cbd5e1" />
+        </pattern>
+        <!-- 箭头标号 -->
+        <marker id="arrow-leader" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+          <path d="M 0 0 L 6 3 L 0 6 z" fill="#0284c7" />
+        </marker>
+      </defs>
+      
+      <!-- 背景网格点阵 -->
+      <rect x="0" y="0" width="938" height="698" fill="url(#grid-pattern-joints)" opacity="0.6"/>
+
+      <!-- 分隔线与子视向标题 -->
+      <line x1="560" y1="20" x2="560" y2="678" stroke="#e2e8f0" stroke-dasharray="4,4" stroke-width="1.5"/>
+
+      <!-- 正视图视口标签 -->
+      <g transform="translate(24, 28)">
+        <text x="0" y="0" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="0.05em">VIEW A-A · 正视图 (FRONT ELEVATION)</text>
+        <text x="0" y="16" font-size="11" fill="#64748b">22 关节全标注 · 肩部/髋部采用短折引线避让</text>
+      </g>
+
+      <!-- 侧视图视口标签 -->
+      <g transform="translate(584, 28)">
+        <text x="0" y="0" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="0.05em">VIEW B-B · 侧视图 (RIGHT LATERAL)</text>
+        <text x="0" y="16" font-size="11" fill="#64748b">左右投影重叠 · 标注中线 4 关节 + 成对侧肢</text>
+      </g>
+
+      <!-- 正视图机器人机体 (基准点: X=280, Y=260) -->
+      <g id="body-front" transform="translate(280, 250)">
+        <!-- 地面基准线 -->
+        <line x1="-160" y1="410" x2="160" y2="410" stroke="#0284c7" stroke-width="1.5"/>
+        <line x1="-150" y1="410" x2="-140" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="-70" y1="410" x2="-60" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="0" y1="410" x2="10" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="70" y1="410" x2="80" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="140" y1="410" x2="150" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <text x="168" y="414" font-size="10" fill="#0284c7" font-weight="700">GND ±0.0</text>
+
+        <!-- 骨架连线 / 机械轮廓 -->
+        <!-- 颈部连接 -->
+        <line x1="0" y1="-140" x2="0" y2="-90" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+        <!-- 头部机盒 -->
+        <rect x="-32" y="-180" width="64" height="48" rx="6" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="-14" cy="-156" r="5" fill="#0f172a"/>
+        <circle cx="14" cy="-156" r="5" fill="#0f172a"/>
+        <path d="M -10 -142 Q 0 -138 10 -142" stroke="#64748b" stroke-width="1.5" fill="none"/>
+
+        <!-- 上躯干 (胸腔) - 橙色区分 -->
+        <rect x="-44" y="-90" width="88" height="52" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="2.2"/>
+        <line x1="-36" y1="-64" x2="36" y2="-64" stroke="#fdba74" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="0" y="-60" text-anchor="middle" font-size="9" fill="#ea580c" font-weight="700">CHEST / TRUNK</text>
+
+        <!-- 腰部连接关节节段 -->
+        <rect x="-24" y="-38" width="48" height="26" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+
+        <!-- 骨盆 (PELVIS) -->
+        <polygon points="-48,0 48,0 36,36 -36,36" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <text x="0" y="22" text-anchor="middle" font-size="9" fill="#475569" font-weight="700">PELVIS</text>
+
+        <!-- 双臂连线 -->
+        <!-- 左肩部横梁 (Viewer's Left -> 机器人的 Right) -->
+        <!-- 机器人手臂：规范中 left_arm 在图纸视角看为左还是右？
+             通常定义：left_arm 为机器人自身左侧（即观者右侧），right_arm 为机器人自身右侧（即观者左侧）。
+             根据前面原 preview.html：
+             left_shoulder_roll x=-76, right_shoulder_roll x=76.
+             此处严格保留原相对左右坐标定义保证一致！ -->
+        <line x1="-44" y1="-76" x2="-80" y2="-76" stroke="#0f172a" stroke-width="3"/>
+        <line x1="44" y1="-76" x2="80" y2="-76" stroke="#0f172a" stroke-width="3"/>
+
+        <!-- 左右大臂 -->
+        <line x1="-80" y1="-76" x2="-80" y2="10" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="80" y1="-76" x2="80" y2="10" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <!-- 左右小臂 -->
+        <line x1="-80" y1="10" x2="-80" y2="95" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="80" y1="10" x2="80" y2="95" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <!-- 左右末端夹爪 (Gripper) -->
+        <path d="M -88 95 L -88 122 L -80 115 L -72 122 L -72 95" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.8"/>
+        <path d="M 72 95 L 72 122 L 80 115 L 88 122 L 88 95" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.8"/>
+
+        <!-- 双腿连线 -->
+        <!-- 髋部连线 -->
+        <line x1="-30" y1="36" x2="-30" y2="85" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="30" y1="36" x2="30" y2="85" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <!-- 大腿 (Thigh) -->
+        <line x1="-30" y1="85" x2="-30" y2="210" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="30" y1="85" x2="30" y2="210" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <!-- 小腿 (Shank) -->
+        <line x1="-30" y1="210" x2="-30" y2="340" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="30" y1="210" x2="30" y2="340" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <!-- 脚掌 (Foot) -->
+        <rect x="-56" y="380" width="52" height="30" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <rect x="4" y="380" width="52" height="30" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <line x1="-30" y1="340" x2="-30" y2="380" stroke="#0f172a" stroke-width="4"/>
+        <line x1="30" y1="340" x2="30" y2="380" stroke="#0f172a" stroke-width="4"/>
+      </g>
+
+      <!-- 侧视图机器人机体 (基准点: X=750, Y=250) -->
+      <g id="body-side" transform="translate(750, 250)">
+        <!-- 地面基准线 -->
+        <line x1="-110" y1="410" x2="120" y2="410" stroke="#0284c7" stroke-width="1.5"/>
+        <line x1="-100" y1="410" x2="-90" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="-30" y1="410" x2="-20" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="40" y1="410" x2="50" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <line x1="100" y1="410" x2="110" y2="418" stroke="#0284c7" stroke-width="1"/>
+        <text x="125" y="414" font-size="10" fill="#0284c7" font-weight="700">GND ±0.0</text>
+
+        <!-- 头部侧视 (含面罩向前突出) -->
+        <path d="M -22 -180 L 16 -180 L 26 -160 L 26 -140 L 14 -132 L -22 -132 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+        <line x1="0" y1="-132" x2="0" y2="-90" stroke="#0f172a" stroke-width="3"/>
+        
+        <!-- 上躯干侧视 -->
+        <rect x="-24" y="-90" width="50" height="52" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="2.2"/>
+        <rect x="-18" y="-38" width="38" height="26" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+        
+        <!-- 骨盆侧视 -->
+        <rect x="-22" y="0" width="46" height="36" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+
+        <!-- 单侧手臂 (投影重合) -->
+        <line x1="0" y1="-76" x2="22" y2="-50" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="22" y1="-50" x2="30" y2="25" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <line x1="30" y1="25" x2="35" y2="100" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 28 100 L 42 100 L 40 125 L 30 125 Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.8"/>
+
+        <!-- 单侧腿部 (投影重合) -->
+        <line x1="0" y1="36" x2="0" y2="85" stroke="#0f172a" stroke-width="4"/>
+        <line x1="0" y1="85" x2="0" y2="210" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="210" x2="0" y2="340" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="340" x2="0" y2="380" stroke="#0f172a" stroke-width="4"/>
+        <rect x="-35" y="380" width="85" height="30" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+      </g>
+
+      <!-- 动态插入的编号标牌与引线图层 -->
+      <g id="joints-front-badges"></g>
+      <g id="joints-side-badges"></g>
+    </svg>
+  </div>
+
+  <!-- 右侧面板 1：自由度构成与规则核对 (left: 994px, top: 122px, width: 648px) -->
+  <div class="card-panel" style="left: 994px; top: 122px; width: 648px; height: 262px;">
+    <div class="card-panel-header">
+      <h3>自由度拓扑构成与赛题合规核验</h3>
+      <span class="sub-badge">TOPOLOGY SPECIFICATION</span>
+    </div>
+    <div class="card-panel-body" style="padding: 8px 12px;">
+      <table class="eng-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">机构分区</th>
+            <th style="width: 70px;">DOF 数量</th>
+            <th style="width: 200px;">关节物理分布 (Axis Distribution)</th>
+            <th>规则合规判据 (Competition Rule Check)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>头部 Head</td>
+            <td><strong>2 DOF</strong></td>
+            <td>yaw (Z向航向) + pitch (Y向俯仰)</td>
+            <td class="hl-ok">满足视觉伺服追踪需求</td>
+          </tr>
+          <tr style="background: #fffaf5;">
+            <td class="hl-trunk">躯干 Trunk</td>
+            <td class="hl-trunk"><strong>2 DOF</strong></td>
+            <td class="hl-trunk">trunk_roll (X横滚) + trunk_pitch (Y俯仰)</td>
+            <td class="hl-trunk">竞赛核心加分项 (橙色高亮 02/03)</td>
+          </tr>
+          <tr>
+            <td>下肢 Leg (L/R)</td>
+            <td><strong>10 DOF</strong> (5×2)</td>
+            <td>左右髋 (yaw/roll/pitch 各3) + 膝 pitch + 踝 pitch</td>
+            <td class="hl-ok">每腿 5 DOF ≥ 4 (超额达标)</td>
+          </tr>
+          <tr>
+            <td>上肢 Arm (L/R)</td>
+            <td><strong>8 DOF</strong> (4×2)</td>
+            <td>左右肩 (pitch/roll 各2) + 肘 pitch + 末端夹爪 gripper</td>
+            <td class="hl-ok">双臂 8 DOF + 躯干 2 DOF = 10 DOF ≥ 10</td>
+          </tr>
+          <tr style="background: #f8fafc; border-top: 2px solid #cbd5e1;">
+            <td><strong>整机合计</strong></td>
+            <td><strong style="font-size: 13px; color: #0284c7;">22 DOF</strong></td>
+            <td><strong>全机 22 个主动控制自由度</strong></td>
+            <td class="hl-ok" style="font-size: 11.5px;">检录规则: 总数 ≥18 (达标 122%)，全项达标</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 右侧面板 2：包络核验与动力学基准 (left: 994px, top: 396px, width: 648px) -->
+  <div class="card-panel" style="left: 994px; top: 396px; width: 648px; height: 248px;">
+    <div class="card-panel-header">
+      <h3>尺寸包络合规与舵机力矩判据口径</h3>
+      <span class="sub-badge">ENVELOPE & ACTUATOR SPEC</span>
+    </div>
+    <div class="card-panel-body" style="padding: 8px 12px;">
+      <table class="eng-table">
+        <thead>
+          <tr>
+            <th style="width: 130px;">核算项目 (Metric)</th>
+            <th style="width: 140px;">基准数值 (Nominal Value)</th>
+            <th style="width: 120px;">赛题限制 / 判据</th>
+            <th>工程核验结论 (Status & Safety Margin)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>现行申报整机包络</td>
+            <td><strong>418 × 223 × 129 mm</strong></td>
+            <td>600 × 300 × 300 mm</td>
+            <td class="hl-ok">高/宽/深余量: 182 / 77 / 171 mm (全绿达标)</td>
+          </tr>
+          <tr>
+            <td>URDF 运动学包络</td>
+            <td>372.8 × 190.0 × 123.0 mm</td>
+            <td>基元理论模型</td>
+            <td style="color: #64748b;">理论连杆投影基元，请勿与申报包络混引</td>
+          </tr>
+          <tr>
+            <td>总线舵机连续额定</td>
+            <td><strong>0.98 N·m</strong></td>
+            <td>热平衡主判据</td>
+            <td>官方标称工况；峰值 1.47 N·m 仅允许短时动态冲刺</td>
+          </tr>
+          <tr>
+            <td>重载关节力矩校核</td>
+            <td>踝 1.63 N·m / 腰 2.09 N·m</td>
+            <td>相对 0.98 额定</td>
+            <td class="hl-trunk">踝达 167%、腰达 214%，列为高负荷热监控关键点</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 6px; padding: 4px 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 2px; font-size: 11px; color: #15803d;">
+        ✔ <strong>合规确认：</strong>三项包络均在赛题规定尺寸限值内，可直接用于正式报名与检录核验。示意图非零件实测。
+      </div>
+    </div>
+  </div>
+
+  <!-- 下方面板：22 关节完整明细表 (left: 42px, top: 832px, width: 1220px, height: 337px) -->
+  <div class="card-panel" style="left: 42px; top: 832px; width: 1220px; height: 337px;">
+    <div class="card-panel-header">
+      <h3>22 关节明细参数表 (ID · 名称 · 组别 · 软件限位 · 旋转轴向 · 设计需求力矩)</h3>
+      <span class="sub-badge">JOINT TOPOLOGY TABLE (22 ROWS FULLY SPECIFIED)</span>
+    </div>
+    <div class="card-panel-body" style="padding: 6px 12px;">
+      <!-- 三列网格卡片排列 22 行关节 -->
+      <div id="joint-cards-container" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 16px; height: 100%;">
+        <!-- JS 动态注入 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 右下角标准工程标题栏 Title Block (right: 22px, bottom: 22px, width: 380px) -->
+  <table class="title-block-table">
+    <tr>
+      <td class="lbl">项目名称</td>
+      <td class="val" colspan="3">A.T.R.I. 桌面自主人形智能机器人</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸名称</td>
+      <td class="val-strong" colspan="3">22 自由度关节编号拓扑图</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸图号</td>
+      <td class="val">ATRI-DWG-001</td>
+      <td class="lbl">视向/比例</td>
+      <td class="val">正视+侧视 / 示意</td>
+    </tr>
+    <tr>
+      <td class="lbl">设计阶段</td>
+      <td class="val">方案工程化验证</td>
+      <td class="lbl">数据来源</td>
+      <td class="val">config.py 单一源</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ======================================================================
+     02 三视图总装 (ATRI-DWG-002)
+     ====================================================================== -->
+<section class="drawing-sheet" id="views">
+  <div class="sheet-border-outer"></div>
+  <div class="sheet-border-inner"></div>
+
+  <div class="sheet-header">
+    <div class="title-group">
+      <h1>
+        A.T.R.I. 整机总装三视图与几何包络
+        <span class="title-tag">OVERALL ASSEMBLY TRIPLE-VIEW</span>
+      </h1>
+      <p>正交投影示意 · 单位 mm · 现行申报包络 418 × 223 × 129 mm · 赛题余量校核 · 编号跳过 03 (原计划爆炸图)</p>
+    </div>
+    <div class="meta-badges">
+      <div class="meta-item">
+        <div class="meta-label">DRAWING NO.</div>
+        <div class="meta-val">ATRI-DWG-002</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">ENVELOPE</div>
+        <div class="meta-val">418 × 223 × 129</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">PROJECTION</div>
+        <div class="meta-val">THIRD ANGLE (ISO)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 正视图窗口 (left: 42px, top: 122px, width: 440px, height: 698px) -->
+  <div class="cad-viewport" style="left: 42px; top: 122px; width: 440px; height: 698px;">
+    <div class="cad-viewport-header">
+      <span class="viewport-name">VIEW I · 正视图</span>
+      <span class="viewport-scale">W 223 × H 418 mm</span>
+    </div>
+    <svg viewBox="0 0 440 698" width="440" height="698" style="overflow: visible;">
+      <!-- 网格与尺寸标注线 -->
+      <line x1="220" y1="50" x2="220" y2="650" stroke="#cbd5e1" stroke-dasharray="6,4" stroke-width="1"/>
+      <g transform="translate(220, 260)">
+        <!-- 地面基准 -->
+        <line x1="-150" y1="360" x2="150" y2="360" stroke="#0284c7" stroke-width="1.5"/>
+        <text x="155" y="364" font-size="10" fill="#0284c7" font-weight="700">±0.0</text>
+        
+        <!-- 正视图机器人精细骨架与机体 -->
+        <!-- 头 -->
+        <rect x="-30" y="-190" width="60" height="50" rx="6" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="-12" cy="-165" r="5" fill="#0f172a"/>
+        <circle cx="12" cy="-165" r="5" fill="#0f172a"/>
+        <!-- 颈 -->
+        <line x1="0" y1="-140" x2="0" y2="-95" stroke="#0f172a" stroke-width="3"/>
+        <!-- 胸腔 (躯干) -->
+        <rect x="-48" y="-95" width="96" height="56" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="2.2"/>
+        <line x1="-38" y1="-67" x2="38" y2="-67" stroke="#fdba74" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="0" y="-63" text-anchor="middle" font-size="9" fill="#ea580c" font-weight="700">TRUNK (ROLL/PITCH)</text>
+        <!-- 腹腰 -->
+        <rect x="-26" y="-39" width="52" height="28" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+        <!-- 骨盆 -->
+        <polygon points="-52,0 52,0 38,38 -38,38" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <!-- 手臂 -->
+        <line x1="-48" y1="-80" x2="-86" y2="-80" stroke="#0f172a" stroke-width="3"/>
+        <line x1="48" y1="-80" x2="86" y2="-80" stroke="#0f172a" stroke-width="3"/>
+        <line x1="-86" y1="-80" x2="-86" y2="10" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="86" y1="-80" x2="86" y2="10" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="-86" y1="10" x2="-86" y2="90" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="86" y1="10" x2="86" y2="90" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <rect x="-94" y="90" width="16" height="30" rx="3" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.8"/>
+        <rect x="78" y="90" width="16" height="30" rx="3" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.8"/>
+        <!-- 双腿 -->
+        <line x1="-34" y1="38" x2="-34" y2="85" stroke="#0f172a" stroke-width="4"/>
+        <line x1="34" y1="38" x2="34" y2="85" stroke="#0f172a" stroke-width="4"/>
+        <line x1="-34" y1="85" x2="-34" y2="200" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="34" y1="85" x2="34" y2="200" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="-34" y1="200" x2="-34" y2="320" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="34" y1="200" x2="34" y2="320" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <rect x="-60" y="330" width="52" height="30" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <rect x="8" y="330" width="52" height="30" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <line x1="-34" y1="320" x2="-34" y2="330" stroke="#0f172a" stroke-width="4"/>
+        <line x1="34" y1="320" x2="34" y2="330" stroke="#0f172a" stroke-width="4"/>
+
+        <!-- 尺寸标注 (高度 418 mm) -->
+        <g stroke="#0284c7" stroke-width="1.2">
+          <!-- 高度引出线 -->
+          <line x1="-120" y1="-190" x2="-160" y2="-190"/>
+          <line x1="-120" y1="360" x2="-160" y2="360"/>
+          <line x1="-150" y1="-190" x2="-150" y2="360"/>
+          <!-- 箭头 -->
+          <polyline points="-154,-180 -150,-190 -146,-180" fill="none"/>
+          <polyline points="-154,350 -150,360 -146,350" fill="none"/>
+        </g>
+        <text x="-162" y="90" font-size="13" font-weight="800" fill="#0284c7" text-anchor="middle" transform="rotate(-90 -162 90)">申报包络高度 418 mm</text>
+
+        <!-- 宽度标注 (宽度 223 mm) -->
+        <g stroke="#0284c7" stroke-width="1.2">
+          <line x1="-105" y1="390" x2="-105" y2="420"/>
+          <line x1="105" y1="390" x2="105" y2="420"/>
+          <line x1="-105" y1="410" x2="105" y2="410"/>
+          <polyline points="-95,406 -105,410 -95,414" fill="none"/>
+          <polyline points="95,406 105,410 95,414" fill="none"/>
+        </g>
+        <text x="0" y="428" font-size="12" font-weight="800" fill="#0284c7" text-anchor="middle">申报包络宽度 223 mm</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 侧视图窗口 (left: 504px, top: 122px, width: 440px, height: 698px) -->
+  <div class="cad-viewport" style="left: 504px; top: 122px; width: 440px; height: 698px;">
+    <div class="cad-viewport-header">
+      <span class="viewport-name">VIEW II · 侧视图</span>
+      <span class="viewport-scale">D 129 × H 418 mm</span>
+    </div>
+    <svg viewBox="0 0 440 698" width="440" height="698" style="overflow: visible;">
+      <line x1="220" y1="50" x2="220" y2="650" stroke="#cbd5e1" stroke-dasharray="6,4" stroke-width="1"/>
+      <g transform="translate(220, 260)">
+        <line x1="-120" y1="360" x2="120" y2="360" stroke="#0284c7" stroke-width="1.5"/>
+        <text x="125" y="364" font-size="10" fill="#0284c7" font-weight="700">±0.0</text>
+
+        <!-- 侧视机器人机体 -->
+        <path d="M -24 -190 L 18 -190 L 30 -168 L 30 -146 L 16 -138 L -24 -138 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+        <line x1="0" y1="-138" x2="0" y2="-95" stroke="#0f172a" stroke-width="3"/>
+        <rect x="-26" y="-95" width="54" height="56" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="2.2"/>
+        <rect x="-20" y="-39" width="42" height="28" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+        <rect x="-24" y="0" width="50" height="38" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <!-- 侧视手臂 -->
+        <line x1="0" y1="-80" x2="24" y2="-50" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="24" y1="-50" x2="32" y2="25" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="32" y1="25" x2="38" y2="95" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+        <rect x="28" y="95" width="18" height="26" rx="2" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.8"/>
+        <!-- 侧视腿部 -->
+        <line x1="0" y1="38" x2="0" y2="85" stroke="#0f172a" stroke-width="4"/>
+        <line x1="0" y1="85" x2="0" y2="200" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="200" x2="0" y2="320" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="320" x2="0" y2="330" stroke="#0f172a" stroke-width="4"/>
+        <rect x="-38" y="330" width="90" height="30" rx="3" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+
+        <!-- 厚度标注 (深度 129 mm) -->
+        <g stroke="#0284c7" stroke-width="1.2">
+          <line x1="-50" y1="390" x2="-50" y2="420"/>
+          <line x1="60" y1="390" x2="60" y2="420"/>
+          <line x1="-50" y1="410" x2="60" y2="410"/>
+          <polyline points="-40,406 -50,410 -40,414" fill="none"/>
+          <polyline points="50,406 60,410 50,414" fill="none"/>
+        </g>
+        <text x="5" y="428" font-size="12" font-weight="800" fill="#0284c7" text-anchor="middle">申报包络深度 129 mm</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 俯视图窗口 (left: 42px, top: 838px, width: 902px, height: 331px) -->
+  <div class="cad-viewport" style="left: 42px; top: 838px; width: 902px; height: 331px;">
+    <div class="cad-viewport-header">
+      <span class="viewport-name">VIEW III · 俯视图 (TOP VIEW)</span>
+      <span class="viewport-scale">W 223 × D 129 mm · 投影截面</span>
+    </div>
+    <svg viewBox="0 0 902 331" width="902" height="331" style="overflow: visible;">
+      <g transform="translate(451, 165)">
+        <!-- 躯干截面 -->
+        <rect x="-110" y="-55" width="220" height="110" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <rect x="-56" y="-34" width="112" height="68" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+        <text x="0" y="4" text-anchor="middle" font-size="11" fill="#ea580c" font-weight="700">TRUNK ENVELOPE</text>
+        <!-- 头部俯视 -->
+        <circle cx="0" cy="-4" r="26" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="-9" cy="-14" r="3" fill="#0f172a"/>
+        <circle cx="9" cy="-14" r="3" fill="#0f172a"/>
+        <!-- 左右肩与双臂外展截面 -->
+        <rect x="-105" y="-20" width="26" height="40" rx="6" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <rect x="79" y="-20" width="26" height="40" rx="6" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+        <!-- 双足底投影基准 -->
+        <rect x="-68" y="24" width="40" height="34" rx="4" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5" opacity="0.8"/>
+        <rect x="28" y="24" width="40" height="34" rx="4" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5" opacity="0.8"/>
+
+        <!-- 标注 -->
+        <g stroke="#0284c7" stroke-width="1.2">
+          <line x1="-110" y1="-75" x2="110" y2="-75"/>
+          <line x1="-110" y1="-65" x2="-110" y2="-85"/>
+          <line x1="110" y1="-65" x2="110" y2="-85"/>
+          <polyline points="-100,-79 -110,-75 -100,-71" fill="none"/>
+          <polyline points="100,-79 110,-75 100,-71" fill="none"/>
+        </g>
+        <text x="0" y="-90" font-size="12" font-weight="800" fill="#0284c7" text-anchor="middle">宽度 223 mm</text>
+
+        <g stroke="#0284c7" stroke-width="1.2">
+          <line x1="135" y1="-55" x2="135" y2="55"/>
+          <line x1="125" y1="-55" x2="145" y2="-55"/>
+          <line x1="125" y1="55" x2="145" y2="55"/>
+          <polyline points="131,-45 135,-55 139,-45" fill="none"/>
+          <polyline points="131,45 135,55 139,45" fill="none"/>
+        </g>
+        <text x="150" y="4" font-size="12" font-weight="800" fill="#0284c7">深度 129 mm</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 右侧面板：包络对比与合规参数 (left: 966px, top: 122px, width: 676px) -->
+  <div class="card-panel" style="left: 966px; top: 122px; width: 676px; height: 350px;">
+    <div class="card-panel-header">
+      <h3>三维几何包络与赛题上限核验对照</h3>
+      <span class="sub-badge">ENVELOPE VERIFICATION MATRIX</span>
+    </div>
+    <div class="card-panel-body" style="padding: 10px 14px;">
+      <table class="eng-table">
+        <thead>
+          <tr>
+            <th>维度 (Dimension)</th>
+            <th>现行申报装配包络</th>
+            <th>赛题规定上限</th>
+            <th>设计余量 (Margin)</th>
+            <th>合规状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>整机高度 (Height Z)</strong></td>
+            <td><strong>418 mm</strong></td>
+            <td>600 mm</td>
+            <td><strong>+182 mm</strong> (余量 30.3%)</td>
+            <td class="hl-ok">✔ 达标 (PASS)</td>
+          </tr>
+          <tr>
+            <td><strong>整机宽度 (Width X/Y)</strong></td>
+            <td><strong>223 mm</strong></td>
+            <td>300 mm</td>
+            <td><strong>+77 mm</strong> (余量 25.7%)</td>
+            <td class="hl-ok">✔ 达标 (PASS)</td>
+          </tr>
+          <tr>
+            <td><strong>整机深度 (Depth X/Y)</strong></td>
+            <td><strong>129 mm</strong></td>
+            <td>300 mm</td>
+            <td><strong>+171 mm</strong> (余量 57.0%)</td>
+            <td class="hl-ok">✔ 达标 (PASS)</td>
+          </tr>
+          <tr style="background: #f8fafc;">
+            <td>URDF 运动学理论高</td>
+            <td>372.8 mm</td>
+            <td>—</td>
+            <td>比实装小 45.2 mm</td>
+            <td style="color: #64748b;">基元纯连杆高度，勿与申报混引</td>
+          </tr>
+          <tr style="background: #f8fafc;">
+            <td>URDF 运动学宽 / 深</td>
+            <td>190.0 mm / 123.0 mm</td>
+            <td>—</td>
+            <td>—</td>
+            <td style="color: #64748b;">纯运动学仿真包络</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 14px; padding: 10px 12px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 3px; font-size: 11.5px; line-height: 1.6;">
+        <strong>合规工程结论：</strong><br>
+        1. 机器人整机物理外廓 418 × 223 × 129 mm 全面收敛在 600 × 300 × 300 mm 赛题立方体包络之内，余量充沛。<br>
+        2. <strong>重要规范说明：</strong>编号跳过 03 (原定 03 爆炸图因本阶段专注外形与总装而推迟至后期出图)。零姿态示意，非零件加工图。
+      </div>
+    </div>
+  </div>
+
+  <div class="card-panel" style="left: 966px; top: 490px; width: 676px; height: 330px;">
+    <div class="card-panel-header">
+      <h3>工程图纸版本与装配基准说明</h3>
+      <span class="sub-badge">ASSEMBLY NOTES</span>
+    </div>
+    <div class="card-panel-body" style="font-size: 12px; line-height: 1.7; color: #334155;">
+      <p style="margin: 0 0 8px 0;"><strong>1. 坐标系定义 (ISO 8855 / ROS REP-103)：</strong><br>
+      机器人原点设于骨盆中心 (Pelvis Center)。X 轴正向向前，Y 轴正向向左，Z 轴正向向上。零姿态定义为直立双腿并拢、双臂自然垂向地面。</p>
+      <p style="margin: 0 0 8px 0;"><strong>2. 申报包络与运动学模型差异来源：</strong><br>
+      URDF 运动学总高 372.8 mm 是连杆原点累加；申报 418 × 223 × 129 mm 是 CAD 实装包络。两套都是真的，不要加成一个高度，也不要用 372.8 去报名。</p>
+      <p style="margin: 0;"><strong>3. 本图不包含：</strong><br>
+      质心未在本仓库标定，图上不写质心高度或横向偏差。零姿态示意，不是零件加工图，也不是爆炸图（图号跳过 03）。</p>
+    </div>
+  </div>
+
+  <table class="title-block-table">
+    <tr>
+      <td class="lbl">项目名称</td>
+      <td class="val" colspan="3">A.T.R.I. 桌面自主人形智能机器人</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸名称</td>
+      <td class="val-strong" colspan="3">整机总装三视图与包络核验</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸图号</td>
+      <td class="val">ATRI-DWG-002</td>
+      <td class="lbl">视向/比例</td>
+      <td class="val">正/侧/俯三视图 / 示意</td>
+    </tr>
+    <tr>
+      <td class="lbl">设计阶段</td>
+      <td class="val">方案工程化验证</td>
+      <td class="lbl">图纸跳号说明</td>
+      <td class="val">跳过03 (原爆炸图)</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ======================================================================
+     04 尺寸链图 (ATRI-DWG-004)
+     ====================================================================== -->
+<section class="drawing-sheet" id="chain">
+  <div class="sheet-border-outer"></div>
+  <div class="sheet-border-inner"></div>
+
+  <div class="sheet-header">
+    <div class="title-group">
+      <h1>
+        A.T.R.I. 关节运动学尺寸链图（Z 轴纵向传递）
+        <span class="title-tag">KINEMATIC DIMENSION CHAIN</span>
+      </h1>
+      <p>由 robot_model.json origin_xyz_mm 逐级累加推导 · 单位 mm · 与 URDF 同源 · 勿把 372.8 与 418 申报包络混加</p>
+    </div>
+    <div class="meta-badges">
+      <div class="meta-item">
+        <div class="meta-label">DRAWING NO.</div>
+        <div class="meta-val">ATRI-DWG-004</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">TOTAL HEIGHT</div>
+        <div class="meta-val">372.8 mm (URDF)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">CHAIN AXIS</div>
+        <div class="meta-val">Z-DIRECTION</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 左侧尺寸链主传递图视口 (left: 42px, top: 122px, width: 780px, height: 1020px) -->
+  <div class="cad-viewport" style="left: 42px; top: 122px; width: 780px; height: 1020px;">
+    <div class="cad-viewport-header">
+      <span class="viewport-name">Z 向尺寸链物理传递示意 (PHYSICAL STACKUP)</span>
+      <span class="viewport-scale">以 Pelvis (Z=0.0) 为基准向上/向下级联</span>
+    </div>
+    <svg viewBox="0 0 780 1020" width="780" height="1020" style="overflow: visible;">
+      <!-- 背景基准线 -->
+      <g transform="translate(240, 480)">
+        <!-- PELVIS 基准零平面 Z=0 -->
+        <line x1="-180" y1="0" x2="380" y2="0" stroke="#ea580c" stroke-width="2" stroke-dasharray="6,3"/>
+        <rect x="-180" y="-12" width="130" height="24" rx="2" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+        <text x="-115" y="4" text-anchor="middle" font-size="11" font-weight="800" fill="#ea580c">PELVIS (基准 ±0.0)</text>
+
+        <!-- 纵向主轴骨架中心线 -->
+        <line x1="0" y1="-440" x2="0" y2="440" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+        <!-- ================= 向上分支 (Headward Chain) ================= -->
+        <!-- 节点 1: trunk_roll (+19.6) -> 绘制位置 y = -19.6 * 2.2 = -43.1 -->
+        <!-- 为直观展现工程图，采用放大比例: 1 mm = 2.0 px 垂直映射 -->
+        <!-- trunk_roll: dz = +19.6, cum = +19.6 -->
+        <g transform="translate(0, -39.2)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">trunk_roll</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#ea580c">+19.6 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 +19.6]</text>
+        </g>
+        <!-- 连线 -->
+        <line x1="0" y1="0" x2="0" y2="-39.2" stroke="#ea580c" stroke-width="3"/>
+
+        <!-- 节点 2: trunk_pitch (+27.5) -> cum = +47.1 -> y = -94.2 -->
+        <g transform="translate(0, -94.2)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">trunk_pitch</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#ea580c">+27.5 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 +47.1]</text>
+        </g>
+        <line x1="0" y1="-39.2" x2="0" y2="-94.2" stroke="#ea580c" stroke-width="3"/>
+
+        <!-- 节点 3: head_yaw (+82.4) -> cum = +129.5 -> y = -259.0 -->
+        <g transform="translate(0, -259.0)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0284c7" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">head_yaw</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#0284c7">+82.4 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 +129.5]</text>
+        </g>
+        <line x1="0" y1="-94.2" x2="0" y2="-259.0" stroke="#0284c7" stroke-width="3"/>
+
+        <!-- 节点 4: head_pitch (+27.5) -> cum = +157.0 -> y = -314.0 -->
+        <g transform="translate(0, -314.0)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0284c7" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">head_pitch</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#0284c7">+27.5 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 +157.0]</text>
+        </g>
+        <line x1="0" y1="-259.0" x2="0" y2="-314.0" stroke="#0284c7" stroke-width="3"/>
+
+        <!-- 节点 5: head 外形半高 (+21.6) -> cum = +178.6 -> y = -357.2 -->
+        <g transform="translate(0, -357.2)">
+          <line x1="-120" y1="0" x2="320" y2="0" stroke="#0284c7" stroke-width="1.5"/>
+          <rect x="-12" y="-12" width="24" height="24" rx="3" fill="#f0f9ff" stroke="#0284c7" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="800" fill="#0284c7">head 外形顶点 (Top Vertex)</text>
+          <text x="210" y="4" font-size="12" font-weight="800" fill="#0284c7">+21.6 mm</text>
+          <text x="290" y="4" font-size="11" font-weight="700" fill="#0284c7">[+178.6 mm]</text>
+        </g>
+        <line x1="0" y1="-314.0" x2="0" y2="-357.2" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="2,2"/>
+
+        <!-- ================= 向下分支 (Footward Chain) ================= -->
+        <!-- 节点 6: left_hip_yaw (-19.6) -> cum = -19.6 -> y = +39.2 -->
+        <g transform="translate(0, 39.2)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">left_hip_yaw</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#0f172a">−19.6 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 −19.6]</text>
+        </g>
+        <line x1="0" y1="0" x2="0" y2="39.2" stroke="#0f172a" stroke-width="3"/>
+
+        <!-- 节点 7: left_hip_roll (-19.6) -> cum = -39.2 -> y = +78.4 -->
+        <g transform="translate(0, 78.4)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">left_hip_roll</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#0f172a">−19.6 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 −39.2]</text>
+        </g>
+        <line x1="0" y1="39.2" x2="0" y2="78.4" stroke="#0f172a" stroke-width="3"/>
+
+        <!-- 节点 8: left_hip_pitch (-19.6) -> cum = -58.8 -> y = +117.6 -->
+        <g transform="translate(0, 117.6)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">left_hip_pitch</text>
+          <text x="140" y="4" font-size="12" font-weight="800" fill="#0f172a">−19.6 mm</text>
+          <text x="230" y="4" font-size="11" fill="#64748b">[累计 −58.8]</text>
+        </g>
+        <line x1="0" y1="78.4" x2="0" y2="117.6" stroke="#0f172a" stroke-width="3"/>
+
+        <!-- 节点 9: left_knee_pitch (-62.8) -> cum = -121.6 -> y = +243.2 -->
+        <g transform="translate(0, 243.2)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">left_knee_pitch (大腿段)</text>
+          <text x="175" y="4" font-size="12" font-weight="800" fill="#0f172a">−62.8 mm</text>
+          <text x="250" y="4" font-size="11" fill="#64748b">[累计 −121.6]</text>
+        </g>
+        <line x1="0" y1="117.6" x2="0" y2="243.2" stroke="#0f172a" stroke-width="3"/>
+
+        <!-- 节点 10: left_ankle_pitch (-62.8) -> cum = -184.4 -> y = +368.8 -->
+        <g transform="translate(0, 368.8)">
+          <line x1="-80" y1="0" x2="280" y2="0" stroke="#cbd5e1" stroke-width="1"/>
+          <circle cx="0" cy="0" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="700" fill="#0f172a">left_ankle_pitch (小腿段)</text>
+          <text x="175" y="4" font-size="12" font-weight="800" fill="#0f172a">−62.8 mm</text>
+          <text x="250" y="4" font-size="11" fill="#64748b">[累计 −184.4]</text>
+        </g>
+        <line x1="0" y1="243.2" x2="0" y2="368.8" stroke="#0f172a" stroke-width="3"/>
+
+        <!-- 节点 11: foot 外形半高 (-9.8) -> cum = -194.2 -> y = +388.4 -->
+        <g transform="translate(0, 388.4)">
+          <line x1="-120" y1="0" x2="320" y2="0" stroke="#16a34a" stroke-width="1.5"/>
+          <rect x="-12" y="-12" width="24" height="24" rx="3" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+          <text x="18" y="4" font-size="12" font-weight="800" fill="#16a34a">foot 足底支撑面 (Foot Bottom)</text>
+          <text x="210" y="4" font-size="12" font-weight="800" fill="#16a34a">−9.8 mm</text>
+          <text x="290" y="4" font-size="11" font-weight="700" fill="#16a34a">[−194.2 mm]</text>
+        </g>
+        <line x1="0" y1="368.8" x2="0" y2="388.4" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="2,2"/>
+
+        <!-- 左侧总高度尺寸标注大箭头 (Z向闭环: +178.6 到 -194.2 -> 总跨度 372.8 mm) -->
+        <g stroke="#0f172a" stroke-width="1.5">
+          <line x1="-140" y1="-357.2" x2="-140" y2="388.4"/>
+          <polyline points="-146,-345 -140,-357.2 -134,-345" fill="none"/>
+          <polyline points="-146,376 -140,388.4 -134,376" fill="none"/>
+        </g>
+        <rect x="-170" y="-18" width="60" height="36" rx="2" fill="#0f172a"/>
+        <text x="-140" y="4" text-anchor="middle" font-size="12" font-weight="800" fill="#ffffff">372.8</text>
+        <text x="-140" y="-24" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">URDF 总高</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 右上面板：数据链级联汇总表 (left: 842px, top: 122px, width: 800px, height: 490px) -->
+  <div class="card-panel" style="left: 842px; top: 122px; width: 800px; height: 490px;">
+    <div class="card-panel-header">
+      <h3>骨盆坐标系起算之双向传递尺寸链明细</h3>
+      <span class="sub-badge">BIDIRECTIONAL DIMENSION CHAIN TABLE</span>
+    </div>
+    <div class="card-panel-body" style="padding: 10px 14px;">
+      <h4 style="margin: 0 0 6px 0; font-size: 12px; color: #ea580c; display: flex; align-items: center; gap: 6px;">
+        ▲ 头顶向运动链 (Pelvis → Head Top Vertex)
+      </h4>
+      <table class="eng-table" style="margin-bottom: 16px;">
+        <thead>
+          <tr>
+            <th>序号</th>
+            <th>关节 / 几何特征 (Joint / Feature)</th>
+            <th>Z向增量 Δz (mm)</th>
+            <th>累计高度 (Cumulative Z)</th>
+            <th>物理说明与拓扑约束</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: #fffaf5;">
+            <td>1</td>
+            <td class="hl-trunk">trunk_roll (腰部横滚)</td>
+            <td class="hl-trunk">+19.6 mm</td>
+            <td class="hl-trunk">+19.6 mm</td>
+            <td>下腰转轴，距骨盆基准面升高</td>
+          </tr>
+          <tr style="background: #fffaf5;">
+            <td>2</td>
+            <td class="hl-trunk">trunk_pitch (胸部俯仰)</td>
+            <td class="hl-trunk">+27.5 mm</td>
+            <td class="hl-trunk">+47.1 mm</td>
+            <td>上腰俯仰轴，连接胸部框架</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>head_yaw (颈部航向)</td>
+            <td>+82.4 mm</td>
+            <td>+129.5 mm</td>
+            <td>胸腔支架跨度至颈部旋转基座</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>head_pitch (头部俯仰)</td>
+            <td>+27.5 mm</td>
+            <td>+157.0 mm</td>
+            <td>头部云台仰角控制轴心</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>head 外形半高 (视觉顶部)</td>
+            <td>+21.6 mm</td>
+            <td class="hl-blue"><strong>+178.6 mm</strong></td>
+            <td>头部顶盖最高外轮廓表面</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin: 0 0 6px 0; font-size: 12px; color: #16a34a; display: flex; align-items: center; gap: 6px;">
+        ▼ 足底向运动链 (Pelvis → Left Foot Contact Plane)
+      </h4>
+      <table class="eng-table">
+        <thead>
+          <tr>
+            <th>序号</th>
+            <th>关节 / 几何特征 (Joint / Feature)</th>
+            <th>Z向增量 Δz (mm)</th>
+            <th>累计高度 (Cumulative Z)</th>
+            <th>物理说明与拓扑约束</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>6</td>
+            <td>left_hip_yaw (髋航向)</td>
+            <td>−19.6 mm</td>
+            <td>−19.6 mm</td>
+            <td>骨盆侧翼向下布置航向舵机</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>left_hip_roll (髋横滚)</td>
+            <td>−19.6 mm</td>
+            <td>−39.2 mm</td>
+            <td>外展/内收轴节段间距</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>left_hip_pitch (髋俯仰)</td>
+            <td>−19.6 mm</td>
+            <td>−58.8 mm</td>
+            <td>大腿主摆动关节中心</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>left_knee_pitch (膝俯仰)</td>
+            <td>−62.8 mm</td>
+            <td>−121.6 mm</td>
+            <td>大腿主连杆长度 (Thigh Link)</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>left_ankle_pitch (踝俯仰)</td>
+            <td>−62.8 mm</td>
+            <td>−184.4 mm</td>
+            <td>小腿主连杆长度 (Shank Link)</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td>foot 外形半高 (足底接触)</td>
+            <td>−9.8 mm</td>
+            <td class="hl-ok"><strong>−194.2 mm</strong></td>
+            <td>踝轴至足底橡胶接触面距离</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 右下面板：总高闭环与包络校核结论 (left: 842px, top: 626px, width: 800px, height: 350px) -->
+  <div class="card-panel" style="left: 842px; top: 626px; width: 800px; height: 350px;">
+    <div class="card-panel-header">
+      <h3>总高工程闭环与两套包络定义防混淆对照</h3>
+      <span class="sub-badge">HEIGHT CLOSURE & DUAL-ENVELOPE AUDIT</span>
+    </div>
+    <div class="card-panel-body" style="padding: 12px 14px;">
+      <table class="eng-table">
+        <tbody>
+          <tr>
+            <td style="width: 180px;">头顶相对骨盆最高点</td>
+            <td><strong>+178.6 mm</strong></td>
+            <td style="color: #64748b;">上链几何累加终点</td>
+          </tr>
+          <tr>
+            <td>足底相对骨盆最低点</td>
+            <td><strong>−194.2 mm</strong></td>
+            <td style="color: #64748b;">下链几何接触面终点</td>
+          </tr>
+          <tr style="background: #f0f9ff;">
+            <td><strong>运动学链总高度</strong></td>
+            <td><strong style="font-size: 14px; color: #0284c7;">372.8 mm</strong></td>
+            <td class="hl-blue"><strong>(+178.6) − (−194.2) = 372.8 mm (理论闭环准确)</strong></td>
+          </tr>
+          <tr>
+            <td><strong>现行申报装配包络高</strong></td>
+            <td><strong style="font-size: 14px; color: #ea580c;">418.0 mm</strong></td>
+            <td class="hl-trunk">含壳体厚度、法兰螺钉外凸、底垫厚度 (勿与 372.8 混加)</td>
+          </tr>
+          <tr>
+            <td><strong>赛题限制高度上限</strong></td>
+            <td><strong>600.0 mm</strong></td>
+            <td class="hl-ok">余量: 600 − 418 = <strong>182 mm</strong> (绝对安全)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 14px; padding: 10px 12px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 3px; font-size: 11.5px; line-height: 1.6;">
+        <span style="color: #15803d; font-weight: 700;">✔ 闭环核验完全一致：</span><br>
+        尺寸链理论推导值 372.8 mm 与 <code>design/robot_model.json</code> / <code>atri.urdf</code> 中定义的整体高度参数完全一致 (差 ≤ 1 mm)。<br>
+        <strong>禁止操作提醒：</strong>严禁将 418 mm 实装高度与 372.8 mm 运动学高度进行叠加，两者系同一机器人在不同工程语境下的几何表征。
+      </div>
+    </div>
+  </div>
+
+  <table class="title-block-table">
+    <tr>
+      <td class="lbl">项目名称</td>
+      <td class="val" colspan="3">A.T.R.I. 桌面自主人形智能机器人</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸名称</td>
+      <td class="val-strong" colspan="3">关节链尺寸链图 (Z 向累计)</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸图号</td>
+      <td class="val">ATRI-DWG-004</td>
+      <td class="lbl">基准原点</td>
+      <td class="val">Pelvis Center (±0.0)</td>
+    </tr>
+    <tr>
+      <td class="lbl">设计阶段</td>
+      <td class="val">方案工程化验证</td>
+      <td class="lbl">闭环公差</td>
+      <td class="val">Δ ≤ 0.1 mm</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ======================================================================
+     05 舵机布局图 (ATRI-DWG-005)
+     ====================================================================== -->
+<section class="drawing-sheet" id="servo">
+  <div class="sheet-border-outer"></div>
+  <div class="sheet-border-inner"></div>
+
+  <div class="sheet-header">
+    <div class="title-group">
+      <h1>
+        A.T.R.I. 舵机动力布局与力矩分档图
+        <span class="title-tag">ACTUATOR DISTRIBUTION</span>
+      </h1>
+      <p>22 路串行总线舵机安装布局 · STS3215 规格统一 · 图元方块按设计需求力矩分档 · 连续额定基准 0.98 N·m</p>
+    </div>
+    <div class="meta-badges">
+      <div class="meta-item">
+        <div class="meta-label">DRAWING NO.</div>
+        <div class="meta-val">ATRI-DWG-005</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">ACTUATOR MODEL</div>
+        <div class="meta-val">FEETECH STS3215</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">BUS TYPE</div>
+        <div class="meta-val">TTL DAISY CHAIN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 左侧主视图区域：正视 + 侧视 (left: 42px, top: 122px, width: 938px, height: 698px) -->
+  <div class="cad-viewport" style="left: 42px; top: 122px; width: 938px; height: 698px;">
+    <svg id="svg-servo" viewBox="0 0 938 698" width="938" height="698" style="overflow: visible;">
+      <defs>
+        <pattern id="grid-pattern-servo" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="12" cy="12" r="0.75" fill="#cbd5e1" />
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="938" height="698" fill="url(#grid-pattern-servo)" opacity="0.6"/>
+      <line x1="560" y1="20" x2="560" y2="678" stroke="#e2e8f0" stroke-dasharray="4,4" stroke-width="1.5"/>
+
+      <!-- 正视视口标签 -->
+      <g transform="translate(24, 28)">
+        <text x="0" y="0" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="0.05em">VIEW A-A · 舵机动力正视图</text>
+        <text x="0" y="16" font-size="11" fill="#64748b">按力矩梯度划分舵机模块: 重载(30×30) / 中载(24×24) / 轻载(18×18)</text>
+      </g>
+
+      <!-- 侧视视口标签 -->
+      <g transform="translate(584, 28)">
+        <text x="0" y="0" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="0.05em">VIEW B-B · 舵机动力侧视图</text>
+        <text x="0" y="16" font-size="11" fill="#64748b">矢状面力矩分配 · 重点关注腰/髋/膝/踝力矩负荷</text>
+      </g>
+
+      <!-- 机体背景 (正视 X=280, Y=250) -->
+      <g transform="translate(280, 250)">
+        <line x1="-160" y1="410" x2="160" y2="410" stroke="#0284c7" stroke-width="1.5"/>
+        <text x="168" y="414" font-size="10" fill="#0284c7" font-weight="700">GND ±0.0</text>
+        <!-- 骨架基底 -->
+        <rect x="-30" y="-180" width="60" height="46" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="0" y1="-134" x2="0" y2="-90" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="-44" y="-90" width="88" height="52" rx="4" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+        <rect x="-24" y="-38" width="48" height="26" rx="3" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+        <polygon points="-48,0 48,0 36,36 -36,36" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+        <!-- 手臂与腿部轴线 -->
+        <line x1="-44" y1="-76" x2="-80" y2="-76" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="44" y1="-76" x2="80" y2="-76" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="-80" y1="-76" x2="-80" y2="95" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="80" y1="-76" x2="80" y2="95" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="-30" y1="36" x2="-30" y2="340" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="30" y1="36" x2="30" y2="340" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="-56" y="380" width="52" height="30" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+        <rect x="4" y="380" width="52" height="30" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+      </g>
+
+      <!-- 机体背景 (侧视 X=750, Y=250) -->
+      <g transform="translate(750, 250)">
+        <line x1="-110" y1="410" x2="120" y2="410" stroke="#0284c7" stroke-width="1.5"/>
+        <text x="125" y="414" font-size="10" fill="#0284c7" font-weight="700">GND ±0.0</text>
+        <path d="M -22 -180 L 16 -180 L 26 -160 L 26 -140 L 14 -132 L -22 -132 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="0" y1="-132" x2="0" y2="-90" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="-24" y="-90" width="50" height="52" rx="4" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+        <rect x="-18" y="-38" width="38" height="26" rx="3" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+        <rect x="-22" y="0" width="46" height="36" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="0" y1="-76" x2="22" y2="-50" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="22" y1="-50" x2="35" y2="100" stroke="#cbd5e1" stroke-width="2"/>
+        <line x1="0" y1="36" x2="0" y2="340" stroke="#cbd5e1" stroke-width="2"/>
+        <rect x="-35" y="380" width="85" height="30" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+      </g>
+
+      <!-- 动态注入舵机方块 -->
+      <g id="servo-front-nodes"></g>
+      <g id="servo-side-nodes"></g>
+    </svg>
+  </div>
+
+  <!-- 右侧面板 1：图例与力矩梯度分级 (left: 994px, top: 122px, width: 648px) -->
+  <div class="card-panel" style="left: 994px; top: 122px; width: 648px; height: 350px;">
+    <div class="card-panel-header">
+      <h3>舵机动力选型与力矩分档图例说明</h3>
+      <span class="sub-badge">TORQUE TIER CLASSIFICATION</span>
+    </div>
+    <div class="card-panel-body" style="padding: 10px 14px;">
+      <table class="eng-table">
+        <thead>
+          <tr>
+            <th>图元分档 (Tier)</th>
+            <th>图例规格</th>
+            <th>数量</th>
+            <th>对应关节物理分布</th>
+            <th>额定与热载荷要求</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: #fef2f2;">
+            <td><strong>重载档 (≥ 3.0 N·m)</strong></td>
+            <td><span style="display:inline-block;width:14px;height:14px;background:#fee2e2;border:2px solid #ef4444;border-radius:2px;vertical-align:middle;"></span> 30×30 方块</td>
+            <td><strong>4 路</strong></td>
+            <td>左右髋俯仰 (06/11)、左右膝俯仰 (07/12)</td>
+            <td style="color: #b91c1c; font-weight: 700;">承受深蹲与起跳峰值，需强制金属法兰与散热接触</td>
+          </tr>
+          <tr style="background: #f0fdf4;">
+            <td><strong>中载档 (2.0–3.0 N·m)</strong></td>
+            <td><span style="display:inline-block;width:12px;height:12px;background:#dcfce7;border:2px solid #16a34a;border-radius:2px;vertical-align:middle;"></span> 24×24 方块</td>
+            <td><strong>8 路</strong></td>
+            <td>躯干腰部 (02/03)、左右髋偏航/横滚 (04/05/09/10)、左右踝俯仰 (08/13)</td>
+            <td style="color: #15803d; font-weight: 700;">行走动态平衡中枢，设计需留足 2.0+ N·m 储备</td>
+          </tr>
+          <tr style="background: #f0f9ff;">
+            <td><strong>轻载档 (&lt; 2.0 N·m)</strong></td>
+            <td><span style="display:inline-block;width:10px;height:10px;background:#e0f2fe;border:2px solid #0284c7;border-radius:2px;vertical-align:middle;"></span> 18×18 方块</td>
+            <td><strong>10 路</strong></td>
+            <td>头部 (00/01)、左右双臂肩/肘 (14/15/16/18/19/20)、夹爪 (17/21)</td>
+            <td>运动负荷小，连续运行温度平稳</td>
+          </tr>
+          <tr style="background: #fffaf5;">
+            <td><strong>橙色特殊标定</strong></td>
+            <td><span style="display:inline-block;width:12px;height:12px;background:#fff7ed;border:2px solid #ea580c;border-radius:2px;vertical-align:middle;"></span> 橙框高亮</td>
+            <td><strong>2 路</strong></td>
+            <td>躯干 2 DOF (02 trunk_roll / 03 trunk_pitch)</td>
+            <td class="hl-trunk">竞赛核心拓扑标识 (腰部 2 自由度)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 10px; font-size: 11.5px; color: #64748b; line-height: 1.5;">
+        注：力矩分档依据 <code>design/robot_model.json</code> 的 <code>effort_nm</code> 设计需求值，非实测堵转数据。全机统一定制 FEETECH STS3215 磁编码总线舵机。
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧面板 2：电气与总线拓扑 (left: 994px, top: 486px, width: 648px) -->
+  <div class="card-panel" style="left: 994px; top: 486px; width: 648px; height: 334px;">
+    <div class="card-panel-header">
+      <h3>电气总线拓扑与额定工作制参数</h3>
+      <span class="sub-badge">ELECTRICAL & BUS SPECIFICATION</span>
+    </div>
+    <div class="card-panel-body" style="padding: 10px 14px;">
+      <table class="eng-table">
+        <tbody>
+          <tr>
+            <td style="width: 130px;"><strong>舵机供电电压</strong></td>
+            <td><strong>DC 11.1 V</strong> (3S 聚合物锂电池直供 / 降压稳压母线)</td>
+          </tr>
+          <tr>
+            <td><strong>控制通信总线</strong></td>
+            <td><strong>单线半双工异步串口 TTL 总线</strong> · 波特率 1 Mbps 闭环通信</td>
+          </tr>
+          <tr>
+            <td><strong>总线菊花链拓扑</strong></td>
+            <td>分流为上半身 (头+胸+双臂 10 路) 与下半身 (双腿 10 路) 双拓扑分支，腰部 2 路串联</td>
+          </tr>
+          <tr>
+            <td><strong>连续额定基准</strong></td>
+            <td><strong>0.98 N·m</strong> · 严控稳态工作点在额定以下；峰值 1.47 N·m 仅作加速短时参考</td>
+          </tr>
+          <tr>
+            <td><strong>热安全监控机制</strong></td>
+            <td>驱动芯片内置温度与电流反馈；踝关节与腰关节设定 75℃ 一级热降额预警</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 12px; padding: 8px 10px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 11px; color: #475569;">
+        <strong>布线工程说明：</strong>关节处引线预留足够的 U 型自由弯曲曲率半径 (R ≥ 15 mm)，避免在 −120° 到 +90° 极限摆动中疲劳折断；所有线束外覆耐磨编织套管。
+      </div>
+    </div>
+  </div>
+
+  <!-- 舵机明细快速索引栏 (left: 42px, top: 832px, width: 1220px, height: 337px) -->
+  <div class="card-panel" style="left: 42px; top: 832px; width: 1220px; height: 337px;">
+    <div class="card-panel-header">
+      <h3>22 路总线舵机动力参数与安装索引总表</h3>
+      <span class="sub-badge">SERVO INSTALLATION ROSTER (22 ACTUATORS)</span>
+    </div>
+    <div class="card-panel-body" style="padding: 6px 12px;">
+      <div id="servo-cards-container" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 16px; height: 100%;">
+        <!-- JS 动态注入 -->
+      </div>
+    </div>
+  </div>
+
+  <table class="title-block-table">
+    <tr>
+      <td class="lbl">项目名称</td>
+      <td class="val" colspan="3">A.T.R.I. 桌面自主人形智能机器人</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸名称</td>
+      <td class="val-strong" colspan="3">舵机安装布局与动力分档图</td>
+    </tr>
+    <tr>
+      <td class="lbl">图纸图号</td>
+      <td class="val">ATRI-DWG-005</td>
+      <td class="lbl">额定口径</td>
+      <td class="val">0.98 N·m (连续工况)</td>
+    </tr>
+    <tr>
+      <td class="lbl">设计阶段</td>
+      <td class="val">方案工程化验证</td>
+      <td class="lbl">拓扑总数</td>
+      <td class="val">22 路总线舵机</td>
+    </tr>
+  </table>
+</section>
+
+</div>
+
+<script>
+// 22 关节权威定义 (与 software/atri/atri/config.py 同源)
+const JOINTS_DATA = [
+  {id: 0,  name: "head_yaw",            group: "head",  lim: "−90→90",  axis: "Z", effort: 1.0, desc: "头部水平航向"},
+  {id: 1,  name: "head_pitch",          group: "head",  lim: "−45→45",  axis: "Y", effort: 1.0, desc: "头部垂直俯仰"},
+  {id: 2,  name: "trunk_roll",          group: "trunk", lim: "−10→10",  axis: "X", effort: 2.0, desc: "躯干腰部横滚"},
+  {id: 3,  name: "trunk_pitch",         group: "trunk", lim: "−15→15",  axis: "Y", effort: 2.0, desc: "躯干腰部俯仰"},
+  {id: 4,  name: "left_hip_yaw",        group: "leg_l", lim: "−45→45",  axis: "Z", effort: 2.5, desc: "左髋水平转向"},
+  {id: 5,  name: "left_hip_roll",       group: "leg_l", lim: "−25→25",  axis: "X", effort: 2.5, desc: "左髋侧向摆动"},
+  {id: 6,  name: "left_hip_pitch",      group: "leg_l", lim: "−60→60",  axis: "Y", effort: 3.0, desc: "左髋前后俯仰"},
+  {id: 7,  name: "left_knee_pitch",     group: "leg_l", lim: "0→90",    axis: "Y", effort: 3.0, desc: "左膝屈伸俯仰"},
+  {id: 8,  name: "left_ankle_pitch",    group: "leg_l", lim: "−40→40",  axis: "Y", effort: 2.0, desc: "左踝前后俯仰"},
+  {id: 9,  name: "right_hip_yaw",       group: "leg_r", lim: "−45→45",  axis: "Z", effort: 2.5, desc: "右髋水平转向"},
+  {id: 10, name: "right_hip_roll",      group: "leg_r", lim: "−25→25",  axis: "X", effort: 2.5, desc: "右髋侧向摆动"},
+  {id: 11, name: "right_hip_pitch",     group: "leg_r", lim: "−60→60",  axis: "Y", effort: 3.0, desc: "右髋前后俯仰"},
+  {id: 12, name: "right_knee_pitch",    group: "leg_r", lim: "0→90",    axis: "Y", effort: 3.0, desc: "右膝屈伸俯仰"},
+  {id: 13, name: "right_ankle_pitch",   group: "leg_r", lim: "−40→40",  axis: "Y", effort: 2.0, desc: "右踝前后俯仰"},
+  {id: 14, name: "left_shoulder_pitch", group: "arm_l", lim: "−90→90",  axis: "Y", effort: 1.5, desc: "左肩前后摆动"},
+  {id: 15, name: "left_shoulder_roll",  group: "arm_l", lim: "−90→90",  axis: "X", effort: 1.5, desc: "左肩侧向展开"},
+  {id: 16, name: "left_elbow_pitch",    group: "arm_l", lim: "−120→0",  axis: "Y", effort: 1.0, desc: "左肘屈伸俯仰"},
+  {id: 17, name: "left_gripper",        group: "arm_l", lim: "0→60",    axis: "Y", effort: 0.4, desc: "左末端夹爪"},
+  {id: 18, name: "right_shoulder_pitch",group: "arm_r", lim: "−90→90",  axis: "Y", effort: 1.5, desc: "右肩前后摆动"},
+  {id: 19, name: "right_shoulder_roll", group: "arm_r", lim: "−90→90",  axis: "X", effort: 1.5, desc: "右肩侧向展开"},
+  {id: 20, name: "right_elbow_pitch",   group: "arm_r", lim: "−120→0",  axis: "Y", effort: 1.0, desc: "右肘屈伸俯仰"},
+  {id: 21, name: "right_gripper",       group: "arm_r", lim: "0→60",    axis: "Y", effort: 0.4, desc: "右末端夹爪"}
+];
+
+// 正视各关节的精确布局与避让引线配置
+// 基准原点 (0,0) 为 Pelvis 顶中心
+// 骨骼关键节点：
+// 头颈: (0, -140), (0, -100)
+// 躯干: (0, -68), (0, -26)
+// 左肩(机器视角): x = 80, y = -76
+// 右肩(机器视角): x = -80, y = -76
+// 左腿: x = 30; 右腿: x = -30
+const FRONT_COORDS = {
+  // 头部 00, 01 -> 颈部与头部
+  0: {anchor: [0, -112], badge: [-64, -112], name: "00 head_yaw"},
+  1: {anchor: [0, -160], badge: [64, -160], name: "01 head_pitch"},
+  // 躯干 02, 03 -> 橙色核心
+  3: {anchor: [0, -68], badge: [-70, -68], name: "03 trunk_pitch", trunk: true},
+  2: {anchor: [0, -26], badge: [70, -26], name: "02 trunk_roll", trunk: true},
+  // 右臂 (视觉左侧 x=-80)
+  18: {anchor: [-80, -76], badge: [-156, -96], name: "18 r_sh_pitch"},
+  19: {anchor: [-80, -76], badge: [-156, -56], name: "19 r_sh_roll"},
+  20: {anchor: [-80, 10], badge: [-150, 10], name: "20 r_elbow"},
+  21: {anchor: [-80, 110], badge: [-150, 110], name: "21 r_grip"},
+  // 左臂 (视觉右侧 x=80)
+  14: {anchor: [80, -76], badge: [156, -96], name: "14 l_sh_pitch"},
+  15: {anchor: [80, -76], badge: [156, -56], name: "15 l_sh_roll"},
+  16: {anchor: [80, 10], badge: [150, 10], name: "16 l_elbow"},
+  17: {anchor: [80, 110], badge: [150, 110], name: "17 l_grip"},
+  // 右腿 (视觉左侧 x=-30)
+  9:  {anchor: [-30, 42], badge: [-92, 42], name: "09 r_hip_yaw"},
+  10: {anchor: [-30, 70], badge: [-92, 70], name: "10 r_hip_roll"},
+  11: {anchor: [-30, 98], badge: [-92, 98], name: "11 r_hip_pitch"},
+  12: {anchor: [-30, 200], badge: [-92, 200], name: "12 r_knee"},
+  13: {anchor: [-30, 335], badge: [-92, 335], name: "13 r_ankle"},
+  // 左腿 (视觉右侧 x=30)
+  4:  {anchor: [30, 42], badge: [92, 42], name: "04 l_hip_yaw"},
+  5:  {anchor: [30, 70], badge: [92, 70], name: "05 l_hip_roll"},
+  6:  {anchor: [30, 98], badge: [92, 98], name: "06 l_hip_pitch"},
+  7:  {anchor: [30, 200], badge: [92, 200], name: "07 l_knee"},
+  8:  {anchor: [30, 335], badge: [92, 335], name: "08 l_ankle"}
+};
+
+// 侧视各关节标注 (侧向投影中线 + 成对标注)
+const SIDE_COORDS = {
+  1: {anchor: [0, -160], badge: [-70, -160], name: "01 head_pitch"},
+  0: {anchor: [0, -112], badge: [-70, -112], name: "00 head_yaw"},
+  3: {anchor: [0, -68], badge: [-70, -68], name: "03 trunk_pitch", trunk: true},
+  2: {anchor: [0, -26], badge: [-70, -26], name: "02 trunk_roll", trunk: true},
+  // 侧视肢体重叠标注 (引向右侧标签)
+  14: {anchor: [10, -76], badge: [84, -76], name: "L/R 肩 (14/15/18/19)"},
+  16: {anchor: [30, 25], badge: [84, 25], name: "L/R 肘 (16/20)"},
+  17: {anchor: [35, 110], badge: [84, 110], name: "L/R 夹爪 (17/21)"},
+  4:  {anchor: [0, 70], badge: [84, 70], name: "L/R 髋 (04-06/09-11)"},
+  7:  {anchor: [0, 200], badge: [84, 200], name: "L/R 膝 (07/12)"},
+  8:  {anchor: [0, 335], badge: [84, 335], name: "L/R 踝 (08/13)"}
+};
+
+// 渲染 01 图纸的关节标牌
+function renderJointBadges() {
+  const fg = document.getElementById("joints-front-badges");
+  const sg = document.getElementById("joints-side-badges");
+  if (!fg || !sg) return;
+
+  // 正视 22 关节全标注 (基点 280, 250)
+  Object.entries(FRONT_COORDS).forEach(([idStr, cfg]) => {
+    const id = parseInt(idStr);
+    const j = JOINTS_DATA[id];
+    const ax = 280 + cfg.anchor[0];
+    const ay = 250 + cfg.anchor[1];
+    const bx = 280 + cfg.badge[0];
+    const by = 250 + cfg.badge[1];
+    const isTrunk = j.group === "trunk";
+
+    // 锚点实心小圆
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", ax); dot.setAttribute("cy", ay); dot.setAttribute("r", 3.5);
+    dot.setAttribute("fill", isTrunk ? "#ea580c" : "#0284c7");
+    fg.appendChild(dot);
+
+    // 折线引线 (Leader Line)
+    const leader = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    const midX = (ax + bx) / 2;
+    leader.setAttribute("points", `${ax},${ay} ${midX},${by} ${bx},${by}`);
+    leader.setAttribute("fill", "none");
+    leader.setAttribute("stroke", isTrunk ? "#fdba74" : "#94a3b8");
+    leader.setAttribute("stroke-width", "1.2");
+    fg.appendChild(leader);
+
+    // 编号圆形标牌 (Badge)
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const r = 11.5;
+    const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    bgCircle.setAttribute("cx", bx); bgCircle.setAttribute("cy", by); bgCircle.setAttribute("r", r);
+    bgCircle.setAttribute("fill", isTrunk ? "#fff7ed" : "#ffffff");
+    bgCircle.setAttribute("stroke", isTrunk ? "#ea580c" : "#0f172a");
+    bgCircle.setAttribute("stroke-width", isTrunk ? "2" : "1.6");
+
+    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    txt.setAttribute("x", bx); txt.setAttribute("y", by + 3.8);
+    txt.setAttribute("text-anchor", "middle");
+    txt.setAttribute("font-size", "10");
+    txt.setAttribute("font-weight", "800");
+    txt.setAttribute("font-family", "monospace");
+    txt.setAttribute("fill", isTrunk ? "#ea580c" : "#0f172a");
+    txt.textContent = String(j.id).padStart(2, "0");
+
+    g.appendChild(bgCircle);
+    g.appendChild(txt);
+    fg.appendChild(g);
+  });
+
+  // 侧视标牌 (基点 750, 250)
+  Object.entries(SIDE_COORDS).forEach(([idStr, cfg]) => {
+    const id = parseInt(idStr);
+    const j = JOINTS_DATA[id];
+    const ax = 750 + cfg.anchor[0];
+    const ay = 250 + cfg.anchor[1];
+    const bx = 750 + cfg.badge[0];
+    const by = 250 + cfg.badge[1];
+    const isTrunk = cfg.trunk;
+
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", ax); dot.setAttribute("cy", ay); dot.setAttribute("r", 3);
+    dot.setAttribute("fill", isTrunk ? "#ea580c" : "#64748b");
+    sg.appendChild(dot);
+
+    const leader = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    leader.setAttribute("points", `${ax},${ay} ${bx},${by}`);
+    leader.setAttribute("fill", "none");
+    leader.setAttribute("stroke", isTrunk ? "#ea580c" : "#cbd5e1");
+    leader.setAttribute("stroke-dasharray", isTrunk ? "none" : "3,3");
+    leader.setAttribute("stroke-width", "1.2");
+    sg.appendChild(leader);
+
+    if (isTrunk || id <= 1) {
+      // 独立中线标牌
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const r = 10.5;
+      const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      bgCircle.setAttribute("cx", bx); bgCircle.setAttribute("cy", by); bgCircle.setAttribute("r", r);
+      bgCircle.setAttribute("fill", isTrunk ? "#fff7ed" : "#ffffff");
+      bgCircle.setAttribute("stroke", isTrunk ? "#ea580c" : "#475569");
+      bgCircle.setAttribute("stroke-width", "1.5");
+
+      const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      txt.setAttribute("x", bx); txt.setAttribute("y", by + 3.5);
+      txt.setAttribute("text-anchor", "middle");
+      txt.setAttribute("font-size", "9.5");
+      txt.setAttribute("font-weight", "800");
+      txt.setAttribute("font-family", "monospace");
+      txt.setAttribute("fill", isTrunk ? "#ea580c" : "#0f172a");
+      txt.textContent = String(j.id).padStart(2, "0");
+
+      g.appendChild(bgCircle); g.appendChild(txt);
+      sg.appendChild(g);
+    } else {
+      // 侧向成对标签文字
+      const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      t.setAttribute("x", bx + 4); t.setAttribute("y", by + 3.5);
+      t.setAttribute("font-size", "10.5");
+      t.setAttribute("font-weight", "700");
+      t.setAttribute("fill", "#475569");
+      t.textContent = cfg.name;
+      sg.appendChild(t);
+    }
+  });
+}
+
+// 渲染 05 图纸的舵机动力图块
+function renderServoBadges() {
+  const sf = document.getElementById("servo-front-nodes");
+  const ss = document.getElementById("servo-side-nodes");
+  if (!sf || !ss) return;
+
+  // 正视 22 舵机方块
+  Object.entries(FRONT_COORDS).forEach(([idStr, cfg]) => {
+    const id = parseInt(idStr);
+    const j = JOINTS_DATA[id];
+    const ax = 280 + cfg.anchor[0];
+    const ay = 250 + cfg.anchor[1];
+    const isTrunk = j.group === "trunk";
+
+    // 尺寸规格分档：
+    // 大 (>=3.0): 28x28, 中 (2.0-3.0): 22x22, 小 (<2.0): 18x18
+    let size = 18;
+    let strokeColor = "#0284c7";
+    let fillColor = "#f0f9ff";
+    if (j.effort >= 3.0) {
+      size = 28; strokeColor = "#ef4444"; fillColor = "#fee2e2";
+    } else if (j.effort >= 2.0) {
+      size = 22; strokeColor = "#16a34a"; fillColor = "#dcfce7";
+    }
+    if (isTrunk) {
+      strokeColor = "#ea580c"; fillColor = "#fff7ed";
+    }
+
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", ax - size / 2); rect.setAttribute("y", ay - size / 2);
+    rect.setAttribute("width", size); rect.setAttribute("height", size);
+    rect.setAttribute("rx", 3);
+    rect.setAttribute("fill", fillColor);
+    rect.setAttribute("stroke", strokeColor);
+    rect.setAttribute("stroke-width", "1.8");
+
+    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    txt.setAttribute("x", ax); txt.setAttribute("y", ay + 3.5);
+    txt.setAttribute("text-anchor", "middle");
+    txt.setAttribute("font-size", size >= 24 ? "10" : "8.5");
+    txt.setAttribute("font-weight", "800");
+    txt.setAttribute("font-family", "monospace");
+    txt.setAttribute("fill", strokeColor);
+    txt.textContent = String(j.id).padStart(2, "0");
+
+    g.appendChild(rect); g.appendChild(txt);
+    sf.appendChild(g);
+  });
+
+  // 侧视典型关键舵机方块
+  [1, 0, 3, 2, 14, 16, 17, 4, 7, 8].forEach(id => {
+    const j = JOINTS_DATA[id];
+    const cfg = SIDE_COORDS[id];
+    if (!cfg) return;
+    const ax = 750 + cfg.anchor[0];
+    const ay = 250 + cfg.anchor[1];
+    const isTrunk = j.group === "trunk";
+
+    let size = j.effort >= 3.0 ? 28 : (j.effort >= 2.0 ? 22 : 18);
+    let strokeColor = j.effort >= 3.0 ? "#ef4444" : (j.effort >= 2.0 ? "#16a34a" : "#0284c7");
+    let fillColor = j.effort >= 3.0 ? "#fee2e2" : (j.effort >= 2.0 ? "#dcfce7" : "#f0f9ff");
+    if (isTrunk) { strokeColor = "#ea580c"; fillColor = "#fff7ed"; }
+
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", ax - size / 2); rect.setAttribute("y", ay - size / 2);
+    rect.setAttribute("width", size); rect.setAttribute("height", size);
+    rect.setAttribute("rx", 3);
+    rect.setAttribute("fill", fillColor); rect.setAttribute("stroke", strokeColor);
+    rect.setAttribute("stroke-width", "1.8");
+
+    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    txt.setAttribute("x", ax); txt.setAttribute("y", ay + 3.5);
+    txt.setAttribute("text-anchor", "middle");
+    txt.setAttribute("font-size", size >= 24 ? "10" : "8.5");
+    txt.setAttribute("font-weight", "800");
+    txt.setAttribute("font-family", "monospace");
+    txt.setAttribute("fill", strokeColor);
+    txt.textContent = String(j.id).padStart(2, "0");
+
+    g.appendChild(rect); g.appendChild(txt);
+    ss.appendChild(g);
+  });
+}
+
+// 填充 01 图纸的 22 关节完整参数卡片表
+function renderJointTableCards() {
+  const container = document.getElementById("joint-cards-container");
+  if (!container) return;
+
+  container.innerHTML = JOINTS_DATA.map(j => {
+    const isTrunk = j.group === "trunk";
+    const bg = isTrunk ? "#fff7ed" : "#f8fafc";
+    const border = isTrunk ? "#ea580c" : "#e2e8f0";
+    const tagColor = isTrunk ? "#ea580c" : "#0284c7";
+
+    return `
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: ${bg}; border: 1px solid ${border}; border-radius: 2px; font-size: 11px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-family: monospace; font-weight: 800; font-size: 11px; background: ${isTrunk ? '#ea580c' : '#0f172a'}; color: #fff; padding: 1px 4px; border-radius: 2px;">
+            ${String(j.id).padStart(2, "0")}
+          </span>
+          <span style="font-weight: 700; color: #0f172a; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${j.name}
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; font-family: monospace;">
+          <span style="color: #64748b; font-size: 10.5px;">${j.lim}</span>
+          <span style="font-weight: 800; color: ${tagColor};">${j.axis}轴</span>
+          <span style="color: #0f172a; font-weight: 700; width: 44px; text-align: right;">${j.effort.toFixed(1)} N·m</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// 填充 05 图纸的 22 舵机动力索引卡片表
+function renderServoTableCards() {
+  const container = document.getElementById("servo-cards-container");
+  if (!container) return;
+
+  container.innerHTML = JOINTS_DATA.map(j => {
+    const isTrunk = j.group === "trunk";
+    let tierTag = "轻载";
+    let tierColor = "#0284c7";
+    let tierBg = "#f0f9ff";
+    if (j.effort >= 3.0) {
+      tierTag = "重载"; tierColor = "#ef4444"; tierBg = "#fee2e2";
+    } else if (j.effort >= 2.0) {
+      tierTag = "中载"; tierColor = "#16a34a"; tierBg = "#dcfce7";
+    }
+    if (isTrunk) {
+      tierTag = "躯干"; tierColor = "#ea580c"; tierBg = "#fff7ed";
+    }
+
+    return `
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 2px; font-size: 11px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-family: monospace; font-weight: 800; font-size: 11px; background: #0f172a; color: #fff; padding: 1px 4px; border-radius: 2px;">
+            ${String(j.id).padStart(2, "0")}
+          </span>
+          <span style="font-weight: 700; color: #0f172a; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${j.name}
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 10px; padding: 1px 4px; background: ${tierBg}; color: ${tierColor}; font-weight: 700; border-radius: 2px;">
+            ${tierTag}
+          </span>
+          <span style="font-family: monospace; font-weight: 800; color: #0f172a;">${j.effort.toFixed(1)} N·m</span>
+          <span style="font-size: 10px; color: #64748b;">STS3215</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// 页面初始化与路由切换
+(function init() {
+  renderJointBadges();
+  renderServoBadges();
+  renderJointTableCards();
+  renderServoTableCards();
+
+  const q = new URLSearchParams(location.search);
+  if (q.has("shot")) {
+    document.documentElement.classList.add("shot");
+  }
+
+  function setTab(tabId) {
+    if (!tabId || !document.getElementById(tabId)) return;
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tabId);
+    });
+    document.querySelectorAll(".drawing-sheet").forEach(sheet => {
+      sheet.classList.toggle("active", sheet.id === tabId);
+    });
+  }
+
+  const initialTab = q.get("tab") || location.hash.replace("#", "") || "joints";
+  setTab(initialTab);
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tab;
+      setTab(target);
+      history.replaceState(null, "", `?tab=${target}`);
+      window.scrollTo(0, 0);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

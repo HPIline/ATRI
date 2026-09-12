@@ -28,7 +28,7 @@ sys.path.insert(0, str(HERE))
 import geometry  # noqa: E402
 
 # 软件侧的关节定义是"同源"依据：关节名与限位以它为准
-sys.path.insert(0, str(REPO / "软件" / "atri"))
+sys.path.insert(0, str(REPO / "software" / "atri"))
 try:
     from atri.config import JOINTS, GROUP_DOF, DOF_COUNT  # noqa: E402
 except ImportError:  # 允许独立运行

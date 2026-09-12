@@ -5,7 +5,7 @@
 ---
 
 你是 A.T.R.I. 项目的 **CAD/装配负责人 + 集成验收者**。工作区 `/Users/zhangjingkun/Projects/github/ATRI`。
-另外两条线程在并行：**Grok 4.6** 做真机链路（`软件/atri/atri/bus_sts3215.py`、`固件/**`），
+另外两条线程在并行：**Grok 4.6** 做真机链路（`software/atri/atri/bus_sts3215.py`、`固件/**`），
 **Gemini** 给经验判据（K1′/K3′/K7′/K8′/K9/K10）。你**不重复它们的工作**，你负责几何与集成。
 
 ## 0. 开工前必读（建立事实，别猜）
@@ -15,7 +15,7 @@ cd /Users/zhangjingkun/Projects/github/ATRI
 sed -n '1,60p' design/handoff/多线程并行施工方案.md     # 线程划分、所有权矩阵、时间线
 sed -n '1,80p' design/handoff/装配一致性修正记录.md     # 已修/未修、性质判定口径
 .venv-cad/bin/python design/cad/audit_assembly.py --top 20   # 当前体检基线
-cd 软件/atri && python3 -m unittest discover -s tests    # 186 项应全绿
+cd software/atri && python3 -m unittest discover -s tests    # 186 项应全绿
 ```
 
 **基线（第 1 节已写死，不要重新论证）**：包络 **407×263×146 mm**（高×宽×深，2026-09-12 实测）、
@@ -40,7 +40,7 @@ cd 软件/atri && python3 -m unittest discover -s tests    # 186 项应全绿
 - 定义**允许接触白名单**（足底-地面、限位面、同一模块内的固定件、线缆预留区），其余都算违规；
 - 输出 `design/cad/out/sweep_report.md`：高危件对、触发姿态（各关节角度）、最大侵入体积、
   以及"哪些关节组合必须限制行程"的结论。
-- 验收：能给出"关节行程建议表"（现有限位是否需要收紧），并与 `软件/atri/atri/config.py` 的
+- 验收：能给出"关节行程建议表"（现有限位是否需要收紧），并与 `software/atri/atri/config.py` 的
   `limit_deg` 对照（软件限位必须落在机械安全范围内）。
 
 ### T-B2 `design/cad/tool_access.py` —— 工具（批头）可达性
@@ -62,7 +62,7 @@ cd 软件/atri && python3 -m unittest discover -s tests    # 186 项应全绿
 1. 改 `design/cad/skeleton.py` / `assembly.py` 的布局与相关零件（**只改布局，不做形体细化**）；
 2. 反复跑体检，把『摆放错误』从 **19 对**压到 **0**（至少 <5 对且逐条写明理由）；
 3. 重算质量并更新 `design/handoff/总体参数汇总表.md`；
-4. 同步 `软件/atri/config/robot.json`（它现在写的 418×223×129 / 3.437 kg 已过期；
+4. 同步 `software/atri/config/robot.json`（它现在写的 418×223×129 / 3.437 kg 已过期；
    顺手把它改成**从模型派生**或加一个 `design/gen_robot_config.py`，消灭手工维护）。
 
 ## 3. 集成验收（你是唯一验收人）
@@ -72,7 +72,7 @@ cd 软件/atri && python3 -m unittest discover -s tests    # 186 项应全绿
 ```bash
 bash design/cad/build.sh                     # 零件→装配→体检（步骤 2.5 会报性质判定）
 .venv-cad/bin/python design/cad/audit_assembly.py --strict
-cd 软件/atri && python3 -m unittest discover -s tests
+cd software/atri && python3 -m unittest discover -s tests
 ```
 
 - Gemini 的 K1′/K3′ 回值到了 → 把"界面类别 → 允许重叠/最小间隙"写进 `fitcheck`，
@@ -90,7 +90,7 @@ cd 软件/atri && python3 -m unittest discover -s tests
 
 - **只改 `design/cad/**` 与 `design/handoff/` 下的记录文档**；`standards.py` 里**已验证的官方数值不许动**
   （只能新增条目，并标注来源等级）。
-- **不要碰**：`软件/atri/atri/bus_sts3215.py`、`固件/**`（Grok 的）、`软件/atri/atri/skills/**`、
+- **不要碰**：`software/atri/atri/bus_sts3215.py`、`固件/**`（Grok 的）、`software/atri/atri/skills/**`、
   `webots/**`、`ppt/**`、`task_cards/**`。
 - **不要手改生成物**：`design/placements.json`、`design/cad/out/**`。
 - **同一时刻只有一个会话 commit**（默认你不提交，只改工作树 + 写报告；由用户统一提交）。
