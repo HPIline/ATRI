@@ -9,6 +9,8 @@
     - 骨盆打印质量不得高于改前
     - 机械零位夹爪不得穿髋 yaw
     - 橡胶垫是全机最低点，踝笼/舵机不得低于垫
+    - 足板（第 11 轮）：单一有效实体（旧版 3 个）、着地 ≥1200 mm²（旧 201）、
+      垫条横向跨度 ≥50 mm（旧 40）、支撑多边形 ≥5800 mm²（旧 5376）、单件 ≤26.5 g
     - 簇臂不得穿父舵机/髋笼/夹爪舵机；XL4015 不得穿背板
 
 用法：
@@ -27,7 +29,8 @@ sys.path.insert(0, str(HERE))
 import assembly as A  # noqa: E402
 from fitcheck import bbox_of, common_volume, is_joint_mate, verdict  # noqa: E402
 from kit import printed_mass  # noqa: E402
-from skeleton import foot_plate, head_shell, pelvis_frame  # noqa: E402
+from skeleton import (FOOT_PAD_X, FOOT_PAD_Y, foot_plate, head_shell,
+                      pelvis_frame)  # noqa: E402
 
 # 改前预览 META.bbox zmax；头壳只许让位、不许抬高整机。
 HEAD_ZMAX_LIMIT_MM = 207.0
@@ -38,6 +41,14 @@ ENVELOPE_DEPTH_MAX_MM = 165.0
 HIP_YAW_Y_MIN_MM = 45.0
 # 改前 pelvis_frame 打印质量（PETG infill 0.45）——实现时先跑本文件记下，再锁。
 PELVIS_MASS_MAX_G = 130.0
+
+# 第 11 轮足部门禁（旧版：四只 Φ8×13 圆柱垫，着地 4×π×4² = 201 mm²、轨距 40 mm、
+# 报告质量 26.7 g/只，且整件是 3 个互不相连的实体）。
+# 质量门槛取"低于旧版报告值" ⇒ foot_plate 小计不上升 ⇒ 全机结构件总质量不增加。
+FOOT_MASS_MAX_G = 26.5
+FOOT_CONTACT_MIN_MM2 = 1200.0     # 着地面积下限（旧 201）
+FOOT_TRACK_MIN_MM = 50.0          # 垫条横向跨度下限（旧 40；足板宽 60）
+FOOT_POLYGON_MIN_MM2 = 5800.0     # 支撑多边形（两条垫条的凸包）下限（旧 5376）
 
 PHASE1_PAIRS = [
     ("pelvis__pelvis_frame", "servo__left_hip_yaw"),
@@ -142,18 +153,80 @@ class LayoutGates(unittest.TestCase):
         # 改前实测局部 zmax=50（顶板 + 相机座）。只许让位，不许再抬。
         self.assertLessEqual(bb.zmax, 50.0 + 0.05, f"head_shell zmax {bb.zmax:.1f}")
 
+    def _foot_section_area(self, z0: float, dz: float = 0.2) -> float:
+        """零件在标高 z0 处的水平截面面积（薄片求交，实测量不是公式）。"""
+        import cadquery as cq
+        wp = foot_plate()
+        slab = (cq.Workplane("XY").box(300.0, 300.0, dz)
+                .translate((0.0, 0.0, z0 + dz / 2.0)))
+        return wp.intersect(slab).val().Volume() / dz
+
     def test_foot_heel_and_pads(self):
-        """后跟 ≥45 mm（静立后向），宽 60，橡胶垫在鞋底之下，不打穿底板。"""
+        """后跟 ≥45 mm（静立后向），宽 60，垫条在鞋底之下，不打穿底板。"""
         wp = foot_plate()
         bb = wp.val().BoundingBox()
         self.assertLessEqual(bb.xmin, -45.0, f"后跟 xmin={bb.xmin:.1f}")
         self.assertLessEqual(bb.ylen, 62.0, f"足宽 {bb.ylen:.1f}")
         self.assertGreaterEqual(bb.ylen, 58.0, f"足宽 {bb.ylen:.1f}")
-        # 垫必须低于踝笼半高（笼约 −15.4），才能成为唯一着地点。
+        # 垫条必须低于踝笼半高（笼约 −15.4），才能成为唯一着地点。
         self.assertLessEqual(bb.zmin, -15.5, f"垫高 zmin={bb.zmin:.1f}")
         self.assertGreaterEqual(bb.zmin, -18.5, "垫过厚会把整机抬出 420 门禁")
-        m = printed_mass(wp, material="PETG", infill=0.45)
-        self.assertLessEqual(m["mass_printed_g"], 42.0, m)
+        # 质量口径与 out/report.md 一致（PETG 0.40）。薄壁近似下壳比 = 1，
+        # 填充率对结果无影响（见 handoff/第11轮 §六），此处照样写出口径。
+        m = printed_mass(wp, material="PETG", infill=0.40)
+        self.assertLessEqual(m["mass_printed_g"], FOOT_MASS_MAX_G, m)
+
+    def test_foot_is_single_printable_solid(self):
+        """第 11 轮：足板必须是**一个**有效实体。
+
+        旧版是 3 个互不相连的实体（前唇缺口把前面两只圆柱垫的落脚面切掉了），
+        `build_all` 的几何列因此一直是 ❌，不能直接进切片器。
+        """
+        wp = foot_plate()
+        solids = wp.solids().vals()
+        self.assertEqual(len(solids), 1,
+                         f"足板由 {len(solids)} 个互不相连的实体组成，非单一可打印体")
+        self.assertTrue(wp.val().isValid(), "足板 B-rep 无效")
+
+    def test_foot_contact_patch_and_track(self):
+        """第 11 轮：垫条着地面积、轨距、支撑多边形、不得超出足板包络。"""
+        import cadquery as cq
+        wp = foot_plate()
+        bb = wp.val().BoundingBox()
+
+        slab = (cq.Workplane("XY").box(300.0, 300.0, 0.2)
+                .translate((0.0, 0.0, bb.zmin + 0.1)))
+        patch = wp.intersect(slab)
+        area = patch.val().Volume() / 0.2
+        pbb = patch.val().BoundingBox()
+
+        self.assertGreaterEqual(area, FOOT_CONTACT_MIN_MM2,
+                                f"着地面积只有 {area:.0f} mm²（旧版 201）")
+        self.assertGreaterEqual(pbb.ylen, FOOT_TRACK_MIN_MM,
+                                f"垫条横向跨度 {pbb.ylen:.0f} mm（旧版 40）")
+        # 两条垫条的 Y 跨度相同 ⇒ 凸包 = 着地斑的包络盒
+        hull = pbb.xlen * pbb.ylen
+        self.assertGreaterEqual(hull, FOOT_POLYGON_MIN_MM2,
+                                f"支撑多边形只有 {hull:.0f} mm²（旧版 5376）")
+        self.assertAlmostEqual(pbb.zmin, bb.zmin, delta=0.25,
+                               msg="最低点不是垫条")
+        # 垫条不得超出足板包络（四周留 ≥1 mm）
+        self.assertGreaterEqual(pbb.xmin, bb.xmin + 1.0, "垫条探出足板后缘")
+        self.assertLessEqual(pbb.xmax, bb.xmax - 1.0, "垫条探出足板前缘")
+        self.assertGreaterEqual(pbb.ymin, bb.ymin + 1.0, "垫条探出足板左侧")
+        self.assertLessEqual(pbb.ymax, bb.ymax - 1.0, "垫条探出足板右侧")
+        # 垫条底板是等截面 ⇒ 最低平面附近只有垫条（腹板/斜肋不蹭地、无刀刃）
+        self.assertAlmostEqual(area, self._foot_section_area(bb.zmin + 0.5),
+                               delta=area * 0.02,
+                               msg="最低平面附近截面不等 ⇒ 有非垫条结构贴地")
+        # 与零件常量对账：着地斑 = 两条垫条 FOOT_PAD_X × (±FOOT_PAD_Y)
+        declared = sum((x1 - x0) * 2.0 * FOOT_PAD_Y for x0, x1 in FOOT_PAD_X)
+        self.assertAlmostEqual(area, declared, delta=declared * 0.02,
+                               msg=f"实测着地 {area:.0f} ≠ 常量表 {declared:.0f} mm²")
+        self.assertAlmostEqual(pbb.xmin, FOOT_PAD_X[0][0], delta=0.5)
+        self.assertAlmostEqual(pbb.xmax, FOOT_PAD_X[1][1], delta=0.5)
+        self.assertAlmostEqual(pbb.ymin, -FOOT_PAD_Y, delta=0.5)
+        self.assertAlmostEqual(pbb.ymax, FOOT_PAD_Y, delta=0.5)
 
     def test_soles_are_lowest(self):
         """橡胶垫是唯一着地点；踝笼/舵机不得低于垫。"""

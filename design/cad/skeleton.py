@@ -759,45 +759,74 @@ def head_shell(wall: float = 2.4) -> cq.Workplane:
 
 
 # --------------------------------------------------------------------------
-# 零件 8：足板（含踝部叉）
+# 零件 8：足板（含踝部叉）—— 第 11 轮「足部重做」
+#
+# 旧版问题（见 docs/process/骨架重构评估-组会汇报.md §5）：
+#   四只 Φ8×13 圆柱垫 = 着地 **201 mm²**、横向轨距 **40 mm**（足板本身 60 mm 宽），
+#   踝区又把中足挖穿 ⇒ 压力中心走到脚掌中部时没有触地点，等于踩高跷。
+#   而且四只垫里**前面两只与本体不相连**（前唇缺口把它们脚下的落脚面切掉了），
+#   所以 `build_all` 的几何列一直是 ❌：整件是 **3 个互不相连的实体**。
+#
+# 新版四件事：
+#   ① 前后两条**横向垫条**（底板 54(Y)×12(X)×3 + 中腹板 3 宽，构成工字梁）：
+#      着地 2×54×12 = **1296 mm²**（旧 201，×6.4），横向轨距 40 → **54 mm**。
+#   ② 从踝叉臂平面（只在 y = 24.05…27.05 一侧）向两条垫条各**拉一条斜肋**：
+#      叉臂的载荷面直接延续到垫条，不再只穿过 3 mm 鞋底板。
+#   ③ **非传力区开窗**（前场中央窗）：把垫条与斜肋的质量补回来，单件不增重。
+#   ④ 一体成形：`len(solids())==1` 且 `isValid()`，可直接进切片器。
 # --------------------------------------------------------------------------
-def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
-               rib_h: float = 6.0, mirror: bool = False) -> cq.Workplane:
+FOOT_LEN = 122.0                 # 足板总长（后跟 48 + 前掌 74）
+FOOT_W = 60.0                    # 足板宽（门禁 58–62）
+FOOT_HEEL = 48.0                 # 踝轴 → 后跟（门禁 ≥45）
+FOOT_SOLE_T = 3.0                # 鞋底板厚（= 结构最小壁厚）
+FOOT_PAD_Y = 27.0                # 垫条半长 → 轨距 54（旧 40；足板宽 60）
+FOOT_PAD_X = ((-45.0, -33.0), (59.0, 71.0))     # 后 / 前垫条底板 X 区间（宽 12）
+FOOT_PAD_TOP = -FOOT_SOLE_T      # −3：垫条底板顶面 = 鞋底底面
+FOOT_PAD_BOT = -16.0             # 垫条底面 = 全机最低点（踝笼约 −15.4）
+FOOT_PAD_T = 3.0                 # 垫条底板厚
+FOOT_PAD_WEB_X = ((-44.0, -41.0), (63.5, 66.5))  # 后 / 前垫条腹板 X 区间（厚 3）
+FOOT_PAD_OVERLAP = 1.5           # 腹板/斜肋压进鞋底板的量（保证布尔成一整体）
+FOOT_WINDOW_X = (40.0, 58.0)     # 前场中央减重窗 X 区间（Y 与踝窝同宽，避免留薄片）
+# 斜肋所在 Y 平面 = 踝叉臂的平面（limb_fork(compact) 的臂 A 内表面 = HORN_FACE+0.05）
+FOOT_RIB_Y0 = HORN_FACE + 0.05   # 24.05
+FOOT_RIB_Y1 = FOOT_RIB_Y0 + PLATE_T  # 27.05
+# 斜肋：从叉臂端面（x=±17）向下斜拉到垫条腹板内表面（后 −41 / 前 63.5）。
+# 弯矩在叉臂处最大、到垫条处归零，所以肋做成"叉臂端最深、垫条端收尖"；
+# 最深端停在着地面之上 1 mm，保证**着地平面只有垫条**（不留刀刃线）。
+FOOT_GUSSET = ((-41.0, -17.0), (63.5, 17.0))
+FOOT_GUSSET_BOT = FOOT_PAD_BOT + 1.0   # −15：斜肋最低点，不参与着地
+
+
+def foot_plate(length: float = FOOT_LEN, width: float = FOOT_W,
+               sole_t: float = FOOT_SOLE_T, mirror: bool = False) -> cq.Workplane:
     """足底板：踝轴 x=0，后跟 48 mm，前掌 74 mm（整机深 ≤147）。左右脚同一零件。
 
-    纵梁贴踝叉臂（y=±Y_HALF）。四角垫低于踝笼半高，是唯一着地点。
+    着地靠**前后两条横向垫条**（低于踝笼半高 15.4 以下，是全机唯一最低点）；
     踝区按 servo_frame 挖槽，笼/舵机留在关节轴上，不平移离轴。
     """
     part = cq.Workplane("XY")
-    heel = 48.0
-    x_rear = -heel
-    x_front = length - heel
+    x_rear = -FOOT_HEEL
+    x_front = length - FOOT_HEEL
     x_mid = (x_rear + x_front) / 2.0
-    y_rib = Y_HALF + 1.5
 
+    # ① 鞋底板（前场不再放纵梁/横梁：踝窝左右不对称，凡跨过 x=+40 的筋都会
+    #    只被右脚踝窝切掉一段，害得左右两件不等重；改用 ⑤ 的开窗 + ⑥⑦ 的
+    #    垫条与斜肋承担刚度，左右两件质量完全一致。）
     part = part.union(box(length, width, sole_t, at=(x_mid, 0.0, -sole_t)))
 
-    # 纵梁接到叉臂；踝区断开，前后各一段
-    for sign in (-1, 1):
-        part = part.union(box(heel - 10.0, 5.0, rib_h,
-                              at=(x_rear + (heel - 10.0) / 2.0 + 4.0,
-                                  sign * y_rib, -0.4)))
-        part = part.union(box(x_front - 18.0, 5.0, rib_h,
-                              at=((x_front + 18.0) / 2.0, sign * y_rib, -0.4)))
-    part = part.union(box(6.0, width - 10.0, rib_h, at=(-28.0, 0.0, -0.4)))
-    part = part.union(box(6.0, width - 10.0, rib_h, at=(22.0, 0.0, -0.4)))
-
+    # ② 踝叉：compact 型只有 +Y 一条臂（底座整段在鞋底以下，会被 ③ 切光）
     fork = limb_fork(shaft="+y", parent="+z", compact=True, spigot=False)
     part = part.union(fork)
     part = part.cut(box(80.0, 80.0, 20.0, at=(0.0, 0.0, -sole_t - 20.0)))
     # 清掉叉底座在鞋面上的台阶，只留叉臂
     part = part.cut(box(36.0, 20.0, 8.0, at=(0.0, 0.0, -0.2)))
 
+    # ③ 前唇缺口（保留旧版形态）
     part = part.cut(box(16.0, width + 2.0, 1.4,
                         at=(x_front - 7.0, 0.0, -sole_t - 0.2)))
 
-    # 踝窝：舵机沿轴不对称（x_min=-35, x_max=+10.2）。右脚 mirror 只翻 Y，
-    # 必须把窝中心翻到 −X_CTR，才能让开 shaft=-y 的右踝舵机。
+    # ④ 踝窝：舵机沿轴不对称（x_min=-35, x_max=+10.2）。右脚 mirror 只翻 Y，
+    #    必须把窝中心翻到 −X_CTR，才能让开 shaft=-y 的右踝舵机。
     well_x = SPAN_X + 2.0
     well_y = GAP + 2.0 * PLATE_T + 2.0
     well_x_ctr = -X_CTR if mirror else X_CTR
@@ -806,13 +835,35 @@ def foot_plate(length: float = 122.0, width: float = 60.0, sole_t: float = 3.0,
                         at=(well_x_ctr, 0.0, -sole_t - 4.0)))
     part = part.cut(servo_body_clearance(well_shaft, "+z", pad=2.0))
 
+    # ⑤ 非传力区开窗：踝窝与前垫条之间的腹板中央。
+    #    X 从 40 起 ⇒ 左右踝窝都到不了（右踝窝到 x=+40 为止），左右仍是同一件。
+    part = part.cut(box(FOOT_WINDOW_X[1] - FOOT_WINDOW_X[0], well_y,
+                        sole_t + 1.0,
+                        at=((FOOT_WINDOW_X[0] + FOOT_WINDOW_X[1]) / 2.0,
+                            0.0, -sole_t - 0.5)))
+
     part = safe_fillet(part, 1.5, "|Z")
-    # 垫必须低于笼半高（约 −15.4），才能成为唯一着地点。圆角之后再加。
-    pad_h = 13.0
-    inset = 9.0
-    for sx, sy in ((x_rear + inset, 20.0), (x_rear + inset, -20.0),
-                   (x_front - inset, 20.0), (x_front - inset, -20.0)):
-        part = part.union(cyl(8.0, pad_h + 0.6, at=(sx, sy, -sole_t - pad_h)))
+
+    # ⑥ 垫条（前后各一条横向工字梁）：底板贴地、腹板把载荷送上鞋底板。
+    #    腹板向鞋底板内压 1.5 mm，避免只靠共面贴合成不了一体。
+    web_h = (FOOT_PAD_TOP + FOOT_PAD_OVERLAP) - (FOOT_PAD_BOT + FOOT_PAD_T)
+    for (x0, x1), (wx0, wx1) in zip(FOOT_PAD_X, FOOT_PAD_WEB_X):
+        part = part.union(box(x1 - x0, 2.0 * FOOT_PAD_Y, FOOT_PAD_T,
+                              at=((x0 + x1) / 2.0, 0.0, FOOT_PAD_BOT)))
+        part = part.union(box(wx1 - wx0, 2.0 * FOOT_PAD_Y, web_h,
+                              at=((wx0 + wx1) / 2.0, 0.0,
+                                  FOOT_PAD_BOT + FOOT_PAD_T)))
+
+    # ⑦ 叉臂斜肋：在叉臂所在 Y 平面里，从叉臂端面斜拉到垫条腹板（含压入量）。
+    for (x_tip, x_deep) in FOOT_GUSSET:
+        tri = (cq.Workplane("XZ")
+               .polyline([(x_deep, FOOT_PAD_TOP + FOOT_PAD_OVERLAP),
+                          (x_deep, FOOT_GUSSET_BOT),
+                          (x_tip, FOOT_PAD_TOP + FOOT_PAD_OVERLAP)])
+               .close().extrude(PLATE_T))
+        # XZ 工作平面的挤出方向是 −Y：平移后落在 y = 24.05…27.05
+        part = part.union(tri.translate((0.0, FOOT_RIB_Y1, 0.0)))
+
     if mirror:
         part = part.mirror("XZ")
     return sanitize(part)
