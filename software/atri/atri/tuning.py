@@ -119,7 +119,12 @@ def _validate(key: str, value: Any, default: Any) -> Tuple[bool, Any, Optional[s
             return False, default, f"{key}: 必须 > 0（默认 {default}），收到 {value!r}"
         if float(default) >= 0.0 and number < 0.0:
             return False, default, f"{key}: 必须 ≥ 0（默认 {default}），收到 {value!r}"
-        return True, (int(number) if want == "int" else number), None
+        if want == "int":
+            # 非整数**不能静默取整**：2.5 被悄悄变成 2，现场会以为"写了就生效了"。
+            if not number.is_integer():
+                return False, default, f"{key}: 必须是整数，收到 {value!r}（不静默取整）"
+            return True, int(number), None
+        return True, number, None
     if want == "str":
         if got != "str":
             return False, default, f"{key}: 期望字符串，收到 {got}（{value!r}）"

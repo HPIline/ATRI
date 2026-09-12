@@ -82,30 +82,41 @@ def _flag(ctx: SkillContext, tuning: Dict[str, Any], key: str) -> bool:
     return default
 
 
+def _fail(t: Any, ctx: SkillContext, reason: str) -> Dict[str, Any]:
+    """统一的技能失败结果：带上**参数出处与告警**，否则现场"改了没生效"查不出来。"""
+    result = failed("carry", reason)
+    result["tuning_source"] = t.source_path.name if t.overridden else "code-defaults"
+    result["tuning_warnings"] = list(t.warnings)
+    return result
+
+
 class CarrySkill(Skill):
     name = "carry"
 
     def run(self, ctx: SkillContext) -> Dict[str, Any]:
-        t = load_tuning("carry", CARRY_DEFAULTS)
+        # warn=print：配置写错时现场要**看得见**告警（与 skills/kick.py 同一口径）。
+        t = load_tuning("carry", CARRY_DEFAULTS, warn=print)
         tuning = t.values
 
         obs, reason = perception_data(ctx, "object")
         if reason:
-            return failed(self.name, reason)
+            return _fail(t, ctx, reason)
 
         target = obs.get("target") or ctx.params.get("target") or "红块"
         raw_distance = obs.get("distance_cm", ctx.params.get("distance_cm"))
         distance_cm = as_finite_float(raw_distance)
         max_distance = _num(ctx, tuning, "max_distance_cm")
         if distance_cm is None or distance_cm <= 0.0:
-            return failed(self.name, f"搬运距离非法或缺测距: {raw_distance!r}")
+            return _fail(t, ctx, f"搬运距离非法或缺测距: {raw_distance!r}")
         if distance_cm > max_distance:
-            return failed(
-                self.name, f"搬运距离 {distance_cm:g}cm 超出上限 {max_distance:g}cm"
-            )
+            return _fail(t, ctx, f"搬运距离 {distance_cm:g}cm 超出上限 {max_distance:g}cm")
+        # 缺横向偏移**不能当成"居中"**：那等于闭着眼睛对正中间下手。
+        # 放置区那一侧本来就是 fail-safe（缺 x_cm 判失败），两侧口径现在一致；
+        # 与 atri/validation.py 的「转换失败返回 None，绝不猜」也一致。
         x_cm = as_finite_float(obs.get("x_cm"))
         if x_cm is None:
-            x_cm = 0.0
+            return _fail(t, ctx, f"object 观测缺横向偏移或非法: {obs.get('x_cm')!r}"
+                                "（不把「没量到」当成居中）")
 
         # —— 第一步：对准目标物 ——
         x_cm, iterations, aligned, reason = lateral_servo(
@@ -118,7 +129,7 @@ class CarrySkill(Skill):
             _num(ctx, tuning, "step_clamp_deg"),
         )
         if reason:
-            return failed(self.name, reason)
+            return _fail(t, ctx, reason)
 
         tolerance = _num(ctx, tuning, "grasp_tolerance_cm")
         print(
@@ -127,8 +138,8 @@ class CarrySkill(Skill):
         )
         if abs(x_cm) > tolerance:
             # 失败也要把过程量带出去：调参时最需要知道"纠了几轮、最后差多少"。
-            result = failed(
-                self.name,
+            result = _fail(
+                t, ctx,
                 f"闭环后横向偏差 {x_cm:g}cm 超过夹取容差 {tolerance:g}cm"
                 f"（迭代 {iterations} 轮未对准），放弃抓取",
             )
@@ -139,7 +150,6 @@ class CarrySkill(Skill):
                 "grasp_tolerance_cm": tolerance,
                 "distance_cm": distance_cm,
                 "target": target,
-                "tuning_source": t.source_path.name if t.overridden else "code-defaults",
             })
             return result
         if not aligned:

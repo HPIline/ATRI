@@ -1,7 +1,7 @@
 {
   "_note": "T-03 物品搬运技能的可调参数（atri/skills/carry.py::CARRY_DEFAULTS）。当前**一个字都没写** = 全部使用代码里的设计值；实物/相机到位后在这里标定回填，不必改代码。",
   "_how": "只写要改的键，例如 \"deadband_cm\": 1.5。优先级：任务卡 params > 本文件 > 代码默认值。",
-  "_keys": "deadband_cm / max_iters / step_gain / step_clamp_deg / give_up_cm / place_align / place_deadband_cm / place_max_iters / place_give_up_cm / step_length_cm / min_steps / max_distance_cm",
-  "_calibration": "实机要量的三件事：① 夹爪能夹住的最大横向偏差（→ deadband_cm/give_up_cm）② 转 1° 身体时目标在画面里移动几厘米（→ step_gain，等于 相机焦距像素 / 物距cm，见 tools/carry_eval.py 的参数边界表）③ 每步实际位移（→ step_length_cm，同时回填 config/odometry.json）。",
+  "_keys": "deadband_cm / max_iters / step_gain / step_clamp_deg / grasp_tolerance_cm / place_align / place_deadband_cm / place_max_iters / place_give_up_cm / step_length_cm / min_steps / max_distance_cm",
+  "_calibration": "实机要量的三件事：① 夹爪能夹住的最大横向偏差（→ deadband_cm 收敛目标、grasp_tolerance_cm 夹取门槛）② **转 1° 身体时目标在画面里横移几厘米**（→ step_gain 的死拍值 = 1 / 这个量；该量 = 物距cm × tan(1°) ≈ 0.01745 × 物距cm。注意它**不是**像素当量 f/物距 [px/cm]，别混）③ 每步实际位移（→ step_length_cm，同时回填 config/odometry.json）。边界表见 tools/carry_eval.py 与 design/handoff/T-03-搬运-方案与评测报告.md §4。",
   "_reference": "评测与边界表见 design/handoff/T-03-搬运-方案与评测报告.md；边界外的情况闭环会迭代封顶，届时应加大 max_iters 或 step_clamp_deg。"
 }

@@ -330,25 +330,104 @@ class TestCarrySkill(unittest.TestCase):
         self.assertEqual(result["place"]["status"], "failed")
         self.assertEqual(bus.count("release"), 0)
 
-    def test_tuning_file_overrides_defaults_and_task_card_wins(self):
-        """三层优先级：任务卡 > config/carry.json > 代码默认值。"""
-        bus = YawGeometryCerebellum()
-        perception = GeometricPerception(bus, object_x=3.0)
+    def test_tuning_file_overrides_defaults(self):
+        """第二层：tuning 文件压过代码默认值（用可观测的迭代数判，不看 tuning_source）。"""
         with tempfile.TemporaryDirectory() as tmp:
             Path(tmp, "carry.json").write_text(
-                json.dumps({"deadband_cm": 0.5, "max_iters": 2}), encoding="utf-8"
+                json.dumps({"deadband_cm": 0.5}), encoding="utf-8"
             )
             with mock.patch.dict(os.environ, {"ATRI_TUNING_DIR": tmp}):
-                from_file = CarrySkill().run(_ctx(bus, perception))
+                bus = YawGeometryCerebellum()
+                from_file = CarrySkill().run(
+                    _ctx(bus, GeometricPerception(bus, object_x=3.0))
+                )
                 self.assertEqual(from_file["tuning_source"], "carry.json")
                 self.assertIn("deadband_cm", from_file["tuning_overridden"])
 
-                bus2 = YawGeometryCerebellum()
-                perception2 = GeometricPerception(bus2, object_x=3.0)
-                from_card = CarrySkill().run(
-                    _ctx(bus2, perception2, params={"max_iters": 5, "step_gain": 0.5})
+                bus2 = YawGeometryCerebellum()   # 无 tuning 文件时用代码默认（死区 2.0）
+                with tempfile.TemporaryDirectory() as empty:
+                    with mock.patch.dict(os.environ, {"ATRI_TUNING_DIR": empty}):
+                        default = CarrySkill().run(
+                            _ctx(bus2, GeometricPerception(bus2, object_x=3.0))
+                        )
+                self.assertEqual(default["tuning_source"], "code-defaults")
+                # 死区 0.5 逼着闭环多纠几轮；死区 2.0 一轮就够——这就是"文件生效"的可观测证据。
+                self.assertGreater(from_file["iterations"], default["iterations"])
+
+    def test_task_card_params_beat_tuning_file(self):
+        """第一层：任务卡 params 压过 tuning 文件。
+
+        断言必须落在**行为量**上：上一版只断言 ``tuning_source == "carry.json"``，
+        而该字段只由"文件是否覆盖"决定、与 params 无关——把优先级改反了它照样绿
+        （独立复核用内存变异证明过）。这里用 step_gain 直接改变迭代次数来判断。
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "carry.json").write_text(
+                json.dumps({"step_gain": 0.25, "deadband_cm": 0.5}), encoding="utf-8"
+            )
+            with mock.patch.dict(os.environ, {"ATRI_TUNING_DIR": tmp}):
+                bus = YawGeometryCerebellum()
+                from_file = CarrySkill().run(
+                    _ctx(bus, GeometricPerception(bus, object_x=6.0))
                 )
-                self.assertEqual(from_card["tuning_source"], "carry.json")
+                bus2 = YawGeometryCerebellum()
+                from_card = CarrySkill().run(
+                    _ctx(bus2, GeometricPerception(bus2, object_x=6.0),
+                         params={"step_gain": 1.0})
+                )
+        # step_gain 0.25 每轮只挪一点 → 轮数明显多于 1.0；若"文件压过卡"，两者会相等。
+        self.assertGreater(from_file["iterations"], from_card["iterations"])
+        self.assertGreaterEqual(from_card["iterations"], 1)
+
+    def test_missing_or_invalid_x_cm_is_fail_safe(self):
+        """缺横向偏移 / NaN / 非数值：**判失败且不下发任何动作**。
+
+        不能把"没量到"当成居中 0——那等于闭着眼睛对正中间下手；
+        放置区那一侧本来就是 fail-safe，两侧口径必须一致（独立复核提出的问题 4）。
+        """
+        for bad in (None, float("nan"), "很远", [1.0]):
+            with self.subTest(x_cm=bad):
+                bus = YawGeometryCerebellum()
+                perception = GeometricPerception(bus, object_x=1.0)
+                perception.detect_object = lambda frame=None, bad=bad: PerceptionResult(
+                    kind="object",
+                    data={"found": True, "target": "红块", "x_cm": bad, "distance_cm": 8.0},
+                )
+                result = CarrySkill().run(_ctx(bus, perception))
+                self.assertEqual(result["status"], "failed")
+                self.assertIn("横向偏移", result["reason"])
+                self.assertEqual(bus.calls, [])
+
+    def test_tuning_warnings_are_attached_and_visible(self):
+        """配置写错时：告警既要打出来（warn=print），也要挂在结果里（含失败分支）。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "carry.json").write_text(
+                json.dumps({"give_up_cm": 1.0, "deadband_cm": -1.0}), encoding="utf-8"
+            )
+            with mock.patch.dict(os.environ, {"ATRI_TUNING_DIR": tmp}):
+                import io
+                import contextlib
+
+                captured = io.StringIO()
+                bus = YawGeometryCerebellum()
+                with contextlib.redirect_stdout(captured):
+                    result = CarrySkill().run(
+                        _ctx(bus, GeometricPerception(bus, object_x=1.0))
+                    )
+                self.assertEqual(result["status"], "ok")
+                self.assertTrue(result["tuning_warnings"])
+                self.assertIn("未知键", captured.getvalue())        # 不存在的键要看得见
+                self.assertIn("必须 > 0", captured.getvalue())       # 非法值也要看得见
+
+                # 失败分支同样要带告警（否则"改了没生效"现场查不出来）
+                bus2 = YawGeometryCerebellum()
+                bad_perception = GeometricPerception(bus2, object_x=1.0)
+                bad_perception.detect_object = lambda frame=None: PerceptionResult(
+                    kind="object", data={"found": False}
+                )
+                failed_result = CarrySkill().run(_ctx(bus2, bad_perception))
+                self.assertEqual(failed_result["status"], "failed")
+                self.assertIn("tuning_warnings", failed_result)
 
     def test_max_distance_still_enforced(self):
         bus = YawGeometryCerebellum()

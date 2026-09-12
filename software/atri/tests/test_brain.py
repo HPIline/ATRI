@@ -108,8 +108,23 @@ class TestBrain(unittest.TestCase):
         self.assertTrue(result["ok"])
 
     def test_carry(self):
-        result = self._run(["carry"], {"object": {"target": "蓝块", "distance_cm": 4.0}})
+        # 观测必须给 x_cm：**缺横向偏移不再当成"居中"**（2026-09-13 改，
+        # 与放置区那一侧的 fail-safe 对齐；独立复核问题 4）。
+        result = self._run(
+            ["carry"], {"object": {"target": "蓝块", "x_cm": 0.5, "distance_cm": 4.0}}
+        )
         self.assertTrue(result["ok"])
+
+    def test_carry_without_lateral_offset_fails(self):
+        """缺 x_cm 时不许盲抓：判失败。
+
+        这里只判"整张卡不 ok + 原因"，"一个动作都不下发"由
+        ``tests/test_carry_tuning.py::test_missing_or_invalid_x_cm_is_fail_safe``
+        用假小脑严格断言（本类的 cere 是真实 Cerebellum，不记录调用）。
+        """
+        result = self._run(["carry"], {"object": {"target": "蓝块", "distance_cm": 4.0}})
+        self.assertFalse(result["ok"])
+        self.assertIn("横向偏移", result["error"])
 
     def test_kick(self):
         result = self._run(["kick"], {"ball": {"x_cm": -2.0, "distance_cm": 10.0}})

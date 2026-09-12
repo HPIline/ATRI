@@ -15,10 +15,14 @@
 
 ## 为什么主扫描轴是 gain 而不是"多少厘米"
 
-闭环收敛与否由 **gain = 相机焦距(px) / 物距(cm)** 决定（"身体转 1°，目标在画面里
-横移多少厘米"）。现有 Mock 里 gain 固定写 1.5 cm/°，而按针孔几何推，
-12 cm 物距下的真实 gain ≈ 0.21 cm/°（差 7 倍）。**这个差直接决定闭环够不够轮数**，
-所以本工具把 gain 当主变量扫，并给出每个 gain 下的可纠正偏差上限。
+闭环收敛与否由 **gain = 物距(cm) × tan(1°)** 决定（它的量纲是 cm/°，物理含义是
+"身体转 1°，目标在画面里横移多少厘米"）。**别把它和像素当量搞混**：
+像素当量 `ppcm = f / 物距`（px/cm），画面横移 `f · tan(1°)`（px/°）——三者量纲不同，
+12 cm 物距下分别是 **0.21 cm/°**、**23.09 px/cm**、**4.84 px/°**。
+
+现有 Mock 里 gain 固定写 **1.5 cm/°**（等价物距 86 cm），按针孔几何推 12 cm 物距
+只有 0.21 cm/°——**差 7 倍**。这个差直接决定闭环够不够轮数，所以本工具把 gain
+当主变量扫，并给出每个 gain 下的可纠正偏差上限。
 
 ## 用法
 
@@ -163,7 +167,7 @@ class DetectorRow:
     distance_cm: Optional[float]
     distance_source: Optional[str]
     note: str = ""
-    in_criteria: bool = False   # 是否落在 BOM 判据条件内（≤1m、固定光照、无遮挡）
+    in_criteria: bool = False   # 是否落在**本工具自选**条件内（见 §2；BOM 没给 T-03 视觉判据）
 
 
 def detector_scan() -> Tuple[List[DetectorRow], Dict[str, Any]]:
@@ -296,7 +300,9 @@ class RenderedObjectPerception:
             focal_px=FRAME_FOCAL_PX,
             object_size_cm=TARGET_SIZE_CM,
         )
-        self.off_frame = False
+        self.off_frame_frames = 0     # 累计"目标中心跑出画面"的帧数
+        self.total_frames = 0         # 本场景一共感知了几帧
+        self.first_cx_px: Optional[float] = None
 
     def yaw_deg(self) -> float:
         from atri.config import JOINTS
@@ -311,7 +317,12 @@ class RenderedObjectPerception:
     def grab(self) -> Any:
         x_rel = self.x_rel_cm()
         cx = FRAME_W / 2.0 + self.pixels_per_cm * x_rel
-        self.off_frame = not (0 <= cx <= FRAME_W)
+        # 逐帧累计（不是"最后一帧"）：报告里那一列说的是"闭环过程中**曾**出画"。
+        self.total_frames += 1
+        if self.first_cx_px is None:
+            self.first_cx_px = round(cx, 1)
+        if not (0 <= cx <= FRAME_W):
+            self.off_frame_frames += 1
         patch = Patch(cx=cx, cy=FRAME_H / 2.0, size=self.size_px, bgr=RED_BGR)
         return make_frame([patch], noise_sigma=self.noise_sigma, blur=self.blur,
                           brightness=self.brightness)
@@ -335,7 +346,9 @@ class LoopRow:
     steps: Optional[int]
     place_status: str
     reason: str = ""
-    off_frame_any: bool = False
+    off_frame_frames: int = 0
+    total_frames: int = 0
+    first_cx_px: Optional[float] = None
 
 
 def run_image_in_loop(
@@ -373,7 +386,9 @@ def run_image_in_loop(
         steps=outcome.get("steps"),
         place_status=str(place.get("status", "")),
         reason=str(outcome.get("reason") or ""),
-        off_frame_any=perception.off_frame,
+        off_frame_frames=perception.off_frame_frames,
+        total_frames=perception.total_frames,
+        first_cx_px=perception.first_cx_px,
     )
 
 
@@ -508,7 +523,7 @@ def boundary_table() -> Dict[str, Any]:
         "assumptions": {
             "deadband_cm": deadband, "grasp_tolerance_cm": tolerance,
             "step_gain": step_gain, "step_clamp_deg": clamp, "max_iters": max_iters,
-            "gain_model": "gain = 物距 × tan(1°)，即相机像素当量/f；等效于针孔模型",
+            "gain_model": "gain[cm/°] = 物距 × tan(1°)（≠ 像素当量 ppcm = f/物距 [px/cm]）",
             "accept_model": "可纠正 = 在迭代上限内最终偏差 ≤ 夹取容差",
             "cap_cm": cap,
         },
@@ -560,12 +575,16 @@ def build_report(det_rows: List[DetectorRow], det_sum: Dict[str, Any],
     add("")
     add("## 2. A 段：色块检测（合成图，真检测器）")
     add("")
-    add(f"- 判据条件内（干净画面、固定光照、无遮挡、噪σ≤16、模糊核≤9）："
+    add("> ⚠ **「条件内」是本工具自选的，不是主办方/BOM 判据**：`docs/research/项目文档/BOM与阶段性指标.md`")
+    add("> 对 T-03 只写了「物品抓取成功率 ≥80% ｜ 未测试」，**没有**给色块检测的判据条件。")
+    add("> 这里的条件 = 干净画面、固定光照、无遮挡、噪 σ≤16、模糊核≤9（引用时必须一起说）。")
+    add("")
+    add(f"- 自选条件内（干净画面、固定光照、无遮挡、噪σ≤16、模糊核≤9）："
         f"**{_pct(det_sum['criteria_found'], det_sum['criteria_total'])}** 检出")
     add(f"- 全扫描（含故意做坏的：偏暗、强噪、重模糊、遮挡）："
         f"**{_pct(det_sum['found'], det_sum['total'])}** 检出")
     if "criteria_max_abs_error_cm" in det_sum:
-        add(f"- 判据条件内横向误差：最大 {det_sum['criteria_max_abs_error_cm']} cm、"
+        add(f"- 自选条件内横向误差：最大 {det_sum['criteria_max_abs_error_cm']} cm、"
             f"平均 {det_sum['criteria_mean_abs_error_cm']} cm（像素当量 {PIXELS_PER_CM:g} px/cm 下的量化误差）")
     add(f"- 距离口径标记：{ '、'.join(det_sum['distance_sources']) }"
         "（无焦距时必须是 `uncalibrated`——它**不是**实测距离）")
@@ -592,6 +611,11 @@ def build_report(det_rows: List[DetectorRow], det_sum: Dict[str, Any],
     add("估算是 `calibrated` 口径）；目标 4cm 见方；身体转过 `yaw` 度后相对偏差")
     add("`x_rel = x_true − 物距·tan(yaw)`；成像 `cx = W/2 + ppcm·x_rel`，超出画面截断渲染；")
     add("并假设**髋偏航指令角 = 身体实际转角**（未标定，见未测项 C1/C2）。")
+    add("")
+    add("> ⚠ **本仓另有一套相机口径**：`design/packages/perception_sim.json` 写的是 640×480 / 水平视场 70°，")
+    add("> 本工具 B 段用 320×240 / 60°（A 段的名义参照是 1280 宽 / 60°）。两者都**未标定**——")
+    add("> 视场半宽 = 物距·tan(HFOV/2)，12 cm 处 60°→±6.93 cm、70°→±8.40 cm；")
+    add("> §4.1 的结论（推荐参数覆盖视场）在 70° 下同样成立，**以实机标定为准**。")
     add("")
     add(f"同一批场景跑两套参数：**代码默认**（`max_iters=5, step_gain=0.5`）与"
         f"**推荐参数**（`max_iters={RECOMMENDED_PARAMS['max_iters']}, "
@@ -623,17 +647,20 @@ def build_report(det_rows: List[DetectorRow], det_sum: Dict[str, Any],
         for key, count in sorted(reasons.items(), key=lambda kv: -kv[1]):
             add(f"| {name} | {key} | {count} |")
     add("")
-    add("逐场景明细（`出画` = 闭环过程中目标曾跑出视场，画面截断会让检出中心失真）：")
+    add("逐场景明细（`出画帧` = **累计**有几帧目标中心跑到画面外 / 该场景一共感知几帧；")
+    add("`首帧中心x` 是闭环开始时目标中心的像素横坐标，画面宽 320 —— 一开始就 >320 的场景，")
+    add("第一帧的检出中心本身就是被边框截断后算出来的，**它算不算『看得见』要打问号**）：")
     add("")
-    add("| 参数组 | 真值 x_cm | 物距 cm | gain cm/° | 视场半宽 cm | 结果 | 迭代 | 闭环后偏差 cm | 放置区 | 出画 |")
-    add("|---|---|---|---|---|---|---|---|---|---|")
+    add("| 参数组 | 真值 x_cm | 物距 cm | gain cm/° | 视场半宽 cm | 结果 | 迭代 | 闭环后偏差 cm | 放置区 | 出画帧 | 首帧中心x |")
+    add("|---|---|---|---|---|---|---|---|---|---|---|")
     for row in loop_rows:
         ok_text = "✅ ok" if row.ok else "❌ " + row.status
         x_text = "—" if row.align_x_cm is None else f"{row.align_x_cm:+.2f}"
+        first_cx = "—" if row.first_cx_px is None else f"{row.first_cx_px:g}"
         add(f"| {row.variant} | {row.x_true_cm:+.1f} | {row.distance_cm:g} | "
             f"{row.gain_cm_per_deg:g} | ±{row.fov_limit_cm:g} | "
             f"{ok_text} | {row.iterations} | {x_text} | "
-            f"{row.place_status} | {'是' if row.off_frame_any else '否'} |")
+            f"{row.place_status} | {row.off_frame_frames}/{row.total_frames} | {first_cx} |")
     add("")
     add("`放置区 = channel-unavailable` 是**预期行为**：本段故意不给放置区通道（实机没地标时同理），")
     add("技能会如实回报「没有放置区感知通道」，而不是假装对准了。")
@@ -701,7 +728,9 @@ def build_report(det_rows: List[DetectorRow], det_sum: Dict[str, Any],
             f"{cell(row['default_reach_cm'])} | {cell(row['recommended_reach_cm'])} | "
             f"{'✅' if row['covers_fov'] else '❌'} |")
     add("")
-    add("读法：**只要「推荐参数可纠正」≥「视场半宽」，就意味着「目标只要看得见，就能对准」**——")
+    add("读法：**只要「推荐参数可纠正」≥「视场半宽」，就意味着「目标只要看得见，就能对准」**")
+    add("（这里「看得见」= 目标中心在画面内**且未被边框截断**；被截断时检出中心会偏内，见 §3 的")
+    add("`首帧中心x` 与 `出画帧` 两列——那几行恰好也是迭代偏多的样本。）")
     add("这是闭环在下层能做到的极限；再远的偏差属于「看不见」，要靠转头搜索而不是靠调参。")
     add("")
     add("⚠ 但这条推荐**不能直接上实机**：它建立在「髋偏航指令角 = 身体实际转角」这个未标定假设上。")
@@ -738,8 +767,23 @@ def build_report(det_rows: List[DetectorRow], det_sum: Dict[str, Any],
     add("")
     add("---")
     add("")
-    add(f"报告由 `tools/carry_eval.py` 生成；场景表 `design/packages/scenario_set.json`（S-03）")
-    add("只规定了变化轴，本工具按 T-01/T-02 同一套做法把轴落成**可复跑的具体场景**。")
+    add("## 7. 与 S-03 场景表的覆盖关系（哪些轴测了、哪些没测）")
+    add("")
+    add("`design/packages/scenario_set.json` 的 `S-03-carry` 除 `variation_axes` 外还给了")
+    add("`initial`（物体位置/质量/目标区）与 `success_criteria`：`{grasp_achieved, object_delivered,")
+    add("converged_within_iterations: 8}`。逐轴对照：")
+    add("")
+    add("| S-03 轴 / 判据 | 本工具是否覆盖 | 说明 |")
+    add("|---|---|---|")
+    add("| `lateral_offset_mm` = 0/50/100/150/200 | **部分**：B 段只扫到 ±60 mm | 150/200 mm 在 8–12 cm 物距下**超出视场**（±4.62/±6.93 cm）→ 先要「转过去找」，本工具没有搜索策略 |")
+    add("| `object_mass_g` = 30/50/80/100 | ❌ 未覆盖 | 一维几何里没有质量项；夹爪力矩/摩擦未建模 |")
+    add("| `ground_friction` = 0.5/0.7/0.95 | ❌ 未覆盖 | 同上，没有接触/摩擦模型 |")
+    add("| `grasp_achieved` / `object_delivered` | ⚠ 只测到「对准并下发动作」 | 夹住没有、搬运到位没有，都要实物 |")
+    add("| `converged_within_iterations: 8` | ⚠ 与推荐值不同源 | 推荐 `max_iters=15` 是**安全上限**，不是目标轮数；本段推荐参数实际最多用 **8 轮**（见 §3 明细的迭代列）。实机应按 S-03 的 8 轮判据先调 `step_gain`，把 `max_iters` 只当护栏 |")
+    add("")
+    add("---")
+    add("")
+    add("报告由 `tools/carry_eval.py` 生成；场景表的轴按 T-01/T-02 同一套做法落成**可复跑的具体场景**。")
     return "\n".join(lines) + "\n"
 
 
