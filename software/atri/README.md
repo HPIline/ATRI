@@ -1,5 +1,7 @@
 # A.T.R.I. 软件栈
 
+> **⚠️ 本包是「现机 22 DOF」控制软件栈，已冻结。** A 路线（`feat/atri-v2-al-petg` 分支）的硬件是 **20 DOF、无 hip_yaw**，机构见 [`design/v2/`](../../design/v2/README.md)。**本包尚未迁移到 20 DOF 机构**；`config.py` 的 22 关节、含 `hip_yaw` 的动作库与任务卡都属现机。**下文的 Mock 5/5 任务演练只代表现机软件逻辑闭环，不能当作 v2 硬件的赛题通过证据。** 对齐状态与冲突（如 T4 踢球仍写 `hip_yaw`）见 [`design/v2/T1-T5-HARDWARE-ALIGNMENT.md`](../../design/v2/T1-T5-HARDWARE-ALIGNMENT.md)。在 G4 关闭前不得改 `atri/config.py`。
+
 这是 A.T.R.I. 双足人形机器人核心控制软件包。基于“大脑—小脑”分层解耦架构开发，上层负责认知与状态机调度，下层负责步态动力学与总线控制。
 
 代码仅依赖 Python 3.14 标准库开发，脱离实体硬件时可通过内置的 Mock 机制直接执行任务卡和步态回放。
