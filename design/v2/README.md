@@ -2,13 +2,23 @@
 
 20×STS3215-C018 12V，20 DOF，无hip_yaw。骨盆两片大铝夹板已移除，改为开放式局部连接；承力件采用激光板和标准角铝/铝管，PETG为不透明哑光白、2.4mm壁厚。现机22DOF软件没有迁移到这套机构。
 
-**当前不是可直接整机下单的制造放行版。** 几何审查、加工文件和渲染有同源输出，但完整线束、质量与预算仍未闭合，G0–G4全部开放。见[打样说明](MANUFACTURING-NOTES.md)和[当前核验](out/ATRI-v2-工程验证.md)。
+**当前不是可直接整机下单的制造放行版。** 几何审查、加工文件和渲染有同源输出，但完整线束、质量与预算仍未闭合。见[打样说明](MANUFACTURING-NOTES.md)和[当前核验](out/ATRI-v2-工程验证.md)。
 
-![当前CAD光追审查图，不是实物照片](out/blender/renders/product_iso.png)
+- 装配快照 `out/assembly-snapshot.json` 当前 **1033** 件，其中仍含待清理的 `battery-secondary*` 三项（清理后约 **1030** 件）。**件数不是放行数字。**
+- 已计质量约 **2469 g**（设计目标 2300 g，硬顶 2450 g，**超硬顶**，且未计线束/相机/总线板/降压板/IMU/音频等）；`design_mass_closed: false`、`physical_mass_verified: false`。
+- **G0–G4 全部 OPEN**：购物车（G0）、舵机温升（G1）、单腿整机质量（G2）、赛方定义（G3）、无 hip_yaw 转向误差（G4）。逐条要求见 [`out/gates.json`](out/gates.json)。
+
+![双片改动前的CAD光追审查图，不代表最新髋腰结构](out/blender/renders/product_iso.png)
+
+## 最新髋腰结构
+
+![新版髋腰双侧支承及前转接件，CAD光追审查图](out/blender/renders/detail_pelvis.png)
+
+左右前转接件已重画，右件与中框零位间隙为 1.32 mm。髋侧摆与腰侧摆均改为前后双侧支承（后角铝 + 自由后盘 + 轴端保持件）。6 项专项连接测试通过；中央结构 31 个侧摆组合抽样通过。髋俯仰大角度后隔柱干涉、右髋外摆与下垂右臂干涉仍开放。已计质量约 2469 g，超过 2450 g 硬顶，且尚未计齐；详见[集成说明](DUAL-SUPPORT-INTEGRATION.md)。
 
 ## 验证范围
 
-当前83项v2测试通过；另对完整网页加载、同源942件清单、14份3MF、58份激光毛坯和压缩包完整性做了检查。裸结构ROM按每关节上下限及6个组合姿态抽样，不能替代连续运动或带真实线束检查。
+髋侧摆与腰侧摆已接入双侧支承，详见[集成说明](DUAL-SUPPORT-INTEGRATION.md)。专项连接检查 5 项通过；腿部及支承开关检查 9 项通过。旧版整机测试数量不作为新版通过证据。最新实体检查见 [双侧支承审查](out/dual-support-audit.json)，仍有右髋外摆与下垂右臂干涉，未放行。
 
 ![舵盘与肩夹具细节](out/blender/renders/detail_horn.png)
 
@@ -17,10 +27,12 @@
 ## 当前实装改动
 
 - 校正第三方舵机STEP的原生轴心和输出方向；C018主/后舵盘按厂家图分开建模，4-M3、PCD14。
+- 髋侧摆和腰侧摆新增后角铝、自由后盘及轴端保持件，形成前后双侧支承。
 - 骨盆开放框架、局部角铝转接、外部壳体夹持；不恢复旧120×160大板和M3×35铜柱布局。
 - 肩部外置输出、双侧腿板、足部角铝、独立固定/活动手指。大腿后板连续斜撑避开髋俯仰后壳凸起；足板开窗减重。
-- 采用有官方机械图的Pi 4B；电池改为实际107×33×22mm、169g的3S2200mAh规格；USB相机朝+X，电缆向下预留。
+- 采用有官方机械图的Pi 4B；**单电池**为实际107×33×22mm、169g的3S2200mAh（Gens Ace GEA223S25T3GT）规格；第二包与扩展托盘已移除，扩容只作受门禁提案见[电源扩展](POWER-EXPANSION.md)；USB相机朝+X，电缆向下预留。
 - 电池有托盘和两条绑带，主板有官方孔位载架，总线板使用完整厂家STEP，降压板使用无假孔位的夹持托座。
+- VL53L1X作为头部前侧20×24×1.6mm夹扣/胶粘预留包络进入主装配，未虚构厂商孔位。
 - 头/胸外壳分件、普通螺母/隔离柱捕获座；14件PETG/TPU提供定向3MF。当前没有热熔螺母。
 
 ## 可下载文件
@@ -32,6 +44,10 @@
 - [文件SHA256](out/packages/checksums.json)
 
 原始STEP超过GitHub单文件限制，因此以无损gzip保存；压缩包经过解压哈希/CRC检查。仿真zip解压到`out/`后得到`sim/meshes`和逐件STL，也可用生成命令复现。此处所有文件均为未放行审查版。
+
+**审查图**：`out/blender/renders/`（`product_iso.png`、`product_front.png`、`product_rear.png`、`detail_pelvis.png`、`detail_horn.png`、`detail_camera.png`、`detail_gripper.png`、`service_exploded.png`）为 GPU 光追 CAD 审查图，非实物照片；`service_exploded.png` 是维护拆解示意，不是逐颗螺母的完整装配工序。`out/render4k/` 的 4K 展示图尚未生成。
+
+**Webots**：`out/sim/atri_v2.urdf` 有 20 个 revolute（m/rad），**尚未真实导入 Webots 运行**。v2 导入冒烟与状态见 `WEBOTS-STATUS.md` / `out/webots/`，当前尚未生成；冻结的 22 DOF 世界仍是 `webots/worlds/atri_22dof.wbt`，不能作为 v2 通过 Webots 任务验证的证据。
 
 ## 文件与复现
 
