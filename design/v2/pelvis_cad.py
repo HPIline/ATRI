@@ -78,31 +78,61 @@ def build_pelvis_items():
   leg=P['adapter_angle_leg_mm']
   out_h=P['adapter_output_half_height_mm'];out_y0=P['adapter_output_y_min_mm']
   front=cq.Workplane('XY').box(tt,case_face+tt-out_y0,2*out_h).translate((inner+tt/2,(out_y0+case_face+tt)/2,0))
+  if tag != 'trunk':
+   # Trim unused rectangular corners; retain the complete PCD14 mounting pad.
+   front=cyl(P['hip_output_pad_radius_mm'],tt,'x',(inner,0,0))
+   bridge=cq.Workplane('XY').box(tt,case_face+tt,2*P['hip_output_neck_half_width_mm']).translate((inner+tt/2,(case_face+tt)/2,0))
+   front=front.union(bridge)
   # Saw away unused stock flanges; keep a continuous diagonal side web.
   depth=P['adapter_depth_leg_mm']
+  web_width=P['trunk_adapter_web_mm'] if tag=='trunk' else P['adapter_web_mm']
   forward=tag=='trunk'
   start_x=inner+tt if forward else inner-tt
   end_x=-C['bolt_x_mm'] if forward else C['bolt_x_mm']
   path=[(start_x,0)]
+  if not forward:path.append(P['hip_adapter_waypoint_xz_mm'])
   path.append((end_x,target_z));side_flat=None
   for a,b in zip(path,path[1:]):
    dx,dz=b[0]-a[0],b[1]-a[1];span=math.hypot(dx,dz)
-   web=cq.Workplane('XY').box(span,P['adapter_web_mm'],tt,centered=(True,True,False)).rotate((0,0,0),(0,0,1),math.degrees(math.atan2(dz,dx))).translate(((a[0]+b[0])/2,(a[1]+b[1])/2,0))
+   web=cq.Workplane('XY').box(span,web_width,tt,centered=(True,True,False)).rotate((0,0,0),(0,0,1),math.degrees(math.atan2(dz,dx))).translate(((a[0]+b[0])/2,(a[1]+b[1])/2,0))
    side_flat=web if side_flat is None else side_flat.union(web)
   side_flat=side_flat.union(cq.Workplane('XY').box(2*tt,2*out_h,tt,centered=(True,True,False)).translate((inner+tt if forward else inner,0,0)))
   xmin,xmax=(-C['x_span_mm'][1],-C['x_span_mm'][0]) if forward else (inner+tt-depth,C['x_span_mm'][1])
-  side_flat=side_flat.union(cq.Workplane('XY').box(xmax-xmin,C['height_mm'],tt,centered=(True,True,False)).translate(((xmin+xmax)/2,target_z,0)))
+  end_pad=cq.Workplane('XY').box(xmax-xmin,C['height_mm'],tt,centered=(True,True,False))
+  if not forward:end_pad=end_pad.edges('|Z').fillet(P['hip_profile_radius_mm'])
+  side_flat=side_flat.union(end_pad.translate(((xmin+xmax)/2,target_z,0)))
+  if forward:
+   # Keep the side flange inside the stock heel: widening must not grow
+   # behind the output face into the adjacent hip clamp sweep.
+   side_flat=side_flat.intersect(cq.Workplane('XY').box(depth,2*(zmax-zmin)+40,tt,centered=(False,True,False)).translate((inner,target_z/2,0)))
   side=side_flat.rotate((0,0,0),(1,0,0),90).translate((0,case_face+tt,0))
   adapter=front.union(side)
   corner=inner+tt if forward else inner
   internal=[e for e in adapter.edges('|Z').vals() if abs(e.Center().x-corner)<.001 and abs(e.Center().y-case_face)<.001]
-  if internal:adapter=adapter.newObject(internal).fillet(P['adapter_inner_radius_mm'])
+  if forward and internal:adapter=adapter.newObject(internal).fillet(P['adapter_inner_radius_mm'])
+  if not forward:
+   r=P['adapter_inner_radius_mm'];h=P['hip_output_neck_half_width_mm']
+   root=cq.Workplane('XY').box(r,r,2*h,centered=(False,False,False)).translate((inner-r,case_face-r,-h))
+   root=root.cut(cyl(r,2*h,'z',(inner-r,case_face-r,-h)))
+   adapter=adapter.union(root)
+  if forward:
+   # Radius the remote through-profile corners after the stock inner radius.
+   # Leave the folded root untouched so its actual extrusion radius is retained.
+   profile_edges=[e for e in adapter.edges('|Y').vals() if e.Center().x >= xmin-1e-6]
+   adapter=adapter.newObject(profile_edges).fillet(P['trunk_profile_radius_mm'])
+   flat_edges=[e for e in side_flat.edges('|Z').vals() if e.Center().x >= xmin-1e-6]
+   side_flat=side_flat.newObject(flat_edges).fillet(P['trunk_profile_radius_mm'])
   for u,v in ((4.95,4.95),(4.95,-4.95),(-4.95,4.95),(-4.95,-4.95)):
    adapter=adapter.cut(cyl(SERVO['horn_clear_mm']/2,tt+2,'x',(inner-1,u,v)))
+   front=front.cut(cyl(SERVO['horn_clear_mm']/2,tt+2,'x',(inner-1,u,v)))
   for zz in C['bolt_z_mm']:
    adapter=adapter.cut(cyl(C['hole_mm']/2,tt+2,'y',(end_x,case_face-1,target_z+zz)))
+   side_flat=side_flat.cut(cyl(C['hole_mm']/2,tt,'z',(end_x,target_z+zz,0)))
   adapter=adapter.cut(cyl(3.3,tt+2,'x',(inner-1,0,0)))
-  add(f'pelvis-output-adapter-{tag}',link,'al',adapter,manufacturing=f'6061-T6 stock angle {depth:g}x{leg:g}x{tt:g}, saw length {zmax-zmin:g}; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets',stock_cut_length_mm=zmax-zmin,side_flat=side_flat)
+  front=front.cut(cyl(3.3,tt+2,'x',(inner-1,0,0)))
+  output_flat=front.translate((-inner,0,0)).rotate((0,0,0),(1,1,1),-120)
+  profile_note=f"remote profile R{P['trunk_profile_radius_mm']:g}; " if forward else f"round PCD pad R{P['hip_output_pad_radius_mm']:g}; bridge width {2*P['hip_output_neck_half_width_mm']:g}; side profile R{P['hip_profile_radius_mm']:g}; "
+  add(f'pelvis-output-adapter-{tag}',link,'al',adapter,manufacturing=f'6061-T6 stock angle {depth:g}x{leg:g}x{tt:g}, saw length {zmax-zmin:g}; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; {profile_note}NO CNC pockets',stock_cut_length_mm=zmax-zmin,side_flat=side_flat,output_flat=output_flat)
   for part in build_case_clamp(tag+'-pitch',link,include_front=False):
    wp=part['wp']
    if '-bolt-' in part['name']:wp=wp.translate((0,tt-C['plate_t_mm'],0))
