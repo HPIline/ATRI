@@ -1,0 +1,541 @@
+[
+  {
+    "pose": {},
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 814,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [
+      {
+        "a": "case-left-shoulder-jaw-rear",
+        "b": "case-left-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-upper-jaw-rear",
+        "b": "case-left-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-fore-jaw-rear",
+        "b": "case-left-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-shoulder-jaw-rear",
+        "b": "case-right-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-upper-jaw-rear",
+        "b": "case-right-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-fore-jaw-rear",
+        "b": "case-right-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      }
+    ],
+    "ok": false
+  },
+  {
+    "pose": {
+      "left_shoulder_pitch": -90,
+      "right_shoulder_pitch": 90
+    },
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 831,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [
+      {
+        "a": "case-left-shoulder-jaw-rear",
+        "b": "case-left-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-upper-jaw-rear",
+        "b": "case-left-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-fore-jaw-rear",
+        "b": "case-left-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-shoulder-jaw-rear",
+        "b": "case-right-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-upper-jaw-rear",
+        "b": "case-right-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-fore-jaw-rear",
+        "b": "case-right-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "torso-beam-0-0",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 80.103,
+        "same_link": false
+      },
+      {
+        "a": "torso-beam-0-4",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 81.0,
+        "same_link": false
+      },
+      {
+        "a": "sbc-carrier-0",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 352.069,
+        "same_link": false
+      },
+      {
+        "a": "sbc",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 47.884,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-011",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 28.931,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-016",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 10.511,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-025",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-026",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-027",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-028",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-029",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-030",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-032",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-033",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      }
+    ],
+    "ok": false
+  },
+  {
+    "pose": {
+      "left_shoulder_roll": 90,
+      "right_shoulder_roll": -90
+    },
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 810,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [
+      {
+        "a": "case-left-shoulder-jaw-rear",
+        "b": "case-left-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-upper-jaw-rear",
+        "b": "case-left-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-fore-jaw-rear",
+        "b": "case-left-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-shoulder-jaw-rear",
+        "b": "case-right-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-upper-jaw-rear",
+        "b": "case-right-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-fore-jaw-rear",
+        "b": "case-right-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      }
+    ],
+    "ok": false
+  },
+  {
+    "pose": {
+      "left_elbow_pitch": -120,
+      "right_elbow_pitch": -120
+    },
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 892,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [
+      {
+        "a": "case-left-shoulder-jaw-rear",
+        "b": "case-left-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-upper-jaw-rear",
+        "b": "case-left-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-fore-jaw-rear",
+        "b": "case-left-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-shoulder-jaw-rear",
+        "b": "case-right-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-upper-jaw-rear",
+        "b": "case-right-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-fore-jaw-rear",
+        "b": "case-right-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      }
+    ],
+    "ok": false
+  },
+  {
+    "pose": {
+      "left_shoulder_pitch": -90,
+      "left_shoulder_roll": 90,
+      "left_elbow_pitch": -120
+    },
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 850,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [
+      {
+        "a": "case-left-shoulder-jaw-rear",
+        "b": "case-left-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-upper-jaw-rear",
+        "b": "case-left-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-fore-jaw-rear",
+        "b": "case-left-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-shoulder-jaw-rear",
+        "b": "case-right-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-upper-jaw-rear",
+        "b": "case-right-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-fore-jaw-rear",
+        "b": "case-right-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "torso-beam-0-4",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 81.0,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      }
+    ],
+    "ok": false
+  },
+  {
+    "pose": {
+      "right_shoulder_pitch": 90,
+      "right_shoulder_roll": -90,
+      "right_elbow_pitch": -120
+    },
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 857,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [
+      {
+        "a": "case-left-shoulder-jaw-rear",
+        "b": "case-left-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-upper-jaw-rear",
+        "b": "case-left-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-left-fore-jaw-rear",
+        "b": "case-left-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-shoulder-jaw-rear",
+        "b": "case-right-shoulder-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-upper-jaw-rear",
+        "b": "case-right-upper-jaw-rear",
+        "volume_mm3": 659.873,
+        "same_link": true
+      },
+      {
+        "a": "case-right-fore-jaw-rear",
+        "b": "case-right-fore-jaw-rear",
+        "volume_mm3": 602.873,
+        "same_link": true
+      },
+      {
+        "a": "torso-beam-0-0",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 80.103,
+        "same_link": false
+      },
+      {
+        "a": "sbc-carrier-0",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 352.069,
+        "same_link": false
+      },
+      {
+        "a": "sbc",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 47.884,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-011",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 28.931,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-016",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 10.511,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-025",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-026",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-027",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-028",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-029",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-030",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-032",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "sbc-component-033",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 0.5,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-left-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      },
+      {
+        "a": "shell-torso-rear",
+        "b": "arm-right-shoulder-rear-angle",
+        "volume_mm3": 64.8,
+        "same_link": false
+      }
+    ],
+    "ok": false
+  }
+]

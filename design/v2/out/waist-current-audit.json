@@ -1,0 +1,99 @@
+{
+  "part_valid": true,
+  "solids": 1,
+  "volume_mm3": 5998.935010059778,
+  "mass_g": 16.1971245271614,
+  "cases": [
+    {
+      "pose": {
+        "trunk_pitch": -15
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 838,
+      "purchased_internal_pairs_excluded": 431,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "pose": {
+        "trunk_pitch": -10
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 823,
+      "purchased_internal_pairs_excluded": 417,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "pose": {
+        "trunk_pitch": -5
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 772,
+      "purchased_internal_pairs_excluded": 368,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "pose": {
+        "trunk_pitch": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 648,
+      "purchased_internal_pairs_excluded": 262,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "pose": {
+        "trunk_pitch": 5
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 808,
+      "purchased_internal_pairs_excluded": 376,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "pose": {
+        "trunk_pitch": 10
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 843,
+      "purchased_internal_pairs_excluded": 423,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "pose": {
+        "trunk_pitch": 15
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": true,
+      "narrow_phase_pairs": 866,
+      "purchased_internal_pairs_excluded": 443,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    }
+  ],
+  "strip_screen": {
+    "stress_mpa": 55.2037037037037,
+    "deflection_mm": 0.5378138605594323,
+    "second_moment_mm4": 40.5
+  },
+  "screen_assumptions": "27.1 N, 55 mm end-loaded weak-axis cantilever, E=69 GPa assumption, not certified loading/material",
+  "release_ready": false
+}

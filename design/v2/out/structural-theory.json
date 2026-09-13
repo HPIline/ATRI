@@ -1,0 +1,133 @@
+{
+  "release_ready": false,
+  "method": "linear cantilever screening, NOT full structure verification",
+  "assumptions": {
+    "E_mpa": 69000.0,
+    "yield_mpa": 200.0,
+    "yield_safety_factor": 2.0,
+    "material_certified": false
+  },
+  "rows": [
+    {
+      "name": "pelvis output web, weak-axis strip",
+      "length_mm": 50,
+      "width_mm": 18.0,
+      "thickness_mm": 3.0,
+      "force_n": 24.0,
+      "stress_mpa": 44.44444444444444,
+      "deflection_mm": 0.3578457684737878,
+      "second_moment_mm4": 40.5,
+      "nominal_yield_margin": 4.5,
+      "screening_below_allowable": true,
+      "scope": "1.2 Nm root moment; angle fold and tapered root not represented; critical lower section still needs CAD section analysis"
+    },
+    {
+      "name": "pelvis rear frame, isolated web",
+      "length_mm": 40,
+      "width_mm": 8.0,
+      "thickness_mm": 1.5,
+      "force_n": 48.069,
+      "stress_mpa": 640.9200000000001,
+      "deflection_mm": 6.605294685990338,
+      "second_moment_mm4": 2.25,
+      "nominal_yield_margin": 0.3120514260750171,
+      "screening_below_allowable": false,
+      "scope": "full 2.45 kg at k=2 applied to one cantilever; actual multi-point load distribution unknown"
+    },
+    {
+      "name": "leg one of two webs, weak-axis strip",
+      "length_mm": 78.0,
+      "width_mm": 12.0,
+      "thickness_mm": 1.5,
+      "force_n": 24.0345,
+      "stress_mpa": 416.598,
+      "deflection_mm": 16.32581147826087,
+      "second_moment_mm4": 3.375,
+      "nominal_yield_margin": 0.48007911703848793,
+      "screening_below_allowable": false,
+      "scope": "equal load sharing assumed; paired frame action, axial loading and spacers not represented"
+    },
+    {
+      "name": "arm link web, weak-axis strip",
+      "length_mm": 58.0,
+      "width_mm": 9.0,
+      "thickness_mm": 3.0,
+      "force_n": 20.689655172413794,
+      "stress_mpa": 88.88888888888889,
+      "deflection_mm": 0.9630345321166577,
+      "second_moment_mm4": 20.25,
+      "nominal_yield_margin": 2.25,
+      "screening_below_allowable": true,
+      "scope": "1.2 Nm screening moment; actual angle section and case grip unresolved"
+    },
+    {
+      "name": "leg drive-side web, in-plane full torque",
+      "length_mm": 78.0,
+      "width_mm": 1.5,
+      "thickness_mm": 12.0,
+      "force_n": 15.384615384615385,
+      "stress_mpa": 33.333333333333336,
+      "deflection_mm": 0.16328502415458937,
+      "second_moment_mm4": 216.0,
+      "nominal_yield_margin": 6.0,
+      "screening_below_allowable": true,
+      "scope": "full 1.2 Nm carried by drive plate; passive rear disc does not halve drive torque"
+    },
+    {
+      "name": "foot toe-edge concentrated load",
+      "length_mm": 58,
+      "width_mm": 34.0,
+      "thickness_mm": 3.0,
+      "force_n": 48.069,
+      "stress_mpa": 54.666705882352936,
+      "deflection_mm": 0.5922666621199204,
+      "second_moment_mm4": 76.5,
+      "nominal_yield_margin": 3.6585339608795118,
+      "screening_below_allowable": true,
+      "scope": "48.07 N at toe edge, 58 mm lever; net section through both windows; stress concentrations and actual ground-pressure distribution excluded"
+    },
+    {
+      "name": "gripper finger, out-of-plane misuse load",
+      "length_mm": 55.0,
+      "width_mm": 6.0,
+      "thickness_mm": 2.0,
+      "force_n": 3.2700000000000005,
+      "stress_mpa": 44.962500000000006,
+      "deflection_mm": 0.6570606884057972,
+      "second_moment_mm4": 4.0,
+      "nominal_yield_margin": 4.448151237142063,
+      "screening_below_allowable": true,
+      "scope": "contact-force magnitude applied to weak axis; normal grip acts mainly in plane, lateral object loads may not"
+    },
+    {
+      "name": "gripper finger, in-plane ideal strip",
+      "length_mm": 55.0,
+      "width_mm": 2.0,
+      "thickness_mm": 6.0,
+      "force_n": 3.2700000000000005,
+      "stress_mpa": 14.987500000000002,
+      "deflection_mm": 0.07300674315619969,
+      "second_moment_mm4": 36.0,
+      "nominal_yield_margin": 13.344453711426187,
+      "screening_below_allowable": true,
+      "scope": "straight moving finger approximation; fixed return-shaped finger needs separate analysis"
+    }
+  ],
+  "grip_100g_mu03_k2": {
+    "normal_per_jaw_n": 3.2700000000000005,
+    "torque_nm": 0.17985,
+    "assumes": "two opposed contacts, Coulomb friction, force normal to jaw; no wedging or object eccentricity"
+  },
+  "unverified": [
+    "hole bearing/net section and stress concentration",
+    "angle section torsion and local buckling",
+    "plastic case crush, creep and clamp slip",
+    "servo shaft and horn capacity",
+    "gripper contact overlap and pad bond",
+    "neck and foot detailed load paths",
+    "torso tube joints and threaded rod preload",
+    "complete mass and centre of gravity",
+    "fatigue, impact and continuous pose envelope"
+  ],
+  "interpretation": "A failed strip screen flags a load-path question; it does not prove the actual braced assembly fails. A passed strip screen does not certify the assembly."
+}

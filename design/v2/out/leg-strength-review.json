@@ -1,0 +1,153 @@
+{
+  "status": "NOT_RELEASED",
+  "baseline_9mm_2mm": {
+    "dimensions": {
+      "plate_t_mm": 1.5,
+      "web_mm": 9.0,
+      "pad_r_mm": 5.0,
+      "output_r_mm": 10.0,
+      "front_inner_mm": [
+        20.2,
+        26.2,
+        33.2
+      ],
+      "rear_inner_mm": [
+        -19.2,
+        -25.2,
+        -32.2
+      ],
+      "horn_bolt_mm": [
+        5.0,
+        12.0,
+        18.0
+      ],
+      "clamp_bolt_mm": [
+        45.0,
+        60.0
+      ],
+      "clamp_head_washer_mm": [
+        0.0,
+        2.0
+      ],
+      "foot_height_mm": 44.0,
+      "foot_angle_leg_mm": 15.0,
+      "foot_angle_length_mm": 20.0,
+      "foot_angle_t_mm": 1.5,
+      "foot_angle_hole_x_mm": [
+        -6.0,
+        6.0
+      ],
+      "foot_angle_inner_r_mm": 1.5,
+      "foot_angle_vertical_hole_mm": 9.0,
+      "foot_angle_horizontal_hole_mm": 9.0,
+      "foot_plate_t_mm": 2.0,
+      "foot_edge_r_mm": 8.0,
+      "spacer_lengths_mm": [
+        10.0,
+        6.0,
+        5.0,
+        3.0,
+        2.0,
+        1.0,
+        0.5,
+        0.2
+      ],
+      "foot_lightening_x_ranges_mm": [
+        [
+          -32.0,
+          -12.0
+        ],
+        [
+          12.0,
+          68.0
+        ]
+      ],
+      "foot_lightening_y_mm": [
+        -18.0,
+        18.0
+      ],
+      "foot_lightening_width_mm": 18.0,
+      "foot_lightening_radius_mm": 4.0,
+      "thigh_rear_web_waypoint_mm": [
+        10.0,
+        -22.0
+      ]
+    },
+    "E_MPa_assumed": 69000.0,
+    "yield_MPa_assumed": 200,
+    "in_plane_Z_mm3": 20.25,
+    "in_plane_I_mm4": 91.125,
+    "loads": [
+      {
+        "mass_kg": 2.3,
+        "k": 1.4,
+        "F_N": 31.577412999999993,
+        "eccentric31mm_moment_Nmm": 978.8998029999998,
+        "eccentric_nominal_stress_MPa": 48.34073101234567,
+        "axial_stress_one_plate_MPa": 2.339067629629629
+      },
+      {
+        "mass_kg": 2.3,
+        "k": 2,
+        "F_N": 45.110589999999995,
+        "eccentric31mm_moment_Nmm": 1398.4282899999998,
+        "eccentric_nominal_stress_MPa": 69.05818716049382,
+        "axial_stress_one_plate_MPa": 3.341525185185185
+      },
+      {
+        "mass_kg": 2.45,
+        "k": 1.4,
+        "F_N": 33.6368095,
+        "eccentric31mm_moment_Nmm": 1042.7410945,
+        "eccentric_nominal_stress_MPa": 51.493387382716044,
+        "axial_stress_one_plate_MPa": 2.4916155185185183
+      },
+      {
+        "mass_kg": 2.45,
+        "k": 2,
+        "F_N": 48.052585,
+        "eccentric31mm_moment_Nmm": 1489.630135,
+        "eccentric_nominal_stress_MPa": 73.56198197530864,
+        "axial_stress_one_plate_MPa": 3.5594507407407407
+      }
+    ],
+    "torque_1200_Nmm": {
+      "nominal_stress_MPa": 59.25925925925926,
+      "end_couple_rotation_deg": 0.8529269736068078,
+      "end_couple_deflection_mm": 0.5805689747718733,
+      "horn_force_per_bolt_N": 42.857142857142854,
+      "bearing_MPa": 9.523809523809524
+    },
+    "weak_axis_pinned_column_N": 283.33137634414254,
+    "plate_masses_g": {
+      "9": 45.6352800196056,
+      "12": 56.69995315124793
+    }
+  },
+  "revision": {
+    "before": {
+      "web_mm": 9,
+      "foot_plate_t_mm": 2,
+      "al_mass_g": 143.33111145825137,
+      "foot_plate_pair_g": 60.54889322098395
+    },
+    "after": {
+      "web_mm": 12.0,
+      "foot_plate_t_mm": 3.0,
+      "al_mass_g": 184.61326708252082,
+      "foot_plate_pair_g": 90.96077571361106
+    },
+    "al_delta_g": 41.28215562426945
+  },
+  "current_nominal_checks": {
+    "web_width_mm": 12,
+    "web_thickness_mm": 1.5,
+    "foot_thickness_mm": 3,
+    "Z_mm3": 36,
+    "torque_1_2_Nm_stress_MPa": 33.333333333333336,
+    "eccentric_31mm_hard_mass_k2_MPa": 41.37861486111112,
+    "toe_edge_hard_mass_k2_MPa": 54.64803784313726
+  },
+  "physical_verified": false,
+  "fea_completed": false
+}

@@ -1,0 +1,130 @@
+{
+  "target": {
+    "object_mm": [
+      15,
+      35
+    ],
+    "mass_kg": 0.1,
+    "task": "T3",
+    "payload_in_robot_weighing": false
+  },
+  "dimensions": {
+    "finger_length_mm": 55.0,
+    "finger_width_mm": 6.0,
+    "finger_t_mm": 2.0,
+    "forearm_mm": 60.0,
+    "pad_height_mm": {
+      "fixed": 24.0,
+      "moving": 24.0
+    }
+  },
+  "poses": [
+    {
+      "angle_deg": 0,
+      "pad_min_distance_mm": 4.0237076473708555,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 23.637512845397204
+    },
+    {
+      "angle_deg": 5,
+      "pad_min_distance_mm": 8.455198766570167,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 23.95933486900523
+    },
+    {
+      "angle_deg": 10,
+      "pad_min_distance_mm": 11.180421868690182,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 23.85564118090953
+    },
+    {
+      "angle_deg": 15,
+      "pad_min_distance_mm": 13.91949305908078,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 23.947866821982313
+    },
+    {
+      "angle_deg": 20,
+      "pad_min_distance_mm": 16.651566352086682,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 23.276217919760498
+    },
+    {
+      "angle_deg": 25,
+      "pad_min_distance_mm": 19.35745491997687,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 22.180469095198
+    },
+    {
+      "angle_deg": 30,
+      "pad_min_distance_mm": 22.03099018322575,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 20.67998478957586
+    },
+    {
+      "angle_deg": 35,
+      "pad_min_distance_mm": 24.666335692010062,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 18.78618459447705
+    },
+    {
+      "angle_deg": 40,
+      "pad_min_distance_mm": 27.257388664707367,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 16.513481472894092
+    },
+    {
+      "angle_deg": 45,
+      "pad_min_distance_mm": 29.798523130782353,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 13.879172067877903
+    },
+    {
+      "angle_deg": 50,
+      "pad_min_distance_mm": 32.2844376081509,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 10.903305064640158
+    },
+    {
+      "angle_deg": 55,
+      "pad_min_distance_mm": 34.71007725030958,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 7.608528607953126
+    },
+    {
+      "angle_deg": 60,
+      "pad_min_distance_mm": 37.070593145551044,
+      "axial_overlap_mm": 2.0,
+      "height_overlap_mm": 4.019917936092611
+    }
+  ],
+  "friction_sensitivity": [
+    {
+      "mu": 0.2,
+      "normal_per_jaw_n": 4.905,
+      "torque_nm": 0.26977500000000004,
+      "assumes": "two opposed contacts, Coulomb friction, force normal to jaw; no wedging or object eccentricity"
+    },
+    {
+      "mu": 0.3,
+      "normal_per_jaw_n": 3.2700000000000005,
+      "torque_nm": 0.17985,
+      "assumes": "two opposed contacts, Coulomb friction, force normal to jaw; no wedging or object eccentricity"
+    },
+    {
+      "mu": 0.5,
+      "normal_per_jaw_n": 1.9620000000000002,
+      "torque_nm": 0.10791,
+      "assumes": "two opposed contacts, Coulomb friction, force normal to jaw; no wedging or object eccentricity"
+    }
+  ],
+  "minimum_gap_scope": "distance between solid pads, not a certified grasp diameter; curved/rectangular object contact and wedging differ",
+  "release_ready": false,
+  "remaining": [
+    "actual object insertion and both contact normals",
+    "minimum grip-pad bond area; metal-backed fixed pad retains about 0.2 mm lip",
+    "force/current limitation and servo heating",
+    "slip under shaking, object eccentricity and friction variability",
+    "100 g payload at arm extension must be included in posture torque/balance tests"
+  ]
+}

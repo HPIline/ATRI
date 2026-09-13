@@ -1,0 +1,150 @@
+{
+  "left": {
+    "release_ready": false,
+    "side": "left",
+    "mass_model": "geometric homogeneous materials plus nominal 55g servo; missing parts are explicitly omitted",
+    "known_arm_mass_without_payload_g": 268.8284525695332,
+    "payload_g": 100,
+    "payload_not_in_robot_weighing": true,
+    "omitted_modeled_items": [
+      "horn-left_shoulder_pitch",
+      "shaft-left_shoulder_pitch",
+      "horn-left_shoulder_roll",
+      "shaft-left_shoulder_roll",
+      "horn-left_elbow_pitch",
+      "shaft-left_elbow_pitch",
+      "horn-left_gripper",
+      "shaft-left_gripper"
+    ],
+    "additionally_unmodeled": "arm wiring; purchased servo accessory mass scope unresolved",
+    "sampled_poses": 819,
+    "gravity_maxima": {
+      "left_shoulder_pitch": {
+        "static_nm": 0.3176412193723802,
+        "pose_deg": {
+          "left_shoulder_pitch": -90,
+          "left_shoulder_roll": 0,
+          "left_elbow_pitch": 0
+        },
+        "k14_nm": 0.4446977071213323,
+        "k2_nm": 0.6352824387447604,
+        "rated_utilization_static": 0.32412369323712265,
+        "k14_below_85pct_rated": true,
+        "k2_below_rated": true,
+        "strip_inplane_mpa_at_k2": 15.685986141845936,
+        "strip_outofplane_mpa_at_k2": 47.057958425537805
+      },
+      "left_shoulder_roll": {
+        "static_nm": 0.32891134909385467,
+        "pose_deg": {
+          "left_shoulder_pitch": 0,
+          "left_shoulder_roll": 90,
+          "left_elbow_pitch": 0
+        },
+        "k14_nm": 0.4604758887313965,
+        "k2_nm": 0.6578226981877093,
+        "rated_utilization_static": 0.33562382560597415,
+        "k14_below_85pct_rated": true,
+        "k2_below_rated": true,
+        "strip_inplane_mpa_at_k2": 16.242535757721217,
+        "strip_outofplane_mpa_at_k2": 48.72760727316365
+      },
+      "left_elbow_pitch": {
+        "static_nm": 0.1689040244324998,
+        "pose_deg": {
+          "left_shoulder_pitch": 15,
+          "left_shoulder_roll": 0,
+          "left_elbow_pitch": -90
+        },
+        "k14_nm": 0.2364656342054997,
+        "k2_nm": 0.3378080488649996,
+        "rated_utilization_static": 0.17235104533928552,
+        "k14_below_85pct_rated": true,
+        "k2_below_rated": true,
+        "strip_inplane_mpa_at_k2": 8.340939478148139,
+        "strip_outofplane_mpa_at_k2": 25.022818434444414
+      }
+    },
+    "limitations": [
+      "No inertial dynamics: k=1.4/2 are comparison multipliers only",
+      "Maximum may be at an infeasible combined pose; this is a rectangular joint-range load envelope",
+      "Payload centre approximation, not a solved object contact pose",
+      "Strip stresses do not include actual angle-frame load sharing, torsion or root concentrations",
+      "Horn thread pullout, spacer bending, housing clamp slip and fatigue remain unqualified"
+    ]
+  },
+  "right": {
+    "release_ready": false,
+    "side": "right",
+    "mass_model": "geometric homogeneous materials plus nominal 55g servo; missing parts are explicitly omitted",
+    "known_arm_mass_without_payload_g": 268.393422852698,
+    "payload_g": 100,
+    "payload_not_in_robot_weighing": true,
+    "omitted_modeled_items": [
+      "horn-right_shoulder_pitch",
+      "shaft-right_shoulder_pitch",
+      "horn-right_shoulder_roll",
+      "shaft-right_shoulder_roll",
+      "horn-right_elbow_pitch",
+      "shaft-right_elbow_pitch",
+      "horn-right_gripper",
+      "shaft-right_gripper"
+    ],
+    "additionally_unmodeled": "arm wiring; purchased servo accessory mass scope unresolved",
+    "sampled_poses": 819,
+    "gravity_maxima": {
+      "right_shoulder_pitch": {
+        "static_nm": 0.3173936961640953,
+        "pose_deg": {
+          "right_shoulder_pitch": -90,
+          "right_shoulder_roll": 0,
+          "right_elbow_pitch": 0
+        },
+        "k14_nm": 0.4443511746297334,
+        "k2_nm": 0.6347873923281906,
+        "rated_utilization_static": 0.3238711185347911,
+        "k14_below_85pct_rated": true,
+        "k2_below_rated": true,
+        "strip_inplane_mpa_at_k2": 15.67376277353557,
+        "strip_outofplane_mpa_at_k2": 47.02128832060671
+      },
+      "right_shoulder_roll": {
+        "static_nm": 0.32866382588556975,
+        "pose_deg": {
+          "right_shoulder_pitch": 0,
+          "right_shoulder_roll": -90,
+          "right_elbow_pitch": 0
+        },
+        "k14_nm": 0.4601293562397976,
+        "k2_nm": 0.6573276517711395,
+        "rated_utilization_static": 0.3353712509036426,
+        "k14_below_85pct_rated": true,
+        "k2_below_rated": true,
+        "strip_inplane_mpa_at_k2": 16.23031238941085,
+        "strip_outofplane_mpa_at_k2": 48.69093716823255
+      },
+      "right_elbow_pitch": {
+        "static_nm": 0.1689040244324998,
+        "pose_deg": {
+          "right_shoulder_pitch": -15,
+          "right_shoulder_roll": 0,
+          "right_elbow_pitch": -90
+        },
+        "k14_nm": 0.2364656342054997,
+        "k2_nm": 0.3378080488649996,
+        "rated_utilization_static": 0.17235104533928552,
+        "k14_below_85pct_rated": true,
+        "k2_below_rated": true,
+        "strip_inplane_mpa_at_k2": 8.340939478148139,
+        "strip_outofplane_mpa_at_k2": 25.022818434444414
+      }
+    },
+    "limitations": [
+      "No inertial dynamics: k=1.4/2 are comparison multipliers only",
+      "Maximum may be at an infeasible combined pose; this is a rectangular joint-range load envelope",
+      "Payload centre approximation, not a solved object contact pose",
+      "Strip stresses do not include actual angle-frame load sharing, torsion or root concentrations",
+      "Horn thread pullout, spacer bending, housing clamp slip and fatigue remain unqualified"
+    ]
+  }
+}
