@@ -51,9 +51,9 @@ archive/v1-22dof/design/cad/out/
 .venv-ppt/
 ppt/out/
 
-# 忽略整个 ppt/ 生成流水线与脚本，仅保留成品 PPTX
+# 忽略 ppt/ 下的生成物与临时件，只保留成品 PPTX（生成器在 ppt-gen/，已入库）
 ppt/*
-!ppt/ATRI-答辩PPT-v4.pptx
+!ppt/ATRI-答辩PPT-*.pptx
 
 # ── T-01 人脸识别（2026-09-12） ──────────────────────────────
 # 人脸模型（约 37 MB 二进制，按需拉取而不是入库；拉取带 sha256 校验）
