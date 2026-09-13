@@ -11,7 +11,7 @@
 电机名与 ``controllers/atri_controller/joint_mapping.json`` 完全一致（默认同名映射），
 所以 20 个关节全部能绑定上，联调跑的就是全关节。关节硬限位（``minStop``/``maxStop``）
 取自 ``design/v2/profile.py``，原点/轴向/质量取自 ``design/v2/out/sim/atri_v2.urdf``。
-冻结的 22 DOF 世界仍在 ``webots/worlds/atri_22dof.wbt``，本生成器默认不再覆盖它。
+旧 22 DOF 世界备份在 ``archive/v1-22dof/webots/worlds/atri_22dof.wbt``，本生成器默认不再覆盖它。
 
 用法::
 
@@ -61,9 +61,9 @@ WORLD_VERSION = "R2025a"
 BASIC_TIME_STEP = 32
 
 # --------------------------------------------------------------------------
-# 默认值：必须与提交在仓库里的 worlds/atri_22dof.wbt 逐字节一致
+# 默认值：必须与提交在仓库里的 worlds/atri_v2.wbt 逐字节一致
 # --------------------------------------------------------------------------
-# 重力置零：这是"运动学联调"世界，验证的是 22 个关节角是否被正确下发与跟随，
+# 重力置零：这是"运动学联调"世界，验证的是 20 个关节角是否被正确下发与跟随，
 # 不是双足平衡。零重力下机器人不会倒地，关节可以自由摆动，轨迹看得最清楚。
 #
 # 注意：Webots R2025a 里 WorldInfo.gravity 是 **SFFloat**（沿"下"轴的大小），

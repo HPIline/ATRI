@@ -29,8 +29,9 @@ import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
-DESIGN = REPO / "design"
+DESIGN = REPO / "archive" / "v1-22dof" / "design"
 sys.path.insert(0, str(DESIGN))
+sys.path.insert(0, str(REPO / "design"))  # geometry.py
 sys.path.insert(0, str(REPO / "software" / "atri"))
 
 import gen_handoff  # noqa: E402
@@ -520,16 +521,18 @@ class TestProjectDocsConsistency(unittest.TestCase):
     """项目文档不得残留旧电源口径（标称 2.89 Ah）；17DOF 核查必须用现行数字。"""
 
     DOC_DIR = REPO / "docs" / "research" / "项目文档"
+    ARCHIVE_RESEARCH = REPO / "archive" / "v1-22dof" / "docs" / "research"
 
     def test_no_stale_battery_nameplate(self):
-        for path in sorted(self.DOC_DIR.glob("*.md")):
+        docs = list(self.DOC_DIR.glob("*.md")) + list(self.ARCHIVE_RESEARCH.glob("*.md"))
+        for path in sorted(docs):
             text = path.read_text(encoding="utf-8")
             with self.subTest(doc=path.name):
                 self.assertNotIn("2.89", text,
                                  f"{path.name} 残留旧电池标称 2.89 Ah")
 
     def test_17dof_doc_does_not_revive_v1_nameplate(self):
-        text = (self.DOC_DIR / "两套17自由度方案可行性核查.md").read_text(
+        text = (self.ARCHIVE_RESEARCH / "两套17自由度方案可行性核查.md").read_text(
             encoding="utf-8")
         self.assertNotIn("2.89", text)
 

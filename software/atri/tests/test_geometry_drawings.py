@@ -13,8 +13,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
-DESIGN = REPO / "design"
+DESIGN = REPO / "archive" / "v1-22dof" / "design"
 sys.path.insert(0, str(DESIGN))
+sys.path.insert(0, str(REPO / "design"))  # geometry.py
 sys.path.insert(0, str(REPO / "software" / "atri"))
 
 import geometry  # noqa: E402

@@ -15,7 +15,7 @@ import math
 VELOCITY = 2.0          # rad/s，与 atri_controller.py 的 DEFAULT_VELOCITY 一致
 HOLD_SIM_S = 10.0       # 站立观察时长（仿真秒）
 
-# 机械零位站姿（design/atri.urdf 的零位；肘部 rest 不是 0，见 software/atri/atri/config.py::rest_pose）
+# 机械零位站姿（v2 URDF 零位；肘部 rest 不是 0，见 software/atri/atri/config.py::rest_pose）
 REST_DEG = {"left_elbow_pitch": -10.0, "right_elbow_pitch": -10.0}
 
 # 全部 20 个关节都下发目标角（漏掉的那个会在重力下瘫掉，但扭矩记成 0，看着像"很轻松"）

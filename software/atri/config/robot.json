@@ -2,13 +2,13 @@
   "name": "A.T.R.I.",
   "dof": 20,
   "size_cm": [
-    14.6,
-    26.3,
-    40.7
+    29.5,
+    18.8,
+    46.65
   ],
-  "size_note": "2026-09-12 实建包络 160 × 268 × 407 mm（design/cad/assembly.py --all 实测；宽 268 由肩部外挂错轴件决定）。历史口径：v3『实装』418 × 223 × 129 mm（提交 6d4b077，已两度过期）；基元/运动学口径 372.8 × 190 × 123 mm。官方上限 60 × 30 × 30 cm。",
-  "mass_kg": 3.036,
-  "mass_note": "2026-09-12：结构件 1390 g〔CAD 实算 81 件〕+ 舵机 1210 + 电子件与电池 316 + 线束紧固件 120 g ≈ 3036 g。**整机重量方案尚未定案**（结构实算已是真值，整机为纸面推算），故本值仅供软件层引用；`design/atri.urdf` 的 link 质量已于 2026-09-12 回灌（sum = 3.0367 kg），待定案后重测。历史口径：结构 1790〔74 件〕/ 整机 3437 g（v3 虚高值，见 装配一致性修正记录 §4.4）。",
+  "size_note": "v2 零位 CAD 外包络 466.5 × 188 × 295 mm（高×宽×深，assembly-snapshot bbox）。官方上限 60 × 30 × 30 cm。比赛包络量法待 G3。",
+  "mass_kg": 2.469,
+  "mass_note": "v2 已计约 2469 g（目标 2300、硬顶 2450，超硬顶且未计齐）。design_mass_closed=false。旧 22 DOF 质量账在 archive/v1-22dof。",
   "model_source": "design/v2/profile.py",
   "motion": {
     "backend": "scripted",

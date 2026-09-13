@@ -33,11 +33,11 @@ design/results/
 design/figures/
 
 # 渲染产物（可复现，本地生成即可；SVG 入库，PNG 不入库）
-design/renders/*.png
-design/drawings/preview_*.png
+archive/v1-22dof/design/renders/*.png
+archive/v1-22dof/design/drawings/preview_*.png
 
 # 交接包内的图片附件（由 gen_handoff.py 从 renders/drawings 复制，可复现）
-design/handoff/*.png
+archive/v1-22dof/design/handoff/*.png
 
 # Webots 联调产物（run_webots_batch.ps1 / 控制器 --report --log 生成）
 /atri_report.json
@@ -45,7 +45,7 @@ design/handoff/*.png
 
 # CadQuery 独立环境与 CAD 产出（体积大，可复现）
 .venv-cad/
-design/cad/out/
+archive/v1-22dof/design/cad/out/
 
 # ── 答辩 PPT 生产流水线（ppt/） ─────────────────────────────
 .venv-ppt/
@@ -75,6 +75,7 @@ models/
 # ── Webots 带重力派生世界（生成产物；默认零重力世界仍入库）──
 docs/process/sim/worlds/
 webots/worlds/atri_22dof_gravity.wbt
+webots/worlds/atri_v2_gravity.wbt
 docs/process/sim/video/
 docs/process/sim/empty_cards/
 docs/process/sim/cards_t05/

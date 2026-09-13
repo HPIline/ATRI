@@ -12,7 +12,7 @@
 
 对应关系：真机驱动的交付物是 `atri/bus_sts3215.py`（实现 `cerebellum.ServoBus`），
 协议与寄存器见 `design/reference/sts3215/PROTOCOL.md` 与
-`design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf`（官方规格书）。
+`archive/v1-22dof/design/cad/vendor/feetech/STS3215_7.4V_19kg_spec.pdf`（官方规格书）。
 """
 from __future__ import annotations
 

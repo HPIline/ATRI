@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """一键生成带重力 / 地面 / 扭矩上限的校核世界（不改默认世界）。
 
-默认世界 ``webots/worlds/atri_22dof.wbt`` 必须保持 ``gravity 0``（CI 钉死）。
+默认世界 ``webots/worlds/atri_v2.wbt`` 必须保持 ``gravity 0``（CI 钉死）。
 本脚本**只调用**现有生成器 ``generate_atri_world.py``，把派生世界写到
-``docs/process/sim/worlds/atri_22dof_gravity.wbt``，再做三条静态自检。
+``docs/process/sim/worlds/atri_v2_gravity.wbt``，再做三条静态自检。
 
 用法（仓库根目录）::
 
@@ -21,7 +21,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 GENERATOR = Path(__file__).resolve().parent / "generate_atri_world.py"
-DEFAULT_OUT = REPO / "docs" / "process" / "sim" / "worlds" / "atri_22dof_gravity.wbt"
+DEFAULT_OUT = REPO / "docs" / "process" / "sim" / "worlds" / "atri_v2_gravity.wbt"
 DEFAULT_WORLD = REPO / "webots" / "worlds" / "atri_v2.wbt"
 
 GRAVITY = -9.81
@@ -35,7 +35,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--out",
         default=None,
-        help="派生世界输出路径（默认 docs/process/sim/worlds/atri_22dof_gravity.wbt）",
+        help="派生世界输出路径（默认 docs/process/sim/worlds/atri_v2_gravity.wbt）",
     )
     parser.add_argument(
         "--python",
@@ -129,7 +129,7 @@ def _rel(path: Path) -> str:
 
 def print_teammate_commands(out: Path) -> None:
     rel = _rel(out)
-    run_copy = "webots/worlds/atri_22dof_gravity.wbt"
+    run_copy = "webots/worlds/atri_v2_gravity.wbt"
     print()
     print("=" * 60)
     print("给队友的启动命令（本机可能没有 Webots GUI，下面都是给有 Webots 的机器用的）")
@@ -137,7 +137,7 @@ def print_teammate_commands(out: Path) -> None:
     print(
         """
 ⚠ 口径：只有这份带重力世界才能谈「站得住」。
-  默认 webots/worlds/atri_22dof.wbt 是 gravity 0、无地面、不写 maxTorque，
+  默认 webots/worlds/atri_v2.wbt 是 gravity 0、无地面、不写 maxTorque，
   零重力下机器人悬浮、静力矩 ≈ 0，用它录的「静立」不能进答辩材料。
 
 ⚠ 控制器发现：世界放在 docs/process/sim/worlds/ 时，Webots 会把
@@ -176,9 +176,10 @@ def main(argv=None) -> int:
     if not GENERATOR.is_file():
         print(f"找不到生成器: {GENERATOR}", file=sys.stderr)
         return 2
-    if not (REPO / "design" / "robot_model.json").is_file():
+    urdf = REPO / "design" / "v2" / "out" / "sim" / "atri_v2.urdf"
+    if not urdf.is_file():
         print(
-            "找不到 design/robot_model.json：生成器从这份模型派生几何/质量/关节。",
+            f"找不到 {urdf}：生成器从 v2 URDF + profile.py 派生几何/质量/关节。",
             file=sys.stderr,
         )
         return 2
@@ -186,7 +187,7 @@ def main(argv=None) -> int:
     out = resolve_out(args.out)
     if out.resolve() == DEFAULT_WORLD.resolve():
         print(
-            "拒绝：--out 指向了默认世界 webots/worlds/atri_22dof.wbt。"
+            "拒绝：--out 指向了默认世界 webots/worlds/atri_v2.wbt。"
             "派生世界必须写到别处（例如 docs/process/sim/worlds/）。",
             file=sys.stderr,
         )
