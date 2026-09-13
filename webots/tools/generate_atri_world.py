@@ -45,7 +45,7 @@ import math
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Sequence
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 WORLD_PATH = Path(__file__).resolve().parents[1] / "worlds" / "atri_v2.wbt"
 
@@ -86,9 +86,10 @@ DEFAULT_GROUND = False
 #   * 机器人高 0.407 m、脚盒 0.11 m，静止站立与五张任务卡场景位移都在 0.5 m 量级，
 #     4 m 给出 ±2 m（≈ 5 倍机高）余量，够"足够大"；
 #   * 再大只会拖慢渲染、影响取景，本场景不需要大地图。
-# 用 Plane 做接触面（Webots 里按无限平面处理）：机器人即使被推出去也不会掉出世界边界；
-# 退一步说，即便某版本按有限矩形处理，4 m 也远超上述活动范围。
+# 重力世界用静态盒做地面（无 Physics）。ODE 无限 Plane 上薄脚盒摩擦经常失效；
+# 官方 NAO Floor / KHR RectangleArena 也是盒，不是 Plane。
 GROUND_SIZE = 4.0
+GROUND_THICKNESS = 0.1
 
 _TRUE_WORDS = {"1", "true", "yes", "on", "y"}
 _FALSE_WORDS = {"0", "false", "no", "off", "n", ""}
@@ -113,6 +114,12 @@ def num(value: float) -> str:
     if float(value) == int(value):
         return str(int(value))
     return f"{float(value):.4f}".rstrip("0").rstrip(".")
+
+
+def num_inertia(value: float) -> str:
+    """惯量必须比 num() 更高精度，否则 9.6e-5 会被四舍五入成 1e-4。"""
+    text = f"{float(value):.9f}".rstrip("0").rstrip(".")
+    return text if text else "0"
 
 
 def vec(values: Sequence[float]) -> str:
@@ -247,6 +254,8 @@ def joint(
     mass: float = 0.15,
     limit_deg: Sequence[float] = (-180.0, 180.0),
     velocity_dps: float = 180.0,
+    inertia: Optional[Tuple[float, float, float, float, float, float]] = None,
+    com: Optional[Tuple[float, float, float]] = None,
     children: Sequence[Dict[str, Any]] = (),
 ) -> Dict[str, Any]:
     """一个 ATRI 关节 = HingeJoint + 电机 + 位置传感器 + 一段连杆。
@@ -262,6 +271,8 @@ def joint(
         "mass": mass,
         "limit_deg": tuple(limit_deg),
         "velocity_dps": float(velocity_dps),
+        "inertia": inertia,
+        "com": com,
         "children": list(children),
     }
 
@@ -308,10 +319,29 @@ def load_model() -> Dict[str, Any]:
         name = link.get("name") or ""
         mass_el = link.find("inertial/mass")
         mass = float(mass_el.get("value")) if mass_el is not None else 0.05
+        inertia_el = link.find("inertial/inertia")
+        inertia = None
+        if inertia_el is not None:
+            inertia = (
+                float(inertia_el.get("ixx", 0)),
+                float(inertia_el.get("iyy", 0)),
+                float(inertia_el.get("izz", 0)),
+                float(inertia_el.get("ixy", 0)),
+                float(inertia_el.get("ixz", 0)),
+                float(inertia_el.get("iyz", 0)),
+            )
+        origin_el = link.find("inertial/origin")
+        com = (0.0, 0.0, 0.0)
+        if origin_el is not None and origin_el.get("xyz"):
+            parts = [float(v) for v in origin_el.get("xyz").split()]
+            if len(parts) == 3:
+                com = (parts[0], parts[1], parts[2])
         size = _LINK_BOX_MM.get(name, [30.0, 30.0, 30.0])
         links.append({
             "name": name,
             "mass_kg": mass,
+            "inertia": inertia,
+            "com": com,
             "geometry": {"type": "box", "size_mm": size},
         })
 
@@ -354,12 +384,18 @@ def _bbox_m(geom: Dict[str, Any]) -> List[float]:
 
 
 def robot_body(model: Dict[str, Any] | None = None):
-    """(根 link 质量 kg, 根 link 包围盒 m, 根 link 离地高度 m)。"""
+    """(根 link 质量 kg, 根 link 包围盒 m, 根 link 离地高度 m, 根惯量, 根质心)。"""
     model = model or load_model()
     children_of = {j["child"] for j in model["joints"]}
     root = next(l for l in model["links"] if l["name"] not in children_of)
-    return (float(root["mass_kg"]), _bbox_m(root["geometry"]),
-            float(model["base_pose_mm"][2]) / 1000.0)
+    com = root.get("com") or (0.0, 0.0, 0.0)
+    return (
+        float(root["mass_kg"]),
+        _bbox_m(root["geometry"]),
+        float(model["base_pose_mm"][2]) / 1000.0,
+        root.get("inertia"),
+        tuple(com),
+    )
 
 
 def robot_children(model: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
@@ -386,6 +422,8 @@ def robot_children(model: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
             mass=float(child["mass_kg"]),
             limit_deg=j["limit_deg"],
             velocity_dps=float(j["velocity_dps"]),
+            inertia=child.get("inertia"),
+            com=child.get("com"),
             children=[node(k) for k in by_parent.get(j["child"], [])],
         )
 
@@ -419,6 +457,53 @@ def left_foot_chain_z_m(model: Dict[str, Any] | None = None) -> float:
             "left_ankle_pitch",
         )
     )
+
+
+def ankle_to_sole_m() -> float:
+    """踝原点到 TPU 底的距离（m）。CAD ``foot_to_ankle_z``，不是 12 mm 脚盒半高。"""
+    return float(v2_profile.K["foot_to_ankle_z"]) / 1000.0
+
+
+def gravity_foot_box_m() -> Tuple[float, float, float]:
+    """CAD/URDF 脚：120×70×44 mm，不是 12 mm 薄盒。"""
+    return (
+        float(v2_profile.K["foot_l"]) / 1000.0,
+        float(v2_profile.K["foot_w"]) / 1000.0,
+        ankle_to_sole_m(),
+    )
+
+
+def gravity_foot_box_offset_z_m() -> float:
+    """盒心在踝下方半高，盒底落在鞋底。"""
+    return -ankle_to_sole_m() / 2.0
+
+
+def render_physics(
+    pad: str,
+    mass: float,
+    inertia: Optional[Tuple[float, float, float, float, float, float]],
+    gravity: float,
+    com: Optional[Sequence[float]] = None,
+) -> List[str]:
+    lines = [
+        f"{pad}    physics Physics {{",
+        f"{pad}      density -1",
+        f"{pad}      mass {num(mass)}",
+    ]
+    if gravity != 0.0 and inertia is not None:
+        ixx, iyy, izz, ixy, ixz, iyz = inertia
+        cx, cy, cz = (0.0, 0.0, 0.0) if com is None else (float(com[0]), float(com[1]), float(com[2]))
+        lines += [
+            f"{pad}      centerOfMass [",
+            f"{pad}        {vec((cx, cy, cz))}",
+            f"{pad}      ]",
+            f"{pad}      inertiaMatrix [",
+            f"{pad}        {num_inertia(ixx)} {num_inertia(iyy)} {num_inertia(izz)}",
+            f"{pad}        {num_inertia(ixy)} {num_inertia(ixz)} {num_inertia(iyz)}",
+            f"{pad}      ]",
+        ]
+    lines.append(f"{pad}    }}")
+    return lines
 
 
 def render_joint(
@@ -462,11 +547,18 @@ def render_joint(
         f"{pad}    }}",
         f"{pad}  ]",
         f"{pad}  endPoint Solid {{",
-        # urdf2webots / design/v2/webots_v2_import.py：子 Solid 放到关节原点。
-        # 不写 translation 时所有连杆叠在骨盆，脚盒碰不到地，带重力必坐穿。
+        # urdf2webots：子 Solid 放到关节原点。脚 Solid 必须在踝，惯量才和 URDF 一致。
         f"{pad}    translation {vec(node['anchor'])}",
         f'{pad}    name "{node["name"]}_link"',
     ]
+    if gravity != 0.0:
+        contact = v2_profile.CONTACT
+        mat = (
+            contact["foot_material"]
+            if "ankle_pitch" in node["name"]
+            else contact["other_material"]
+        )
+        lines.append(f'{pad}    contactMaterial "{mat}"')
     mass = float(node["mass"])
     if gravity == 0.0:
         lines += [
@@ -475,24 +567,26 @@ def render_joint(
             f"{pad}    }}",
         ]
     elif "ankle_pitch" in node["name"]:
+        lx, ly, lz = gravity_foot_box_m()
+        dz = gravity_foot_box_offset_z_m()
         lines += [
-            f"{pad}    boundingObject Box {{",
-            f"{pad}      size {vec(node['size'])}",
+            f"{pad}    boundingObject Pose {{",
+            f"{pad}      translation 0 0 {num(dz)}",
+            f"{pad}      children [",
+            f"{pad}        Box {{",
+            f"{pad}          size {num(lx)} {num(ly)} {num(lz)}",
+            f"{pad}        }}",
+            f"{pad}      ]",
             f"{pad}    }}",
         ]
     else:
-        # 小圆球只用来算惯量，避免大腿 AABB 戳进地面把整机压扁。
+        # 碰撞用小球避免大腿 AABB 戳地；惯量仍写 URDF 盒，不用球。
         lines += [
             f"{pad}    boundingObject Sphere {{",
             f"{pad}      radius 0.008",
             f"{pad}    }}",
         ]
-    lines += [
-        f"{pad}    physics Physics {{",
-        f"{pad}      density -1",
-        f"{pad}      mass {num(mass)}",
-        f"{pad}    }}",
-    ]
+    lines += render_physics(pad, mass, node.get("inertia"), gravity, node.get("com"))
     visual: List[str] = []
     if gravity != 0.0:
         # 碰撞仍用脚盒 + 其它小球；画面要用完整连杆盒，否则录屏里机器人是隐形的。
@@ -524,16 +618,17 @@ def render_joint(
 
 
 def render_ground() -> List[str]:
-    """地面：``Solid`` + ``Plane``，落在 z = 0（脚底所在平面）。
+    """地面：静态 ``Box``，顶面在 z = 0（脚底所在平面）。
 
-    为什么不用 ``Floor``：``Floor`` / ``Ground`` 都是 Webots 的 **PROTO**，
-    引用时必须配 ``EXTERNPROTO``，会破坏本世界"自包含、不引外部 PROTO"这条
-    刻意保留的约束（见模块 docstring）。``Plane`` 是内置几何节点，两种场合都能用。
+    不用 ``Floor`` PROTO（要 ``EXTERNPROTO``）。不用 ``Plane``：ODE 无限平面
+    对薄脚盒的切向摩擦经常不生效，μ=0.7 和 μ=8 都会滑。
     """
+    z = -GROUND_THICKNESS / 2.0
+    size = f"{num(GROUND_SIZE)} {num(GROUND_SIZE)} {num(GROUND_THICKNESS)}"
     return [
         "Solid {",
         '  name "ground"',
-        "  translation 0 0 0",
+        f"  translation 0 0 {num(z)}",
         "  children [",
         "    Shape {",
         "      appearance Appearance {",
@@ -541,14 +636,15 @@ def render_ground() -> List[str]:
         "          diffuseColor 0.86 0.82 0.74",
         "        }",
         "      }",
-        "      geometry Plane {",
-        f"        size {num(GROUND_SIZE)} {num(GROUND_SIZE)}",
+        "      geometry Box {",
+        f"        size {size}",
         "      }",
         "    }",
         "  ]",
-        "  boundingObject Plane {",
-        f"    size {num(GROUND_SIZE)} {num(GROUND_SIZE)}",
+        "  boundingObject Box {",
+        f"    size {size}",
         "  }",
+        f'  contactMaterial "{v2_profile.CONTACT["ground_material"]}"',
         "}",
     ]
 
@@ -569,7 +665,7 @@ def render_provenance(
         else f"{num(max_torque)} N·m（STS3215 堵转 2.94 N·m）"
     )
     ground_text = (
-        f"有：Plane，{num(GROUND_SIZE)} m × {num(GROUND_SIZE)} m，z = 0"
+        f"有：Box，{num(GROUND_SIZE)} m × {num(GROUND_SIZE)} m × {num(GROUND_THICKNESS)} m，顶面 z = 0"
         if ground
         else "无"
     )
@@ -601,9 +697,11 @@ def render_world(
     spawn_z = float(_body[2])
     damping = JOINT_DAMPING
     if gravity != 0.0:
+        if max_torque is None:
+            max_torque = float(v2_profile.SERVO["stall_nm"])
         spawn_z = pelvis_spawn_z_m(
             chain_z_m=left_foot_chain_z_m(),
-            foot_half_z_m=_LINK_BOX_MM["left_foot"][2] / 2000.0,
+            foot_half_z_m=ankle_to_sole_m(),
             clearance_m=0.008,
         )
         damping = GRAVITY_JOINT_DAMPING
@@ -631,15 +729,28 @@ def render_world(
         "  CFM 1e-05",
     ]
     if gravity != 0.0:
-        # ENU：Z 向上。无摩擦会劈叉。空 bumpSound 避免联网拉默认 wav。
+        contact = v2_profile.CONTACT
+        # ENU：Z 向上。μ 来自 profile.CONTACT（TPU95A 鞋底 × 室内塑胶地板）。
         lines += [
             '  coordinateSystem "ENU"',
             '  gpsCoordinateSystem "local"',
             "  contactProperties [",
             "    ContactProperties {",
-            "      coulombFriction 8",
-            "      bounce 0",
-            "      softCFM 1e-4",
+            f'      material1 "{contact["foot_material"]}"',
+            f'      material2 "{contact["ground_material"]}"',
+            f'      coulombFriction {num(contact["mu_foot_ground"])}',
+            f'      bounce {num(contact["bounce"])}',
+            "      softCFM 1e-5",
+            '      bumpSound ""',
+            '      rollSound ""',
+            '      slideSound ""',
+            "    }",
+            "    ContactProperties {",
+            f'      material1 "{contact["other_material"]}"',
+            f'      material2 "{contact["ground_material"]}"',
+            f'      coulombFriction {num(contact["mu_other_ground"])}',
+            f'      bounce {num(contact["bounce"])}',
+            "      softCFM 1e-5",
             '      bumpSound ""',
             '      rollSound ""',
             '      slideSound ""',
@@ -693,6 +804,7 @@ def render_world(
     if gravity != 0.0:
         # Supervisor 才能 movieStartRecording；默认零重力世界不加，CI 对账不变。
         lines.append("  supervisor TRUE")
+        lines.append(f'  contactMaterial "{v2_profile.CONTACT["other_material"]}"')
     lines.append(f"  translation 0 0 {num(spawn_z)}")
     if gravity == 0.0:
         lines += [
@@ -706,11 +818,26 @@ def render_world(
             "    radius 0.008",
             "  }",
         ]
-    lines += [
+    physics_lines = [
         "  physics Physics {",
         "    density -1",
         f"    mass {num(_body[0])}",
-        "  }",
+    ]
+    if gravity != 0.0 and _body[3] is not None:
+        ixx, iyy, izz, ixy, ixz, iyz = _body[3]
+        com = _body[4] if len(_body) > 4 and _body[4] is not None else (0.0, 0.0, 0.0)
+        physics_lines += [
+            "    centerOfMass [",
+            f"      {vec(com)}",
+            "    ]",
+            "    inertiaMatrix [",
+            f"      {num_inertia(ixx)} {num_inertia(iyy)} {num_inertia(izz)}",
+            f"      {num_inertia(ixy)} {num_inertia(ixz)} {num_inertia(iyz)}",
+            "    ]",
+        ]
+    physics_lines.append("  }")
+    lines += physics_lines
+    lines += [
         "  children [",
     ]
     if gravity != 0.0:
@@ -769,13 +896,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
           f"×{model['overall']['depth_mm']:.1f} mm")
 
     if not opts.is_default:
-        torque_text = (
-            "不写字段（Webots 默认 10 N·m）"
-            if opts.max_torque is None
-            else f"{num(opts.max_torque)} N·m × 20"
-        )
+        if opts.max_torque is not None:
+            torque_text = f"{num(opts.max_torque)} N·m × 20"
+        elif opts.gravity != 0.0:
+            torque_text = f"{num(v2_profile.SERVO['stall_nm'])} N·m × 20（STS3215 堵转）"
+        else:
+            torque_text = "不写字段（Webots 默认 10 N·m）"
         ground_text = (
-            f"有（Plane {num(GROUND_SIZE)}×{num(GROUND_SIZE)} m）" if opts.ground else "无"
+            f"有（Box {num(GROUND_SIZE)}×{num(GROUND_SIZE)}×{num(GROUND_THICKNESS)} m）" if opts.ground else "无"
         )
         print(f"  [生成器] 非默认参数：gravity={num(opts.gravity)} m/s²，"
               f"maxTorque={torque_text}，地面={ground_text}")
