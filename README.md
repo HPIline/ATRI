@@ -2,22 +2,24 @@
 
 > **ATRI-v2 A 路线（当前 main）**：20 DOF 桌面人形重构。**20×Feetech STS3215-C018（12 V，额定 0.98 N·m）**，6061 铝夹层承力 + **2.4 mm PETG 不透明哑光白**外壳，开放骨盆框架，髋/腰双侧支承，**单舵机两指夹爪**（固定指 + 活动指 + 指垫 + 隔柱 + 支承），**单电池**，头部前侧 VL53L1X 预留。
 >
-> **现机 22 DOF 软件保持冻结，没有迁移到本机构。** 当前机构口径一切以 [`design/v2/`](design/v2/README.md) 为准；软件口径仍属现机，见文末[附录](#附录现机-22-dof-软件与旧-cad未迁移到本机构)。
+> 当前机构与软件入口均为 **20 DOF、无 hip_yaw**，口径以 [`design/v2/`](design/v2/README.md) 与 [`software/atri/`](software/atri/README.md) 为准。转向是髋 roll 占位，**G4 仍开放**。文末[附录](#附录现机-22-dof-软件与旧-cad未迁移到本机构) 是冻结的旧 CAD / 22 DOF 世界，不是当前入口。
 
 ![ATRI-v2 CAD 光追审查图，非实物照片](design/v2/out/blender/renders/product_iso.png)
 
-> 上图：**CAD 路径追踪（Cycles HIP）审查渲染，不是实物照片**。仓库当前没有任何已制造整机。
+![ATRI-v2 无标号爆炸图，CAD 光追，不是实物拆解照片](design/v2/out/render4k/exploded.png)
+
+> 上图：**CAD 路径追踪（Cycles HIP）审查渲染，不是实物照片**。爆炸图是装配分解，不是实物拆解。仓库当前没有任何已制造整机。零件表见 [`exploded-parts.md`](design/v2/out/render4k/exploded-parts.md)。
 
 [![DOF](https://img.shields.io/badge/DOF-v2%20%E6%9C%BA%E6%9E%84-20%20Active-green.svg)](design/v2/out/sim/atri_v2.urdf)
 [![Servos](https://img.shields.io/badge/Servos-20%C3%97STS3215--C018%2012V-blue.svg)](design/v2/out/ATRI-v2-BOM.md)
 [![Structure](https://img.shields.io/badge/Structure-6061%20Al%20%2B%202.4mm%20PETG-lightgrey.svg)](design/v2/MANUFACTURING-NOTES.md)
-[![Frozen Software](https://img.shields.io/badge/Software-%E7%8E%B0%E6%9C%BA%2022%20DOF%20Frozen-orange.svg)](software/atri/README.md)
+[![Software](https://img.shields.io/badge/Software-v2%2020%20DOF-green.svg)](software/atri/README.md)
 [![Gates](https://img.shields.io/badge/G0%E2%80%93G4-OPEN-red.svg)](design/v2/out/gates.json)
 [![Mass](https://img.shields.io/badge/Mass-2469g%20%3E%202450g%20hard%20limit-red.svg)](design/v2/out/%E8%B4%A8%E9%87%8F%E8%B4%A6.md)
 [![License](https://img.shields.io/badge/License-Pending-lightgrey.svg)](#开源声明与许可证-notice--license)
 
 ```
-20 DOF v2 机构（头 2 · 躯干 2 · 腿 4+4 · 臂 4+4，无 hip_yaw）  ·  20×C018 12V  ·  零位 CAD 外包络 466.5 × 188 × 295 mm  ·  已计质量 ≈2469 g（超 2450 g 硬顶，未计齐）  ·  现机 22 DOF 软件冻结  ·  Python 3.14
+20 DOF v2 机构（头 2 · 躯干 2 · 腿 4+4 · 臂 4+4，无 hip_yaw）  ·  20×C018 12V  ·  零位 CAD 外包络 466.5 × 188 × 295 mm  ·  已计质量 ≈2469 g（超 2450 g 硬顶，未计齐）  ·  软件 20 DOF  ·  Python 3.14
 ```
 
 ---
@@ -36,7 +38,7 @@
 
 - **不是已打样整机。** CAD 审查、加工文件、光追图同源输出，但**没有已制造实物**。CAD 审查 ≠ 打样 ≠ 赛题验证。
 - **不是制造放行版。** `design_mass_closed: false`、`physical_mass_verified: false`，G0–G4 全部开放。
-- **不是 22 DOF 真机闭环。** 仓库里的 5/5 Mock 任务演练属于**现机 22 DOF 软件**，**不能当作 v2 硬件的赛事通过证据**。
+- **不是真机闭环，也不是 G4。** 仓库里的 5/5 Mock / Webots 运动学联调属于 **20 DOF 软件流程**，**不能当作 v2 硬件的赛事通过证据**。
 
 ---
 
@@ -48,7 +50,7 @@
 | **零件数** | 装配快照当前 **1030** 件 | `assembly-snapshot.json` 同源导出 **1030** 件，已去掉第二块电池。**这不是放行数字。** |
 | **质量账** | 已计 **≈2469 g**，设计目标 2300 g，硬顶 2450 g | **超硬顶**；未计线束、相机、总线板、降压板、IMU、音频等，**不得填 0**。见 [`质量账.md`](design/v2/out/%E8%B4%A8%E9%87%8F%E8%B4%A6.md) |
 | **门禁 G0–G4** | **全部 OPEN** | G0 购物车、G1 温升、G2 单腿质量、G3 赛方定义、G4 无 hip_yaw 转向误差。见 [`gates.json`](design/v2/out/gates.json) |
-| **软件对齐** | T1/T3 条件对齐；**T2/T4/T5 未对齐** | 现机 22 DOF 软件未迁移；T4 踢球代码仍在写 `hip_yaw`。见 [`T1-T5-HARDWARE-ALIGNMENT.md`](design/v2/T1-T5-HARDWARE-ALIGNMENT.md) |
+| **软件对齐** | 20 DOF 拓扑已迁；T1–T5 可在 Mock/Webots 运动学联调 | 转向是髋 roll 占位，**G4 未关闭**。无硬件 5/5 ≠ 真机通过。见 [`T1-T5-HARDWARE-ALIGNMENT.md`](design/v2/T1-T5-HARDWARE-ALIGNMENT.md) |
 | **验证边界** | 几何/装配审查，非强度/热/续航 | CAD 有效网格、零位无相交**不等于**强度、走线或量产合格 |
 
 > **口径纪律**：`release_ready` 为 `false`。任何"已打样 / 已通过验证 / 5/5 真机闭环 / 30 分钟续航"的表述都不成立，不要写进材料。
@@ -119,15 +121,15 @@ ATRI/
 │   ├── cad/                        # 旧 22 DOF CadQuery 建模（冻结）
 │   ├── atri.urdf                   # 旧 22 DOF URDF（冻结）
 │   └── robot_model.json            # 旧 22 DOF L1 模型（冻结，历史口径）
-├── software/atri/                  # 现机 22 DOF 控制软件栈（冻结，未迁移到 v2）
-├── webots/                         # 冻结的 22 DOF 仿真世界与控制器
+├── software/atri/                  # v2 20 DOF 控制软件栈（无 hip_yaw）
+├── webots/                         # 默认 atri_v2.wbt（20 DOF）；atri_22dof.wbt 为冻结现机世界
 ├── docs/                           # 工程过程记录、立项调研与参赛材料
 ├── 固件/                           # 接线与寄存器语义（不是已烧录固件）
 ├── ppt/                            # 答辩交付物
 └── NOTICE                          # 第三方参考资产合规声明
 ```
 
-> `design/cad/`、`design/atri.urdf`、`design/robot_model.json` 与 `webots/`、`software/atri/` 属**冻结的现机 22 DOF / 旧 CAD 线**，见文末[附录](#附录现机-22-dof-软件与旧-cad未迁移到本机构)。
+> `design/cad/`、`design/atri.urdf`、`design/robot_model.json` 与 `webots/worlds/atri_22dof.wbt` 属**冻结的现机 22 DOF / 旧 CAD 线**。软件与默认 Webots 世界已迁到 20 DOF，见文末[附录](#附录现机-22-dof-软件与旧-cad未迁移到本机构)。
 
 ---
 
@@ -140,7 +142,7 @@ ATRI/
 - [文件 SHA256](design/v2/out/packages/checksums.json)
 - 逐件装配身份 / 材料 / 加工文件：`design/v2/out/manufacturing/manifest.json`
 
-**出图状态**：`design/v2/out/blender/renders/` 为 GPU 光追 CAD 审查图（含 `product_iso.png`、`service_exploded.png` 等）。`design/v2/out/render4k/` 的 4K 展示图尚未生成；未生成前以审查 PNG 为准。
+**出图状态**：`design/v2/out/blender/renders/` 为 GPU 光追 CAD 审查图（含 `product_iso.png`、`service_exploded.png` 等）。`design/v2/out/render4k/` 为 4K 展示图：整机前/后、腰-手-传感器细节、**无标号爆炸图**（不提交带编号版）。
 
 > 此处所有文件均为**未放行审查版**。原始 STEP 超过 GitHub 单文件限制，故以无损 gzip 保存；压缩包经解压哈希/CRC 检查。
 
@@ -162,9 +164,9 @@ blender --background --python design/v2/blender_build.py -- --out design/v2/out 
 
 ---
 
-# 附录：现机 22 DOF 软件与旧 CAD，未迁移到本机构
+# 附录：冻结的现机 22 DOF 旧 CAD 与旧仿真世界
 
-> **本节描述的是冻结的现机 22 DOF 项目（软件 / 仿真 / 旧 CAD），不是 v2 机构。** 保留其使用说明与历史记录供复核；其 22 关节、`hip_yaw` 与旧包络**不代表 A 路线机器人**。在 G4 关闭前不得修改 `software/atri/atri/config.py`，也不得把现机软件任务演练当作 v2 硬件通过。
+> **本节描述的是冻结的现机 22 DOF 旧 CAD / 旧仿真世界，不是当前软件入口。** 软件栈与默认 Webots 世界已迁到 20 DOF。下文历史记录里的 22 关节、`hip_yaw` 与旧包络**不代表 A 路线机器人**。无硬件 5/5 与运动学联调不能当作 v2 真机通过。
 
 ## 项目定位（现机 22 DOF）
 
@@ -178,7 +180,7 @@ blender --background --python design/v2/blender_build.py -- --out design/v2/out 
 2. **算法散**：底座抽离出统一 FSM 调度器与 Skill 契约规范，换场景仅需换一张结构化 JSON 任务卡。
 3. **断网瘫**：单目轻量视觉、离线 TTS 引擎与状态机全板载，实现**全离线 0 次网络出站闭环**。
 
-现机闭环赛题规约的五项任务（**属现机 22 DOF 软件，不是 v2 真机验证**）：
+赛题规约的五项任务（**属软件流程 / Mock，不是 v2 真机验证**）：
 
 - **人脸识别**（T-01，现机软件）：YuNet + SFace + 人脸库 + 显式拒识（LFW 口径，**不是实机 / 不是 v2 机构**）；Haar 兜底保留；
 - **二维码指令响应**（T-02）：解算二维码载荷中的标准 JSON 业务指令并状态转移；
@@ -186,7 +188,7 @@ blender --background --python design/v2/blender_build.py -- --out design/v2/out 
 - **自主足球踢球**（T-04）：单目测距定位球体，行进至击球区并执行参数化侧踢；
 - **编排动作舞蹈**（T-05）：多姿态关键帧库回放，配合离线语音节拍完成展示。
 
-## 快速上手（现机 22 DOF 软件）
+## 快速上手（当前 20 DOF 软件）
 
 核心控制软件位于 `software/atri/`，仅依赖 **Python 3.14 标准库**（零 pip 依赖）。无硬件连线、无 GPU 时可直接跑通任务卡、FSM 到虚拟舵机总线的完整闭环：
 
@@ -194,20 +196,20 @@ blender --background --python design/v2/blender_build.py -- --out design/v2/out 
 # 1. 进入软件核心目录
 cd software/atri
 
-# 2. 运行主软件栈单元测试（现机软件 699 项；零依赖环境下部分自动跳过）
+# 2. 运行主软件栈单元测试（CadQuery 用例需仓库根 .venv-cad，系统 3.14 会报缺依赖）
 python3 -m unittest discover -s tests
 
 # 3. 运行赛题五项任务无硬件闭环演练（--fast 跳过动作等待）
 python3 run_demo.py --fast
 
-# 4. 运行 Webots 控制器及映射离线自检（切回仓库根目录，现机 41 项）
+# 4. 运行 Webots 控制器及映射离线自检（切回仓库根目录）
 cd ../..
 python3 -m unittest discover -s webots/tests
 ```
 
-## 现机 22 DOF 软件补强（已在 main，未迁移到 v2 机构）
+## 历史做实记录（含 hip_yaw 时期）
 
-以下章节来自 origin/main 的 T-01～T-05 做实记录。它们描述的是**现机 22 DOF 软件**，含 `hip_yaw`。**不能当作 A 路线 20 DOF 硬件已经通过赛题。**
+以下章节来自更早的 T-01～T-05 做实记录。部分文字仍按当时 22 DOF / `hip_yaw` 口径写。**不能当作 A 路线 20 DOF 硬件已经通过赛题。**
 
 ## 人脸识别 T-01（2026-09-12 做实）
 

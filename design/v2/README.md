@@ -1,6 +1,6 @@
 # ATRI-v2 A路线实装审查
 
-20×STS3215-C018 12V，20 DOF，无hip_yaw。骨盆两片大铝夹板已移除，改为开放式局部连接；承力件采用激光板和标准角铝/铝管，PETG为不透明哑光白、2.4mm壁厚。现机22DOF软件没有迁移到这套机构。
+20×STS3215-C018 12V，20 DOF，无hip_yaw。骨盆两片大铝夹板已移除，改为开放式局部连接；承力件采用激光板和标准角铝/铝管，PETG为不透明哑光白、2.4mm壁厚。控制软件与默认 Webots 世界已按 20 DOF 适配。
 
 **当前不是可直接整机下单的制造放行版。** 几何审查、加工文件和渲染有同源输出，但完整线束、质量与预算仍未闭合。见[打样说明](MANUFACTURING-NOTES.md)和[当前核验](out/ATRI-v2-工程验证.md)。
 
@@ -9,6 +9,8 @@
 - **G0–G4 全部 OPEN**：购物车（G0）、舵机温升（G1）、单腿整机质量（G2）、赛方定义（G3）、无 hip_yaw 转向误差（G4）。逐条要求见 [`out/gates.json`](out/gates.json)。
 
 ![双片改动前的CAD光追审查图，不代表最新髋腰结构](out/blender/renders/product_iso.png)
+
+![ATRI-v2 无标号爆炸图，CAD 光追，不是实物拆解照片](out/render4k/exploded.png)
 
 ## 最新髋腰结构
 
@@ -45,9 +47,9 @@
 
 原始STEP超过GitHub单文件限制，因此以无损gzip保存；压缩包经过解压哈希/CRC检查。仿真zip解压到`out/`后得到`sim/meshes`和逐件STL，也可用生成命令复现。此处所有文件均为未放行审查版。
 
-**审查图**：`out/blender/renders/`（`product_iso.png`、`product_front.png`、`product_rear.png`、`detail_pelvis.png`、`detail_horn.png`、`detail_camera.png`、`detail_gripper.png`、`service_exploded.png`）为 GPU 光追 CAD 审查图，非实物照片；`service_exploded.png` 是维护拆解示意，不是逐颗螺母的完整装配工序。`out/render4k/` 的 4K 展示图尚未生成。
+**审查图**：`out/blender/renders/`（`product_iso.png`、`product_front.png`、`product_rear.png`、`detail_pelvis.png`、`detail_horn.png`、`detail_camera.png`、`detail_gripper.png`、`service_exploded.png`）为 GPU 光追 CAD 审查图，非实物照片；`service_exploded.png` 是维护拆解示意，不是逐颗螺母的完整装配工序。`out/render4k/exploded.png` 为 4K 无标号爆炸图。
 
-**Webots**：`out/sim/atri_v2.urdf` 有 20 个 revolute（m/rad），**尚未真实导入 Webots 运行**。v2 导入冒烟与状态见 `WEBOTS-STATUS.md` / `out/webots/`，当前尚未生成；冻结的 22 DOF 世界仍是 `webots/worlds/atri_22dof.wbt`，不能作为 v2 通过 Webots 任务验证的证据。
+**Webots**：默认运动学联调世界是仓库根下 `webots/worlds/atri_v2.wbt`（20 电机、`atri_controller`）。CAD 网格导入冒烟见 `WEBOTS-STATUS.md`。这不是 G4，不是真机任务验证。
 
 ## 文件与复现
 
