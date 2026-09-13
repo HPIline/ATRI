@@ -3,8 +3,8 @@
   "rows": [
     {
       "item": "al",
-      "count": 245,
-      "mass_g": 430.075,
+      "count": 283,
+      "mass_g": 525.621,
       "basis": "nominal solid volume × assumed material density",
       "caveat": "Material grade/density and finished mass require sample"
     },
@@ -18,14 +18,14 @@
     {
       "item": "tpu",
       "count": 6,
-      "mass_g": 39.027,
+      "mass_g": 39.755,
       "basis": "nominal solid volume × assumed material density",
       "caveat": "Material grade/density and finished mass require sample"
     },
     {
       "item": "fastener",
-      "count": 398,
-      "mass_g": 365.018,
+      "count": 444,
+      "mass_g": 393.228,
       "basis": "nominal solid volume × assumed material density",
       "caveat": "Major-diameter thread envelopes, not measured screw masses"
     },
@@ -44,9 +44,9 @@
       "caveat": "Accessory/cable inclusion in supplier weight must be established before adding them separately"
     },
     {
-      "item": "Gens-Ace-GEA223S25T3GT",
-      "count": 1,
-      "mass_g": 169.0,
+      "item": "Gens-Ace-GEA223S25T3GT ×2",
+      "count": 2,
+      "mass_g": 338.0,
       "basis": "published battery mass",
       "caveat": "Check adapter and lead inclusion"
     },
@@ -58,7 +58,7 @@
       "caveat": "Board revision, heatsink and card not weighed"
     }
   ],
-  "accounted_estimate_g": 2344.473,
+  "accounted_estimate_g": 2637.957,
   "unknown_items": [
     "camera and lens",
     "bus adapter",
@@ -73,8 +73,8 @@
   "whole_robot_mass_g": null,
   "design_target_g": 2300.0,
   "hard_limit_g": 2450.0,
-  "allowance_to_design_g": -44.473,
-  "allowance_to_hard_limit_g": 105.527,
+  "allowance_to_design_g": -337.957,
+  "allowance_to_hard_limit_g": -187.957,
   "design_mass_closed": false,
   "physical_mass_verified": false,
   "statement": "This is an incomplete conservative design ledger, neither measured mass nor a certified lower bound. Unknown entries cannot be silently assigned zero. No arbitrary thread-volume discount is applied."

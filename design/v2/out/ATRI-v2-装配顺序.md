@@ -14,6 +14,9 @@
 |---|---|---|
 | servo-trunk_roll | pelvis | 见实装清单及紧固件核验；无详细工序声明 |
 | horn-trunk_roll | trunk_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
+| passive-horn-trunk_roll | trunk_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
+| rear-retainer-washer-trunk_roll | pelvis | PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items |
+| rear-retainer-screw-trunk_roll | pelvis | PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items |
 | shaft-trunk_roll | trunk_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
 | horn-center-screw-trunk_roll | trunk_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
 | servo-trunk_pitch | trunk_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
@@ -44,6 +47,9 @@
 | screw-h-head_pitch-3 | head | 见实装清单及紧固件核验；无详细工序声明 |
 | servo-left_hip_roll | pelvis | 见实装清单及紧固件核验；无详细工序声明 |
 | horn-left_hip_roll | left_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
+| passive-horn-left_hip_roll | left_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
+| rear-retainer-washer-left_hip_roll | pelvis | PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items |
+| rear-retainer-screw-left_hip_roll | pelvis | PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items |
 | shaft-left_hip_roll | left_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
 | horn-center-screw-left_hip_roll | left_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
 | servo-left_hip_pitch | left_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
@@ -69,6 +75,9 @@
 | horn-center-screw-left_ankle_pitch | left_foot | 见实装清单及紧固件核验；无详细工序声明 |
 | servo-right_hip_roll | pelvis | 见实装清单及紧固件核验；无详细工序声明 |
 | horn-right_hip_roll | right_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
+| passive-horn-right_hip_roll | right_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
+| rear-retainer-washer-right_hip_roll | pelvis | PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items |
+| rear-retainer-screw-right_hip_roll | pelvis | PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items |
 | shaft-right_hip_roll | right_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
 | horn-center-screw-right_hip_roll | right_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
 | servo-right_hip_pitch | right_hip_roll_link | 见实装清单及紧固件核验；无详细工序声明 |
@@ -262,7 +271,7 @@
 | leg-left-foot-rear-side-bolt-1 | left_foot | M3x8 ISO4762 |
 | leg-left-foot-rear-side-nut-1 | left_foot | M3 ISO4032 |
 | leg-left-foot-rear-angle | left_foot | cut/drill stock 15x15x1.5 aluminium angle; 20 mm long; inside radius <=1.5 mm purchase constraint |
-| leg-left-foot-plate | left_foot | laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr |
+| leg-left-foot-plate | left_foot | laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr |
 | leg-left-foot-sole | left_foot | TPU95A; adhesive bond to aluminium; bond qualification required |
 | leg-right-thigh-front | right_thigh | laser 6061-T6 1.5 mm; deburr |
 | leg-right-thigh-front-horn-spacer-0-0 | right_thigh | M3 plain spacer/shim OD5 ID3.2 length 1 mm; supplier SKU to verify |
@@ -402,7 +411,7 @@
 | leg-right-foot-rear-side-bolt-1 | right_foot | M3x8 ISO4762 |
 | leg-right-foot-rear-side-nut-1 | right_foot | M3 ISO4032 |
 | leg-right-foot-rear-angle | right_foot | cut/drill stock 15x15x1.5 aluminium angle; 20 mm long; inside radius <=1.5 mm purchase constraint |
-| leg-right-foot-plate | right_foot | laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr |
+| leg-right-foot-plate | right_foot | laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr |
 | leg-right-foot-sole | right_foot | TPU95A; adhesive bond to aluminium; bond qualification required |
 | arm-left-shoulder-output-bolt-4.95-4.95 | left_upper | M3x10 ISO4762; nominal thread |
 | arm-left-shoulder-output-spacer-4.95-4.95-0 | left_upper | M3 OD5 ID3.2 spacer/shim 5mm |
@@ -440,20 +449,30 @@
 | arm-left-fore-output-bolt--4.95--4.95 | left_hand | M3x20 DIN7991 countersunk; length includes head |
 | arm-left-fore-output-spacer--4.95--4.95-0 | left_hand | M3 OD5 ID3.2 spacer/shim 10mm |
 | arm-left-fore-output-spacer--4.95--4.95-1 | left_hand | M3 OD5 ID3.2 spacer/shim 3mm |
-| arm-left-fore-angle | left_hand | 6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling；External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier |
+| arm-left-fore-angle | left_hand | 6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling；External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier |
 | case-left-fore-jaw-rear | left_hand | laser 6061-T6 1.5 mm; deburr；case clamp preload, slip and creep test required |
 | case-left-fore-nut-0 | left_hand | M3 ISO4032; retention method to qualify |
 | case-left-fore-bolt-1 | left_hand | M3x45 ISO4762 |
 | case-left-fore-nut-1 | left_hand | M3 ISO4032; retention method to qualify |
 | arm-left-gripper-fixed-finger | left_hand | laser 6061-T6 2mm; deburr；finger stiffness and pinch-force sample test required |
-| arm-left-gripper-moving-bolt-4.95-4.95 | left_grip | M3x6 ISO4762; nominal thread |
-| arm-left-gripper-moving-spacer-4.95-4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
-| arm-left-gripper-moving-bolt-4.95--4.95 | left_grip | M3x6 ISO4762; nominal thread |
-| arm-left-gripper-moving-spacer-4.95--4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
-| arm-left-gripper-moving-bolt--4.95-4.95 | left_grip | M3x6 ISO4762; nominal thread |
-| arm-left-gripper-moving-spacer--4.95-4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
-| arm-left-gripper-moving-bolt--4.95--4.95 | left_grip | M3x6 ISO4762; nominal thread |
-| arm-left-gripper-moving-spacer--4.95--4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
+| arm-left-gripper-pad-support-0 | left_hand | laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr |
+| arm-left-gripper-pad-support-1 | left_hand | laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr |
+| arm-left-gripper-pad-support-bolt-0 | left_hand | M2x10 ISO4762; clamp pad backing stack |
+| arm-left-gripper-pad-support-nut-0 | left_hand | M2 ISO4032 nominal AF4 height1.6 |
+| arm-left-gripper-pad-support-bolt-1 | left_hand | M2x10 ISO4762; clamp pad backing stack |
+| arm-left-gripper-pad-support-nut-1 | left_hand | M2 ISO4032 nominal AF4 height1.6 |
+| arm-left-gripper-moving-bolt-4.95-4.95 | left_grip | M3x16 ISO4762; nominal thread |
+| arm-left-gripper-moving-spacer-4.95-4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-left-gripper-moving-spacer-4.95-4.95-1 | left_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
+| arm-left-gripper-moving-bolt-4.95--4.95 | left_grip | M3x16 ISO4762; nominal thread |
+| arm-left-gripper-moving-spacer-4.95--4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-left-gripper-moving-spacer-4.95--4.95-1 | left_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
+| arm-left-gripper-moving-bolt--4.95-4.95 | left_grip | M3x16 ISO4762; nominal thread |
+| arm-left-gripper-moving-spacer--4.95-4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-left-gripper-moving-spacer--4.95-4.95-1 | left_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
+| arm-left-gripper-moving-bolt--4.95--4.95 | left_grip | M3x16 ISO4762; nominal thread |
+| arm-left-gripper-moving-spacer--4.95--4.95-0 | left_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-left-gripper-moving-spacer--4.95--4.95-1 | left_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
 | arm-left-gripper-moving-finger | left_grip | laser 6061-T6 2mm; deburr |
 | arm-left-gripper-fixed-spacer--15.0 | left_hand | M3 OD6 ID3.2 spacer 5mm |
 | arm-left-gripper-fixed-bolt--15.0 | left_hand | M3x50 ISO4762 through finger, spacer and angle |
@@ -498,20 +517,30 @@
 | arm-right-fore-output-bolt--4.95--4.95 | right_hand | M3x20 DIN7991 countersunk; length includes head |
 | arm-right-fore-output-spacer--4.95--4.95-0 | right_hand | M3 OD5 ID3.2 spacer/shim 10mm |
 | arm-right-fore-output-spacer--4.95--4.95-1 | right_hand | M3 OD5 ID3.2 spacer/shim 3mm |
-| arm-right-fore-angle | right_hand | 6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling；External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier |
+| arm-right-fore-angle | right_hand | 6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling；External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier |
 | case-right-fore-jaw-rear | right_hand | laser 6061-T6 1.5 mm; deburr；case clamp preload, slip and creep test required |
 | case-right-fore-nut-0 | right_hand | M3 ISO4032; retention method to qualify |
 | case-right-fore-bolt-1 | right_hand | M3x45 ISO4762 |
 | case-right-fore-nut-1 | right_hand | M3 ISO4032; retention method to qualify |
 | arm-right-gripper-fixed-finger | right_hand | laser 6061-T6 2mm; deburr；finger stiffness and pinch-force sample test required |
-| arm-right-gripper-moving-bolt-4.95-4.95 | right_grip | M3x6 ISO4762; nominal thread |
-| arm-right-gripper-moving-spacer-4.95-4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
-| arm-right-gripper-moving-bolt-4.95--4.95 | right_grip | M3x6 ISO4762; nominal thread |
-| arm-right-gripper-moving-spacer-4.95--4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
-| arm-right-gripper-moving-bolt--4.95-4.95 | right_grip | M3x6 ISO4762; nominal thread |
-| arm-right-gripper-moving-spacer--4.95-4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
-| arm-right-gripper-moving-bolt--4.95--4.95 | right_grip | M3x6 ISO4762; nominal thread |
-| arm-right-gripper-moving-spacer--4.95--4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length2mm |
+| arm-right-gripper-pad-support-0 | right_hand | laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr |
+| arm-right-gripper-pad-support-1 | right_hand | laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr |
+| arm-right-gripper-pad-support-bolt-0 | right_hand | M2x10 ISO4762; clamp pad backing stack |
+| arm-right-gripper-pad-support-nut-0 | right_hand | M2 ISO4032 nominal AF4 height1.6 |
+| arm-right-gripper-pad-support-bolt-1 | right_hand | M2x10 ISO4762; clamp pad backing stack |
+| arm-right-gripper-pad-support-nut-1 | right_hand | M2 ISO4032 nominal AF4 height1.6 |
+| arm-right-gripper-moving-bolt-4.95-4.95 | right_grip | M3x16 ISO4762; nominal thread |
+| arm-right-gripper-moving-spacer-4.95-4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-right-gripper-moving-spacer-4.95-4.95-1 | right_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
+| arm-right-gripper-moving-bolt-4.95--4.95 | right_grip | M3x16 ISO4762; nominal thread |
+| arm-right-gripper-moving-spacer-4.95--4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-right-gripper-moving-spacer-4.95--4.95-1 | right_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
+| arm-right-gripper-moving-bolt--4.95-4.95 | right_grip | M3x16 ISO4762; nominal thread |
+| arm-right-gripper-moving-spacer--4.95-4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-right-gripper-moving-spacer--4.95-4.95-1 | right_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
+| arm-right-gripper-moving-bolt--4.95--4.95 | right_grip | M3x16 ISO4762; nominal thread |
+| arm-right-gripper-moving-spacer--4.95--4.95-0 | right_grip | M3 plain spacer/shim OD5 ID3.2 length10mm |
+| arm-right-gripper-moving-spacer--4.95--4.95-1 | right_grip | M3 plain spacer/shim OD5 ID3.2 length1mm |
 | arm-right-gripper-moving-finger | right_grip | laser 6061-T6 2mm; deburr |
 | arm-right-gripper-fixed-spacer--15.0 | right_hand | M3 OD6 ID3.2 spacer 5mm |
 | arm-right-gripper-fixed-bolt--15.0 | right_hand | M3x50 ISO4762 through finger, spacer and angle |
@@ -545,36 +574,94 @@
 | pelvis-frame-washer-3 | pelvis | M3 washer 0.5 mm |
 | pelvis-frame-washer-4 | pelvis | M3 washer 0.5 mm |
 | pelvis-frame-washer-5 | pelvis | M3 washer 0.5 mm |
-| pelvis-output-adapter-left | left_hip_roll_link | 6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets |
+| pelvis-output-adapter-left | left_hip_roll_link | 6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets |
 | case-left-pitch-jaw-rear | left_hip_roll_link | laser 6061-T6 1.5 mm; deburr；case clamp preload, slip and creep test required |
-| case-left-pitch-bolt-0 | left_hip_roll_link | M3x45 ISO4762 |
-| case-left-pitch-nut-0 | left_hip_roll_link | M3 ISO4032; retention method to qualify |
-| case-left-pitch-bolt-1 | left_hip_roll_link | M3x45 ISO4762 |
-| case-left-pitch-nut-1 | left_hip_roll_link | M3 ISO4032; retention method to qualify |
 | adapter-output-screw-left-0 | left_hip_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-left-1 | left_hip_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-left-2 | left_hip_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-left-3 | left_hip_roll_link | M3x6; 3 mm horn engagement |
-| pelvis-output-adapter-right | right_hip_roll_link | 6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets |
+| pelvis-output-adapter-right | right_hip_roll_link | 6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets |
 | case-right-pitch-jaw-rear | right_hip_roll_link | laser 6061-T6 1.5 mm; deburr；case clamp preload, slip and creep test required |
-| case-right-pitch-bolt-0 | right_hip_roll_link | M3x45 ISO4762 |
-| case-right-pitch-nut-0 | right_hip_roll_link | M3 ISO4032; retention method to qualify |
-| case-right-pitch-bolt-1 | right_hip_roll_link | M3x45 ISO4762 |
-| case-right-pitch-nut-1 | right_hip_roll_link | M3 ISO4032; retention method to qualify |
 | adapter-output-screw-right-0 | right_hip_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-right-1 | right_hip_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-right-2 | right_hip_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-right-3 | right_hip_roll_link | M3x6; 3 mm horn engagement |
-| pelvis-output-adapter-trunk | trunk_roll_link | 6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets |
+| pelvis-output-adapter-trunk | trunk_roll_link | 6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; remote profile R1; NO CNC pockets |
 | case-trunk-pitch-jaw-rear | trunk_roll_link | laser 6061-T6 1.5 mm; deburr；case clamp preload, slip and creep test required |
-| case-trunk-pitch-bolt-0 | trunk_roll_link | M3x45 ISO4762 |
-| case-trunk-pitch-nut-0 | trunk_roll_link | M3 ISO4032; retention method to qualify |
 | case-trunk-pitch-bolt-1 | trunk_roll_link | M3x45 ISO4762 |
 | case-trunk-pitch-nut-1 | trunk_roll_link | M3 ISO4032; retention method to qualify |
 | adapter-output-screw-trunk-0 | trunk_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-trunk-1 | trunk_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-trunk-2 | trunk_roll_link | M3x6; 3 mm horn engagement |
 | adapter-output-screw-trunk-3 | trunk_roll_link | M3x6; 3 mm horn engagement |
+| hip-dual-left-pcd-spacer--4.95--4.95-0 | left_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-left-pcd-spacer--4.95--4.95-1 | left_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-left-pcd-head-washer--4.95--4.95 | left_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-left-pcd-bolt--4.95--4.95 | left_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-left-pcd-spacer--4.95-4.95-0 | left_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-left-pcd-spacer--4.95-4.95-1 | left_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-left-pcd-head-washer--4.95-4.95 | left_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-left-pcd-bolt--4.95-4.95 | left_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-left-pcd-spacer-4.95--4.95-0 | left_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-left-pcd-spacer-4.95--4.95-1 | left_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-left-pcd-head-washer-4.95--4.95 | left_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-left-pcd-bolt-4.95--4.95 | left_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-left-pcd-spacer-4.95-4.95-0 | left_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-left-pcd-spacer-4.95-4.95-1 | left_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-left-pcd-head-washer-4.95-4.95 | left_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-left-pcd-bolt-4.95-4.95 | left_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-left-case-spacer-0 | left_hip_roll_link | M3 OD7 ID3.2 spacer9 |
+| hip-dual-left-case-bolt-0 | left_hip_roll_link | M3x55 through paired front/rear support stack |
+| hip-dual-left-case-nut-0 | left_hip_roll_link | M3 ISO4032 |
+| hip-dual-left-case-spacer-1 | left_hip_roll_link | M3 OD7 ID3.2 spacer9 |
+| hip-dual-left-case-bolt-1 | left_hip_roll_link | M3x55 through paired front/rear support stack |
+| hip-dual-left-case-nut-1 | left_hip_roll_link | M3 ISO4032 |
+| hip-dual-left-rear-angle | left_hip_roll_link | 3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section；Rear bearing and clamp preload still require sample |
+| hip-dual-right-pcd-spacer--4.95--4.95-0 | right_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-right-pcd-spacer--4.95--4.95-1 | right_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-right-pcd-head-washer--4.95--4.95 | right_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-right-pcd-bolt--4.95--4.95 | right_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-right-pcd-spacer--4.95-4.95-0 | right_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-right-pcd-spacer--4.95-4.95-1 | right_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-right-pcd-head-washer--4.95-4.95 | right_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-right-pcd-bolt--4.95-4.95 | right_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-right-pcd-spacer-4.95--4.95-0 | right_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-right-pcd-spacer-4.95--4.95-1 | right_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-right-pcd-head-washer-4.95--4.95 | right_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-right-pcd-bolt-4.95--4.95 | right_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-right-pcd-spacer-4.95-4.95-0 | right_hip_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| hip-dual-right-pcd-spacer-4.95-4.95-1 | right_hip_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| hip-dual-right-pcd-head-washer-4.95-4.95 | right_hip_roll_link | M3 washer 0.5 mm |
+| hip-dual-right-pcd-bolt-4.95-4.95 | right_hip_roll_link | M3x12; nominal 3 mm projection through rear disc flange, sample fit required |
+| hip-dual-right-case-spacer-0 | right_hip_roll_link | M3 OD7 ID3.2 spacer9 |
+| hip-dual-right-case-bolt-0 | right_hip_roll_link | M3x55 through paired front/rear support stack |
+| hip-dual-right-case-nut-0 | right_hip_roll_link | M3 ISO4032 |
+| hip-dual-right-case-spacer-1 | right_hip_roll_link | M3 OD7 ID3.2 spacer9 |
+| hip-dual-right-case-bolt-1 | right_hip_roll_link | M3x55 through paired front/rear support stack |
+| hip-dual-right-case-nut-1 | right_hip_roll_link | M3 ISO4032 |
+| hip-dual-right-rear-angle | right_hip_roll_link | 3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section；Rear bearing and clamp preload still require sample |
+| waist-dual-pcd-spacer--4.95--4.95-0 | trunk_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| waist-dual-pcd-spacer--4.95--4.95-1 | trunk_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| waist-dual-pcd-washer--4.95--4.95 | trunk_roll_link | M3 washer 0.5 mm |
+| waist-dual-pcd-screw--4.95--4.95 | trunk_roll_link | M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit |
+| waist-dual-pcd-spacer--4.95-4.95-0 | trunk_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| waist-dual-pcd-spacer--4.95-4.95-1 | trunk_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| waist-dual-pcd-washer--4.95-4.95 | trunk_roll_link | M3 washer 0.5 mm |
+| waist-dual-pcd-screw--4.95-4.95 | trunk_roll_link | M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit |
+| waist-dual-pcd-spacer-4.95--4.95-0 | trunk_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| waist-dual-pcd-spacer-4.95--4.95-1 | trunk_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| waist-dual-pcd-washer-4.95--4.95 | trunk_roll_link | M3 washer 0.5 mm |
+| waist-dual-pcd-screw-4.95--4.95 | trunk_roll_link | M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit |
+| waist-dual-pcd-spacer-4.95-4.95-0 | trunk_roll_link | M3 OD5 ID3.2 spacer 5 mm |
+| waist-dual-pcd-spacer-4.95-4.95-1 | trunk_roll_link | M3 OD5 ID3.2 spacer 0.5 mm |
+| waist-dual-pcd-washer-4.95-4.95 | trunk_roll_link | M3 washer 0.5 mm |
+| waist-dual-pcd-screw-4.95-4.95 | trunk_roll_link | M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit |
+| waist-dual-rear-angle | trunk_roll_link | Saw/drill 75x50x3 stock angle, 55 mm axial blank; open trim, PCD14, clamp hole; retain inside R3. Verify supplied corner radius before cutting.；Stock availability, material certificate, bearing rating and clamp preload require qualification |
+| waist-dual-clamp-spacer-0 | trunk_roll_link | M3 OD7 ID3.2 spacer 10 mm |
+| waist-dual-clamp-spacer-1 | trunk_roll_link | M3 OD7 ID3.2 spacer 4 mm |
+| waist-dual-clamp-spacer-2 | trunk_roll_link | M3 OD7 ID3.2 spacer 0.5 mm |
+| waist-dual-clamp-replacement-bolt | trunk_roll_link | M3x60; rear support through bolt |
+| waist-dual-clamp-replacement-nut | trunk_roll_link | M3 ISO4032, relocated behind new rear angle |
 | torso-output-front | torso | laser 6061-T6 1.5 mm; deburr |
 | torso-output-spacer-front-0 | torso | M3 OD5 ID3.2 spacer 3 mm; split into stocked lengths at release |
 | torso-output-bolt-front-0 | torso | M3x8 ISO4762 |
@@ -743,6 +830,7 @@
 | camera-rear-envelope | head | 见实装清单及紧固件核验；无详细工序声明 |
 | battery | torso | 见实装清单及紧固件核验；无详细工序声明 |
 | sbc | torso | 见实装清单及紧固件核验；无详细工序声明 |
+| vl53l1x | head | 见实装清单及紧固件核验；无详细工序声明 |
 | sbc-component-000 | torso | 见实装清单及紧固件核验；无详细工序声明 |
 | sbc-component-001 | torso | 见实装清单及紧固件核验；无详细工序声明 |
 | sbc-component-002 | torso | 见实装清单及紧固件核验；无详细工序声明 |

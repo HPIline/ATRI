@@ -1,0 +1,474 @@
+{
+  "part_count": 1030,
+  "review_export_parts": 1030,
+  "parts_json_count": 1030,
+  "counts_match": true,
+  "revolute": 20,
+  "revolute_names": [
+    "trunk_roll",
+    "trunk_pitch",
+    "head_yaw",
+    "head_pitch",
+    "left_hip_roll",
+    "left_hip_pitch",
+    "left_knee_pitch",
+    "left_ankle_pitch",
+    "right_hip_roll",
+    "right_hip_pitch",
+    "right_knee_pitch",
+    "right_ankle_pitch",
+    "left_shoulder_pitch",
+    "left_shoulder_roll",
+    "left_elbow_pitch",
+    "left_gripper",
+    "right_shoulder_pitch",
+    "right_shoulder_roll",
+    "right_elbow_pitch",
+    "right_gripper"
+  ],
+  "hip_yaw_count": 0,
+  "has_vl53": true,
+  "vl53_names": [
+    "vl53l1x"
+  ],
+  "has_secondary_battery": false,
+  "secondary_battery_names": [],
+  "has_gripper": true,
+  "gripper_part_count": 62,
+  "urdf_link_count": 21,
+  "urdf_link_meshes_present": true,
+  "missing_urdf_meshes": [],
+  "sim_mesh_stl_count": 21,
+  "generate_exit": 0,
+  "cad_export_exit": 0,
+  "unittest_exit": 0,
+  "unittest_summary": "Ran 35 tests in 51.623s OK",
+  "generate_tail": "Generated 2203 current-assembly files in /home/carrot/Grok build/atri-v2-al-petg/design/v2/out; G0–G4 OPEN",
+  "cad_export_parts": 1030,
+  "same_build_note": "STEP/STL/URDF/preview/manufacturing mtimes are from cad_export (13:47-13:49 +08). generate ran first (13:43-13:46 +08) and wrote markdown/generated-files.json. packages/*.gz remain from 11:26 +08, not this run. CadQuery FutureWarning on save() only.",
+  "g0_g4": "OPEN",
+  "file_timestamps": {
+    "assembly-snapshot.json": {
+      "exists": true,
+      "mtime": "2026-09-13T13:49:00+08:00",
+      "size": 586431
+    },
+    "review-export.json": {
+      "exists": true,
+      "mtime": "2026-09-13T13:49:00+08:00",
+      "size": 117674
+    },
+    "generated-files.json": {
+      "exists": true,
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 113204
+    },
+    "cad/ATRI-v2-review.step": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:46+08:00",
+      "size": 107590628
+    },
+    "packages/ATRI-v2-review.step.gz": {
+      "exists": true,
+      "mtime": "2026-09-13T11:26:48+08:00",
+      "size": 17144981
+    },
+    "preview/ATRI-v2.html": {
+      "exists": true,
+      "mtime": "2026-09-13T13:48:36+08:00",
+      "size": 30543817
+    },
+    "sim/atri_v2.urdf": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:47+08:00",
+      "size": 20395
+    },
+    "sim/parts.json": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:47+08:00",
+      "size": 259078
+    },
+    "manufacturing/manifest.json": {
+      "exists": true,
+      "mtime": "2026-09-13T13:49:00+08:00",
+      "size": 775597
+    },
+    "ATRI-v2-工程验证.md": {
+      "exists": true,
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 1068
+    },
+    "sim/meshes/head.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 2865084
+    },
+    "sim/meshes/head_yaw_link.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3017784
+    },
+    "sim/meshes/left_foot.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3926484
+    },
+    "sim/meshes/left_fore.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 2348884
+    },
+    "sim/meshes/left_grip.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:36+08:00",
+      "size": 1027284
+    },
+    "sim/meshes/left_hand.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:36+08:00",
+      "size": 3524784
+    },
+    "sim/meshes/left_hip_roll_link.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3768584
+    },
+    "sim/meshes/left_shank.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 4694384
+    },
+    "sim/meshes/left_thigh.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3995384
+    },
+    "sim/meshes/left_upper.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 2541984
+    },
+    "sim/meshes/pelvis.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 5973584
+    },
+    "sim/meshes/right_foot.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3926484
+    },
+    "sim/meshes/right_fore.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:36+08:00",
+      "size": 3155284
+    },
+    "sim/meshes/right_grip.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:36+08:00",
+      "size": 1027284
+    },
+    "sim/meshes/right_hand.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:36+08:00",
+      "size": 3524784
+    },
+    "sim/meshes/right_hip_roll_link.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3768584
+    },
+    "sim/meshes/right_shank.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 4694384
+    },
+    "sim/meshes/right_thigh.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3995384
+    },
+    "sim/meshes/right_upper.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:36+08:00",
+      "size": 2541984
+    },
+    "sim/meshes/torso.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 21368384
+    },
+    "sim/meshes/trunk_roll_link.stl": {
+      "exists": true,
+      "mtime": "2026-09-13T13:47:35+08:00",
+      "size": 3806384
+    }
+  },
+  "out_artifacts": {
+    "ATRI-v2-BOM.csv": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 3694
+    },
+    "ATRI-v2-BOM.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 7797
+    },
+    "ATRI-v2-工程验证.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 1068
+    },
+    "ATRI-v2-能力验证.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 2308
+    },
+    "ATRI-v2-装配顺序.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 101555
+    },
+    "G3-赛方确认函.md": {
+      "kind": "file",
+      "mtime": "2026-09-12T21:03:50+08:00",
+      "size": 864
+    },
+    "PETG-打印清单.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 4149
+    },
+    "README.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:53+08:00",
+      "size": 1278
+    },
+    "additions-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T12:38:23+08:00",
+      "size": 6920
+    },
+    "arm-dual-global-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:44:05+08:00",
+      "size": 15036
+    },
+    "arm-load-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:18:40+08:00",
+      "size": 5645
+    },
+    "arm-review": {
+      "kind": "dir",
+      "mtime": "2026-09-13T04:01:29+08:00",
+      "size": 9926
+    },
+    "assembly-snapshot.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:49:00+08:00",
+      "size": 586431
+    },
+    "blender": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:30:01+08:00",
+      "size": 186
+    },
+    "cad": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:47:44+08:00",
+      "size": 38
+    },
+    "cad-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:28:20+08:00",
+      "size": 1085
+    },
+    "connector-reservation-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T05:24:07+08:00",
+      "size": 22421
+    },
+    "dual-support-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:03:20+08:00",
+      "size": 4987
+    },
+    "front-adapter-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:23:00+08:00",
+      "size": 16432
+    },
+    "front-adapter-pitch-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:25:03+08:00",
+      "size": 13873
+    },
+    "gates.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 725
+    },
+    "generated-files.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 113204
+    },
+    "gravity-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:22:06+08:00",
+      "size": 12253
+    },
+    "gripper-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:13:45+08:00",
+      "size": 3669
+    },
+    "head-revision": {
+      "kind": "dir",
+      "mtime": "2026-09-13T02:18:43+08:00",
+      "size": 1346
+    },
+    "leg-live-update": {
+      "kind": "dir",
+      "mtime": "2026-09-13T04:39:16+08:00",
+      "size": 114
+    },
+    "leg-revision": {
+      "kind": "dir",
+      "mtime": "2026-09-13T03:11:36+08:00",
+      "size": 20608
+    },
+    "leg-strength-review.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T09:59:20+08:00",
+      "size": 3738
+    },
+    "leg-strength-review.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:00:13+08:00",
+      "size": 9928
+    },
+    "legacy-superseded": {
+      "kind": "dir",
+      "mtime": "2026-09-13T05:18:36+08:00",
+      "size": 102
+    },
+    "live-sync": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:23:11+08:00",
+      "size": 62168
+    },
+    "manufacturing": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:49:00+08:00",
+      "size": 88
+    },
+    "mass-ledger.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 2591
+    },
+    "neck-revision": {
+      "kind": "dir",
+      "mtime": "2026-09-13T03:04:27+08:00",
+      "size": 774
+    },
+    "packages": {
+      "kind": "dir",
+      "mtime": "2026-09-13T05:27:31+08:00",
+      "size": 194
+    },
+    "pelvis-revision": {
+      "kind": "dir",
+      "mtime": "2026-09-13T02:44:14+08:00",
+      "size": 11638
+    },
+    "preview": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:48:36+08:00",
+      "size": 24
+    },
+    "reference": {
+      "kind": "dir",
+      "mtime": "2026-09-13T01:51:05+08:00",
+      "size": 220
+    },
+    "review-export.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:49:00+08:00",
+      "size": 117674
+    },
+    "rom-cad-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:21:10+08:00",
+      "size": 27642
+    },
+    "sim": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:47:47+08:00",
+      "size": 66
+    },
+    "structural-theory.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:13:45+08:00",
+      "size": 4989
+    },
+    "torso-final-review": {
+      "kind": "dir",
+      "mtime": "2026-09-13T04:15:00+08:00",
+      "size": 24702
+    },
+    "torso-review": {
+      "kind": "dir",
+      "mtime": "2026-09-13T03:37:45+08:00",
+      "size": 8100
+    },
+    "verification-summary.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:27:16+08:00",
+      "size": 1475
+    },
+    "visible-review": {
+      "kind": "dir",
+      "mtime": "2026-09-13T04:22:24+08:00",
+      "size": 54576
+    },
+    "waist-current-audit.json": {
+      "kind": "file",
+      "mtime": "2026-09-13T11:39:57+08:00",
+      "size": 4122
+    },
+    "webots": {
+      "kind": "dir",
+      "mtime": "2026-09-13T13:48:06+08:00",
+      "size": 78
+    },
+    "实装核验记录.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T05:16:46+08:00",
+      "size": 1930
+    },
+    "手臂载荷核验.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:18:40+08:00",
+      "size": 2025
+    },
+    "结构理论初筛.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T10:13:45+08:00",
+      "size": 1524
+    },
+    "质量账.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 1832
+    },
+    "铝件-加工清单.md": {
+      "kind": "file",
+      "mtime": "2026-09-13T13:46:07+08:00",
+      "size": 71949
+    }
+  }
+}

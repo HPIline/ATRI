@@ -1,17 +1,17 @@
 {
   "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
   "same_link_checked": true,
-  "narrow_phase_pairs": 537,
+  "narrow_phase_pairs": 648,
   "purchased_internal_pairs_excluded": 262,
   "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
   "intersections": [],
   "ok": true,
-  "n_items": 942,
+  "n_items": 1029,
   "invalid_solids": [],
   "mass_g_by_kind": {
-    "fastener": 365.02,
-    "al": 430.08,
-    "tpu": 39.03,
+    "fastener": 393.23,
+    "al": 525.62,
+    "tpu": 39.76,
     "standoff": 9.29,
     "petg": 180.06
   },

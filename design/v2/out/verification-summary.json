@@ -2,23 +2,30 @@
   "release_ready": false,
   "tests": {
     "command": "PYTHONPATH=design .venv-cad/bin/python -m unittest discover -s software/atri/tests -p 'test_v2_*.py' -q",
-    "passed": 83,
-    "duration_s": 260.548
+    "passed": 95,
+    "duration_s": 283.472
   },
-  "cad_parts": 942,
+  "cad_parts": 962,
   "zero_intersections": 0,
   "sampled_motion_cases": 46,
   "sampled_motion_passed": 46,
   "continuous_motion_verified": false,
   "complete_wiring_verified": false,
-  "rom_tested_source_sha256": "94233faebb1d0d0b0ef5f1836b684e17fcaf065c1a60775038ace129cd56b869",
-  "current_source_sha256": "dd37eba14b91bbef8172fd32c24fca1d1375eb94e20d6686586efc59587d4011",
-  "changes_after_rom": "Trailing whitespace removed from assembly3d.py comment only. CAD geometry unchanged.",
+  "rom_tested_source_sha256": "d5098734c6fe3996fc29cd3c5a808be9fc32e6ca9916357b982fb99b125050ad",
+  "changes_after_rom": "Report-only changes; subsequent double-side geometry requires new validation",
   "release_blockers": [
-    "C018 plug revision and complete moving harness/power distribution unresolved",
-    "IMU and audio purchase parts and mounts incomplete",
-    "Incomplete accounted mass estimate 2344.473 g already exceeds 2300 g design target",
-    "Close price estimate 3137 CNY exceeds G0 3000 CNY; no verified cart",
-    "G0 through G4 remain open; no prototype or Webots run"
-  ]
+    "Double-side hip, waist and arm redesign is in progress; this baseline is not final",
+    "Case clamps and output bearing loads remain unqualified",
+    "Incomplete accounted robot mass about2408g; 2300g target not closed",
+    "Complete wiring, IMU/audio and actual G0 cart missing",
+    "G0-G4 remain open"
+  ],
+  "baseline_scope": "Strengthened single-side hip/waist/arm review baseline; user-requested double-side supports pending integration",
+  "current_revision_status": "Front adapters revised and hip/waist paired supports integrated. Central side-sway samples pass; hip rear spacer/thigh pitch and hip/hanging-arm conflicts remain. Mass exceeds hard limit.",
+  "dual_support_tests": {
+    "connection_tests_passed": 5,
+    "leg_and_support_enable_tests_passed": 9
+  },
+  "current_part_count": 1029,
+  "current_accounted_mass_g": 2468.957
 }
