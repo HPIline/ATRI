@@ -225,43 +225,36 @@ CI 会重新生成一次并 `git diff --exit-code`，保证 `.wbt` 和生成脚�
 零重力下机器人悬浮不下垂，电机的静力矩 ≈ 0。S1（静立、支撑多边形）与
 S2（逐关节站立扭矩）必须换成**带重力 + 带地面 + 显式扭矩上限**的派生世界。
 
-> 派生世界是**生成产物**：写到 `docs/process/sim/` 之类的临时目录或仓库外，
-> **不要覆盖 `webots/worlds/atri_v2.wbt`**——CI 会重跑生成器并 `git diff --exit-code` 对账。
+> 带重力校核世界入库为 `webots/worlds/atri_v2_gravity.wbt`（ENU 下 `gravity 9.81` 才往下掉）。
+> **不要覆盖 `webots/worlds/atri_v2.wbt`**——那是零重力运动学联调，CI 会重跑生成器对账。
 >
-> **默认模式（不带任何开关）产出的世界仍与仓库里那份逐字节一致**，
-> 零重力模式继续用于**纯运动学演示**（20 个关节角下发/回读/行程）。
+> **默认模式（不带任何开关）产出的世界仍与仓库里那份逐字节一致**。
 
 ### 1. 生成带重力世界（仓库根目录执行）
 
 ```bash
-# 带重力 + 地面 + 舵机扭矩上限（2.94 N·m = STS3215 堵转）
-ATRI_WORLD_GRAVITY=-9.81 ATRI_WORLD_MAX_TORQUE=2.94 ATRI_WORLD_GROUND=1 \
-  python3 webots/tools/generate_atri_world.py \
-  --out docs/process/sim/worlds/atri_v2_gravity.wbt
+# 带重力 + 地面；不写 --max-torque 时按 STS3215 堵转 2.94 N·m
+python3 webots/tools/generate_atri_world.py --gravity=9.81 --ground \
+  --out webots/worlds/atri_v2_gravity.wbt
 ```
 
-等价的命令行写法（Windows PowerShell 建议用 `--gravity=-9.81` 这种 `=` 形式，
-否则 `-9.81` 可能被当成参数名）：
-
 ```powershell
-python webots\tools\generate_atri_world.py --gravity=-9.81 --max-torque=2.94 --ground `
-  --out docs\process\sim\worlds\atri_v2_gravity.wbt
+python webots\tools\generate_atri_world.py --gravity=9.81 --ground `
+  --out webots\worlds\atri_v2_gravity.wbt
 ```
 
 | 开关 | 环境变量 | 默认 | 语义 |
 |---|---|---|---|
-| `--gravity` | `ATRI_WORLD_GRAVITY` | `0.0` | `WorldInfo.gravity`（m/s²，**沿 Z 轴的有符号标量**，向下为负）；正值直接报错退出 |
-| `--max-torque` | `ATRI_WORLD_MAX_TORQUE` | 不写该字段 | 逐 `RotationalMotor` 的 `maxTorque`（N·m）。**不写 ≠ 无限大，而是 Webots 默认 10 N·m** |
-| `--ground` | `ATRI_WORLD_GROUND` | 不生成 | 生成 `Plane` 地面（4 m × 4 m，z = 0）。**重力非 0 时自动强制打开** |
+| `--gravity` | `ATRI_WORLD_GRAVITY` | `0.0` | `WorldInfo.gravity`（m/s²）。本机 R2025a ENU：**9.81 往下掉，负值往天上飞** |
+| `--max-torque` | `ATRI_WORLD_MAX_TORQUE` | 重力世界默认堵转 2.94 | 逐 `RotationalMotor` 的 `maxTorque`（N·m）。不写时零重力世界沿用 Webots 默认 10 |
+| `--ground` | `ATRI_WORLD_GROUND` | 不生成 | 静态 `Box` 地面（4 m × 4 m × 0.1 m，顶面 z = 0）。重力非 0 时强制打开 |
 | `--out` | — | `webots/worlds/atri_v2.wbt` | 输出路径 |
 
 三条硬约束（生成器里已经卡住，不用记）：
 
-1. **重力非 0 ⇒ 必须带地面**：没有地面就是自由落体，静立/站立数字全是废的。
-   少写 `ATRI_WORLD_GROUND` 不会报错，而是**自动补上地面**并在控制台说明原因；
-2. **重力为正 ⇒ 报错退出（2）**：`gravity` 是沿 Z 轴的有符号标量，正值等于让机器人往上飞；
-3. **`ATRI_WORLD_GRAVITY=-9,81` 这类笔误 ⇒ 报错退出（2）**：绝不悄悄退回零重力，
-   否则跑出来的还是一份"悬浮世界"，而数字看着像真的。
+1. **重力非 0 ⇒ 必须带地面**：没有地面就是自由落体。
+2. **重力为负 ⇒ 报错退出（2）**：R2025a ENU 下负值沿 +Z 加速。
+3. **笔误的非有限数 ⇒ 报错退出（2）**：绝不悄悄退回零重力。
 
 **地面为什么用 `Plane`、为什么取 4 m × 4 m**：`Floor` / `Ground` 都是 Webots 的 **PROTO**，
 引用必须配 `EXTERNPROTO`，会破坏本世界"自包含、不引任何外部 PROTO"的约束
@@ -273,10 +266,10 @@ python webots\tools\generate_atri_world.py --gravity=-9.81 --max-torque=2.94 --g
 生成后**先自检三条，三条都过**再拿这个世界跑 S1/S2：
 
 ```bash
-W=docs/process/sim/worlds/atri_v2_gravity.wbt
-grep -c "gravity -9.81" $W     # 期望 1
-grep -c "maxTorque 2.94" $W    # 期望恰好 20：漏一个，那个关节就还是 Webots 默认 10 N·m
-grep -cE "Floor|Plane" $W      # 期望 ≥1（地面）
+W=webots/worlds/atri_v2_gravity.wbt
+grep -c "gravity 9.81" $W      # 期望 ≥1
+grep -c "maxTorque 2.94" $W    # 期望恰好 20
+grep -c "vinyl_floor" $W       # 期望地面接触
 ```
 
 ### 2. 跑 S1/S2（都用这一份带重力世界）
@@ -286,8 +279,8 @@ grep -cE "Floor|Plane" $W      # 期望 ≥1（地面）
 
 ```bash
 # Linux / macOS：批量无人值守（调用方 shell 里的环境变量会被继承到 Webots 进程）
-ATRI_WEBOTS_MAX_TORQUE=2.94 bash webots/tools/run_webots_batch.sh \
-  -World   docs/process/sim/worlds/atri_v2_gravity.wbt \
+ATRI_WEBOTS_STAND_S=10 bash webots/tools/run_webots_batch.sh \
+  -World   webots/worlds/atri_v2_gravity.wbt \
   -Report  docs/process/sim/s1_report.json \
   -Log     docs/process/sim/s1_console.log \
   -TimeoutSec 600

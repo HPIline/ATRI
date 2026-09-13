@@ -72,10 +72,10 @@ models/
 # 预编译包解压到仓库内（自包含、不动系统）。版本与来源记在 .python/VERSION.txt
 .python/
 
-# ── Webots 带重力派生世界（生成产物；默认零重力世界仍入库）──
+# ── Webots 带重力世界：v2 校核世界入库；旧 22 DOF 与编辑器工程不入库──
 docs/process/sim/worlds/
 webots/worlds/atri_22dof_gravity.wbt
-webots/worlds/atri_v2_gravity.wbt
+webots/worlds/*.wbproj
 docs/process/sim/video/*
 !docs/process/sim/video/ATRI-v2-stand.mp4
 docs/process/sim/empty_cards/

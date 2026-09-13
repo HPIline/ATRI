@@ -1,0 +1,1133 @@
+#VRML_SIM R2025a utf8
+
+# 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。
+# A.T.R.I. 20 DOF 桌面人形：限位来自 design/v2/profile.py，树来自 atri_v2.urdf。
+# 关节限位与电机速度上限同样来自模型（minStop/maxStop/maxVelocity）。
+# 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。
+#
+# ⚠ 本世界用非默认参数生成，只用于**仿真校核**，里面的数字是仿真值不是实测值：
+#   gravity   = 9.81 m/s²
+#   maxTorque = 2.94 N·m（STS3215 堵转 2.94 N·m）
+#   ground    = 有：Box，4 m × 4 m × 0.1 m，顶面 z = 0
+#   生成命令：见 webots/README.md「带重力/带地面的校核跑法」。
+
+WorldInfo {
+  title "A.T.R.I. 20 DOF 桌面人形（带重力校核）"
+  basicTimeStep 8
+  gravity 9.81
+  ERP 0.2
+  CFM 1e-05
+  coordinateSystem "ENU"
+  gpsCoordinateSystem "local"
+  contactProperties [
+    ContactProperties {
+      material1 "TPU95A"
+      material2 "vinyl_floor"
+      coulombFriction 0.7
+      bounce 0
+      softCFM 1e-5
+      bumpSound ""
+      rollSound ""
+      slideSound ""
+    }
+    ContactProperties {
+      material1 "PETG"
+      material2 "vinyl_floor"
+      coulombFriction 0.35
+      bounce 0
+      softCFM 1e-5
+      bumpSound ""
+      rollSound ""
+      slideSound ""
+    }
+  ]
+}
+
+Viewpoint {
+  orientation -0.1567 0.8935 0.4214 1.1077
+  position 0.45 -0.55 0.28
+  follow "ATRI"
+  followType "None"
+}
+
+Background {
+  skyColor [ 0.62 0.72 0.88 ]
+}
+DirectionalLight {
+  ambientIntensity 0.8
+  direction 0.4 -0.6 -1
+  intensity 2
+  castShadows FALSE
+}
+
+
+Solid {
+  name "ground"
+  translation 0 0 -0.05
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.86 0.82 0.74
+        }
+      }
+      geometry Box {
+        size 4 4 0.1
+      }
+    }
+  ]
+  boundingObject Box {
+    size 4 4 0.1
+  }
+  contactMaterial "vinyl_floor"
+}
+
+Robot {
+  name "ATRI"
+  controller "atri_controller"
+  supervisor TRUE
+  contactMaterial "PETG"
+  translation 0 0 0.24
+  boundingObject Sphere {
+    radius 0.008
+  }
+  physics Physics {
+    density -1
+    mass 0.0987
+    centerOfMass [
+      0 0 0
+    ]
+    inertiaMatrix [
+      0.000045051 0.000071378 0.000106952
+      0 0 0
+    ]
+  }
+  children [
+    GPS {
+      name "pelvis_gps"
+    }
+    InertialUnit {
+      name "imu"
+    }
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.86 0.28 0.18
+        }
+      }
+      geometry Box {
+        size 0.04 0.08 0.032
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 1 0 0
+        anchor 0 0 0.018
+        minStop -0.1745
+        maxStop 0.1745
+        dampingConstant 2
+      }
+      device [
+        RotationalMotor {
+          name "trunk_roll"
+          maxVelocity 4.7171
+          maxTorque 2.94
+        }
+        PositionSensor {
+          name "trunk_roll_sensor"
+        }
+      ]
+      endPoint Solid {
+        translation 0 0 0.018
+        name "trunk_roll_link"
+        contactMaterial "PETG"
+        boundingObject Sphere {
+          radius 0.008
+        }
+        physics Physics {
+          density -1
+          mass 0.0726
+          centerOfMass [
+            0 0 0.003
+          ]
+          inertiaMatrix [
+            0.000014525 0.00001101 0.000011009
+            0 0 0
+          ]
+        }
+        children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0.18 0.42 0.86
+            }
+          }
+          geometry Box {
+            size 0.028 0.04 0.02
+          }
+        }
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 0.025
+              minStop -0.2618
+              maxStop 0.2618
+              dampingConstant 2
+            }
+            device [
+              RotationalMotor {
+                name "trunk_pitch"
+                maxVelocity 4.7171
+                maxTorque 2.94
+              }
+              PositionSensor {
+                name "trunk_pitch_sensor"
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 0.025
+              name "trunk_pitch_link"
+              contactMaterial "PETG"
+              boundingObject Sphere {
+                radius 0.008
+              }
+              physics Physics {
+                density -1
+                mass 0.6834
+                centerOfMass [
+                  0.0042 -0.001 0.0133
+                ]
+                inertiaMatrix [
+                  0.000875555 0.001197827 0.001133422
+                  -0.000038375 -0.000094592 0.00001607
+                ]
+              }
+              children [
+              Shape {
+                appearance Appearance {
+                  material Material {
+                    diffuseColor 0.18 0.42 0.86
+                  }
+                }
+                geometry Box {
+                  size 0.055 0.09 0.08
+                }
+              }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 0 0 1
+                    anchor 0 0 0.087
+                    minStop -1.5708
+                    maxStop 1.5708
+                    dampingConstant 2
+                  }
+                  device [
+                    RotationalMotor {
+                      name "head_yaw"
+                      maxVelocity 4.7171
+                      maxTorque 2.94
+                    }
+                    PositionSensor {
+                      name "head_yaw_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation 0 0 0.087
+                    name "head_yaw_link"
+                    contactMaterial "PETG"
+                    boundingObject Sphere {
+                      radius 0.008
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.0726
+                      centerOfMass [
+                        0 0 0.0073
+                      ]
+                      inertiaMatrix [
+                        0.000024454 0.000020939 0.000011009
+                        0 0 0
+                      ]
+                    }
+                    children [
+                    Shape {
+                      appearance Appearance {
+                        material Material {
+                          diffuseColor 0.18 0.42 0.86
+                        }
+                      }
+                      geometry Box {
+                        size 0.025 0.03 0.02
+                      }
+                    }
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 0 1 0
+                          anchor 0 0 0.06
+                          minStop -0.7854
+                          maxStop 0.7854
+                          dampingConstant 2
+                        }
+                        device [
+                          RotationalMotor {
+                            name "head_pitch"
+                            maxVelocity 4.7171
+                            maxTorque 2.94
+                          }
+                          PositionSensor {
+                            name "head_pitch_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          translation 0 0 0.06
+                          name "head_pitch_link"
+                          contactMaterial "PETG"
+                          boundingObject Sphere {
+                            radius 0.008
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.1533
+                            centerOfMass [
+                              0 0 0
+                            ]
+                            inertiaMatrix [
+                              0.000054351 0.000050836 0.000059735
+                              0 0 0
+                            ]
+                          }
+                          children [
+                          Shape {
+                            appearance Appearance {
+                              material Material {
+                                diffuseColor 0.18 0.42 0.86
+                              }
+                            }
+                            geometry Box {
+                              size 0.04 0.04 0.045
+                            }
+                          }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 0 1 0
+                    anchor 0 0.075 0.045
+                    minStop -1.5708
+                    maxStop 1.5708
+                    dampingConstant 2
+                  }
+                  device [
+                    RotationalMotor {
+                      name "left_shoulder_pitch"
+                      maxVelocity 4.7171
+                      maxTorque 2.94
+                    }
+                    PositionSensor {
+                      name "left_shoulder_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation 0 0.075 0.045
+                    name "left_shoulder_pitch_link"
+                    contactMaterial "PETG"
+                    boundingObject Sphere {
+                      radius 0.008
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.0732
+                      centerOfMass [
+                        0 0.0055 0
+                      ]
+                      inertiaMatrix [
+                        0.000022376 0.000011981 0.000016456
+                        0 0 0
+                      ]
+                    }
+                    children [
+                    Shape {
+                      appearance Appearance {
+                        material Material {
+                          diffuseColor 0.18 0.42 0.86
+                        }
+                      }
+                      geometry Box {
+                        size 0.022 0.022 0.05
+                      }
+                    }
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 1 0 0
+                          anchor 0 0.044 0
+                          minStop 0
+                          maxStop 1.5708
+                          dampingConstant 2
+                        }
+                        device [
+                          RotationalMotor {
+                            name "left_shoulder_roll"
+                            maxVelocity 4.7171
+                            maxTorque 2.94
+                          }
+                          PositionSensor {
+                            name "left_shoulder_roll_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          translation 0 0.044 0
+                          name "left_shoulder_roll_link"
+                          contactMaterial "PETG"
+                          boundingObject Sphere {
+                            radius 0.008
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.0691
+                            centerOfMass [
+                              0 0 -0.0059
+                            ]
+                            inertiaMatrix [
+                              0.000023936 0.000020331 0.000009215
+                              0 0 0
+                            ]
+                          }
+                          children [
+                          Shape {
+                            appearance Appearance {
+                              material Material {
+                                diffuseColor 0.18 0.42 0.86
+                              }
+                            }
+                            geometry Box {
+                              size 0.02 0.02 0.044
+                            }
+                          }
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                axis 0 1 0
+                                anchor 0 0 -0.058
+                                minStop -2.0944
+                                maxStop 0
+                                dampingConstant 2
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "left_elbow_pitch"
+                                  maxVelocity 4.7171
+                                  maxTorque 2.94
+                                }
+                                PositionSensor {
+                                  name "left_elbow_pitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                translation 0 0 -0.058
+                                name "left_elbow_pitch_link"
+                                contactMaterial "PETG"
+                                boundingObject Sphere {
+                                  radius 0.008
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.0691
+                                  centerOfMass [
+                                    0 0 -0.0061
+                                  ]
+                                  inertiaMatrix [
+                                    0.000024598 0.000020994 0.000009215
+                                    0 0 0
+                                  ]
+                                }
+                                children [
+                                Shape {
+                                  appearance Appearance {
+                                    material Material {
+                                      diffuseColor 0.18 0.42 0.86
+                                    }
+                                  }
+                                  geometry Box {
+                                    size 0.02 0.02 0.04
+                                  }
+                                }
+                                  HingeJoint {
+                                    jointParameters HingeJointParameters {
+                                      axis 1 0 0
+                                      anchor 0 0 -0.06
+                                      minStop 0
+                                      maxStop 1.0472
+                                      dampingConstant 2
+                                    }
+                                    device [
+                                      RotationalMotor {
+                                        name "left_gripper"
+                                        maxVelocity 4.7171
+                                        maxTorque 2.94
+                                      }
+                                      PositionSensor {
+                                        name "left_gripper_sensor"
+                                      }
+                                    ]
+                                    endPoint Solid {
+                                      translation 0 0 -0.06
+                                      name "left_gripper_link"
+                                      contactMaterial "PETG"
+                                      boundingObject Sphere {
+                                        radius 0.008
+                                      }
+                                      physics Physics {
+                                        density -1
+                                        mass 0.061
+                                        centerOfMass [
+                                          0 0 0
+                                        ]
+                                        inertiaMatrix [
+                                          0.00001071 0.000007067 0.000008635
+                                          0 0 0
+                                        ]
+                                      }
+                                      children [
+                                      Shape {
+                                        appearance Appearance {
+                                          material Material {
+                                            diffuseColor 0.18 0.42 0.86
+                                          }
+                                        }
+                                        geometry Box {
+                                          size 0.015 0.02 0.03
+                                        }
+                                      }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 0 -1 0
+                    anchor 0 -0.075 0.045
+                    minStop -1.5708
+                    maxStop 1.5708
+                    dampingConstant 2
+                  }
+                  device [
+                    RotationalMotor {
+                      name "right_shoulder_pitch"
+                      maxVelocity 4.7171
+                      maxTorque 2.94
+                    }
+                    PositionSensor {
+                      name "right_shoulder_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation 0 -0.075 0.045
+                    name "right_shoulder_pitch_link"
+                    contactMaterial "PETG"
+                    boundingObject Sphere {
+                      radius 0.008
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.0732
+                      centerOfMass [
+                        0 -0.0055 0
+                      ]
+                      inertiaMatrix [
+                        0.000022376 0.000011981 0.000016456
+                        0 0 0
+                      ]
+                    }
+                    children [
+                    Shape {
+                      appearance Appearance {
+                        material Material {
+                          diffuseColor 0.18 0.42 0.86
+                        }
+                      }
+                      geometry Box {
+                        size 0.022 0.022 0.05
+                      }
+                    }
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 1 0 0
+                          anchor 0 -0.044 0
+                          minStop -1.5708
+                          maxStop 0
+                          dampingConstant 2
+                        }
+                        device [
+                          RotationalMotor {
+                            name "right_shoulder_roll"
+                            maxVelocity 4.7171
+                            maxTorque 2.94
+                          }
+                          PositionSensor {
+                            name "right_shoulder_roll_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          translation 0 -0.044 0
+                          name "right_shoulder_roll_link"
+                          contactMaterial "PETG"
+                          boundingObject Sphere {
+                            radius 0.008
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.0691
+                            centerOfMass [
+                              0 0 -0.0059
+                            ]
+                            inertiaMatrix [
+                              0.000023936 0.000020331 0.000009215
+                              0 0 0
+                            ]
+                          }
+                          children [
+                          Shape {
+                            appearance Appearance {
+                              material Material {
+                                diffuseColor 0.18 0.42 0.86
+                              }
+                            }
+                            geometry Box {
+                              size 0.02 0.02 0.044
+                            }
+                          }
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                axis 0 1 0
+                                anchor 0 0 -0.058
+                                minStop -2.0944
+                                maxStop 0
+                                dampingConstant 2
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "right_elbow_pitch"
+                                  maxVelocity 4.7171
+                                  maxTorque 2.94
+                                }
+                                PositionSensor {
+                                  name "right_elbow_pitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                translation 0 0 -0.058
+                                name "right_elbow_pitch_link"
+                                contactMaterial "PETG"
+                                boundingObject Sphere {
+                                  radius 0.008
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.0691
+                                  centerOfMass [
+                                    0 0 -0.0061
+                                  ]
+                                  inertiaMatrix [
+                                    0.000024598 0.000020994 0.000009215
+                                    0 0 0
+                                  ]
+                                }
+                                children [
+                                Shape {
+                                  appearance Appearance {
+                                    material Material {
+                                      diffuseColor 0.18 0.42 0.86
+                                    }
+                                  }
+                                  geometry Box {
+                                    size 0.02 0.02 0.04
+                                  }
+                                }
+                                  HingeJoint {
+                                    jointParameters HingeJointParameters {
+                                      axis 1 0 0
+                                      anchor 0 0 -0.06
+                                      minStop 0
+                                      maxStop 1.0472
+                                      dampingConstant 2
+                                    }
+                                    device [
+                                      RotationalMotor {
+                                        name "right_gripper"
+                                        maxVelocity 4.7171
+                                        maxTorque 2.94
+                                      }
+                                      PositionSensor {
+                                        name "right_gripper_sensor"
+                                      }
+                                    ]
+                                    endPoint Solid {
+                                      translation 0 0 -0.06
+                                      name "right_gripper_link"
+                                      contactMaterial "PETG"
+                                      boundingObject Sphere {
+                                        radius 0.008
+                                      }
+                                      physics Physics {
+                                        density -1
+                                        mass 0.061
+                                        centerOfMass [
+                                          0 0 0
+                                        ]
+                                        inertiaMatrix [
+                                          0.00001071 0.000007067 0.000008635
+                                          0 0 0
+                                        ]
+                                      }
+                                      children [
+                                      Shape {
+                                        appearance Appearance {
+                                          material Material {
+                                            diffuseColor 0.18 0.42 0.86
+                                          }
+                                        }
+                                        geometry Box {
+                                          size 0.015 0.02 0.03
+                                        }
+                                      }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 1 0 0
+        anchor 0 0.04 0
+        minStop 0
+        maxStop 0.4363
+        dampingConstant 2
+      }
+      device [
+        RotationalMotor {
+          name "left_hip_roll"
+          maxVelocity 4.7171
+          maxTorque 2.94
+        }
+        PositionSensor {
+          name "left_hip_roll_sensor"
+        }
+      ]
+      endPoint Solid {
+        translation 0 0.04 0
+        name "left_hip_roll_link"
+        contactMaterial "PETG"
+        boundingObject Sphere {
+          radius 0.008
+        }
+        physics Physics {
+          density -1
+          mass 0.0726
+          centerOfMass [
+            0 0 -0.0039
+          ]
+          inertiaMatrix [
+            0.000015857 0.000012341 0.000011009
+            0 0 0
+          ]
+        }
+        children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0.18 0.42 0.86
+            }
+          }
+          geometry Box {
+            size 0.03 0.03 0.03
+          }
+        }
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 -0.032
+              minStop -1.0472
+              maxStop 1.0472
+              dampingConstant 2
+            }
+            device [
+              RotationalMotor {
+                name "left_hip_pitch"
+                maxVelocity 4.7171
+                maxTorque 2.94
+              }
+              PositionSensor {
+                name "left_hip_pitch_sensor"
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 -0.032
+              name "left_hip_pitch_link"
+              contactMaterial "PETG"
+              boundingObject Sphere {
+                radius 0.008
+              }
+              physics Physics {
+                density -1
+                mass 0.0774
+                centerOfMass [
+                  0 0 -0.0113
+                ]
+                inertiaMatrix [
+                  0.00004612 0.000042761 0.000010015
+                  0 0 0
+                ]
+              }
+              children [
+              Shape {
+                appearance Appearance {
+                  material Material {
+                    diffuseColor 0.18 0.42 0.86
+                  }
+                }
+                geometry Box {
+                  size 0.025 0.025 0.078
+                }
+              }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 0 1 0
+                    anchor 0 0 -0.078
+                    minStop 0
+                    maxStop 1.5708
+                    dampingConstant 2
+                  }
+                  device [
+                    RotationalMotor {
+                      name "left_knee_pitch"
+                      maxVelocity 4.7171
+                      maxTorque 2.94
+                    }
+                    PositionSensor {
+                      name "left_knee_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation 0 0 -0.078
+                    name "left_knee_pitch_link"
+                    contactMaterial "PETG"
+                    boundingObject Sphere {
+                      radius 0.008
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.0774
+                      centerOfMass [
+                        0 0 -0.0113
+                      ]
+                      inertiaMatrix [
+                        0.00004612 0.000042761 0.000010015
+                        0 0 0
+                      ]
+                    }
+                    children [
+                    Shape {
+                      appearance Appearance {
+                        material Material {
+                          diffuseColor 0.18 0.42 0.86
+                        }
+                      }
+                      geometry Box {
+                        size 0.022 0.022 0.078
+                      }
+                    }
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 0 1 0
+                          anchor 0 0 -0.078
+                          minStop -0.6981
+                          maxStop 0.6981
+                          dampingConstant 2
+                        }
+                        device [
+                          RotationalMotor {
+                            name "left_ankle_pitch"
+                            maxVelocity 4.7171
+                            maxTorque 2.94
+                          }
+                          PositionSensor {
+                            name "left_ankle_pitch_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          translation 0 0 -0.078
+                          name "left_ankle_pitch_link"
+                          contactMaterial "TPU95A"
+                          boundingObject Pose {
+                            translation 0 0 -0.022
+                            children [
+                              Box {
+                                size 0.12 0.07 0.044
+                              }
+                            ]
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.1204
+                            centerOfMass [
+                              0 0 -0.0226
+                            ]
+                            inertiaMatrix [
+                              0.000088277 0.000136505 0.000113485
+                              0 0 0
+                            ]
+                          }
+                          children [
+                          Shape {
+                            appearance Appearance {
+                              material Material {
+                                diffuseColor 0.18 0.42 0.86
+                              }
+                            }
+                            geometry Box {
+                              size 0.12 0.07 0.012
+                            }
+                          }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 1 0 0
+        anchor 0 -0.04 0
+        minStop -0.4363
+        maxStop 0
+        dampingConstant 2
+      }
+      device [
+        RotationalMotor {
+          name "right_hip_roll"
+          maxVelocity 4.7171
+          maxTorque 2.94
+        }
+        PositionSensor {
+          name "right_hip_roll_sensor"
+        }
+      ]
+      endPoint Solid {
+        translation 0 -0.04 0
+        name "right_hip_roll_link"
+        contactMaterial "PETG"
+        boundingObject Sphere {
+          radius 0.008
+        }
+        physics Physics {
+          density -1
+          mass 0.0726
+          centerOfMass [
+            0 0 -0.0039
+          ]
+          inertiaMatrix [
+            0.000015857 0.000012341 0.000011009
+            0 0 0
+          ]
+        }
+        children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0.18 0.42 0.86
+            }
+          }
+          geometry Box {
+            size 0.03 0.03 0.03
+          }
+        }
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 -0.032
+              minStop -1.0472
+              maxStop 1.0472
+              dampingConstant 2
+            }
+            device [
+              RotationalMotor {
+                name "right_hip_pitch"
+                maxVelocity 4.7171
+                maxTorque 2.94
+              }
+              PositionSensor {
+                name "right_hip_pitch_sensor"
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 -0.032
+              name "right_hip_pitch_link"
+              contactMaterial "PETG"
+              boundingObject Sphere {
+                radius 0.008
+              }
+              physics Physics {
+                density -1
+                mass 0.0774
+                centerOfMass [
+                  0 0 -0.0113
+                ]
+                inertiaMatrix [
+                  0.00004612 0.000042761 0.000010015
+                  0 0 0
+                ]
+              }
+              children [
+              Shape {
+                appearance Appearance {
+                  material Material {
+                    diffuseColor 0.18 0.42 0.86
+                  }
+                }
+                geometry Box {
+                  size 0.025 0.025 0.078
+                }
+              }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    axis 0 1 0
+                    anchor 0 0 -0.078
+                    minStop 0
+                    maxStop 1.5708
+                    dampingConstant 2
+                  }
+                  device [
+                    RotationalMotor {
+                      name "right_knee_pitch"
+                      maxVelocity 4.7171
+                      maxTorque 2.94
+                    }
+                    PositionSensor {
+                      name "right_knee_pitch_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation 0 0 -0.078
+                    name "right_knee_pitch_link"
+                    contactMaterial "PETG"
+                    boundingObject Sphere {
+                      radius 0.008
+                    }
+                    physics Physics {
+                      density -1
+                      mass 0.0774
+                      centerOfMass [
+                        0 0 -0.0113
+                      ]
+                      inertiaMatrix [
+                        0.00004612 0.000042761 0.000010015
+                        0 0 0
+                      ]
+                    }
+                    children [
+                    Shape {
+                      appearance Appearance {
+                        material Material {
+                          diffuseColor 0.18 0.42 0.86
+                        }
+                      }
+                      geometry Box {
+                        size 0.022 0.022 0.078
+                      }
+                    }
+                      HingeJoint {
+                        jointParameters HingeJointParameters {
+                          axis 0 1 0
+                          anchor 0 0 -0.078
+                          minStop -0.6981
+                          maxStop 0.6981
+                          dampingConstant 2
+                        }
+                        device [
+                          RotationalMotor {
+                            name "right_ankle_pitch"
+                            maxVelocity 4.7171
+                            maxTorque 2.94
+                          }
+                          PositionSensor {
+                            name "right_ankle_pitch_sensor"
+                          }
+                        ]
+                        endPoint Solid {
+                          translation 0 0 -0.078
+                          name "right_ankle_pitch_link"
+                          contactMaterial "TPU95A"
+                          boundingObject Pose {
+                            translation 0 0 -0.022
+                            children [
+                              Box {
+                                size 0.12 0.07 0.044
+                              }
+                            ]
+                          }
+                          physics Physics {
+                            density -1
+                            mass 0.1204
+                            centerOfMass [
+                              0 0 -0.0226
+                            ]
+                            inertiaMatrix [
+                              0.000088277 0.000136505 0.000113485
+                              0 0 0
+                            ]
+                          }
+                          children [
+                          Shape {
+                            appearance Appearance {
+                              material Material {
+                                diffuseColor 0.18 0.42 0.86
+                              }
+                            }
+                            geometry Box {
+                              size 0.12 0.07 0.012
+                            }
+                          }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
