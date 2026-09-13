@@ -48,7 +48,13 @@ PELVIS = {
     "adapter_depth_leg_mm": 60.0,
     "adapter_output_half_height_mm": 10.0,
     "adapter_output_y_min_mm": -10.0,
-    "adapter_web_mm": 8.0,
+    "adapter_web_mm": 12.0,
+    "hip_output_pad_radius_mm": 10.0,
+    "hip_output_neck_half_width_mm": 6.0,
+    "hip_profile_radius_mm": 1.0,
+    "hip_adapter_waypoint_xz_mm": (-12.0,-21.0),
+    "trunk_adapter_web_mm": 18.0,
+    "trunk_profile_radius_mm": 1.0,
     "trunk_adapter_waypoint_mm": (0.0,20.0),
     "adapter_inner_radius_mm": 3.0,
     "adapter_case_washer_mm": 0.5,
@@ -140,14 +146,14 @@ NECK = {
 }
 
 LEG = {
-    'plate_t_mm':1.5, 'web_mm':9., 'pad_r_mm':5., 'output_r_mm':10.,
+    'plate_t_mm':1.5, 'web_mm':12., 'pad_r_mm':5., 'output_r_mm':10.,
     'front_inner_mm':(20.2,26.2,33.2), 'rear_inner_mm':(-19.2,-25.2,-32.2),
     'horn_bolt_mm':(5.,12.,18.), 'clamp_bolt_mm':(45.,60.),
     'clamp_head_washer_mm':(0.,2.), 'foot_height_mm':44.,
     'foot_angle_leg_mm':15., 'foot_angle_length_mm':20., 'foot_angle_t_mm':1.5,
     'foot_angle_hole_x_mm':(-6.,6.), 'foot_angle_inner_r_mm':1.5,
     'foot_angle_vertical_hole_mm':9., 'foot_angle_horizontal_hole_mm':9.,
-    'foot_plate_t_mm':2., 'foot_edge_r_mm':8.,
+    'foot_plate_t_mm':3., 'foot_edge_r_mm':8.,
     'spacer_lengths_mm':(10.,6.,5.,3.,2.,1.,.5,.2),
     'foot_lightening_x_ranges_mm':((-32.,-12.),(12.,68.)),
     'foot_lightening_y_mm':(-18.,18.), 'foot_lightening_width_mm':18.,
@@ -164,21 +170,23 @@ ARM = {
     'fore_spacer_stack_mm':(10.,3.),
     'fore_bridge_drop_mm':46., 'fore_output_waypoint_yz_mm':(-30.,28.),
     'spaced_bolt_base_mm':5., 'spacer_od_mm':5.,
-    'finger_t_mm':2., 'finger_length_mm':38.,
-    'finger_mount_x_mm':25., 'finger_width_mm':5.,
-    'moving_finger_x_mm':21.2,
+    'finger_t_mm':2., 'finger_length_mm':55.,
+    'finger_mount_x_mm':25., 'finger_width_mm':6.,
+    'moving_finger_x_mm':30.2,
     'finger_case_bolt_y_mm':31., 'finger_case_bolt_z_mm':(-15.,-36.),
     'finger_aux_bolt_mm':16.,
-    'finger_bridge_z_mm':-26., 'fixed_finger_y_mm':-15.,
+    'finger_bridge_z_mm':-26., 'fixed_finger_y_mm':-18.,
     'moving_finger_tip_y_mm':-4., 'finger_mount_web_mm':9.,
-    'finger_center_d_mm':6.4, 'finger_bolt_mm':6.,
-    'finger_spacer_stack_mm':(2.,), 'fixed_spacer_face_mm':20.,
+    'finger_center_d_mm':6.4, 'finger_bolt_mm':16.,
+    'finger_spacer_stack_mm':(10.,1.), 'fixed_spacer_face_mm':20.,
     'fixed_spacer_od_mm':6., 'fixed_bolt_mm':50.,
-    'pad_y_mm':{'fixed':-11.5,'moving':-3.5},
-    'pad_height_mm':{'fixed':8.,'moving':12.}, 'pad_t_mm':2.,
+    'pad_y_mm':{'fixed':-14.,'moving':-4.},
+    'pad_height_mm':{'fixed':24.,'moving':24.}, 'pad_t_mm':2.,
+    'pad_support_stack_mm':(2.,3.), 'pad_support_hole_z_mm':(-49.,-37.),
+    'pad_support_hole_mm':2.2, 'pad_support_bolt_mm':10.,
     'material':'6061-T6',
     'stock_equal_leg_mm':(40.,50.,60.,75.,80.,100.),
-    'fore_csk_bolt_mm':20., 'csk_head_d_mm':6., 'csk_depth_mm':1.7,
+    'fore_csk_bolt_mm':20., 'csk_head_d_mm':6., 'csk_depth_mm':1.5,
     'button_head_d_mm':5.7, 'button_head_h_mm':1.65,
     'button_socket_af_mm':2., 'button_socket_depth_mm':1.1,
     'button_edge_r_mm':.8,
@@ -328,7 +336,7 @@ K = {
     "hip_width": 80.0,
     "shoulder_width": 150.0,
     "upper_arm": 58.0,
-    "forearm": 52.0,
+    "forearm": 60.0,
     "gripper": 38.0,
     "torso_depth": 92.0,
     "cover_half": 18.0,
@@ -450,3 +458,49 @@ CONNECTOR_STUDY = {
     'status':'Provisional mating-space probe only; dimensions not qualified by C018 connector drawing',
     'source':'C018 p6 specifies 5264/2.54 3P; older reference STEP has approximately 2.4 mm pin pitch. Full plug drawing and revision are unresolved.',
 }
+
+# Passive-side arm support candidate, pending full swept-volume qualification.
+ARM_DUAL = {
+    'shoulder_bridge_z_mm': -50.,
+    'shoulder_output_route_mm': ((0.,0.),(-10.,-20.),(-10.,-50.),(20.,-50.)),
+    'rear_outer_mm': -23.2,
+    'rear_plate_t_mm': 3.,
+    'rear_disc_spacer_stack_mm': (2., .5),
+    'rear_head_washer_mm': .5,
+    'rear_horn_bolt_mm': 8.,
+    'rear_horn_thread_engagement_mm': 2.,
+    'upper_bridge_drop_mm': 37.,
+    'upper_route_y_mm': {'left':24., 'right':20.5},
+    'upper_web_mm': {'left':9., 'right':6.},
+    'upper_route_elbow_z_mm': -30.,
+    'upper_route_bottom_z_mm': -95.,
+    'lap_outer_y_mm': 23.,
+    'case_bolt_mm':45.,
+    'spacer_od_mm':5.,
+    'hole_mm':3.2,
+}
+
+# Owner-authorized paired hip-roll support revision; assembly qualification open.
+HIP_DUAL = {
+    'plate_t_mm':3., 'web_mm':12., 'disc_pad_r_mm':10.,
+    'rear_outer_x_mm':-26.2, 'side_outer_y_mm':-31.2,
+    'pcd_spacer_stack_mm':(5.,.5), 'pcd_head_washer_mm':.5,
+    'pcd_bolt_mm':12., 'case_spacer_mm':9., 'case_bolt_mm':55., 'case_seat_d_mm':7.4,
+    'inside_radius_mm':3., 'centre_clear_mm':8.2,
+}
+
+# Waist roll rear support: paired with the active front angle on the moving link.
+WAIST_DUAL = dict(plate_t_mm=3., rear_outer_x_mm=-26.2, side_outer_y_mm=-36.7,
+    clamp_x_mm=31., clamp_z_mm=40., return_center_z_mm=35.,
+    side_length_mm=62., side_center_x_mm=6., return_join_mm=6.,
+    disc_pad_radius_mm=10., centre_clear_mm=8.2, end_radius_mm=5., return_width_mm=18., rear_web_mm=12., inside_radius_mm=3.,
+    pcd_spacer_stack_mm=(5., .5), head_washer_mm=.5, pcd_bolt_mm=12.,
+    clamp_spacer_stack_mm=(10., 4., .5), clamp_bolt_mm=60.)
+
+# Additive second battery candidate; integration is explicit and requires electrical review.
+SECOND_BATTERY = {'sku':'Gens-Ace-GEA223S25T3GT', 'body_mm':(33.,107.,22.), 'position_mm':(86.5,0.,42.), 'mass_g':169., 'tray_bounds_mm':(55.,-62.,29.,108.,62.,31.4), 'status':'candidate mechanical mount; fuse/ORing, charger and thermal validation required'}
+
+BATTERY_EXPANSION = dict(center_mm=(86.5,0.,42.), tray_x_mm=(68.,108.),
+    tray_y_mm=(-62.,62.), tray_z_mm=29., thickness_mm=2.,
+    bridge_start_x_mm=50., bridge_y_mm=(-58.,58.), bridge_width_mm=8.,
+    shell_clearance_mm=.6, strap_y_mm=(-32.,32.), strap_width_mm=10., strap_t_mm=1.)
