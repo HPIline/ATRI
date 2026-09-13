@@ -51,6 +51,10 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 try:
     from controller import Robot
+    try:
+        from controller import Supervisor
+    except ImportError:  # pragma: no cover
+        Supervisor = None  # type: ignore[misc, assignment]
 except ImportError:  # pragma: no cover - 只有在 Webots 之外直接运行时才走到
     print(
         "本控制器需要在 Webots 环境中运行（Python 的 controller 模块由 Webots 提供）。\n"
@@ -68,6 +72,15 @@ sys.path.insert(0, str(SOFTWARE_ROOT))
 from atri.brain import Brain  # noqa: E402
 from atri.cerebellum import Cerebellum, ServoBus  # noqa: E402
 from atri.config import JOINTS  # noqa: E402
+from atri.stand_balance import (  # noqa: E402
+    STAND_KP_PITCH,
+    STAND_KP_ROLL,
+    STAND_SETTLE_S,
+    balance_offsets,
+    evaluate_stand,
+    mix_pose,
+    stand_base_pose,
+)
 from atri.perception import MockPerception  # noqa: E402
 from atri.sim import run_task_cards  # noqa: E402
 from atri.voice import MockTTS  # noqa: E402
@@ -260,6 +273,17 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--report", default=None, help="把联调结果写入 JSON 文件")
     parser.add_argument("--log", default=None, help="把控制器控制台输出同时写入文件")
     parser.add_argument("--task-card-dir", default=None, help="任务卡目录（默认 software/atri/task_cards）")
+    parser.add_argument(
+        "--stand-s",
+        type=float,
+        default=0.0,
+        help=">0 时只做自主站立，不跑任务卡（仿真秒）",
+    )
+    parser.add_argument(
+        "--movie",
+        default=None,
+        help="Supervisor 录屏 mp4 路径（需要世界里 Robot.supervisor TRUE）",
+    )
     return parser
 
 
@@ -301,6 +325,16 @@ def resolve_options(args: argparse.Namespace) -> argparse.Namespace:
         raise ValueError(
             f"max-torque 必须 > 0，实际 {args.max_torque}（0 或负数 = 电机没有力矩）"
         )
+    env_stand = os.environ.get("ATRI_WEBOTS_STAND_S")
+    if env_stand and args.stand_s == 0.0:
+        try:
+            args.stand_s = float(env_stand)
+        except ValueError:
+            raise ValueError(f"环境变量 ATRI_WEBOTS_STAND_S={env_stand!r} 不是合法数字") from None
+    if args.stand_s < 0:
+        raise ValueError(f"stand-s 必须 ≥ 0，实际 {args.stand_s}")
+    if args.movie is None:
+        args.movie = os.environ.get("ATRI_WEBOTS_MOVIE") or None
     return args
 
 
@@ -365,6 +399,44 @@ def step_seconds(
     return True
 
 
+def start_movie(robot: Any, path_str: str) -> Optional[str]:
+    """开始 Supervisor 录屏；成功返回绝对路径，否则 None。"""
+    starter = getattr(robot, "movieStartRecording", None)
+    if starter is None:
+        print(
+            "  [控制器] 当前对象没有 movieStartRecording（需要 Supervisor + supervisor TRUE）",
+            file=sys.stderr,
+        )
+        return None
+    path = Path(path_str)
+    if not path.is_absolute():
+        path = Path.cwd() / path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    starter(str(path), 1280, 720, 0, 80, 1, False)
+    print(f"  [控制器] 开始录屏: {path}")
+    return str(path)
+
+
+def finish_movie(robot: Any, timestep_ms: int) -> None:
+    """停录并等到编码器写完文件。"""
+    stopper = getattr(robot, "movieStopRecording", None)
+    if stopper is None:
+        return
+    stopper()
+    ready = getattr(robot, "movieIsReady", None)
+    failed = getattr(robot, "movieFailed", None)
+    if ready is not None:
+        for _ in range(8000):
+            if ready():
+                break
+            if robot.step(int(timestep_ms)) == -1:
+                break
+    if failed is not None and failed():
+        print("  [控制器] 录屏编码失败", file=sys.stderr)
+    else:
+        print("  [控制器] 录屏结束")
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     # Webots 也可能往控制器进程塞自己的参数，用 parse_known_args 不因未知参数崩掉
     args, unknown = build_arg_parser().parse_known_args(argv)
@@ -378,8 +450,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
     console_log = install_console_log(args.log)
 
-    robot = Robot()
+    movie_path = args.movie
+    if movie_path:
+        if Supervisor is None:
+            print("  [控制器] --movie 需要 Supervisor，当前环境没有", file=sys.stderr)
+            return 2
+        robot = Supervisor()
+    else:
+        robot = Robot()
     timestep = int(robot.getBasicTimeStep())
+    recording = start_movie(robot, movie_path) if movie_path else None
 
     mapping_path = Path(args.mapping) if args.mapping else DEFAULT_MAPPING
     if not mapping_path.is_absolute():
@@ -417,6 +497,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 最小/最大角，报告里给出真实行程——这才是"联调通过"的证据。
     travel_min: Dict[str, float] = {}
     travel_max: Dict[str, float] = {}
+    pelvis_xyz: List[List[float]] = []
+    imu_rpy: List[List[float]] = []
+    gps = robot.getDevice("pelvis_gps")
+    imu = robot.getDevice("imu")
+    if gps is not None:
+        gps.enable(timestep)
+    if imu is not None:
+        imu.enable(timestep)
 
     def sample_pose() -> None:
         for name, spec in JOINTS.items():
@@ -427,6 +515,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 travel_min[name] = deg
             if name not in travel_max or deg > travel_max[name]:
                 travel_max[name] = deg
+        if gps is not None:
+            values = list(gps.getValues() or [])
+            if len(values) >= 3 and values[2] == values[2]:
+                pelvis_xyz.append([float(values[0]), float(values[1]), float(values[2])])
+        if imu is not None:
+            getter = getattr(imu, "getRollPitchYaw", None)
+            if getter is not None:
+                rpy = list(getter() or [])
+                if len(rpy) >= 3 and rpy[0] == rpy[0]:
+                    imu_rpy.append([float(rpy[0]), float(rpy[1]), float(rpy[2])])
 
     def sleeper(dt_s: float) -> None:
         if not state["alive"]:
@@ -440,23 +538,107 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     started = time.time()
 
-    # 1) 先回零，让机器人进入初始站姿，并等姿态稳定
-    cerebellum.home()
-    if not step_seconds(robot, timestep, args.settle_s, state):
-        state["alive"] = False
-    sample_pose()
-    print(f"  [控制器] 回零完成并稳定 {args.settle_s:.2f} 仿真秒")
-
-    # 2) 顺序执行五项任务卡（与 run_demo.py 同一条链路）
-    task_card_dir = Path(args.task_card_dir) if args.task_card_dir else TASK_CARD_DIR
-    results, passed, total = run_task_cards(brain, task_card_dir=task_card_dir, verbose=True)
-
-    # 3) 让最后一次动作走完，再回零
-    if state["alive"]:
-        step_seconds(robot, timestep, args.settle_s, state)
-        cerebellum.home()
-        step_seconds(robot, timestep, args.settle_s, state)
+    stand_verdict: Optional[Dict[str, Any]] = None
+    stand_trace: List[Dict[str, Any]] = []
+    pose_first: Optional[Dict[str, float]] = None
+    pose_last: Optional[Dict[str, float]] = None
+    if args.stand_s > 0:
+        # 自主站立：微蹲 + IMU PD，不跑任务卡。
+        for motor in bus.motors.values():
+            setter = getattr(motor, "setControlPID", None)
+            if setter is not None:
+                setter(400.0, 0.0, 20.0)
+            torque_set = getattr(motor, "setAvailableTorque", None)
+            if torque_set is not None:
+                # 盒体世界要撑住 2.3 kg，2.94 N·m 会蹲穿；静立仿真用 20 N·m。
+                torque_set(20.0)
+        base = stand_base_pose()
+        cerebellum.set_pose(base)
+        settle_s = max(float(args.settle_s), STAND_SETTLE_S)
+        if not step_seconds(robot, timestep, settle_s, state):
+            state["alive"] = False
         sample_pose()
+        pose_first = cerebellum.get_pose()
+
+        def _trace_stand() -> None:
+            z = pelvis_xyz[-1][2] if pelvis_xyz else None
+            roll_d = pitch_d = None
+            if imu_rpy:
+                roll_d = imu_rpy[-1][0] * 180.0 / math.pi
+                pitch_d = imu_rpy[-1][1] * 180.0 / math.pi
+            stand_trace.append({
+                "t": round(state.get("sim_ms", 0) / 1000.0, 3),
+                "z": None if z is None else round(float(z), 4),
+                "roll_deg": None if roll_d is None else round(float(roll_d), 2),
+                "pitch_deg": None if pitch_d is None else round(float(pitch_d), 2),
+            })
+
+        _trace_stand()
+        print(
+            f"  [控制器] 站立姿态就绪 z={stand_trace[-1]['z']} "
+            f"roll={stand_trace[-1]['roll_deg']} pitch={stand_trace[-1]['pitch_deg']}，"
+            f"开始自主站立 {args.stand_s:.2f} 仿真秒"
+        )
+        remaining = max(timestep, int(round(args.stand_s * 1000)))
+        next_trace_ms = state.get("sim_ms", 0) + 200
+        while remaining > 0 and state["alive"]:
+            rpy = [0.0, 0.0, 0.0]
+            if imu is not None:
+                getter = getattr(imu, "getRollPitchYaw", None)
+                if getter is not None:
+                    got = list(getter() or [])
+                    if len(got) >= 3:
+                        rpy = [float(got[0]), float(got[1]), float(got[2])]
+            offsets = balance_offsets(
+                rpy[0], rpy[1], kp_pitch=STAND_KP_PITCH, kp_roll=STAND_KP_ROLL
+            )
+            cerebellum.set_pose(mix_pose(base, offsets))
+            dt = min(timestep, remaining)
+            if robot.step(dt) == -1:
+                state["alive"] = False
+                break
+            state["sim_ms"] = state.get("sim_ms", 0) + dt
+            remaining -= dt
+            sample_pose()
+            if state["sim_ms"] >= next_trace_ms:
+                _trace_stand()
+                next_trace_ms += 200
+        _trace_stand()
+        pose_last = cerebellum.get_pose()
+        zs = [p[2] for p in pelvis_xyz]
+        rolls = [p[0] * 180.0 / math.pi for p in imu_rpy] if imu_rpy else [0.0] * len(zs)
+        pitches = [p[1] * 180.0 / math.pi for p in imu_rpy] if imu_rpy else [0.0] * len(zs)
+        if not imu_rpy and zs:
+            rolls = [0.0] * len(zs)
+            pitches = [0.0] * len(zs)
+        stand_verdict = evaluate_stand(zs, rolls, pitches)
+        passed = 1 if stand_verdict.get("ok") else 0
+        total = 1
+        results = [{"task_id": "STAND", "ok": bool(stand_verdict.get("ok")), "history": [], "error": stand_verdict.get("reason")}]
+        print(
+            f"  [控制器] 站立判定: ok={stand_verdict.get('ok')} "
+            f"reason={stand_verdict.get('reason')} "
+            f"z=[{stand_verdict.get('z_min')}, {stand_verdict.get('z_max')}] "
+            f"tilt={stand_verdict.get('tilt_peak_deg')}"
+        )
+    else:
+        # 1) 先回零，让机器人进入初始站姿，并等姿态稳定
+        cerebellum.home()
+        if not step_seconds(robot, timestep, args.settle_s, state):
+            state["alive"] = False
+        sample_pose()
+        print(f"  [控制器] 回零完成并稳定 {args.settle_s:.2f} 仿真秒")
+
+        # 2) 顺序执行五项任务卡（与 run_demo.py 同一条链路）
+        task_card_dir = Path(args.task_card_dir) if args.task_card_dir else TASK_CARD_DIR
+        results, passed, total = run_task_cards(brain, task_card_dir=task_card_dir, verbose=True)
+
+        # 3) 让最后一次动作走完，再回零
+        if state["alive"]:
+            step_seconds(robot, timestep, args.settle_s, state)
+            cerebellum.home()
+            step_seconds(robot, timestep, args.settle_s, state)
+            sample_pose()
 
     # 每个关节在整轮联调里的实际行程（最大值 - 最小值，单位：度）
     travel: Dict[str, float] = {}
@@ -479,7 +661,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         and bus.bound_count == bus.mapped_count
     )
     # 绑定完整不等于真的动了：velocity=0 时电机锁死，任务卡照样"逻辑上"跑完。
-    motion_ok = len(moved_joints) > 0
+    # 站立模式目标是稳住，不要求大行程。
+    motion_ok = True if args.stand_s > 0 else len(moved_joints) > 0
 
     print("=" * 64)
     print(f"Webots 闭环: {passed}/{total} 项任务通过")
@@ -510,6 +693,38 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "simulation_alive": state["alive"],
         "moved_joints": len(moved_joints),
         "joint_travel_deg": travel,
+        "pelvis_z_m": (
+            {
+                "n": len(pelvis_xyz),
+                "first": round(pelvis_xyz[0][2], 4),
+                "last": round(pelvis_xyz[-1][2], 4),
+                "min": round(min(p[2] for p in pelvis_xyz), 4),
+                "max": round(max(p[2] for p in pelvis_xyz), 4),
+                "xy_drift_m": round(
+                    max((p[0] ** 2 + p[1] ** 2) ** 0.5 for p in pelvis_xyz), 4
+                ),
+            }
+            if pelvis_xyz
+            else {"n": 0, "first": None, "last": None, "min": None, "max": None, "xy_drift_m": None}
+        ),
+        "imu_tilt_deg": (
+            {
+                "n": len(imu_rpy),
+                "roll_max_abs": round(max(abs(p[0]) for p in imu_rpy) * 180.0 / math.pi, 2),
+                "pitch_max_abs": round(max(abs(p[1]) for p in imu_rpy) * 180.0 / math.pi, 2),
+            }
+            if imu_rpy
+            else {"n": 0, "roll_max_abs": None, "pitch_max_abs": None}
+        ),
+        "mode": "stand" if args.stand_s > 0 else "tasks",
+        "stand": stand_verdict,
+        "stand_trace": stand_trace,
+        "pose_first": (
+            {k: round(v, 2) for k, v in pose_first.items()} if pose_first else None
+        ),
+        "pose_last": (
+            {k: round(v, 2) for k, v in pose_last.items()} if pose_last else None
+        ),
         "tasks": [
             {
                 "task_id": r.get("task_id"),
@@ -520,6 +735,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             for r in results
         ],
     }
+
+    if recording:
+        finish_movie(robot, timestep)
+        payload["movie"] = recording
 
     if args.report:
         report_path = Path(args.report)

@@ -73,12 +73,16 @@ class TestWebotsControllerIdentityMapping(unittest.TestCase):
 
     def test_sensor_reads_are_finite(self):
         for name, motor in self.world.devices.items():
+            if name in ("pelvis_gps", "imu"):
+                continue
             with self.subTest(joint=name):
                 value = motor.position_sensor.getValue()
                 self.assertEqual(value, value, "getValue() 返回 NaN，说明传感器没被 enable")
 
     def test_motor_velocity_is_set(self):
         for name, motor in self.world.devices.items():
+            if name in ("pelvis_gps", "imu"):
+                continue
             with self.subTest(joint=name):
                 self.assertIsNotNone(motor.velocity, "控制器没有设置关节角速度")
                 self.assertGreater(motor.velocity, 0.0)
@@ -475,6 +479,8 @@ class TestWebotsControllerEnvOptions(unittest.TestCase):
         self.assertEqual(payload["velocity_rad_s"], 1.5)
         self.assertEqual(payload["passed"], 5)
         for name, motor in world.devices.items():
+            if name in ("pelvis_gps", "imu"):
+                continue
             with self.subTest(joint=name):
                 self.assertEqual(motor.velocity, 1.5)
 
@@ -574,6 +580,93 @@ class TestAtriWorldFile(unittest.TestCase):
         for name, spec in specs.items():
             with self.subTest(joint=name):
                 self.assertGreater(spec["maxVelocity"], 0.0)
+
+    def test_each_endpoint_is_translated_to_joint_origin(self):
+        """不写 endPoint.translation 时子连杆叠在骨盆，脚盒碰不到地，静立必塌。"""
+        robot = self.text.split("Robot {", 1)[1]
+        self.assertGreaterEqual(
+            robot.count("translation "),
+            DOF,
+            "每个 HingeJoint 的 endPoint Solid 必须带 URDF 关节原点 translation",
+        )
+
+
+class TestJointFrames(unittest.TestCase):
+    """盒体世界必须把子 Solid 放到关节原点，与 urdf2webots / CAD 导入世界同一约定。"""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        sys.path.insert(0, str(REPO_ROOT / "webots" / "tools"))
+        import generate_atri_world as gen  # noqa: WPS433
+
+        cls.gen = gen
+
+    def test_render_joint_writes_translation_equal_to_anchor(self):
+        def check(node: dict) -> None:
+            rendered = self.gen.render_joint(node, indent=2)
+            idx = next(i for i, ln in enumerate(rendered) if "endPoint Solid" in ln)
+            window = "\n".join(rendered[idx:idx + 6])
+            expected = f"translation {self.gen.vec(node['anchor'])}"
+            self.assertIn(expected, window, msg=f"{node['name']}: {window}")
+            for child in node["children"]:
+                check(child)
+
+        for root in self.gen.robot_children():
+            check(root)
+
+    def test_gravity_world_enables_supervisor_for_movie(self):
+        text = self.gen.render_world(gravity=9.81, max_torque=20.0, ground=True)
+        self.assertIn("supervisor TRUE", text)
+        self.assertIn('follow "ATRI"', text)
+        self.assertIn("diffuseColor 0.18 0.42 0.86", text)
+        self.assertIn("DirectionalLight", text)
+        self.assertIn("Background", text)
+        default = self.gen.render_world()
+        self.assertNotIn("supervisor TRUE", default)
+        self.assertNotIn("diffuseColor 0.18 0.42 0.86", default)
+        self.assertNotIn("DirectionalLight", default)
+
+    def test_left_ankle_chain_reaches_below_pelvis(self):
+        z = 0.0
+        nodes = self.gen.robot_children()
+
+        def find(items, name):
+            for node in items:
+                if node["name"] == name:
+                    return node
+                got = find(node["children"], name)
+                if got is not None:
+                    return got
+            return None
+
+        for name in (
+            "left_hip_roll",
+            "left_hip_pitch",
+            "left_knee_pitch",
+            "left_ankle_pitch",
+        ):
+            node = find(nodes, name)
+            self.assertIsNotNone(node, name)
+            z += node["anchor"][2]
+        self.assertAlmostEqual(z, -0.188, places=4)
+
+
+class TestStandMode(unittest.TestCase):
+    def test_stand_seconds_passes_on_level_stub(self):
+        world = FakeWebots(device_names=ATRI_JOINT_NAMES)
+        code, out = _run(world, ["--exit-on-done", "--stand-s", "1"])
+        self.assertEqual(code, 0, msg=out)
+        self.assertIn("站立判定: ok=True", out)
+
+    def test_movie_flag_is_a_no_op_on_stub(self):
+        world = FakeWebots(device_names=ATRI_JOINT_NAMES)
+        with tempfile.TemporaryDirectory() as tmp:
+            movie = str(Path(tmp) / "stand.mp4")
+            code, out = _run(
+                world, ["--exit-on-done", "--stand-s", "1", "--movie", movie]
+            )
+        self.assertEqual(code, 0, msg=out)
+        self.assertIn("开始录屏", out)
 
 
 if __name__ == "__main__":

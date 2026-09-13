@@ -72,6 +72,35 @@ def parse_world_actuators(world_path: Path = WORLD_PATH) -> Dict[str, Dict[str, 
     return specs
 
 
+class FakeInertialUnit:
+    """水平姿态桩：roll/pitch/yaw 全 0。"""
+
+    def __init__(self, name: str = "imu") -> None:
+        self.name = name
+        self.enabled = False
+
+    def enable(self, _timestep: int) -> None:
+        self.enabled = True
+
+    def getRollPitchYaw(self) -> List[float]:
+        return [0.0, 0.0, 0.0]
+
+
+class FakeGPS:
+    """骨盆 GPS：离线桩返回站立高度，不参与电机步进。"""
+
+    def __init__(self, name: str = "pelvis_gps", z: float = 0.232) -> None:
+        self.name = name
+        self._z = z
+        self.enabled = False
+
+    def enable(self, _timestep: int) -> None:
+        self.enabled = True
+
+    def getValues(self) -> List[float]:
+        return [0.0, 0.0, self._z]
+
+
 class FakePositionSensor:
     """位置传感器：未使能时 ``getValue()` 返回 NaN（与 Webots 行为一致）。"""
 
@@ -183,6 +212,18 @@ def make_robot_class(world: "FakeWebots") -> type:
         def step(self, duration: int) -> int:
             return world.step(duration)
 
+        def movieStartRecording(self, *args: Any, **kwargs: Any) -> None:
+            return None
+
+        def movieStopRecording(self) -> None:
+            return None
+
+        def movieIsReady(self) -> bool:
+            return True
+
+        def movieFailed(self) -> bool:
+            return False
+
     return Robot
 
 
@@ -201,7 +242,7 @@ class FakeWebots:
         motor_specs: Optional[Dict[str, Dict[str, float]]] = None,
     ) -> None:
         specs = parse_world_actuators() if motor_specs is None else motor_specs
-        self.devices: Dict[str, FakeMotor] = {}
+        self.devices: Dict[str, Any] = {}
         for name in device_names:
             spec = specs.get(name) or {}
             self.devices[name] = FakeMotor(
@@ -210,6 +251,8 @@ class FakeWebots:
                 min_stop=spec.get("minStop"),
                 max_stop=spec.get("maxStop"),
             )
+        self.devices["pelvis_gps"] = FakeGPS(z=0.20)
+        self.devices["imu"] = FakeInertialUnit()
         self.time_step = time_step
         self.max_steps = max_steps
         self.step_count = 0
@@ -224,7 +267,8 @@ class FakeWebots:
         self.step_count += 1
         self.sim_time_ms += int(duration_ms)
         for motor in self.devices.values():
-            motor.advance(int(duration_ms) / 1000.0)
+            if isinstance(motor, FakeMotor):
+                motor.advance(int(duration_ms) / 1000.0)
         if self.max_steps is not None and self.step_count > self.max_steps:
             self.ended = True
         return -1 if self.ended else 0
@@ -232,8 +276,10 @@ class FakeWebots:
     # -- 生命周期 --------------------------------------------------------
     def install(self) -> types.ModuleType:
         module = types.ModuleType("controller")
-        module.Robot = make_robot_class(self)  # type: ignore[attr-defined]
-        module.__dict__["__all__"] = ["Robot"]
+        robot_cls = make_robot_class(self)
+        module.Robot = robot_cls  # type: ignore[attr-defined]
+        module.Supervisor = robot_cls  # type: ignore[attr-defined]
+        module.__dict__["__all__"] = ["Robot", "Supervisor"]
         self._previous = sys.modules.get("controller")
         sys.modules["controller"] = module
         self._module = module
@@ -248,13 +294,17 @@ class FakeWebots:
     # -- 断言辅助 --------------------------------------------------------
     def moved_joints(self) -> List[str]:
         """返回目标角真的被改动过的关节名。"""
-        return [name for name, motor in self.devices.items() if motor.commanded_positions]
+        return [
+            name
+            for name, motor in self.devices.items()
+            if isinstance(motor, FakeMotor) and motor.commanded_positions
+        ]
 
     def sensors_enabled(self) -> List[str]:
         return [
             name
             for name, motor in self.devices.items()
-            if motor.position_sensor.enabled
+            if isinstance(motor, FakeMotor) and motor.position_sensor.enabled
         ]
 
     def commanded_degrees(self, name: str) -> List[float]:
