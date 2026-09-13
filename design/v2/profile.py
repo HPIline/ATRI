@@ -400,6 +400,17 @@ MATERIALS = {
     "TPU95A": {"density_g_cm3": 1.21},
 }
 
+# Webots 接触：脚底 TPU95A 对室内塑胶/PVC 地板（赛题未另指定地面）。
+# μ 取工程表橡胶-木/橡胶-混凝土/轮胎-路面干态区间的中值，不是实验室测值。
+CONTACT = {
+    "foot_material": "TPU95A",
+    "ground_material": "vinyl_floor",
+    "other_material": "PETG",
+    "mu_foot_ground": 0.70,
+    "mu_other_ground": 0.35,
+    "bounce": 0.0,
+}
+
 # 踝：τ = (m - m_foot) g r k ；r=25 mm 与现机 CoP 口径一致，禁止再乘安全系数
 ANKLE = {
     "cop_m": 0.025,
