@@ -27,14 +27,7 @@ MODEL_PATH = HERE / "robot_model.json"
 sys.path.insert(0, str(HERE))
 import geometry  # noqa: E402
 
-# 软件侧的关节定义是"同源"依据：关节名与限位以它为准
-sys.path.insert(0, str(REPO / "software" / "atri"))
-try:
-    from atri.config import JOINTS, GROUP_DOF, DOF_COUNT  # noqa: E402
-except ImportError:  # 允许独立运行
-    JOINTS = None
-    GROUP_DOF = None
-    DOF_COUNT = 22
+# 旧 CAD 线是冻结的 22 DOF；软件栈已迁到 v2 20 DOF。本校验只查模型自洽。
 
 
 def load_model(path: Path = MODEL_PATH) -> dict:
@@ -157,27 +150,7 @@ def check(model: dict) -> list[str]:
     if ids != list(range(len(joints))):
         problems.append(f"关节编号不连续: {ids}")
 
-    # 2) 与软件配置同源
-    if JOINTS is not None:
-        model_names = {j["name"] for j in joints}
-        code_names = set(JOINTS)
-        if model_names != code_names:
-            missing = sorted(code_names - model_names)
-            extra = sorted(model_names - code_names)
-            if missing:
-                problems.append(f"模型缺少软件侧关节: {missing}")
-            if extra:
-                problems.append(f"模型多出未知关节: {extra}")
-        for j in joints:
-            spec = JOINTS.get(j["name"])
-            if not spec:
-                continue
-            if list(j["limit_deg"]) != list(spec["limit_deg"]):
-                problems.append(
-                    f"{j['name']} 限位不一致: 模型 {j['limit_deg']} vs 软件 {spec['limit_deg']}"
-                )
-            if j["id"] != spec["id"]:
-                problems.append(f"{j['name']} 编号不一致: {j['id']} vs {spec['id']}")
+    # 2) 冻结 CAD 仍是 22 DOF（含 hip_yaw），不与 v2 软件关节表对账。
 
     # 3) 父子 link 必须存在
     for j in joints:
@@ -210,15 +183,19 @@ def check(model: dict) -> list[str]:
     if o["depth_mm"] > c["competition_max_depth_mm"]:
         problems.append(f"厚度 {o['depth_mm']} 超过上限 {c['competition_max_depth_mm']}")
 
-    # 7) 自由度分组
-    if GROUP_DOF is not None:
-        if GROUP_DOF["leg_l"] < c["competition_min_leg_dof_per_side"]:
-            problems.append("单腿自由度数不足")
-        upper = GROUP_DOF["arm_l"] + GROUP_DOF["arm_r"] + GROUP_DOF["trunk"]
-        if upper < c["competition_min_upper_dof"]:
-            problems.append(f"上肢+躯干自由度 {upper} 不足 {c['competition_min_upper_dof']}")
-        if len(JOINTS) < c["competition_min_dof"]:
-            problems.append("总自由度数不足")
+    # 7) 自由度分组（按子 link 的 group 字段计）
+    links_by_name = {link["name"]: link for link in model["links"]}
+    groups: dict[str, int] = {}
+    for j in joints:
+        group = (links_by_name.get(j["child"]) or {}).get("group", "")
+        groups[group] = groups.get(group, 0) + 1
+    if groups.get("leg_l", 0) < c["competition_min_leg_dof_per_side"]:
+        problems.append("单腿自由度数不足")
+    upper = groups.get("arm_l", 0) + groups.get("arm_r", 0) + groups.get("trunk", 0)
+    if upper < c["competition_min_upper_dof"]:
+        problems.append(f"上肢+躯干自由度 {upper} 不足 {c['competition_min_upper_dof']}")
+    if len(joints) < c["competition_min_dof"]:
+        problems.append("总自由度数不足")
 
     # 8) 几何基元定义合法性
     for link in model["links"]:
