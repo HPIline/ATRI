@@ -531,6 +531,22 @@ def make_labels(parts_by_number, cam):
     font = _load_cjk_font()
     mat = _label_material()
     names = {n: label for n, label in BOM_GROUPS}
+    # Camera-space (right, up) offsets so numbers sit outside dense clusters.
+    cam_extra = {
+        1: (0.07, 0.05),
+        2: (0.01, -0.06),
+        3: (0.10, 0.07),
+        4: (-0.09, 0.03),
+        5: (0.06, -0.01),
+        6: (0.08, 0.05),
+        7: (0.10, 0.03),
+        8: (-0.03, 0.09),
+        9: (0.02, -0.05),
+        10: (-0.07, 0.12),
+        11: (0.05, 0.09),
+    }
+    right = cam.matrix_world.to_quaternion() @ Vector((1.0, 0.0, 0.0))
+    up = cam.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
     cam_loc = cam.matrix_world.translation
     planned = {}
     for number, group_parts in sorted(parts_by_number.items()):
@@ -538,26 +554,27 @@ def make_labels(parts_by_number, cam):
             continue
         cluster = _label_cluster(number, group_parts)
         center = _centroid(cluster)
-        mean = Vector((0.0, 0.0, 0.0))
-        for obj in cluster:
-            mean += Vector(obj.get("atri_explode", (0.0, 0.0, 0.0)))
-        mean /= len(cluster)
         toward = cam_loc - center
         if toward.length < 1e-6:
             toward = Vector((1.0, -1.0, 0.4))
-        push = mean.normalized() * 0.08 if mean.length > 1e-6 else Vector((0.0, 0.0, 0.04))
-        planned[number] = center + push + toward.normalized() * 0.04 + Vector((0.0, 0.0, 0.03))
-    planned = _separate_labels(planned, cam)
+        extra_x, extra_y = cam_extra.get(number, (0.0, 0.04))
+        planned[number] = (
+            center
+            + toward.normalized() * 0.12
+            + right.normalized() * extra_x
+            + up.normalized() * extra_y
+        )
+    planned = _separate_labels(planned, cam, min_dist=0.10)
 
     labels = []
     for number, loc in planned.items():
         curve = bpy.data.curves.new(f"ATRI_label_{number}", "FONT")
         curve.body = f"{number} {names[number]}"
         curve.font = font
-        curve.size = 0.046
+        curve.size = 0.052
         curve.align_x = "CENTER"
         curve.align_y = "CENTER"
-        curve.extrude = 0.0018
+        curve.extrude = 0.002
         obj = bpy.data.objects.new(f"ATRI_label_{number}", curve)
         bpy.context.scene.collection.objects.link(obj)
         obj.location = loc
@@ -565,9 +582,11 @@ def make_labels(parts_by_number, cam):
         obj.data.materials.clear()
         obj.data.materials.append(mat)
         obj.visible_shadow = False
+        obj.hide_viewport = False
         obj.hide_render = False
         obj["atri_label_number"] = number
         labels.append(obj)
+        print(f"LABEL {number} {names[number]} at {tuple(round(c, 3) for c in loc)}")
     bpy.context.view_layer.update()
     return labels
 
@@ -692,8 +711,8 @@ def render4k(samples=64):
             cam_detail,
             OUT / "detail_waist_hand_sensor.png",
             detail_focus(parts),
-            (0.35, 1.15, 0.22),
-            1.2,
+            (-0.75, 0.95, 0.32),
+            1.22,
         )
     )
 
@@ -702,7 +721,7 @@ def render4k(samples=64):
     if ground:
         ground.hide_render = True
     files.append(
-        _render(cam_exploded, OUT / "exploded.png", parts, (1.0, -1.05, 0.42), 1.14)
+        _render(cam_exploded, OUT / "exploded.png", parts, (1.0, -1.05, 0.42), 1.08)
     )
 
     by_number = defaultdict(list)
@@ -715,7 +734,7 @@ def render4k(samples=64):
             OUT / "exploded_numbered.png",
             parts,
             (1.0, -1.05, 0.42),
-            1.16,
+            1.10,
         )
     )
 
