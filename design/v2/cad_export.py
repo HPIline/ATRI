@@ -57,6 +57,15 @@ def _color(kind: str) -> Any:
     return cq.Color(rgb[0], rgb[1], rgb[2], a)
 
 
+def has_passive_support(j):
+    """Only engineered paired supports receive a freely rotating rear disc."""
+    if j['name'] in ('left_hip_roll', 'right_hip_roll', 'trunk_roll'):
+        return True
+    if j['group'] in ('arm_l', 'arm_r'):
+        return False  # Arm paired supports still need whole-body clearance.
+    return j['name'] not in PELVIS['housing_clock_deg'] and j['name'] != 'head_yaw'
+
+
 def build_items() -> List[Dict[str, Any]]:
     """link 局部坐标系里的实体列表。"""
     tree = kinematic_tree()
@@ -88,9 +97,9 @@ def build_items() -> List[Dict[str, Any]]:
         swp = swp.union(orient_y_to_axis(pivot,j["axis"]))
         add(f"servo-{j['name']}",j["parent"],"servo",swp.translate(jxyz))
         for key,prefix in (("drive","horn"),("passive","passive-horn")):
-            if key=='passive' and (j['name'] in PELVIS['housing_clock_deg'] or j['name']=='head_yaw' or j['group'] in ('arm_l','arm_r')):continue
+            if key=='passive' and not has_passive_support(j):continue
             add(f"{prefix}-{j['name']}",j["child"],"horn",orient_y_to_axis(accessories[key],j["axis"]))
-        if j['name'] not in PELVIS['housing_clock_deg'] and j['name']!='head_yaw' and j['group'] not in ('arm_l','arm_r'):
+        if has_passive_support(j):
             tip=CAD_INTERFACE['vendor_passive_body_face_mm']-SERVO['rear_stub_length_mm']
             wt=SERVO['rear_retainer_washer_t_mm'];seat=tip-wt
             washer=cyl(SERVO['rear_retainer_washer_od_mm']/2,wt,'y',(0,seat,0)).cut(cyl(SERVO['rear_retainer_washer_id_mm']/2,wt,'y',(0,seat,0)))
@@ -123,6 +132,12 @@ def build_items() -> List[Dict[str, Any]]:
     cq = _cq()
     from .pelvis_cad import build_pelvis_items
     items.extend(build_pelvis_items())
+    from .hip_dual_cad import build_hip_dual_items
+    from .waist_dual_cad import build_waist_dual_items
+    additions = build_hip_dual_items() + build_waist_dual_items()
+    replaced = {item['replaces'] for item in additions if 'replaces' in item}
+    items = [item for item in items if item['name'] not in replaced]
+    items.extend(additions)
 
     from .torso_cad import build_torso_items
     items.extend(build_torso_items())
