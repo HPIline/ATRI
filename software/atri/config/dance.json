@@ -1,0 +1,12 @@
+{
+  "_note": "T-05 舞蹈技能的可调参数（atri/skills/dance.py::DANCE_DEFAULTS）。当前**没有任何覆盖值**：下面全是说明键（'_' 开头，tuning 层会忽略），实际生效的是代码里的默认值，即**设计值**。",
+  "_how": "只写要改的键，例如 \"unknown_speech\": \"再说一遍\"。优先级：任务卡 params > 本文件 > 代码默认值（改完立刻生效，不用重启）。",
+  "_keys": "keywords / unknown_speech / bars / bars_max / audio_enabled",
+  "_why": "白名单放哪些说法、听不清说什么、跳几小节，都是这台机器/这个现场的事；实物与引擎到位后应当改 JSON 而不是改代码。",
+  "_keywords_note": "关键词白名单（只有「判定」作用，不决定「能不能听见」）。tuning 只支持标量，故写成「、」分隔的字符串，例如 \"跳舞、跳个舞、来段舞蹈\"。当前代码默认值（设计值）：跳舞、挥手、鞠躬。",
+  "_unknown_speech_note": "听不清 / 未命中白名单时的播报语。当前代码默认值（设计值）：我没听清。",
+  "_bars_note": "一次舞蹈的默认小节数（任务卡 params.bars 优先）。当前代码默认值（设计值）：2。",
+  "_bars_max_note": "小节数上限，整数，**只能收紧**（硬上限是 atri/config.py 的 MAX_BARS=8）。当前代码默认值（设计值）：8。",
+  "_audio_enabled_note": "是否播放任务卡 params.audio 指定的伴奏 wav（本机没有播放器时结果里是 unavailable，代表没放出声、不代表不用放）。当前代码默认值（设计值）：true。",
+  "_engine_status": "离线识别引擎现状（2026-09-13 实测）：仓库基准解释器 .python/bin/python3 里**没有** vosk（核心包保持零依赖，这是正确行为）；真引擎装在独立 venv（/tmp/atri-asr/venv），重建步骤与模型 sha256 见 design/handoff/T-05-语音真解码验证报告.md 与 tools/asr_decode_eval.py 文件头。"
+}

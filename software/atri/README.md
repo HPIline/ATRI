@@ -47,7 +47,24 @@ python3 -m unittest discover -s tests
 python3 run_demo.py --fast
 ```
 
-当前单元测试套件包含 **639** 项测试（零依赖环境下 46 项自动 skip；以 `python3 -m unittest discover -s tests` 当场输出为准），覆盖状态机流转、技能成败、总线限位、NaN/Inf 拒绝、感知容错、T-01 真识别/拒识与头部随动、T-02 路径序列与踩步转体、T-03/T-04 多轮横向伺服、T-05 语音门闩及任务卡解析。
+当前单元测试套件包含 **699** 项测试（零依赖环境下 46 项自动 skip；以 `python3 -m unittest discover -s tests` 当场输出为准），覆盖状态机流转、技能成败、总线限位、NaN/Inf 拒绝、感知容错、T-01 真识别/拒识与头部随动、T-02 路径序列与踩步转体、T-03 两步对准与放置区门闩、T-04 闭环与球距门限、T-05 关键词门闩与真识别记账、可调参数层（`atri/tuning.py`）及任务卡解析。
+
+**技能可调参数**：控制常数不再写死在代码里——优先级是
+**任务卡 params > `config/<skill>.json` > 代码默认值**（`atri/tuning.py`）。
+随代码发布的 `config/{carry,kick,dance}.json` **只有说明、不含覆盖值**，它们是实物标定回填点；
+写错的键/非法值/坏 JSON 只告警不抛异常，告警同时进 stdout 与结果的 `tuning_warnings`；
+改完立刻生效（每次调用重读文件）。
+
+**任务评测工具**（`tools/`，产出可复跑的证据；每个工具"测什么、不是什么"写在各自报告里）：
+
+| 工具 | 任务 | 量什么 |
+|---|---|---|
+| `face_eval.py` / `face_enroll.py` | T-01 | LFW 识别率 / 人脸库录入 |
+| `qr_eval.py` | T-02 | 27 场景 × 3 解码器 + 指令回放 |
+| `carry_eval.py` | T-03 | 色块检测 + 图像在环闭环 + 参数边界表 |
+| `kick_eval.py` | T-04 | 绿球检测 + 图像/几何在环闭环 + 参数边界表 |
+| `dance_eval.py` | T-05 | 关键词门闩与匹配注入统计（零依赖） |
+| `asr_decode_eval.py` | T-05 | 真引擎真解码（合成语音 + 白噪声扫描；需外部 venv） |
 
 ## 视觉感知模块
 

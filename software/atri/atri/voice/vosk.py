@@ -26,12 +26,21 @@ DEFAULT_SAMPLE_RATE = 16000
 ENV_MODEL = "ATRI_VOSK_MODEL"
 
 
+def _squeeze(text: str) -> str:
+    """去掉所有空白（含全角空格）后比较。
+
+    引擎**自由解码**时会在汉字之间吐空格（实测原文就是 `跳 个 舞`、`来 段 舞蹈`），
+    不归一化的话多字关键词永远匹配不上——"念对了却判成没听见"。
+    """
+    return "".join(str(text or "").split())
+
+
 def match_keyword(text: str, keywords: Sequence[str]) -> str:
-    """从转写文本里取白名单命中：优先最长词，避免短词误吞。"""
-    blob = str(text or "").strip()
+    """从转写文本里取白名单命中：先归一化空白，再优先最长词，避免短词误吞。"""
+    blob = _squeeze(text)
     if not blob or not keywords:
         return ""
-    hits = [str(word) for word in keywords if str(word) and str(word) in blob]
+    hits = [str(word) for word in keywords if str(word) and _squeeze(word) in blob]
     if not hits:
         return ""
     hits.sort(key=len, reverse=True)
@@ -60,13 +69,23 @@ class VoskKeywordRecognizer(KeywordRecognizer):
         keywords: Sequence[str] = DEFAULT_KEYWORDS,
         vosk_module: Any = None,
         model: Any = None,
+        constrained: bool = True,
     ) -> None:
+        """``constrained=True``（默认）把白名单当**语法**喂给引擎：识别更抗噪，
+        但代价是**引擎只会吐出白名单里的词**——所以"命中率"这一项在约束模式下
+        不能单独看（它无法表达"听错成别的词"），必须配"负样本误接受"与
+        **自由解码**模式一起读。评测时两种模式都跑，见 ``tools/asr_decode_eval.py``。
+        """
         self.model_path = model_path if model_path is not None else (os.environ.get(ENV_MODEL) or "")
         self.sample_rate = int(sample_rate)
         self.keywords = tuple(str(item) for item in keywords)
+        self.constrained = bool(constrained)
         self._vosk = vosk_module
         self._model = model
         self._load_error: Optional[str] = None
+        # 引擎**原样**转写（未做白名单匹配）。"识别成功"从此带着可核对的原文：
+        # 报告里可以把原文原样打出来，而不是只给一个"命中了"的结论。
+        self.last_text: str = ""
 
     def available(self) -> bool:
         try:
@@ -89,6 +108,7 @@ class VoskKeywordRecognizer(KeywordRecognizer):
             raise VoiceError(f"vosk 识别失败：{exc}") from exc
         payload = _result_payload(rec)
         text = str(payload.get("text") or payload.get("partial") or "")
+        self.last_text = text
         return match_keyword(text, self.keywords)
 
     def _get_vosk(self) -> Any:
@@ -123,6 +143,12 @@ class VoskKeywordRecognizer(KeywordRecognizer):
     def _make_recognizer(self) -> Any:
         vosk = self._get_vosk()
         model = self._get_model()
+        if not self.constrained:
+            # 自由解码：引擎可以说任何话（才看得到"听错成什么"）。
+            try:
+                return vosk.KaldiRecognizer(model, self.sample_rate)
+            except Exception as exc:
+                raise VoiceError(f"vosk KaldiRecognizer 创建失败：{exc}") from exc
         grammar = json.dumps(list(self.keywords), ensure_ascii=False)
         try:
             return vosk.KaldiRecognizer(model, self.sample_rate, grammar)
@@ -182,6 +208,7 @@ def build_recognizer(
     keywords: Optional[Sequence[str]] = None,
     vosk_module: Any = None,
     model: Any = None,
+    constrained: bool = True,
 ) -> Optional[VoskKeywordRecognizer]:
     """有引擎+模型才返回识别器，否则 None。不静默降级成 Mock。"""
     rec = VoskKeywordRecognizer(
@@ -189,6 +216,7 @@ def build_recognizer(
         keywords=DEFAULT_KEYWORDS if keywords is None else keywords,
         vosk_module=vosk_module,
         model=model,
+        constrained=constrained,
     )
     return rec if rec.available() else None
 
