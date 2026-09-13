@@ -93,6 +93,27 @@ class ArmAssemblyTests(unittest.TestCase):
                 self.assertLessEqual(part['wp'].val().BoundingBox().ymax,-19.2+1e-6)
         self.assertFalse(any(p.get('stock_angle_mm',(0,))[0]>=100 for p in self.parts))
 
+    def test_fixed_pad_has_metal_support_across_contact_width(self):
+        parts={p['name']:p for p in self.parts}
+        for side in ('left','right'):
+            shoe=parts[f'arm-{side}-gripper-pad-support-1']['wp'].val()
+            pad=parts[f'arm-{side}-gripper-fixed-pad']['wp'].val()
+            self.assertLess(shoe.distance(pad),1e-6)
+            a,b=shoe.BoundingBox(),pad.BoundingBox()
+            self.assertGreaterEqual(a.xmax,b.xmax-.3)
+            self.assertGreaterEqual(len(shoe.Solids()),1)
+
+    def test_gripper_35mm_opening_retains_contact_height(self):
+        from v2.profile import K
+        parts={p['name']:p for p in self.parts}
+        for side in ('left','right'):
+            fixed=parts[f'arm-{side}-gripper-fixed-pad']['wp'].translate((0,0,K['forearm'])).val()
+            moving=parts[f'arm-{side}-gripper-moving-pad']['wp'].val().rotate((0,0,0),(1,0,0),60)
+            self.assertGreaterEqual(fixed.distance(moving),35.)
+            a,b=fixed.BoundingBox(),moving.BoundingBox()
+            self.assertGreaterEqual(min(a.zmax,b.zmax)-max(a.zmin,b.zmin),4.)
+            self.assertGreaterEqual(min(a.xmax,b.xmax)-max(a.xmin,b.xmin),1.9)
+
     def test_gripper_pads_bond_to_separate_fingers_and_open(self):
         parts={p['name']:p for p in self.parts}
         for side in ('left','right'):
