@@ -33,8 +33,9 @@ def _transform(wp,swapped):
     return wp.rotate((0,0,0),(1,1,0),180) if swapped else wp
 
 
-def _orthogonal(tag,link,target,clock,swapped=False,output_spacer=0.):
-    p=parameters();t=p['angle_t_mm'];parts=[]
+def _orthogonal(tag,link,target,clock,swapped=False,output_spacer=0., *, design=None, case=None):
+    C = case if case is not None else globals()['C']
+    p=design if design is not None else parameters();t=p['angle_t_mm'];parts=[]
     def add(name,kind,wp,**meta):
         parts.append(dict(name=f'arm-{tag}-{name}',link=link,kind=kind,wp=_transform(wp,swapped),**meta))
     face=p['output_front_mm']+output_spacer
@@ -48,6 +49,7 @@ def _orthogonal(tag,link,target,clock,swapped=False,output_spacer=0.):
     midpoint=((holes[0][0]+holes[1][0])/2,(holes[0][1]+holes[1][1])/2)
     bridge_z=midpoint[1]-p['upper_bridge_drop_mm'] if tag.endswith('-upper') else midpoint[1]
     if tag.endswith('-fore'):bridge_z+=p['fore_bridge_drop_mm']
+    bridge_z=p.get('bridge_z_override',bridge_z)
     waypoints=[(face,bridge_z),(midpoint[0],bridge_z),midpoint,*holes]
     sideflat=_path(waypoints,p['web_mm'],t)
     # Exact flat clamp contact patch, including both external bolt pads.
@@ -67,8 +69,9 @@ def _orthogonal(tag,link,target,clock,swapped=False,output_spacer=0.):
     if tag.endswith('-fore'):
         yy,zz=p['fore_output_waypoint_yz_mm']
         output_path=[(0,0),(yy,zz),(yy,bridge_z),(y1-t,bridge_z)]
+    output_path=p.get('output_path_override',output_path)
     outputflat=cq.Workplane('XY').circle(p['output_radius_mm']).extrude(t).union(_path(output_path,p['web_mm'],t))
-    if not tag.endswith('-fore'):
+    if not tag.endswith('-fore') and not p.get('allow_output_outside_case',False):
         outputflat=outputflat.intersect(cq.Workplane('XY').box(extent,extent,t,centered=(False,True,False)).translate((y1-extent,0,0)))
     output=outputflat.rotate((0,0,0),(1,1,1),120).translate((face,0,0))
     sq=SERVO['horn_hole_square_mm']/2
@@ -77,16 +80,16 @@ def _orthogonal(tag,link,target,clock,swapped=False,output_spacer=0.):
         output=output.cut(cyl(SERVO['horn_clear_mm']/2,2*t,'x',(face-t,y,z)))
         bolt_length=output_spacer+p['spaced_bolt_base_mm'] if output_spacer else p['horn_bolt_mm']
         bolt=screw(bolt_length,'-x',(face+t,y,z))
-        if tag.endswith('-fore'):
+        if tag.endswith('-fore') and not p.get('plain_output',False):
             bolt_length=p['fore_csk_bolt_mm']
             cone=cq.Workplane('XY').newObject([cq.Solid.makeCone(p['csk_head_d_mm']/2,1.5,p['csk_depth_mm'])])
             bolt=cone.union(cyl(1.5,bolt_length,'z',(0,0,0)))
             bolt=bolt.cut(cq.Workplane('XY').polygon(6,p['button_socket_af_mm']/math.cos(math.pi/6)).extrude(p['button_socket_depth_mm']))
             bolt=bolt.rotate((0,0,0),(0,1,0),-90).translate((face+t,y,z))
-            sink=cq.Workplane('XY').newObject([cq.Solid.makeCone(p['csk_head_d_mm']/2,C['hole_mm']/2,p['csk_depth_mm'])]).rotate((0,0,0),(0,1,0),-90).translate((face+t,y,z))
+            sink=cq.Workplane('XY').newObject([cq.Solid.makeCone(p['csk_head_d_mm']/2,C['hole_mm']/2,(p['csk_head_d_mm']-C['hole_mm'])/2)]).rotate((0,0,0),(0,1,0),-90).translate((face+t,y,z))
             output=output.cut(sink)
         add(f'output-bolt-{y}-{z}','fastener',bolt,spec=f"M3x{bolt_length:g} ISO4762; nominal thread")
-        if tag.endswith('-fore'):parts[-1]['spec']=f'M3x{bolt_length:g} DIN7991 countersunk; length includes head'
+        if tag.endswith('-fore') and not p.get('plain_output',False):parts[-1]['spec']=f'M3x{bolt_length:g} DIN7991 countersunk; length includes head'
         if output_spacer:
             stack=p['fore_spacer_stack_mm'] if tag.endswith('-fore') else (output_spacer,)
             start=p['output_front_mm']
@@ -207,7 +210,28 @@ def _gripper(side):
     fixed=_path([(by,zhi),(by,bz),(fy,bz),(fy,-length)],p['finger_width_mm'],t)
     fixed=fixed.union(_path([(by,zlo),(by,zhi)],p['finger_mount_web_mm'],t))
     for z in p['finger_case_bolt_z_mm']:fixed=fixed.cut(cyl(C['hole_mm']/2,t,'z',(by,z,0)))
+    for zz in p['pad_support_hole_z_mm']:
+        fixed=fixed.cut(cyl(p['pad_support_hole_mm']/2,t,'z',(fy,zz,0)))
     add('fixed-finger',side+'_hand','al',yz(fixed,p['finger_mount_x_mm']),flat=fixed,manufacturing=f"laser {p['material']} {t:g}mm; deburr",qualification='finger stiffness and pinch-force sample test required')
+    # Two ordinary flat plates support the pad overhang, rather than relying
+    # on an unsupported TPU lip. Their top face meets the pad backing plane.
+    xx=p['finger_mount_x_mm']+t
+    for k,st in enumerate(p['pad_support_stack_mm']):
+        flat=cq.Workplane('XY').box(p['finger_width_mm'],p['pad_height_mm']['fixed'],st,centered=(True,True,False)).translate((fy,-length+p['pad_height_mm']['fixed']/2,0))
+        for zz in p['pad_support_hole_z_mm']:
+            flat=flat.cut(cyl(p['pad_support_hole_mm']/2,st,'z',(fy,zz,0)))
+        add('pad-support-'+str(k),side+'_hand','al',yz(flat,xx),flat=flat,manufacturing=f"laser {p['material']} {st:g} mm; finish-drill two 2.2 mm holes; deburr")
+        xx+=st
+    from .profile import HEAD as h
+    for k,zz in enumerate(p['pad_support_hole_z_mm']):
+        shaft=cyl(h['m2_shank_d_mm']/2,p['pad_support_bolt_mm'],'z',(0,0,0))
+        cap=cq.Workplane('XY').circle(h['m2_head_d_mm']/2).extrude(-h['m2_head_h_mm'])
+        socket=cq.Workplane('XY').polygon(6,h['m2_socket_af_mm']/math.cos(math.pi/6)).extrude(-h['m2_socket_depth_mm']).translate((0,0,-h['m2_socket_offset_mm']))
+        bolt=shaft.union(cap.cut(socket)).rotate((0,0,0),(0,1,0),90).translate((p['finger_mount_x_mm'],fy,zz))
+        add('pad-support-bolt-'+str(k),side+'_hand','fastener',bolt,spec=f"M2x{p['pad_support_bolt_mm']:g} ISO4762; clamp pad backing stack")
+        nut=cq.Workplane('XY').polygon(6,4/math.cos(math.pi/6)).extrude(1.6).cut(cyl(.8,1.6,'z',(0,0,0)))
+        add('pad-support-nut-'+str(k),side+'_hand','fastener',nut.rotate((0,0,0),(0,1,0),90).translate((xx,fy,zz)),spec='M2 ISO4032 nominal AF4 height1.6')
+
     moving=cq.Workplane('XY').circle(p['output_radius_mm']).extrude(t).union(_path([(0,0),(p['moving_finger_tip_y_mm'],-length)],p['finger_width_mm'],t))
     a=SERVO['horn_hole_square_mm']/2
     for u,v in ((a,a),(a,-a),(-a,a),(-a,-a)):
@@ -233,8 +257,8 @@ def _gripper(side):
             add('fixed-aux-nut',side+'_hand','fastener',nut,spec='M3 ISO4032')
     for name,link in [('fixed',side+'_hand'),('moving',side+'_grip')]:
         yy=p['pad_y_mm'][name]
-        left=p['moving_finger_x_mm']
-        right=p['finger_mount_x_mm']+t if name=='fixed' else left+t
+        left=p['finger_mount_x_mm'] if name=='fixed' else p['moving_finger_x_mm']
+        right=p['moving_finger_x_mm']+t
         pad_h=p['pad_height_mm'][name]
         pad=cq.Workplane('XY').box(right-left,p['pad_t_mm'],pad_h).translate(((left+right)/2,yy,-length+pad_h/2))
         if name=='moving':pad=pad.rotate((0,0,0),(1,0,0),math.degrees(math.atan2(p['moving_finger_tip_y_mm'],length)))
