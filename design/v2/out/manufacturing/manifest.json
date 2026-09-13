@@ -5,7 +5,7 @@
   "format_reference": "https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md",
   "assembly_gate_status": "not evaluated by manufacturing exporter",
   "quantity_policy": "one row per named assembly item; no inferred equivalence grouping",
-  "part_count": 942,
+  "part_count": 1030,
   "parts": [
     {
       "name": "servo-trunk_roll",
@@ -46,6 +46,74 @@
       "process": "unspecified",
       "files": {
         "review_stl": "review/horn-trunk_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "passive-horn-trunk_roll",
+      "link": "trunk_roll_link",
+      "kind": "horn",
+      "quantity": 1,
+      "volume_mm3": 571.5636959354506,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "passive-horn-trunk_roll",
+        "link": "trunk_roll_link",
+        "kind": "horn"
+      },
+      "process": "unspecified",
+      "files": {
+        "review_stl": "review/passive-horn-trunk_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "rear-retainer-washer-trunk_roll",
+      "link": "pelvis",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642551,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "rear-retainer-washer-trunk_roll",
+        "link": "pelvis",
+        "kind": "fastener",
+        "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items"
+      },
+      "process": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+      "files": {
+        "review_stl": "review/rear-retainer-washer-trunk_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "rear-retainer-screw-trunk_roll",
+      "link": "pelvis",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 94.45512472283067,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "rear-retainer-screw-trunk_roll",
+        "link": "pelvis",
+        "kind": "fastener",
+        "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items"
+      },
+      "process": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+      "files": {
+        "review_stl": "review/rear-retainer-screw-trunk_roll.stl"
       },
       "unresolved": [
         "source_not_attached"
@@ -716,6 +784,74 @@
       ]
     },
     {
+      "name": "passive-horn-left_hip_roll",
+      "link": "left_hip_roll_link",
+      "kind": "horn",
+      "quantity": 1,
+      "volume_mm3": 571.5636959354506,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "passive-horn-left_hip_roll",
+        "link": "left_hip_roll_link",
+        "kind": "horn"
+      },
+      "process": "unspecified",
+      "files": {
+        "review_stl": "review/passive-horn-left_hip_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "rear-retainer-washer-left_hip_roll",
+      "link": "pelvis",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "rear-retainer-washer-left_hip_roll",
+        "link": "pelvis",
+        "kind": "fastener",
+        "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items"
+      },
+      "process": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+      "files": {
+        "review_stl": "review/rear-retainer-washer-left_hip_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "rear-retainer-screw-left_hip_roll",
+      "link": "pelvis",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 94.45512472283065,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "rear-retainer-screw-left_hip_roll",
+        "link": "pelvis",
+        "kind": "fastener",
+        "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items"
+      },
+      "process": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+      "files": {
+        "review_stl": "review/rear-retainer-screw-left_hip_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "shaft-left_hip_roll",
       "link": "left_hip_roll_link",
       "kind": "horn",
@@ -1266,6 +1402,74 @@
       "process": "unspecified",
       "files": {
         "review_stl": "review/horn-right_hip_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "passive-horn-right_hip_roll",
+      "link": "right_hip_roll_link",
+      "kind": "horn",
+      "quantity": 1,
+      "volume_mm3": 571.5636959354506,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "passive-horn-right_hip_roll",
+        "link": "right_hip_roll_link",
+        "kind": "horn"
+      },
+      "process": "unspecified",
+      "files": {
+        "review_stl": "review/passive-horn-right_hip_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "rear-retainer-washer-right_hip_roll",
+      "link": "pelvis",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "rear-retainer-washer-right_hip_roll",
+        "link": "pelvis",
+        "kind": "fastener",
+        "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items"
+      },
+      "process": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+      "files": {
+        "review_stl": "review/rear-retainer-washer-right_hip_roll.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "rear-retainer-screw-right_hip_roll",
+      "link": "pelvis",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 94.45512472283063,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "rear-retainer-screw-right_hip_roll",
+        "link": "pelvis",
+        "kind": "fastener",
+        "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items"
+      },
+      "process": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+      "files": {
+        "review_stl": "review/rear-retainer-screw-right_hip_roll.stl"
       },
       "unresolved": [
         "source_not_attached"
@@ -2052,7 +2256,7 @@
       "link": "left_hand",
       "kind": "servo",
       "quantity": 1,
-      "volume_mm3": 34819.35214344957,
+      "volume_mm3": 34819.35214344956,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -2404,7 +2608,7 @@
       "link": "right_hand",
       "kind": "servo",
       "quantity": 1,
-      "volume_mm3": 34819.35214344957,
+      "volume_mm3": 34819.35214344956,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -2492,7 +2696,7 @@
       "link": "left_thigh",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1638.7074814045538,
+      "volume_mm3": 2070.531095101596,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -2511,7 +2715,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1638.7074814045538,
+      "laser_blank_volume_mm3": 2070.531095101596,
       "stock_thickness_mm": 1.5
     },
     {
@@ -2707,7 +2911,7 @@
       "link": "left_thigh",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1797.1862370998094,
+      "volume_mm3": 2279.7197250381396,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -2726,7 +2930,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1797.1862370998094,
+      "laser_blank_volume_mm3": 2279.7197250381396,
       "stock_thickness_mm": 1.5
     },
     {
@@ -3306,7 +3510,7 @@
       "link": "left_shank",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1638.7074814045538,
+      "volume_mm3": 2070.5310951015963,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -3325,7 +3529,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1638.7074814045538,
+      "laser_blank_volume_mm3": 2070.531095101596,
       "stock_thickness_mm": 1.5
     },
     {
@@ -3617,7 +3821,7 @@
       "link": "left_shank",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1638.7074814045538,
+      "volume_mm3": 2070.5310951015963,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -3636,7 +3840,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1638.7074814045538,
+      "laser_blank_volume_mm3": 2070.531095101596,
       "stock_thickness_mm": 1.5
     },
     {
@@ -4454,7 +4658,7 @@
       "link": "left_foot",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 868.8345500474863,
+      "volume_mm3": 986.3391569811224,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -4473,7 +4677,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 868.8345500474865,
+      "laser_blank_volume_mm3": 986.3391569811226,
       "stock_thickness_mm": 1.5
     },
     {
@@ -4861,7 +5065,7 @@
       "link": "left_foot",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 868.8345500474863,
+      "volume_mm3": 986.3391569811224,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -4880,7 +5084,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 868.8345500474865,
+      "laser_blank_volume_mm3": 986.3391569811226,
       "stock_thickness_mm": 1.5
     },
     {
@@ -5360,7 +5564,7 @@
       "link": "left_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.7602785212727,
+      "volume_mm3": 66.8753229291188,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -5452,7 +5656,7 @@
       "link": "left_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.7602785212727,
+      "volume_mm3": 66.8753229291188,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -5568,7 +5772,7 @@
       "link": "left_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.76027852127268,
+      "volume_mm3": 66.87532292911878,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -5614,7 +5818,7 @@
       "link": "left_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 120.24582880982078,
+      "volume_mm3": 120.24582880982086,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -5660,7 +5864,7 @@
       "link": "left_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.76027852127268,
+      "volume_mm3": 66.87532292911878,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -5706,7 +5910,7 @@
       "link": "left_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 120.24582880982078,
+      "volume_mm3": 120.24582880982086,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -5776,7 +5980,7 @@
       "link": "left_foot",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 11205.971046743438,
+      "volume_mm3": 16844.58809511316,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -5784,9 +5988,9 @@
         "name": "leg-left-foot-plate",
         "link": "left_foot",
         "kind": "al",
-        "manufacturing": "laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr"
+        "manufacturing": "laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr"
       },
-      "process": "laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr",
+      "process": "laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr",
       "files": {
         "review_stl": "review/leg-left-foot-plate.stl",
         "laser_dxf": "laser/leg-left-foot-plate.dxf"
@@ -5795,8 +5999,8 @@
         "source_not_attached",
         "secondary_operations_require_drawing"
       ],
-      "laser_blank_volume_mm3": 11263.660182454492,
-      "stock_thickness_mm": 2.0
+      "laser_blank_volume_mm3": 16895.4902736817,
+      "stock_thickness_mm": 3.0
     },
     {
       "name": "leg-left-foot-sole",
@@ -5831,7 +6035,7 @@
       "link": "right_thigh",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1638.7074814045538,
+      "volume_mm3": 2070.531095101596,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -5850,7 +6054,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1638.7074814045538,
+      "laser_blank_volume_mm3": 2070.531095101596,
       "stock_thickness_mm": 1.5
     },
     {
@@ -6046,7 +6250,7 @@
       "link": "right_thigh",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1797.1862370998094,
+      "volume_mm3": 2279.7197250381396,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -6065,7 +6269,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1797.1862370998094,
+      "laser_blank_volume_mm3": 2279.7197250381396,
       "stock_thickness_mm": 1.5
     },
     {
@@ -6645,7 +6849,7 @@
       "link": "right_shank",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1638.7074814045538,
+      "volume_mm3": 2070.5310951015963,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -6664,7 +6868,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1638.7074814045538,
+      "laser_blank_volume_mm3": 2070.531095101596,
       "stock_thickness_mm": 1.5
     },
     {
@@ -6956,7 +7160,7 @@
       "link": "right_shank",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1638.7074814045538,
+      "volume_mm3": 2070.5310951015963,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -6975,7 +7179,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 1638.7074814045538,
+      "laser_blank_volume_mm3": 2070.531095101596,
       "stock_thickness_mm": 1.5
     },
     {
@@ -7793,7 +7997,7 @@
       "link": "right_foot",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 868.8345500474863,
+      "volume_mm3": 986.3391569811224,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -7812,7 +8016,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 868.8345500474865,
+      "laser_blank_volume_mm3": 986.3391569811226,
       "stock_thickness_mm": 1.5
     },
     {
@@ -8200,7 +8404,7 @@
       "link": "right_foot",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 868.8345500474863,
+      "volume_mm3": 986.3391569811224,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -8219,7 +8423,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 868.8345500474865,
+      "laser_blank_volume_mm3": 986.3391569811226,
       "stock_thickness_mm": 1.5
     },
     {
@@ -8699,7 +8903,7 @@
       "link": "right_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.7602785212727,
+      "volume_mm3": 66.8753229291188,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -8791,7 +8995,7 @@
       "link": "right_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.7602785212727,
+      "volume_mm3": 66.8753229291188,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -8907,7 +9111,7 @@
       "link": "right_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.76027852127268,
+      "volume_mm3": 66.87532292911878,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -8953,7 +9157,7 @@
       "link": "right_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 120.24582880982078,
+      "volume_mm3": 120.24582880982086,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -8999,7 +9203,7 @@
       "link": "right_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 68.76027852127268,
+      "volume_mm3": 66.87532292911878,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -9045,7 +9249,7 @@
       "link": "right_foot",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 120.24582880982078,
+      "volume_mm3": 120.24582880982086,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -9115,7 +9319,7 @@
       "link": "right_foot",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 11205.971046743438,
+      "volume_mm3": 16844.58809511316,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -9123,9 +9327,9 @@
         "name": "leg-right-foot-plate",
         "link": "right_foot",
         "kind": "al",
-        "manufacturing": "laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr"
+        "manufacturing": "laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr"
       },
-      "process": "laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr",
+      "process": "laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr",
       "files": {
         "review_stl": "review/leg-right-foot-plate.stl",
         "laser_dxf": "laser/leg-right-foot-plate.dxf"
@@ -9134,8 +9338,8 @@
         "source_not_attached",
         "secondary_operations_require_drawing"
       ],
-      "laser_blank_volume_mm3": 11263.660182454492,
-      "stock_thickness_mm": 2.0
+      "laser_blank_volume_mm3": 16895.4902736817,
+      "stock_thickness_mm": 3.0
     },
     {
       "name": "leg-right-foot-sole",
@@ -9762,7 +9966,7 @@
       "link": "left_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819715,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -9833,7 +10037,7 @@
       "link": "left_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819715,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -9904,7 +10108,7 @@
       "link": "left_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819712,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -9975,7 +10179,7 @@
       "link": "left_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819712,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10046,7 +10250,7 @@
       "link": "left_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 6565.6321952089575,
+      "volume_mm3": 6792.539808436413,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10059,11 +10263,11 @@
           60.0,
           3.0
         ],
-        "stock_cut_length_mm": 113,
-        "manufacturing": "6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
+        "stock_cut_length_mm": 121,
+        "manufacturing": "6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
         "qualification": "External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier"
       },
-      "process": "6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
+      "process": "6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
       "files": {
         "review_stl": "review/arm-left-fore-angle.stl",
         "side_flat_reference_dxf": "stock-templates/arm-left-fore-angle-side_flat-REFERENCE-ONLY.dxf"
@@ -10080,7 +10284,7 @@
       "link": "left_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 602.872568420431,
+      "volume_mm3": 602.8725684204308,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10155,7 +10359,7 @@
       "link": "left_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 51.092471863788525,
+      "volume_mm3": 51.09247186378845,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10178,7 +10382,7 @@
       "link": "left_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1025.0170248250315,
+      "volume_mm3": 1364.2707860777164,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10198,15 +10402,161 @@
         "source_not_attached",
         "qualification_required: finger stiffness and pinch-force sample test required"
       ],
-      "laser_blank_volume_mm3": 1025.0170248250315,
+      "laser_blank_volume_mm3": 1364.2707860777143,
       "stock_thickness_mm": 2.0
+    },
+    {
+      "name": "arm-left-gripper-pad-support-0",
+      "link": "left_hand",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 272.79469155662593,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-pad-support-0",
+        "link": "left_hand",
+        "kind": "al",
+        "manufacturing": "laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr"
+      },
+      "process": "laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr",
+      "files": {
+        "review_stl": "review/arm-left-gripper-pad-support-0.stl",
+        "laser_dxf": "laser/arm-left-gripper-pad-support-0.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "secondary_operations_require_drawing"
+      ],
+      "laser_blank_volume_mm3": 272.79469155662537,
+      "stock_thickness_mm": 2.0
+    },
+    {
+      "name": "arm-left-gripper-pad-support-1",
+      "link": "left_hand",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 409.1920373349387,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-pad-support-1",
+        "link": "left_hand",
+        "kind": "al",
+        "manufacturing": "laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr"
+      },
+      "process": "laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr",
+      "files": {
+        "review_stl": "review/arm-left-gripper-pad-support-1.stl",
+        "laser_dxf": "laser/arm-left-gripper-pad-support-1.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "secondary_operations_require_drawing"
+      ],
+      "laser_blank_volume_mm3": 409.192037334938,
+      "stock_thickness_mm": 3.0
+    },
+    {
+      "name": "arm-left-gripper-pad-support-bolt-0",
+      "link": "left_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.75995690459831,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-pad-support-bolt-0",
+        "link": "left_hand",
+        "kind": "fastener",
+        "spec": "M2x10 ISO4762; clamp pad backing stack"
+      },
+      "process": "M2x10 ISO4762; clamp pad backing stack",
+      "files": {
+        "review_stl": "review/arm-left-gripper-pad-support-bolt-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "arm-left-gripper-pad-support-nut-0",
+      "link": "left_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 18.953259459605682,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-pad-support-nut-0",
+        "link": "left_hand",
+        "kind": "fastener",
+        "spec": "M2 ISO4032 nominal AF4 height1.6"
+      },
+      "process": "M2 ISO4032 nominal AF4 height1.6",
+      "files": {
+        "review_stl": "review/arm-left-gripper-pad-support-nut-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "arm-left-gripper-pad-support-bolt-1",
+      "link": "left_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.75995690459832,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-pad-support-bolt-1",
+        "link": "left_hand",
+        "kind": "fastener",
+        "spec": "M2x10 ISO4762; clamp pad backing stack"
+      },
+      "process": "M2x10 ISO4762; clamp pad backing stack",
+      "files": {
+        "review_stl": "review/arm-left-gripper-pad-support-bolt-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "arm-left-gripper-pad-support-nut-1",
+      "link": "left_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 18.953259459605682,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-pad-support-nut-1",
+        "link": "left_hand",
+        "kind": "fastener",
+        "spec": "M2 ISO4032 nominal AF4 height1.6"
+      },
+      "process": "M2 ISO4032 nominal AF4 height1.6",
+      "files": {
+        "review_stl": "review/arm-left-gripper-pad-support-nut-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
     },
     {
       "name": "arm-left-gripper-moving-bolt-4.95-4.95",
       "link": "left_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443712,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10214,9 +10564,9 @@
         "name": "arm-left-gripper-moving-bolt-4.95-4.95",
         "link": "left_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-bolt-4.95-4.95.stl"
       },
@@ -10229,7 +10579,7 @@
       "link": "left_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492674,
+      "volume_mm3": 115.9247689174634,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10237,9 +10587,9 @@
         "name": "arm-left-gripper-moving-spacer-4.95-4.95-0",
         "link": "left_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-spacer-4.95-4.95-0.stl"
       },
@@ -10249,11 +10599,34 @@
       ]
     },
     {
+      "name": "arm-left-gripper-moving-spacer-4.95-4.95-1",
+      "link": "left_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746337,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-moving-spacer-4.95-4.95-1",
+        "link": "left_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-left-gripper-moving-spacer-4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-left-gripper-moving-bolt-4.95--4.95",
       "link": "left_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443718,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10261,9 +10634,9 @@
         "name": "arm-left-gripper-moving-bolt-4.95--4.95",
         "link": "left_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-bolt-4.95--4.95.stl"
       },
@@ -10276,7 +10649,7 @@
       "link": "left_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492666,
+      "volume_mm3": 115.92476891746337,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10284,9 +10657,9 @@
         "name": "arm-left-gripper-moving-spacer-4.95--4.95-0",
         "link": "left_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-spacer-4.95--4.95-0.stl"
       },
@@ -10296,11 +10669,34 @@
       ]
     },
     {
+      "name": "arm-left-gripper-moving-spacer-4.95--4.95-1",
+      "link": "left_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746333,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-moving-spacer-4.95--4.95-1",
+        "link": "left_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-left-gripper-moving-spacer-4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-left-gripper-moving-bolt--4.95-4.95",
       "link": "left_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443718,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10308,9 +10704,9 @@
         "name": "arm-left-gripper-moving-bolt--4.95-4.95",
         "link": "left_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-bolt--4.95-4.95.stl"
       },
@@ -10323,7 +10719,7 @@
       "link": "left_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492674,
+      "volume_mm3": 115.9247689174634,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10331,9 +10727,9 @@
         "name": "arm-left-gripper-moving-spacer--4.95-4.95-0",
         "link": "left_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-spacer--4.95-4.95-0.stl"
       },
@@ -10343,11 +10739,34 @@
       ]
     },
     {
+      "name": "arm-left-gripper-moving-spacer--4.95-4.95-1",
+      "link": "left_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746337,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-moving-spacer--4.95-4.95-1",
+        "link": "left_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-left-gripper-moving-spacer--4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-left-gripper-moving-bolt--4.95--4.95",
       "link": "left_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443712,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10355,9 +10774,9 @@
         "name": "arm-left-gripper-moving-bolt--4.95--4.95",
         "link": "left_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-bolt--4.95--4.95.stl"
       },
@@ -10370,7 +10789,7 @@
       "link": "left_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492674,
+      "volume_mm3": 115.92476891746337,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10378,9 +10797,9 @@
         "name": "arm-left-gripper-moving-spacer--4.95--4.95-0",
         "link": "left_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-left-gripper-moving-spacer--4.95--4.95-0.stl"
       },
@@ -10390,11 +10809,34 @@
       ]
     },
     {
+      "name": "arm-left-gripper-moving-spacer--4.95--4.95-1",
+      "link": "left_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746337,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-left-gripper-moving-spacer--4.95--4.95-1",
+        "link": "left_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-left-gripper-moving-spacer--4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-left-gripper-moving-finger",
       "link": "left_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 802.4249703467051,
+      "volume_mm3": 1071.48149921132,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10412,7 +10854,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 802.424970346705,
+      "laser_blank_volume_mm3": 1071.481499211319,
       "stock_thickness_mm": 2.0
     },
     {
@@ -10467,7 +10909,7 @@
       "link": "left_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 101.15928344559141,
+      "volume_mm3": 101.1592834455914,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -10514,7 +10956,7 @@
       "link": "left_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 51.09247186378847,
+      "volume_mm3": 51.09247186378846,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -10537,7 +10979,7 @@
       "link": "left_hand",
       "kind": "tpu",
       "quantity": 1,
-      "volume_mm3": 92.79999999999995,
+      "volume_mm3": 345.60000000000014,
       "solid_count": 1,
       "material": "TPU",
       "source": null,
@@ -10565,7 +11007,7 @@
       "link": "left_grip",
       "kind": "tpu",
       "quantity": 1,
-      "volume_mm3": 48.00000000000002,
+      "volume_mm3": 96.00000000000009,
       "solid_count": 1,
       "material": "TPU",
       "source": null,
@@ -11199,7 +11641,7 @@
       "link": "right_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819715,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11270,7 +11712,7 @@
       "link": "right_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819715,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11341,7 +11783,7 @@
       "link": "right_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819712,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11412,7 +11854,7 @@
       "link": "right_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 153.58328016819712,
+      "volume_mm3": 151.69832457604323,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11483,7 +11925,7 @@
       "link": "right_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 6565.6321952089575,
+      "volume_mm3": 6792.539808436413,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11496,11 +11938,11 @@
           60.0,
           3.0
         ],
-        "stock_cut_length_mm": 113,
-        "manufacturing": "6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
+        "stock_cut_length_mm": 121,
+        "manufacturing": "6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
         "qualification": "External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier"
       },
-      "process": "6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
+      "process": "6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
       "files": {
         "review_stl": "review/arm-right-fore-angle.stl",
         "side_flat_reference_dxf": "stock-templates/arm-right-fore-angle-side_flat-REFERENCE-ONLY.dxf"
@@ -11517,7 +11959,7 @@
       "link": "right_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 602.872568420431,
+      "volume_mm3": 602.8725684204308,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11592,7 +12034,7 @@
       "link": "right_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 51.092471863788525,
+      "volume_mm3": 51.09247186378845,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11615,7 +12057,7 @@
       "link": "right_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 1025.0170248250315,
+      "volume_mm3": 1364.2707860777164,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11635,15 +12077,161 @@
         "source_not_attached",
         "qualification_required: finger stiffness and pinch-force sample test required"
       ],
-      "laser_blank_volume_mm3": 1025.0170248250315,
+      "laser_blank_volume_mm3": 1364.2707860777143,
       "stock_thickness_mm": 2.0
+    },
+    {
+      "name": "arm-right-gripper-pad-support-0",
+      "link": "right_hand",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 272.79469155662593,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-pad-support-0",
+        "link": "right_hand",
+        "kind": "al",
+        "manufacturing": "laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr"
+      },
+      "process": "laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr",
+      "files": {
+        "review_stl": "review/arm-right-gripper-pad-support-0.stl",
+        "laser_dxf": "laser/arm-right-gripper-pad-support-0.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "secondary_operations_require_drawing"
+      ],
+      "laser_blank_volume_mm3": 272.79469155662537,
+      "stock_thickness_mm": 2.0
+    },
+    {
+      "name": "arm-right-gripper-pad-support-1",
+      "link": "right_hand",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 409.1920373349387,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-pad-support-1",
+        "link": "right_hand",
+        "kind": "al",
+        "manufacturing": "laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr"
+      },
+      "process": "laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr",
+      "files": {
+        "review_stl": "review/arm-right-gripper-pad-support-1.stl",
+        "laser_dxf": "laser/arm-right-gripper-pad-support-1.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "secondary_operations_require_drawing"
+      ],
+      "laser_blank_volume_mm3": 409.192037334938,
+      "stock_thickness_mm": 3.0
+    },
+    {
+      "name": "arm-right-gripper-pad-support-bolt-0",
+      "link": "right_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.75995690459831,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-pad-support-bolt-0",
+        "link": "right_hand",
+        "kind": "fastener",
+        "spec": "M2x10 ISO4762; clamp pad backing stack"
+      },
+      "process": "M2x10 ISO4762; clamp pad backing stack",
+      "files": {
+        "review_stl": "review/arm-right-gripper-pad-support-bolt-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "arm-right-gripper-pad-support-nut-0",
+      "link": "right_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 18.953259459605682,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-pad-support-nut-0",
+        "link": "right_hand",
+        "kind": "fastener",
+        "spec": "M2 ISO4032 nominal AF4 height1.6"
+      },
+      "process": "M2 ISO4032 nominal AF4 height1.6",
+      "files": {
+        "review_stl": "review/arm-right-gripper-pad-support-nut-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "arm-right-gripper-pad-support-bolt-1",
+      "link": "right_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.75995690459832,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-pad-support-bolt-1",
+        "link": "right_hand",
+        "kind": "fastener",
+        "spec": "M2x10 ISO4762; clamp pad backing stack"
+      },
+      "process": "M2x10 ISO4762; clamp pad backing stack",
+      "files": {
+        "review_stl": "review/arm-right-gripper-pad-support-bolt-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "arm-right-gripper-pad-support-nut-1",
+      "link": "right_hand",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 18.953259459605682,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-pad-support-nut-1",
+        "link": "right_hand",
+        "kind": "fastener",
+        "spec": "M2 ISO4032 nominal AF4 height1.6"
+      },
+      "process": "M2 ISO4032 nominal AF4 height1.6",
+      "files": {
+        "review_stl": "review/arm-right-gripper-pad-support-nut-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
     },
     {
       "name": "arm-right-gripper-moving-bolt-4.95-4.95",
       "link": "right_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443712,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11651,9 +12239,9 @@
         "name": "arm-right-gripper-moving-bolt-4.95-4.95",
         "link": "right_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-bolt-4.95-4.95.stl"
       },
@@ -11666,7 +12254,7 @@
       "link": "right_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492674,
+      "volume_mm3": 115.9247689174634,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11674,9 +12262,9 @@
         "name": "arm-right-gripper-moving-spacer-4.95-4.95-0",
         "link": "right_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-spacer-4.95-4.95-0.stl"
       },
@@ -11686,11 +12274,34 @@
       ]
     },
     {
+      "name": "arm-right-gripper-moving-spacer-4.95-4.95-1",
+      "link": "right_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746337,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-moving-spacer-4.95-4.95-1",
+        "link": "right_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-right-gripper-moving-spacer-4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-right-gripper-moving-bolt-4.95--4.95",
       "link": "right_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443718,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11698,9 +12309,9 @@
         "name": "arm-right-gripper-moving-bolt-4.95--4.95",
         "link": "right_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-bolt-4.95--4.95.stl"
       },
@@ -11713,7 +12324,7 @@
       "link": "right_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492666,
+      "volume_mm3": 115.92476891746337,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11721,9 +12332,9 @@
         "name": "arm-right-gripper-moving-spacer-4.95--4.95-0",
         "link": "right_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-spacer-4.95--4.95-0.stl"
       },
@@ -11733,11 +12344,34 @@
       ]
     },
     {
+      "name": "arm-right-gripper-moving-spacer-4.95--4.95-1",
+      "link": "right_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746333,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-moving-spacer-4.95--4.95-1",
+        "link": "right_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-right-gripper-moving-spacer-4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-right-gripper-moving-bolt--4.95-4.95",
       "link": "right_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443718,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11745,9 +12379,9 @@
         "name": "arm-right-gripper-moving-bolt--4.95-4.95",
         "link": "right_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-bolt--4.95-4.95.stl"
       },
@@ -11760,7 +12394,7 @@
       "link": "right_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492674,
+      "volume_mm3": 115.9247689174634,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11768,9 +12402,9 @@
         "name": "arm-right-gripper-moving-spacer--4.95-4.95-0",
         "link": "right_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-spacer--4.95-4.95-0.stl"
       },
@@ -11780,11 +12414,34 @@
       ]
     },
     {
+      "name": "arm-right-gripper-moving-spacer--4.95-4.95-1",
+      "link": "right_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746337,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-moving-spacer--4.95-4.95-1",
+        "link": "right_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-right-gripper-moving-spacer--4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-right-gripper-moving-bolt--4.95--4.95",
       "link": "right_grip",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 106.10866186866681,
+      "volume_mm3": 176.79449657443712,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11792,9 +12449,9 @@
         "name": "arm-right-gripper-moving-bolt--4.95--4.95",
         "link": "right_grip",
         "kind": "fastener",
-        "spec": "M3x6 ISO4762; nominal thread"
+        "spec": "M3x16 ISO4762; nominal thread"
       },
-      "process": "M3x6 ISO4762; nominal thread",
+      "process": "M3x16 ISO4762; nominal thread",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-bolt--4.95--4.95.stl"
       },
@@ -11807,7 +12464,7 @@
       "link": "right_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 23.184953783492674,
+      "volume_mm3": 115.92476891746337,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11815,9 +12472,9 @@
         "name": "arm-right-gripper-moving-spacer--4.95--4.95-0",
         "link": "right_grip",
         "kind": "al",
-        "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm"
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm"
       },
-      "process": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+      "process": "M3 plain spacer/shim OD5 ID3.2 length10mm",
       "files": {
         "review_stl": "review/arm-right-gripper-moving-spacer--4.95--4.95-0.stl"
       },
@@ -11827,11 +12484,34 @@
       ]
     },
     {
+      "name": "arm-right-gripper-moving-spacer--4.95--4.95-1",
+      "link": "right_grip",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 11.592476891746337,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "arm-right-gripper-moving-spacer--4.95--4.95-1",
+        "link": "right_grip",
+        "kind": "fastener",
+        "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm"
+      },
+      "process": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+      "files": {
+        "review_stl": "review/arm-right-gripper-moving-spacer--4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
       "name": "arm-right-gripper-moving-finger",
       "link": "right_grip",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 802.4249703467051,
+      "volume_mm3": 1071.48149921132,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11849,7 +12529,7 @@
       "unresolved": [
         "source_not_attached"
       ],
-      "laser_blank_volume_mm3": 802.424970346705,
+      "laser_blank_volume_mm3": 1071.481499211319,
       "stock_thickness_mm": 2.0
     },
     {
@@ -11904,7 +12584,7 @@
       "link": "right_hand",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 101.15928344559141,
+      "volume_mm3": 101.1592834455914,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -11951,7 +12631,7 @@
       "link": "right_hand",
       "kind": "fastener",
       "quantity": 1,
-      "volume_mm3": 51.09247186378847,
+      "volume_mm3": 51.09247186378846,
       "solid_count": 1,
       "material": "purchased part; see source",
       "source": null,
@@ -11974,7 +12654,7 @@
       "link": "right_hand",
       "kind": "tpu",
       "quantity": 1,
-      "volume_mm3": 92.79999999999995,
+      "volume_mm3": 345.60000000000014,
       "solid_count": 1,
       "material": "TPU",
       "source": null,
@@ -12002,7 +12682,7 @@
       "link": "right_grip",
       "kind": "tpu",
       "quantity": 1,
-      "volume_mm3": 48.00000000000002,
+      "volume_mm3": 96.00000000000009,
       "solid_count": 1,
       "material": "TPU",
       "source": null,
@@ -12670,7 +13350,7 @@
       "link": "left_hip_roll_link",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 4408.78019476302,
+      "volume_mm3": 4569.924690878831,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -12678,10 +13358,10 @@
         "name": "pelvis-output-adapter-left",
         "link": "left_hip_roll_link",
         "kind": "al",
-        "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+        "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets",
         "stock_cut_length_mm": 61.0
       },
-      "process": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+      "process": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets",
       "files": {
         "review_stl": "review/pelvis-output-adapter-left.stl",
         "side_flat_reference_dxf": "stock-templates/pelvis-output-adapter-left-side_flat-REFERENCE-ONLY.dxf"
@@ -12719,100 +13399,6 @@
       ],
       "laser_blank_volume_mm3": 659.8725684204305,
       "stock_thickness_mm": 1.5
-    },
-    {
-      "name": "case-left-pitch-bolt-0",
-      "link": "left_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 381.7834172211712,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-left-pitch-bolt-0",
-        "link": "left_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3x45 ISO4762",
-        "connection": "external clamp; sample qualification required"
-      },
-      "process": "M3x45 ISO4762",
-      "files": {
-        "review_stl": "review/case-left-pitch-bolt-0.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-left-pitch-nut-0",
-      "link": "left_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 51.09247186378849,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-left-pitch-nut-0",
-        "link": "left_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3 ISO4032; retention method to qualify"
-      },
-      "process": "M3 ISO4032; retention method to qualify",
-      "files": {
-        "review_stl": "review/case-left-pitch-nut-0.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-left-pitch-bolt-1",
-      "link": "left_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 381.7834172211712,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-left-pitch-bolt-1",
-        "link": "left_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3x45 ISO4762",
-        "connection": "external clamp; sample qualification required"
-      },
-      "process": "M3x45 ISO4762",
-      "files": {
-        "review_stl": "review/case-left-pitch-bolt-1.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-left-pitch-nut-1",
-      "link": "left_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 51.09247186378849,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-left-pitch-nut-1",
-        "link": "left_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3 ISO4032; retention method to qualify"
-      },
-      "process": "M3 ISO4032; retention method to qualify",
-      "files": {
-        "review_stl": "review/case-left-pitch-nut-1.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
     },
     {
       "name": "adapter-output-screw-left-0",
@@ -12911,7 +13497,7 @@
       "link": "right_hip_roll_link",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 4408.78019476302,
+      "volume_mm3": 4569.924690878831,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -12919,10 +13505,10 @@
         "name": "pelvis-output-adapter-right",
         "link": "right_hip_roll_link",
         "kind": "al",
-        "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+        "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets",
         "stock_cut_length_mm": 61.0
       },
-      "process": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+      "process": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets",
       "files": {
         "review_stl": "review/pelvis-output-adapter-right.stl",
         "side_flat_reference_dxf": "stock-templates/pelvis-output-adapter-right-side_flat-REFERENCE-ONLY.dxf"
@@ -12960,100 +13546,6 @@
       ],
       "laser_blank_volume_mm3": 659.8725684204305,
       "stock_thickness_mm": 1.5
-    },
-    {
-      "name": "case-right-pitch-bolt-0",
-      "link": "right_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 381.7834172211712,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-right-pitch-bolt-0",
-        "link": "right_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3x45 ISO4762",
-        "connection": "external clamp; sample qualification required"
-      },
-      "process": "M3x45 ISO4762",
-      "files": {
-        "review_stl": "review/case-right-pitch-bolt-0.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-right-pitch-nut-0",
-      "link": "right_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 51.09247186378849,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-right-pitch-nut-0",
-        "link": "right_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3 ISO4032; retention method to qualify"
-      },
-      "process": "M3 ISO4032; retention method to qualify",
-      "files": {
-        "review_stl": "review/case-right-pitch-nut-0.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-right-pitch-bolt-1",
-      "link": "right_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 381.7834172211712,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-right-pitch-bolt-1",
-        "link": "right_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3x45 ISO4762",
-        "connection": "external clamp; sample qualification required"
-      },
-      "process": "M3x45 ISO4762",
-      "files": {
-        "review_stl": "review/case-right-pitch-bolt-1.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-right-pitch-nut-1",
-      "link": "right_hip_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 51.09247186378849,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-right-pitch-nut-1",
-        "link": "right_hip_roll_link",
-        "kind": "fastener",
-        "spec": "M3 ISO4032; retention method to qualify"
-      },
-      "process": "M3 ISO4032; retention method to qualify",
-      "files": {
-        "review_stl": "review/case-right-pitch-nut-1.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
     },
     {
       "name": "adapter-output-screw-right-0",
@@ -13152,7 +13644,7 @@
       "link": "trunk_roll_link",
       "kind": "al",
       "quantity": 1,
-      "volume_mm3": 3237.5417762022057,
+      "volume_mm3": 3603.7312382150653,
       "solid_count": 1,
       "material": "aluminum; alloy/temper require source metadata",
       "source": null,
@@ -13160,10 +13652,10 @@
         "name": "pelvis-output-adapter-trunk",
         "link": "trunk_roll_link",
         "kind": "al",
-        "manufacturing": "6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+        "manufacturing": "6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; remote profile R1; NO CNC pockets",
         "stock_cut_length_mm": 54.0
       },
-      "process": "6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+      "process": "6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; remote profile R1; NO CNC pockets",
       "files": {
         "review_stl": "review/pelvis-output-adapter-trunk.stl",
         "side_flat_reference_dxf": "stock-templates/pelvis-output-adapter-trunk-side_flat-REFERENCE-ONLY.dxf"
@@ -13201,53 +13693,6 @@
       ],
       "laser_blank_volume_mm3": 659.8725684204305,
       "stock_thickness_mm": 1.5
-    },
-    {
-      "name": "case-trunk-pitch-bolt-0",
-      "link": "trunk_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 381.7834172211712,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-trunk-pitch-bolt-0",
-        "link": "trunk_roll_link",
-        "kind": "fastener",
-        "spec": "M3x45 ISO4762",
-        "connection": "external clamp; sample qualification required"
-      },
-      "process": "M3x45 ISO4762",
-      "files": {
-        "review_stl": "review/case-trunk-pitch-bolt-0.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
-    },
-    {
-      "name": "case-trunk-pitch-nut-0",
-      "link": "trunk_roll_link",
-      "kind": "fastener",
-      "quantity": 1,
-      "volume_mm3": 51.092471863788475,
-      "solid_count": 1,
-      "material": "purchased part; see source",
-      "source": null,
-      "metadata": {
-        "name": "case-trunk-pitch-nut-0",
-        "link": "trunk_roll_link",
-        "kind": "fastener",
-        "spec": "M3 ISO4032; retention method to qualify"
-      },
-      "process": "M3 ISO4032; retention method to qualify",
-      "files": {
-        "review_stl": "review/case-trunk-pitch-nut-0.stl"
-      },
-      "unresolved": [
-        "source_not_attached"
-      ]
     },
     {
       "name": "case-trunk-pitch-bolt-1",
@@ -13383,6 +13828,1632 @@
       "process": "M3x6; 3 mm horn engagement",
       "files": {
         "review_stl": "review/adapter-output-screw-trunk-3.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer--4.95--4.95-0",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.962384458731684,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer--4.95--4.95-0",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer--4.95--4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer--4.95--4.95-1",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer--4.95--4.95-1",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer--4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-head-washer--4.95--4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-head-washer--4.95--4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-head-washer--4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-bolt--4.95--4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-bolt--4.95--4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-bolt--4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer--4.95-4.95-0",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.96238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer--4.95-4.95-0",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer--4.95-4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer--4.95-4.95-1",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer--4.95-4.95-1",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer--4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-head-washer--4.95-4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642555,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-head-washer--4.95-4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-head-washer--4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-bolt--4.95-4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-bolt--4.95-4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-bolt--4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer-4.95--4.95-0",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.96238445873169,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer-4.95--4.95-0",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer-4.95--4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer-4.95--4.95-1",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873167,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer-4.95--4.95-1",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer-4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-head-washer-4.95--4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-head-washer-4.95--4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-head-washer-4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-bolt-4.95--4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-bolt-4.95--4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-bolt-4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer-4.95-4.95-0",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.962384458731684,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer-4.95-4.95-0",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer-4.95-4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-spacer-4.95-4.95-1",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-spacer-4.95-4.95-1",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-spacer-4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-head-washer-4.95-4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642551,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-head-washer-4.95-4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-head-washer-4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-pcd-bolt-4.95-4.95",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-pcd-bolt-4.95-4.95",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-left-pcd-bolt-4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-case-spacer-0",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 273.9782953195658,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-case-spacer-0",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer9"
+      },
+      "process": "M3 OD7 ID3.2 spacer9",
+      "files": {
+        "review_stl": "review/hip-dual-left-case-spacer-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-case-bolt-0",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 452.4692519269415,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-case-bolt-0",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-left-pitch-bolt-0",
+        "spec": "M3x55 through paired front/rear support stack"
+      },
+      "process": "M3x55 through paired front/rear support stack",
+      "files": {
+        "review_stl": "review/hip-dual-left-case-bolt-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-case-nut-0",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.09247186378849,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-case-nut-0",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-left-pitch-nut-0",
+        "spec": "M3 ISO4032"
+      },
+      "process": "M3 ISO4032",
+      "files": {
+        "review_stl": "review/hip-dual-left-case-nut-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-case-spacer-1",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 273.9782953195659,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-case-spacer-1",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer9"
+      },
+      "process": "M3 OD7 ID3.2 spacer9",
+      "files": {
+        "review_stl": "review/hip-dual-left-case-spacer-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-left-case-bolt-1",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 452.46925192694147,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-case-bolt-1",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-left-pitch-bolt-1",
+        "spec": "M3x55 through paired front/rear support stack"
+      },
+      "process": "M3x55 through paired front/rear support stack",
+      "files": {
+        "review_stl": "review/hip-dual-left-case-bolt-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-case-nut-1",
+      "link": "left_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.092471863788475,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-case-nut-1",
+        "link": "left_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-left-pitch-nut-1",
+        "spec": "M3 ISO4032"
+      },
+      "process": "M3 ISO4032",
+      "files": {
+        "review_stl": "review/hip-dual-left-case-nut-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-left-rear-angle",
+      "link": "left_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 3658.9526752163374,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-left-rear-angle",
+        "link": "left_hip_roll_link",
+        "kind": "al",
+        "manufacturing": "3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section",
+        "qualification": "Rear bearing and clamp preload still require sample"
+      },
+      "process": "3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section",
+      "files": {
+        "review_stl": "review/hip-dual-left-rear-angle.stl",
+        "side_flat_reference_dxf": "stock-templates/hip-dual-left-rear-angle-side_flat-REFERENCE-ONLY.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "qualification_required: Rear bearing and clamp preload still require sample",
+        "stock_or_purchased_part_requires_process_drawing",
+        "side_flat_is_not_unfolded_blank_or_complete_drilling_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer--4.95--4.95-0",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.962384458731684,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer--4.95--4.95-0",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer--4.95--4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer--4.95--4.95-1",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer--4.95--4.95-1",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer--4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-head-washer--4.95--4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-head-washer--4.95--4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-head-washer--4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-bolt--4.95--4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-bolt--4.95--4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-bolt--4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer--4.95-4.95-0",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.96238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer--4.95-4.95-0",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer--4.95-4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer--4.95-4.95-1",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer--4.95-4.95-1",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer--4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-head-washer--4.95-4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642555,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-head-washer--4.95-4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-head-washer--4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-bolt--4.95-4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-bolt--4.95-4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-bolt--4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer-4.95--4.95-0",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.96238445873169,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer-4.95--4.95-0",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer-4.95--4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer-4.95--4.95-1",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873167,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer-4.95--4.95-1",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer-4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-head-washer-4.95--4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-head-washer-4.95--4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-head-washer-4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-bolt-4.95--4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-bolt-4.95--4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-bolt-4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer-4.95-4.95-0",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.962384458731684,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer-4.95-4.95-0",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer-4.95-4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-spacer-4.95-4.95-1",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-spacer-4.95-4.95-1",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-spacer-4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-head-washer-4.95-4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642551,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-head-washer-4.95-4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-head-washer-4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-pcd-bolt-4.95-4.95",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-pcd-bolt-4.95-4.95",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required"
+      },
+      "process": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+      "files": {
+        "review_stl": "review/hip-dual-right-pcd-bolt-4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-case-spacer-0",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 273.9782953195658,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-case-spacer-0",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer9"
+      },
+      "process": "M3 OD7 ID3.2 spacer9",
+      "files": {
+        "review_stl": "review/hip-dual-right-case-spacer-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-case-bolt-0",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 452.4692519269415,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-case-bolt-0",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-right-pitch-bolt-0",
+        "spec": "M3x55 through paired front/rear support stack"
+      },
+      "process": "M3x55 through paired front/rear support stack",
+      "files": {
+        "review_stl": "review/hip-dual-right-case-bolt-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-case-nut-0",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.09247186378849,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-case-nut-0",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-right-pitch-nut-0",
+        "spec": "M3 ISO4032"
+      },
+      "process": "M3 ISO4032",
+      "files": {
+        "review_stl": "review/hip-dual-right-case-nut-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-case-spacer-1",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 273.9782953195659,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-case-spacer-1",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer9"
+      },
+      "process": "M3 OD7 ID3.2 spacer9",
+      "files": {
+        "review_stl": "review/hip-dual-right-case-spacer-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "hip-dual-right-case-bolt-1",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 452.46925192694147,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-case-bolt-1",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-right-pitch-bolt-1",
+        "spec": "M3x55 through paired front/rear support stack"
+      },
+      "process": "M3x55 through paired front/rear support stack",
+      "files": {
+        "review_stl": "review/hip-dual-right-case-bolt-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-case-nut-1",
+      "link": "right_hip_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.092471863788475,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-case-nut-1",
+        "link": "right_hip_roll_link",
+        "kind": "fastener",
+        "replaces": "case-right-pitch-nut-1",
+        "spec": "M3 ISO4032"
+      },
+      "process": "M3 ISO4032",
+      "files": {
+        "review_stl": "review/hip-dual-right-case-nut-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "hip-dual-right-rear-angle",
+      "link": "right_hip_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 3658.9526752163374,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "hip-dual-right-rear-angle",
+        "link": "right_hip_roll_link",
+        "kind": "al",
+        "manufacturing": "3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section",
+        "qualification": "Rear bearing and clamp preload still require sample"
+      },
+      "process": "3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section",
+      "files": {
+        "review_stl": "review/hip-dual-right-rear-angle.stl",
+        "side_flat_reference_dxf": "stock-templates/hip-dual-right-rear-angle-side_flat-REFERENCE-ONLY.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "qualification_required: Rear bearing and clamp preload still require sample",
+        "stock_or_purchased_part_requires_process_drawing",
+        "side_flat_is_not_unfolded_blank_or_complete_drilling_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer--4.95--4.95-0",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.962384458731684,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer--4.95--4.95-0",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer--4.95--4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer--4.95--4.95-1",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer--4.95--4.95-1",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer--4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-washer--4.95--4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-washer--4.95--4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-washer--4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-screw--4.95--4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-screw--4.95--4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit"
+      },
+      "process": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-screw--4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer--4.95-4.95-0",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.96238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer--4.95-4.95-0",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer--4.95-4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer--4.95-4.95-1",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer--4.95-4.95-1",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer--4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-washer--4.95-4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642555,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-washer--4.95-4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-washer--4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-screw--4.95-4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-screw--4.95-4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit"
+      },
+      "process": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-screw--4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer-4.95--4.95-0",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.96238445873169,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer-4.95--4.95-0",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer-4.95--4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer-4.95--4.95-1",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873167,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer-4.95--4.95-1",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer-4.95--4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-washer-4.95--4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642544,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-washer-4.95--4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-washer-4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-screw-4.95--4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-screw-4.95--4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit"
+      },
+      "process": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-screw-4.95--4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer-4.95-4.95-0",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 57.962384458731684,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer-4.95-4.95-0",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer-4.95-4.95-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-spacer-4.95-4.95-1",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5.796238445873168,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-spacer-4.95-4.95-1",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD5 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD5 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-spacer-4.95-4.95-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-washer-4.95-4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 15.221016406642551,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-washer-4.95-4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3 washer 0.5 mm"
+      },
+      "process": "M3 washer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-washer-4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-pcd-screw-4.95-4.95",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 148.52016269212902,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-pcd-screw-4.95-4.95",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit"
+      },
+      "process": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+      "files": {
+        "review_stl": "review/waist-dual-pcd-screw-4.95-4.95.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-rear-angle",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 5998.935010059778,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-rear-angle",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "manufacturing": "Saw/drill 75x50x3 stock angle, 55 mm axial blank; open trim, PCD14, clamp hole; retain inside R3. Verify supplied corner radius before cutting.",
+        "stock_section_mm": [
+          75,
+          50,
+          3
+        ],
+        "stock_cut_length_mm": 55,
+        "qualification": "Stock availability, material certificate, bearing rating and clamp preload require qualification"
+      },
+      "process": "Saw/drill 75x50x3 stock angle, 55 mm axial blank; open trim, PCD14, clamp hole; retain inside R3. Verify supplied corner radius before cutting.",
+      "files": {
+        "review_stl": "review/waist-dual-rear-angle.stl",
+        "side_flat_reference_dxf": "stock-templates/waist-dual-rear-angle-side_flat-REFERENCE-ONLY.dxf"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "qualification_required: Stock availability, material certificate, bearing rating and clamp preload require qualification",
+        "stock_or_purchased_part_requires_process_drawing",
+        "side_flat_is_not_unfolded_blank_or_complete_drilling_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-clamp-spacer-0",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 304.4203281328509,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-clamp-spacer-0",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer 10 mm"
+      },
+      "process": "M3 OD7 ID3.2 spacer 10 mm",
+      "files": {
+        "review_stl": "review/waist-dual-clamp-spacer-0.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-clamp-spacer-1",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 121.76813125314035,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-clamp-spacer-1",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer 4 mm"
+      },
+      "process": "M3 OD7 ID3.2 spacer 4 mm",
+      "files": {
+        "review_stl": "review/waist-dual-clamp-spacer-1.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-clamp-spacer-2",
+      "link": "trunk_roll_link",
+      "kind": "al",
+      "quantity": 1,
+      "volume_mm3": 15.22101640664254,
+      "solid_count": 1,
+      "material": "aluminum; alloy/temper require source metadata",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-clamp-spacer-2",
+        "link": "trunk_roll_link",
+        "kind": "al",
+        "spec": "M3 OD7 ID3.2 spacer 0.5 mm"
+      },
+      "process": "M3 OD7 ID3.2 spacer 0.5 mm",
+      "files": {
+        "review_stl": "review/waist-dual-clamp-spacer-2.stl"
+      },
+      "unresolved": [
+        "source_not_attached",
+        "stock_or_purchased_part_requires_process_drawing"
+      ]
+    },
+    {
+      "name": "waist-dual-clamp-replacement-bolt",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 487.8121692798266,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-clamp-replacement-bolt",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "replaces": "case-trunk-pitch-bolt-0",
+        "spec": "M3x60; rear support through bolt"
+      },
+      "process": "M3x60; rear support through bolt",
+      "files": {
+        "review_stl": "review/waist-dual-clamp-replacement-bolt.stl"
+      },
+      "unresolved": [
+        "source_not_attached"
+      ]
+    },
+    {
+      "name": "waist-dual-clamp-replacement-nut",
+      "link": "trunk_roll_link",
+      "kind": "fastener",
+      "quantity": 1,
+      "volume_mm3": 51.09247186378849,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": null,
+      "metadata": {
+        "name": "waist-dual-clamp-replacement-nut",
+        "link": "trunk_roll_link",
+        "kind": "fastener",
+        "replaces": "case-trunk-pitch-nut-0",
+        "spec": "M3 ISO4032, relocated behind new rear angle"
+      },
+      "process": "M3 ISO4032, relocated behind new rear angle",
+      "files": {
+        "review_stl": "review/waist-dual-clamp-replacement-nut.stl"
       },
       "unresolved": [
         "source_not_attached"
@@ -17402,6 +19473,30 @@
       "process": "unspecified",
       "files": {
         "review_stl": "review/sbc.stl"
+      },
+      "unresolved": []
+    },
+    {
+      "name": "vl53l1x",
+      "link": "head",
+      "kind": "pcb",
+      "quantity": 1,
+      "volume_mm3": 767.9999999999999,
+      "solid_count": 1,
+      "material": "purchased part; see source",
+      "source": "generic carrier envelope; connector/hole pattern pending vendor selection",
+      "metadata": {
+        "name": "vl53l1x",
+        "link": "head",
+        "kind": "pcb",
+        "sku": "VL53L1X carrier (20x24 mm)",
+        "purchased_mass_g": 4,
+        "source": "generic carrier envelope; connector/hole pattern pending vendor selection",
+        "mounting": "adhesive or printed clip reservation; no unverified holes"
+      },
+      "process": "unspecified",
+      "files": {
+        "review_stl": "review/vl53l1x.stl"
       },
       "unresolved": []
     },
