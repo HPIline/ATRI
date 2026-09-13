@@ -49,6 +49,12 @@ def build_electronics():
         board=board.cut(cq.Workplane('XY').center(hx,hy).circle(b['hole_d_mm']/2).extrude(t,both=True))
     board=board.translate((-w/2,-h/2,0)).rotate((0,0,0),(0,1,0),-90).rotate((0,0,0),(1,0,0),-90)
     add('sbc','torso','pcb',board.translate(b['position_mm']),sku=b['sku'],purchased_mass_g=b['mass_g'],source=b['mounting_status'],purchased_assembly='sbc')
+    # VL53L1X carrier: head-front envelope, kept separate from the camera and
+    # tied to the head link so it follows head yaw/pitch in the assembly.
+    tof=cq.Workplane('YZ').box(1.6,20.,24.,centered=(False,True,True)).translate((7.5,-14.,18.))
+    add('vl53l1x','head','pcb',tof,sku='VL53L1X carrier (20x24 mm)',purchased_mass_g=4,
+        source='generic carrier envelope; connector/hole pattern pending vendor selection',
+        mounting='adhesive or printed clip reservation; no unverified holes')
     reference=Path(__file__).parents[1]/'cad/vendor/pi4b/component-envelopes.json'
     components=json.loads(reference.read_text())['components']
     for index,component in enumerate(components):
