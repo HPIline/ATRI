@@ -1,0 +1,28 @@
+{
+  "engine": "CYCLES",
+  "device_names": [
+    "AMD Radeon RX 7900 XT"
+  ],
+  "cpu_enabled": false,
+  "samples": 64,
+  "resolution": [
+    3840,
+    2160
+  ],
+  "part_count": 1030,
+  "files": [
+    "assembled_front.png",
+    "assembled_rear.png",
+    "detail_waist_hand_sensor.png",
+    "exploded.png",
+    "exploded_numbered.png"
+  ],
+  "hip_gpu": "AMD Radeon RX 7900 XT",
+  "bom": [
+    "exploded-parts.csv",
+    "exploded-parts.md"
+  ],
+  "label_count": 11,
+  "invalid_meshes": [],
+  "note": "CAD review renders, not photographs or manufacturing qualification. These images are produced from the exported assembly blend and do not claim the robot was manufactured or physically verified."
+}
