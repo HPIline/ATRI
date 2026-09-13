@@ -21,7 +21,7 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 from ..config import MAX_STEPS
-from ..tuning import load_tuning, param_or
+from ..tuning import effective_overrides, load_tuning, param_or, tuning_source_label
 from .base import (
     Skill,
     SkillContext,
@@ -85,7 +85,8 @@ def _flag(ctx: SkillContext, tuning: Dict[str, Any], key: str) -> bool:
 def _fail(t: Any, ctx: SkillContext, reason: str) -> Dict[str, Any]:
     """统一的技能失败结果：带上**参数出处与告警**，否则现场"改了没生效"查不出来。"""
     result = failed("carry", reason)
-    result["tuning_source"] = t.source_path.name if t.overridden else "code-defaults"
+    result["tuning_source"] = tuning_source_label(t, ctx.params)
+    result["tuning_overridden"] = list(effective_overrides(t, ctx.params))
     result["tuning_warnings"] = list(t.warnings)
     return result
 
@@ -184,8 +185,8 @@ class CarrySkill(Skill):
             "grasp": grasp_result,
             "walk": walk_result,
             # 参数出处：让报告能说清"这是标定值还是设计值"
-            "tuning_source": t.source_path.name if t.overridden else "code-defaults",
-            "tuning_overridden": list(t.overridden),
+            "tuning_source": tuning_source_label(t, ctx.params),
+            "tuning_overridden": list(effective_overrides(t, ctx.params)),
             "tuning_warnings": list(t.warnings),
         }
 

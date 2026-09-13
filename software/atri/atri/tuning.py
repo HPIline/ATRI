@@ -219,6 +219,22 @@ def param_or(
     return default
 
 
+def effective_overrides(t: Tuning, params: Optional[Mapping[str, Any]] = None) -> Tuple[str, ...]:
+    """tuning 文件里**真正生效**的键。
+
+    任务卡给了同名值时，那一次是任务卡说了算——把这种键也算作"来自文件"，
+    报告就会把"现场临时指定的值"说成"标定回填的值"，正好是这类材料最容易出的错。
+    （独立复核在 T-03 上提过这一点。）
+    """
+    given = params or {}
+    return tuple(key for key in t.overridden if given.get(key) is None)
+
+
+def tuning_source_label(t: Tuning, params: Optional[Mapping[str, Any]] = None) -> str:
+    """参数出处的一行标记：``"code-defaults"`` 或 tuning 文件名（只在真有键生效时）。"""
+    return t.source_path.name if effective_overrides(t, params) else "code-defaults"
+
+
 TUNING_VERSION = 1
 
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from ..tuning import load_tuning, param_or
+from ..tuning import effective_overrides, load_tuning, param_or, tuning_source_label
 from .base import (
     Skill,
     SkillContext,
@@ -53,32 +53,57 @@ def _num(ctx: SkillContext, tuning: Dict[str, Any], key: str, *, integer: bool =
     return float(value)
 
 
+def _fail(t: Any, reason: str, params: Any = None) -> Dict[str, Any]:
+    """统一的技能失败结果：带上参数出处与告警，否则现场"改了没生效"查不出来。
+
+    （与 ``skills/carry.py::_fail`` / ``skills/dance.py`` 同一口径：
+    失败路径也必须能看到 ``tuning_warnings``。）
+    """
+    result = failed("kick", reason)
+    result["tuning_source"] = tuning_source_label(t, params)
+    result["tuning_overridden"] = list(effective_overrides(t, params))
+    result["tuning_warnings"] = list(t.warnings)
+    return result
+
+
 class KickSkill(Skill):
     name = "kick"
 
     def run(self, ctx: SkillContext) -> Dict[str, Any]:
-        t = load_tuning("kick", KICK_DEFAULTS)
+        # warn=print：配置写错时现场要看得见（与 carry/dance 同口径）。
+        t = load_tuning("kick", KICK_DEFAULTS, warn=print)
         tuning = t.values
+        def fail(reason: str) -> Dict[str, Any]:
+            """本技能的失败出口：绑好本次的任务卡 params（出处标注要用）。"""
+            return _fail(t, reason, ctx.params)
+
 
         obs, reason = perception_data(ctx, "ball")
         if reason:
-            return failed(self.name, reason)
+            return fail(reason)
 
-        raw_x = obs.get("x_cm", ctx.params.get("x_cm", 0.0))
-        ball_x = as_finite_float(raw_x)
+        # 横向偏移取值顺序：观测 → 任务卡 params → **判失败**。
+        # 不再有 0.0 这个隐含默认：把"没量到"当成"正前方"就是对着空气摆腿，
+        # 与 carry（缺 x_cm 不夹）和 validation.py 的「转换失败返回 None，绝不猜」同口径。
+        obs_x = obs.get("x_cm") if "x_cm" in obs else None
+        ball_x = as_finite_float(obs_x)
         if ball_x is None:
-            return failed(self.name, f"球的横向偏移非法: {raw_x!r}")
+            ball_x = as_finite_float(ctx.params.get("x_cm"))
+        if ball_x is None:
+            return fail(
+                f"球的横向偏移缺失或非法: 观测={obs.get('x_cm')!r} 任务卡={ctx.params.get('x_cm')!r}"
+                "（不把「没量到」当成正前方）",
+            )
         raw_dist = obs.get("distance_cm", ctx.params.get("distance_cm"))
         ball_dist = as_finite_float(raw_dist)
         if ball_dist is None or ball_dist <= 0.0:
-            return failed(self.name, f"球距离非法或缺测距: {raw_dist!r}")
+            return fail(f"球距离非法或缺测距: {raw_dist!r}")
 
         min_dist = _num(ctx, tuning, "min_distance_cm")
         max_dist = _num(ctx, tuning, "max_distance_cm")
         if ball_dist < min_dist or ball_dist > max_dist:
-            return failed(
-                self.name,
-                f"球距离 {ball_dist:g}cm 不在 [{min_dist:g}, {max_dist:g}] cm",
+            return fail(
+                f"球距离 {ball_dist:g}cm 不在 [{min_dist:g}, {max_dist:g}] cm"
             )
 
         deadband = _num(ctx, tuning, "deadband_cm")
@@ -90,7 +115,7 @@ class KickSkill(Skill):
             ctx, "ball", ball_x, deadband, max_iters, step_gain, step_clamp
         )
         if reason:
-            return failed(self.name, reason)
+            return fail(reason)
 
         print(
             f"  [Kick] 球相对偏移 x={ball_x}cm, 距离={ball_dist}cm, "
@@ -108,7 +133,7 @@ class KickSkill(Skill):
             "iterations": iterations,
             "converged": converged,
             "kick": kick_result,
-            "tuning_source": t.source_path.name if t.overridden else "code-defaults",
-            "tuning_overridden": list(t.overridden),
+            "tuning_source": tuning_source_label(t, ctx.params),
+            "tuning_overridden": list(effective_overrides(t, ctx.params)),
             "tuning_warnings": list(t.warnings),
         }
