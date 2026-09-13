@@ -12,6 +12,26 @@
     "file": "horn-trunk_roll.stl"
   },
   {
+    "name": "passive-horn-trunk_roll",
+    "link": "trunk_roll_link",
+    "kind": "horn",
+    "file": "passive-horn-trunk_roll.stl"
+  },
+  {
+    "name": "rear-retainer-washer-trunk_roll",
+    "link": "pelvis",
+    "kind": "fastener",
+    "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+    "file": "rear-retainer-washer-trunk_roll.stl"
+  },
+  {
+    "name": "rear-retainer-screw-trunk_roll",
+    "link": "pelvis",
+    "kind": "fastener",
+    "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+    "file": "rear-retainer-screw-trunk_roll.stl"
+  },
+  {
     "name": "shaft-trunk_roll",
     "link": "trunk_roll_link",
     "kind": "horn",
@@ -196,6 +216,26 @@
     "file": "horn-left_hip_roll.stl"
   },
   {
+    "name": "passive-horn-left_hip_roll",
+    "link": "left_hip_roll_link",
+    "kind": "horn",
+    "file": "passive-horn-left_hip_roll.stl"
+  },
+  {
+    "name": "rear-retainer-washer-left_hip_roll",
+    "link": "pelvis",
+    "kind": "fastener",
+    "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+    "file": "rear-retainer-washer-left_hip_roll.stl"
+  },
+  {
+    "name": "rear-retainer-screw-left_hip_roll",
+    "link": "pelvis",
+    "kind": "fastener",
+    "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+    "file": "rear-retainer-screw-left_hip_roll.stl"
+  },
+  {
     "name": "shaft-left_hip_roll",
     "link": "left_hip_roll_link",
     "kind": "horn",
@@ -350,6 +390,26 @@
     "link": "right_hip_roll_link",
     "kind": "horn",
     "file": "horn-right_hip_roll.stl"
+  },
+  {
+    "name": "passive-horn-right_hip_roll",
+    "link": "right_hip_roll_link",
+    "kind": "horn",
+    "file": "passive-horn-right_hip_roll.stl"
+  },
+  {
+    "name": "rear-retainer-washer-right_hip_roll",
+    "link": "pelvis",
+    "kind": "fastener",
+    "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+    "file": "rear-retainer-washer-right_hip_roll.stl"
+  },
+  {
+    "name": "rear-retainer-screw-right_hip_roll",
+    "link": "pelvis",
+    "kind": "fastener",
+    "spec": "PA3x5 from C018 p6; pan-head envelope and washer are sample-fit items",
+    "file": "rear-retainer-screw-right_hip_roll.stl"
   },
   {
     "name": "shaft-right_hip_roll",
@@ -1671,7 +1731,7 @@
     "name": "leg-left-foot-plate",
     "link": "left_foot",
     "kind": "al",
-    "manufacturing": "laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr",
+    "manufacturing": "laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr",
     "file": "leg-left-foot-plate.stl"
   },
   {
@@ -2666,7 +2726,7 @@
     "name": "leg-right-foot-plate",
     "link": "right_foot",
     "kind": "al",
-    "manufacturing": "laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr",
+    "manufacturing": "laser 6061-T6 3 mm; four M3 countersinks after cutting; deburr",
     "file": "leg-right-foot-plate.stl"
   },
   {
@@ -2958,8 +3018,8 @@
       60.0,
       3.0
     ],
-    "stock_cut_length_mm": 113,
-    "manufacturing": "6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
+    "stock_cut_length_mm": 121,
+    "manufacturing": "6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
     "qualification": "External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier",
     "file": "arm-left-fore-angle.stl"
   },
@@ -3002,60 +3062,130 @@
     "file": "arm-left-gripper-fixed-finger.stl"
   },
   {
+    "name": "arm-left-gripper-pad-support-0",
+    "link": "left_hand",
+    "kind": "al",
+    "manufacturing": "laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr",
+    "file": "arm-left-gripper-pad-support-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-pad-support-1",
+    "link": "left_hand",
+    "kind": "al",
+    "manufacturing": "laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr",
+    "file": "arm-left-gripper-pad-support-1.stl"
+  },
+  {
+    "name": "arm-left-gripper-pad-support-bolt-0",
+    "link": "left_hand",
+    "kind": "fastener",
+    "spec": "M2x10 ISO4762; clamp pad backing stack",
+    "file": "arm-left-gripper-pad-support-bolt-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-pad-support-nut-0",
+    "link": "left_hand",
+    "kind": "fastener",
+    "spec": "M2 ISO4032 nominal AF4 height1.6",
+    "file": "arm-left-gripper-pad-support-nut-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-pad-support-bolt-1",
+    "link": "left_hand",
+    "kind": "fastener",
+    "spec": "M2x10 ISO4762; clamp pad backing stack",
+    "file": "arm-left-gripper-pad-support-bolt-1.stl"
+  },
+  {
+    "name": "arm-left-gripper-pad-support-nut-1",
+    "link": "left_hand",
+    "kind": "fastener",
+    "spec": "M2 ISO4032 nominal AF4 height1.6",
+    "file": "arm-left-gripper-pad-support-nut-1.stl"
+  },
+  {
     "name": "arm-left-gripper-moving-bolt-4.95-4.95",
     "link": "left_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-left-gripper-moving-bolt-4.95-4.95.stl"
   },
   {
     "name": "arm-left-gripper-moving-spacer-4.95-4.95-0",
     "link": "left_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-left-gripper-moving-spacer-4.95-4.95-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-moving-spacer-4.95-4.95-1",
+    "link": "left_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-left-gripper-moving-spacer-4.95-4.95-1.stl"
   },
   {
     "name": "arm-left-gripper-moving-bolt-4.95--4.95",
     "link": "left_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-left-gripper-moving-bolt-4.95--4.95.stl"
   },
   {
     "name": "arm-left-gripper-moving-spacer-4.95--4.95-0",
     "link": "left_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-left-gripper-moving-spacer-4.95--4.95-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-moving-spacer-4.95--4.95-1",
+    "link": "left_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-left-gripper-moving-spacer-4.95--4.95-1.stl"
   },
   {
     "name": "arm-left-gripper-moving-bolt--4.95-4.95",
     "link": "left_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-left-gripper-moving-bolt--4.95-4.95.stl"
   },
   {
     "name": "arm-left-gripper-moving-spacer--4.95-4.95-0",
     "link": "left_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-left-gripper-moving-spacer--4.95-4.95-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-moving-spacer--4.95-4.95-1",
+    "link": "left_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-left-gripper-moving-spacer--4.95-4.95-1.stl"
   },
   {
     "name": "arm-left-gripper-moving-bolt--4.95--4.95",
     "link": "left_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-left-gripper-moving-bolt--4.95--4.95.stl"
   },
   {
     "name": "arm-left-gripper-moving-spacer--4.95--4.95-0",
     "link": "left_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-left-gripper-moving-spacer--4.95--4.95-0.stl"
+  },
+  {
+    "name": "arm-left-gripper-moving-spacer--4.95--4.95-1",
+    "link": "left_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-left-gripper-moving-spacer--4.95--4.95-1.stl"
   },
   {
     "name": "arm-left-gripper-moving-finger",
@@ -3410,8 +3540,8 @@
       60.0,
       3.0
     ],
-    "stock_cut_length_mm": 113,
-    "manufacturing": "6061-T6 stock 60x60x3 angle, saw 113mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
+    "stock_cut_length_mm": 121,
+    "manufacturing": "6061-T6 stock 60x60x3 angle, saw 121mm; trim both open flange profiles and drill; R3 inside corner; no CNC pockets; four DIN7991 countersinks after drilling",
     "qualification": "External clamp: slip, housing distortion and creep require G2 sample; angle section, radius and trim quote must be confirmed by supplier",
     "file": "arm-right-fore-angle.stl"
   },
@@ -3454,60 +3584,130 @@
     "file": "arm-right-gripper-fixed-finger.stl"
   },
   {
+    "name": "arm-right-gripper-pad-support-0",
+    "link": "right_hand",
+    "kind": "al",
+    "manufacturing": "laser 6061-T6 2 mm; finish-drill two 2.2 mm holes; deburr",
+    "file": "arm-right-gripper-pad-support-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-pad-support-1",
+    "link": "right_hand",
+    "kind": "al",
+    "manufacturing": "laser 6061-T6 3 mm; finish-drill two 2.2 mm holes; deburr",
+    "file": "arm-right-gripper-pad-support-1.stl"
+  },
+  {
+    "name": "arm-right-gripper-pad-support-bolt-0",
+    "link": "right_hand",
+    "kind": "fastener",
+    "spec": "M2x10 ISO4762; clamp pad backing stack",
+    "file": "arm-right-gripper-pad-support-bolt-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-pad-support-nut-0",
+    "link": "right_hand",
+    "kind": "fastener",
+    "spec": "M2 ISO4032 nominal AF4 height1.6",
+    "file": "arm-right-gripper-pad-support-nut-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-pad-support-bolt-1",
+    "link": "right_hand",
+    "kind": "fastener",
+    "spec": "M2x10 ISO4762; clamp pad backing stack",
+    "file": "arm-right-gripper-pad-support-bolt-1.stl"
+  },
+  {
+    "name": "arm-right-gripper-pad-support-nut-1",
+    "link": "right_hand",
+    "kind": "fastener",
+    "spec": "M2 ISO4032 nominal AF4 height1.6",
+    "file": "arm-right-gripper-pad-support-nut-1.stl"
+  },
+  {
     "name": "arm-right-gripper-moving-bolt-4.95-4.95",
     "link": "right_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-right-gripper-moving-bolt-4.95-4.95.stl"
   },
   {
     "name": "arm-right-gripper-moving-spacer-4.95-4.95-0",
     "link": "right_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-right-gripper-moving-spacer-4.95-4.95-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-moving-spacer-4.95-4.95-1",
+    "link": "right_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-right-gripper-moving-spacer-4.95-4.95-1.stl"
   },
   {
     "name": "arm-right-gripper-moving-bolt-4.95--4.95",
     "link": "right_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-right-gripper-moving-bolt-4.95--4.95.stl"
   },
   {
     "name": "arm-right-gripper-moving-spacer-4.95--4.95-0",
     "link": "right_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-right-gripper-moving-spacer-4.95--4.95-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-moving-spacer-4.95--4.95-1",
+    "link": "right_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-right-gripper-moving-spacer-4.95--4.95-1.stl"
   },
   {
     "name": "arm-right-gripper-moving-bolt--4.95-4.95",
     "link": "right_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-right-gripper-moving-bolt--4.95-4.95.stl"
   },
   {
     "name": "arm-right-gripper-moving-spacer--4.95-4.95-0",
     "link": "right_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-right-gripper-moving-spacer--4.95-4.95-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-moving-spacer--4.95-4.95-1",
+    "link": "right_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-right-gripper-moving-spacer--4.95-4.95-1.stl"
   },
   {
     "name": "arm-right-gripper-moving-bolt--4.95--4.95",
     "link": "right_grip",
     "kind": "fastener",
-    "spec": "M3x6 ISO4762; nominal thread",
+    "spec": "M3x16 ISO4762; nominal thread",
     "file": "arm-right-gripper-moving-bolt--4.95--4.95.stl"
   },
   {
     "name": "arm-right-gripper-moving-spacer--4.95--4.95-0",
     "link": "right_grip",
     "kind": "al",
-    "spec": "M3 plain spacer/shim OD5 ID3.2 length2mm",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length10mm",
     "file": "arm-right-gripper-moving-spacer--4.95--4.95-0.stl"
+  },
+  {
+    "name": "arm-right-gripper-moving-spacer--4.95--4.95-1",
+    "link": "right_grip",
+    "kind": "fastener",
+    "spec": "M3 plain spacer/shim OD5 ID3.2 length1mm",
+    "file": "arm-right-gripper-moving-spacer--4.95--4.95-1.stl"
   },
   {
     "name": "arm-right-gripper-moving-finger",
@@ -3784,7 +3984,7 @@
     "name": "pelvis-output-adapter-left",
     "link": "left_hip_roll_link",
     "kind": "al",
-    "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+    "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets",
     "stock_cut_length_mm": 61.0,
     "file": "pelvis-output-adapter-left.stl"
   },
@@ -3795,36 +3995,6 @@
     "manufacturing": "laser 6061-T6 1.5 mm; deburr",
     "qualification": "case clamp preload, slip and creep test required",
     "file": "case-left-pitch-jaw-rear.stl"
-  },
-  {
-    "name": "case-left-pitch-bolt-0",
-    "link": "left_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3x45 ISO4762",
-    "connection": "external clamp; sample qualification required",
-    "file": "case-left-pitch-bolt-0.stl"
-  },
-  {
-    "name": "case-left-pitch-nut-0",
-    "link": "left_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3 ISO4032; retention method to qualify",
-    "file": "case-left-pitch-nut-0.stl"
-  },
-  {
-    "name": "case-left-pitch-bolt-1",
-    "link": "left_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3x45 ISO4762",
-    "connection": "external clamp; sample qualification required",
-    "file": "case-left-pitch-bolt-1.stl"
-  },
-  {
-    "name": "case-left-pitch-nut-1",
-    "link": "left_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3 ISO4032; retention method to qualify",
-    "file": "case-left-pitch-nut-1.stl"
   },
   {
     "name": "adapter-output-screw-left-0",
@@ -3858,7 +4028,7 @@
     "name": "pelvis-output-adapter-right",
     "link": "right_hip_roll_link",
     "kind": "al",
-    "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+    "manufacturing": "6061-T6 stock angle 60x40x3, saw length 61; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; round PCD pad R10; bridge width 12; side profile R1; NO CNC pockets",
     "stock_cut_length_mm": 61.0,
     "file": "pelvis-output-adapter-right.stl"
   },
@@ -3869,36 +4039,6 @@
     "manufacturing": "laser 6061-T6 1.5 mm; deburr",
     "qualification": "case clamp preload, slip and creep test required",
     "file": "case-right-pitch-jaw-rear.stl"
-  },
-  {
-    "name": "case-right-pitch-bolt-0",
-    "link": "right_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3x45 ISO4762",
-    "connection": "external clamp; sample qualification required",
-    "file": "case-right-pitch-bolt-0.stl"
-  },
-  {
-    "name": "case-right-pitch-nut-0",
-    "link": "right_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3 ISO4032; retention method to qualify",
-    "file": "case-right-pitch-nut-0.stl"
-  },
-  {
-    "name": "case-right-pitch-bolt-1",
-    "link": "right_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3x45 ISO4762",
-    "connection": "external clamp; sample qualification required",
-    "file": "case-right-pitch-bolt-1.stl"
-  },
-  {
-    "name": "case-right-pitch-nut-1",
-    "link": "right_hip_roll_link",
-    "kind": "fastener",
-    "spec": "M3 ISO4032; retention method to qualify",
-    "file": "case-right-pitch-nut-1.stl"
   },
   {
     "name": "adapter-output-screw-right-0",
@@ -3932,7 +4072,7 @@
     "name": "pelvis-output-adapter-trunk",
     "link": "trunk_roll_link",
     "kind": "al",
-    "manufacturing": "6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; NO CNC pockets",
+    "manufacturing": "6061-T6 stock angle 60x40x3, saw length 54; trim flange and open side profile; 6x3.2 and 1x6.6 drilled; inner R<=3; remote profile R1; NO CNC pockets",
     "stock_cut_length_mm": 54.0,
     "file": "pelvis-output-adapter-trunk.stl"
   },
@@ -3943,21 +4083,6 @@
     "manufacturing": "laser 6061-T6 1.5 mm; deburr",
     "qualification": "case clamp preload, slip and creep test required",
     "file": "case-trunk-pitch-jaw-rear.stl"
-  },
-  {
-    "name": "case-trunk-pitch-bolt-0",
-    "link": "trunk_roll_link",
-    "kind": "fastener",
-    "spec": "M3x45 ISO4762",
-    "connection": "external clamp; sample qualification required",
-    "file": "case-trunk-pitch-bolt-0.stl"
-  },
-  {
-    "name": "case-trunk-pitch-nut-0",
-    "link": "trunk_roll_link",
-    "kind": "fastener",
-    "spec": "M3 ISO4032; retention method to qualify",
-    "file": "case-trunk-pitch-nut-0.stl"
   },
   {
     "name": "case-trunk-pitch-bolt-1",
@@ -4001,6 +4126,501 @@
     "kind": "fastener",
     "spec": "M3x6; 3 mm horn engagement",
     "file": "adapter-output-screw-trunk-3.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer--4.95--4.95-0",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-left-pcd-spacer--4.95--4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer--4.95--4.95-1",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-left-pcd-spacer--4.95--4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-head-washer--4.95--4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-left-pcd-head-washer--4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-bolt--4.95--4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-left-pcd-bolt--4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer--4.95-4.95-0",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-left-pcd-spacer--4.95-4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer--4.95-4.95-1",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-left-pcd-spacer--4.95-4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-head-washer--4.95-4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-left-pcd-head-washer--4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-bolt--4.95-4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-left-pcd-bolt--4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer-4.95--4.95-0",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-left-pcd-spacer-4.95--4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer-4.95--4.95-1",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-left-pcd-spacer-4.95--4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-head-washer-4.95--4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-left-pcd-head-washer-4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-bolt-4.95--4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-left-pcd-bolt-4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer-4.95-4.95-0",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-left-pcd-spacer-4.95-4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-spacer-4.95-4.95-1",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-left-pcd-spacer-4.95-4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-head-washer-4.95-4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-left-pcd-head-washer-4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-pcd-bolt-4.95-4.95",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-left-pcd-bolt-4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-left-case-spacer-0",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer9",
+    "file": "hip-dual-left-case-spacer-0.stl"
+  },
+  {
+    "name": "hip-dual-left-case-bolt-0",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-left-pitch-bolt-0",
+    "spec": "M3x55 through paired front/rear support stack",
+    "file": "hip-dual-left-case-bolt-0.stl"
+  },
+  {
+    "name": "hip-dual-left-case-nut-0",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-left-pitch-nut-0",
+    "spec": "M3 ISO4032",
+    "file": "hip-dual-left-case-nut-0.stl"
+  },
+  {
+    "name": "hip-dual-left-case-spacer-1",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer9",
+    "file": "hip-dual-left-case-spacer-1.stl"
+  },
+  {
+    "name": "hip-dual-left-case-bolt-1",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-left-pitch-bolt-1",
+    "spec": "M3x55 through paired front/rear support stack",
+    "file": "hip-dual-left-case-bolt-1.stl"
+  },
+  {
+    "name": "hip-dual-left-case-nut-1",
+    "link": "left_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-left-pitch-nut-1",
+    "spec": "M3 ISO4032",
+    "file": "hip-dual-left-case-nut-1.stl"
+  },
+  {
+    "name": "hip-dual-left-rear-angle",
+    "link": "left_hip_roll_link",
+    "kind": "al",
+    "manufacturing": "3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section",
+    "qualification": "Rear bearing and clamp preload still require sample",
+    "file": "hip-dual-left-rear-angle.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer--4.95--4.95-0",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-right-pcd-spacer--4.95--4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer--4.95--4.95-1",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-right-pcd-spacer--4.95--4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-head-washer--4.95--4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-right-pcd-head-washer--4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-bolt--4.95--4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-right-pcd-bolt--4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer--4.95-4.95-0",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-right-pcd-spacer--4.95-4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer--4.95-4.95-1",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-right-pcd-spacer--4.95-4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-head-washer--4.95-4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-right-pcd-head-washer--4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-bolt--4.95-4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-right-pcd-bolt--4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer-4.95--4.95-0",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-right-pcd-spacer-4.95--4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer-4.95--4.95-1",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-right-pcd-spacer-4.95--4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-head-washer-4.95--4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-right-pcd-head-washer-4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-bolt-4.95--4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-right-pcd-bolt-4.95--4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer-4.95-4.95-0",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "hip-dual-right-pcd-spacer-4.95-4.95-0.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-spacer-4.95-4.95-1",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "hip-dual-right-pcd-spacer-4.95-4.95-1.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-head-washer-4.95-4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "hip-dual-right-pcd-head-washer-4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-pcd-bolt-4.95-4.95",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; nominal 3 mm projection through rear disc flange, sample fit required",
+    "file": "hip-dual-right-pcd-bolt-4.95-4.95.stl"
+  },
+  {
+    "name": "hip-dual-right-case-spacer-0",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer9",
+    "file": "hip-dual-right-case-spacer-0.stl"
+  },
+  {
+    "name": "hip-dual-right-case-bolt-0",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-right-pitch-bolt-0",
+    "spec": "M3x55 through paired front/rear support stack",
+    "file": "hip-dual-right-case-bolt-0.stl"
+  },
+  {
+    "name": "hip-dual-right-case-nut-0",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-right-pitch-nut-0",
+    "spec": "M3 ISO4032",
+    "file": "hip-dual-right-case-nut-0.stl"
+  },
+  {
+    "name": "hip-dual-right-case-spacer-1",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer9",
+    "file": "hip-dual-right-case-spacer-1.stl"
+  },
+  {
+    "name": "hip-dual-right-case-bolt-1",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-right-pitch-bolt-1",
+    "spec": "M3x55 through paired front/rear support stack",
+    "file": "hip-dual-right-case-bolt-1.stl"
+  },
+  {
+    "name": "hip-dual-right-case-nut-1",
+    "link": "right_hip_roll_link",
+    "kind": "fastener",
+    "replaces": "case-right-pitch-nut-1",
+    "spec": "M3 ISO4032",
+    "file": "hip-dual-right-case-nut-1.stl"
+  },
+  {
+    "name": "hip-dual-right-rear-angle",
+    "link": "right_hip_roll_link",
+    "kind": "al",
+    "manufacturing": "3 mm stock angle, open trim, drill PCD14 and two clamp holes; insideR3; two D7.4 flat-bottom spotfaces to cheek inside plane for OD7 spacers; qualify stock section",
+    "qualification": "Rear bearing and clamp preload still require sample",
+    "file": "hip-dual-right-rear-angle.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer--4.95--4.95-0",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "waist-dual-pcd-spacer--4.95--4.95-0.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer--4.95--4.95-1",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "waist-dual-pcd-spacer--4.95--4.95-1.stl"
+  },
+  {
+    "name": "waist-dual-pcd-washer--4.95--4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "waist-dual-pcd-washer--4.95--4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-screw--4.95--4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+    "file": "waist-dual-pcd-screw--4.95--4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer--4.95-4.95-0",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "waist-dual-pcd-spacer--4.95-4.95-0.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer--4.95-4.95-1",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "waist-dual-pcd-spacer--4.95-4.95-1.stl"
+  },
+  {
+    "name": "waist-dual-pcd-washer--4.95-4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "waist-dual-pcd-washer--4.95-4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-screw--4.95-4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+    "file": "waist-dual-pcd-screw--4.95-4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer-4.95--4.95-0",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "waist-dual-pcd-spacer-4.95--4.95-0.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer-4.95--4.95-1",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "waist-dual-pcd-spacer-4.95--4.95-1.stl"
+  },
+  {
+    "name": "waist-dual-pcd-washer-4.95--4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "waist-dual-pcd-washer-4.95--4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-screw-4.95--4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+    "file": "waist-dual-pcd-screw-4.95--4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer-4.95-4.95-0",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 5 mm",
+    "file": "waist-dual-pcd-spacer-4.95-4.95-0.stl"
+  },
+  {
+    "name": "waist-dual-pcd-spacer-4.95-4.95-1",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD5 ID3.2 spacer 0.5 mm",
+    "file": "waist-dual-pcd-spacer-4.95-4.95-1.stl"
+  },
+  {
+    "name": "waist-dual-pcd-washer-4.95-4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3 washer 0.5 mm",
+    "file": "waist-dual-pcd-washer-4.95-4.95.stl"
+  },
+  {
+    "name": "waist-dual-pcd-screw-4.95-4.95",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "spec": "M3x12; 3 mm nominal projection through rear flange; qualify sample thread fit",
+    "file": "waist-dual-pcd-screw-4.95-4.95.stl"
+  },
+  {
+    "name": "waist-dual-rear-angle",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "manufacturing": "Saw/drill 75x50x3 stock angle, 55 mm axial blank; open trim, PCD14, clamp hole; retain inside R3. Verify supplied corner radius before cutting.",
+    "stock_section_mm": [
+      75,
+      50,
+      3
+    ],
+    "stock_cut_length_mm": 55,
+    "qualification": "Stock availability, material certificate, bearing rating and clamp preload require qualification",
+    "file": "waist-dual-rear-angle.stl"
+  },
+  {
+    "name": "waist-dual-clamp-spacer-0",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer 10 mm",
+    "file": "waist-dual-clamp-spacer-0.stl"
+  },
+  {
+    "name": "waist-dual-clamp-spacer-1",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer 4 mm",
+    "file": "waist-dual-clamp-spacer-1.stl"
+  },
+  {
+    "name": "waist-dual-clamp-spacer-2",
+    "link": "trunk_roll_link",
+    "kind": "al",
+    "spec": "M3 OD7 ID3.2 spacer 0.5 mm",
+    "file": "waist-dual-clamp-spacer-2.stl"
+  },
+  {
+    "name": "waist-dual-clamp-replacement-bolt",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "replaces": "case-trunk-pitch-bolt-0",
+    "spec": "M3x60; rear support through bolt",
+    "file": "waist-dual-clamp-replacement-bolt.stl"
+  },
+  {
+    "name": "waist-dual-clamp-replacement-nut",
+    "link": "trunk_roll_link",
+    "kind": "fastener",
+    "replaces": "case-trunk-pitch-nut-0",
+    "spec": "M3 ISO4032, relocated behind new rear angle",
+    "file": "waist-dual-clamp-replacement-nut.stl"
   },
   {
     "name": "torso-output-front",
@@ -5230,6 +5850,16 @@
     "source": "Pi4 official mechanical drawing: 85x56, pitch58x49, holes2.7; mass52g is an allocation",
     "purchased_assembly": "sbc",
     "file": "sbc.stl"
+  },
+  {
+    "name": "vl53l1x",
+    "link": "head",
+    "kind": "pcb",
+    "sku": "VL53L1X carrier (20x24 mm)",
+    "purchased_mass_g": 4,
+    "source": "generic carrier envelope; connector/hole pattern pending vendor selection",
+    "mounting": "adhesive or printed clip reservation; no unverified holes",
+    "file": "vl53l1x.stl"
   },
   {
     "name": "sbc-component-000",
