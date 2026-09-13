@@ -2,7 +2,7 @@
 
 **这是一次 URDF 导入 / 运动学冒烟测试，不是 G4，不是 5/5 任务卡验证，不是真机测试。**
 
-This is an import/kinematics smoke test, **NOT G4**, **NOT 5/5 contest-task verification**, **NOT a physical robot test**. T1–T5 were not run. The 22-DOF `webots/worlds/atri_22dof.wbt` controller and `software/atri` were not modified.
+This is an import/kinematics smoke test of the **CAD-mesh** world, **NOT G4**, **NOT contest-task verification**, **NOT a physical robot test**. The mesh import used `atri_v2_import_check`, not `atri_controller`. Frozen 22-DOF CAD remains `webots/worlds/atri_22dof.wbt`. Software later moved to 20 DOF; default kinematic world is `webots/worlds/atri_v2.wbt`.
 
 生成器：`design/v2/webots_v2_import.py`（自写 URDF→WBT，未安装 `urdf2webots`）。  
 参考：本仓库 `webots/tools/generate_atri_world.py`（嵌套 HingeJoint、`dampingConstant`、`gravity` 为 SFFloat、禁止 EXTERNPROTO）以及 cyberbotics/urdf2webots 的 `endPoint.translation = joint origin`、`anchor = origin`、Mesh+scale 约定。
@@ -97,7 +97,7 @@ torso STL 约 427k 三角（21 MB）。`--no-rendering` 冒烟能跑；GUI / 带
 
 - **降面**：给仿真一份 &lt;20k 三角的凸包或抽稀网格；现在是审查用 CAD 网格。
 - **重力 + 地面 + 接触**：本次 `gravity 0`、无 Plane、碰撞是 AABB 盒子。不能当静立/扭矩/走路证据。
-- **22 DOF 控制器 / 任务卡**：电机名是 v2 URDF 名，没有 `hip_yaw`。直接套 `atri_controller` + `joint_mapping.json` 会按 22 关节绑，**不要**拿这次冒烟当任务闭环。
+- **22 DOF 控制器 / 任务卡**：已改为 20 DOF。默认运动学联调世界是 `webots/worlds/atri_v2.wbt` + `atri_controller`。CAD 网格导入世界仍是 `design/v2/out/webots/worlds/atri_v2.wbt`（`atri_v2_import_check`）。**不要**把运动学 5/5 当 G4 或真机通过。
 - **传感器**：无相机、无 VL53 DistanceSensor、无 IMU。T2/T3 对位未测。
 - **惯量真值**：要 CAD 质量属性或实测再回填。
 - **自碰撞 / 网格碰撞**：`selfCollision FALSE`；密网格不宜直接当 `boundingObject`。
@@ -106,6 +106,18 @@ torso STL 约 427k 三角（21 MB）。`--no-rendering` 冒烟能跑；GUI / 带
 ## 明确不是什么
 
 - **不是 G4。**
-- **不是 5/5 任务验证，没有跑 T1–T5。**
+- **CAD 网格导入没有跑 T1–T5。** 盒体运动学世界 `webots/worlds/atri_v2.wbt` 上 `atri_controller` 能把任务卡流程跑完，那是零重力关节下发/回读，**不是赛题验证**。
 - **不是真机、不是舵机总线、不是赛场。**
-- 只证明：这份 20 轴 URDF 能进 Webots R2025a，关节名/轴/零位/质量能对上，夹爪 solid 在，hip_yaw 不在，头 yaw 能转过一小角。
+- 网格导入只证明：这份 20 轴 URDF 能进 Webots R2025a，关节名/轴/零位/质量能对上，夹爪 solid 在，hip_yaw 不在，头 yaw 能转过一小角。
+
+## 默认控制器运动学联调（盒体世界）
+
+默认入口：`webots/worlds/atri_v2.wbt`（`generate_atri_world.py` 从 v2 URDF + `profile.py` 生成），控制器 `atri_controller`，20 电机，重力 0。
+
+```
+bash webots/tools/run_webots_batch.sh \
+  -World webots/worlds/atri_v2.wbt \
+  -Report design/v2/out/webots/logs/v2-controller-report.json
+```
+
+报告见 `design/v2/out/webots/logs/v2-controller-report.json`：`passed` 5/5，`bound_joints` 20，`moved_joints` 20。这是运动学联调，不是 G4，不是真机。

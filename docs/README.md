@@ -12,4 +12,4 @@ docs/
 
 A 路线铝夹层图纸/BOM/验证：`design/v2/`（出图 `PYTHONPATH=design python3 -m v2.generate`）。
 
-`design/v2/` 是当前 main 的 A 路线机构（20 DOF、无 hip_yaw）；`software/atri/`、`webots/` 与旧 `design/cad/` 属冻结的现机 22 DOF 线，未迁移到 v2；`docs/process/` 为历史日志，不回改。
+`design/v2/` 是当前 main 的 A 路线机构（20 DOF、无 hip_yaw）；`software/atri/` 与默认 `webots/worlds/atri_v2.wbt` 已按 20 DOF 适配。旧 `design/cad/`、`design/atri.urdf`、`webots/worlds/atri_22dof.wbt` 仍是冻结的现机 22 DOF 线。`docs/process/` 为历史日志，不回改。
