@@ -1,0 +1,431 @@
+{
+  "passed": 1,
+  "total": 1,
+  "bound_joints": 20,
+  "mapped_joints": 20,
+  "binding_ok": true,
+  "mapping_problems": [],
+  "motion_ok": true,
+  "expected_joints": 20,
+  "unbound_joints": [],
+  "mapping": "joint_mapping.json",
+  "basic_time_step_ms": 8,
+  "velocity_rad_s": 2.0,
+  "max_torque_nm": null,
+  "torque_limited_joints": 0,
+  "sim_seconds": 12.0,
+  "sim_steps": 1500,
+  "wall_seconds": 0.447,
+  "simulation_alive": true,
+  "moved_joints": 2,
+  "joint_travel_deg": {
+    "head_yaw": 0.99,
+    "head_pitch": 0.96,
+    "trunk_roll": 0.93,
+    "trunk_pitch": 0.92,
+    "left_hip_roll": 4.67,
+    "left_hip_pitch": 0.94,
+    "left_knee_pitch": 0.93,
+    "left_ankle_pitch": 0.94,
+    "right_hip_roll": 4.58,
+    "right_hip_pitch": 0.94,
+    "right_knee_pitch": 0.93,
+    "right_ankle_pitch": 0.94,
+    "left_shoulder_pitch": 0.93,
+    "left_shoulder_roll": 0.93,
+    "left_elbow_pitch": 0.93,
+    "left_gripper": 0.95,
+    "right_shoulder_pitch": 0.93,
+    "right_shoulder_roll": 0.93,
+    "right_elbow_pitch": 0.93,
+    "right_gripper": 0.93
+  },
+  "pelvis_z_m": {
+    "n": 1251,
+    "first": 0.1975,
+    "last": 0.1958,
+    "min": 0.1911,
+    "max": 0.2047,
+    "xy_drift_m": 0.5274
+  },
+  "imu_tilt_deg": {
+    "n": 1251,
+    "roll_max_abs": 8.87,
+    "pitch_max_abs": 11.46
+  },
+  "mode": "stand",
+  "stand": {
+    "ok": true,
+    "reason": null,
+    "n": 1251,
+    "z_min": 0.1911,
+    "z_max": 0.2047,
+    "tilt_peak_deg": 11.46
+  },
+  "stand_trace": [
+    {
+      "t": 2.0,
+      "z": 0.1975,
+      "roll_deg": -3.4,
+      "pitch_deg": -7.52
+    },
+    {
+      "t": 2.2,
+      "z": 0.1991,
+      "roll_deg": -0.06,
+      "pitch_deg": -6.54
+    },
+    {
+      "t": 2.4,
+      "z": 0.1927,
+      "roll_deg": 2.05,
+      "pitch_deg": -8.5
+    },
+    {
+      "t": 2.6,
+      "z": 0.1971,
+      "roll_deg": 2.28,
+      "pitch_deg": -5.05
+    },
+    {
+      "t": 2.8,
+      "z": 0.1994,
+      "roll_deg": 1.4,
+      "pitch_deg": -4.6
+    },
+    {
+      "t": 3.0,
+      "z": 0.1936,
+      "roll_deg": -0.44,
+      "pitch_deg": -5.5
+    },
+    {
+      "t": 3.2,
+      "z": 0.1969,
+      "roll_deg": 1.72,
+      "pitch_deg": -8.33
+    },
+    {
+      "t": 3.4,
+      "z": 0.2014,
+      "roll_deg": 0.23,
+      "pitch_deg": -7.74
+    },
+    {
+      "t": 3.6,
+      "z": 0.2022,
+      "roll_deg": -6.31,
+      "pitch_deg": -8.55
+    },
+    {
+      "t": 3.8,
+      "z": 0.1987,
+      "roll_deg": -0.78,
+      "pitch_deg": -8.42
+    },
+    {
+      "t": 4.0,
+      "z": 0.1972,
+      "roll_deg": 0.4,
+      "pitch_deg": -9.13
+    },
+    {
+      "t": 4.2,
+      "z": 0.1961,
+      "roll_deg": 3.82,
+      "pitch_deg": -8.7
+    },
+    {
+      "t": 4.4,
+      "z": 0.1957,
+      "roll_deg": -3.21,
+      "pitch_deg": -6.28
+    },
+    {
+      "t": 4.6,
+      "z": 0.1966,
+      "roll_deg": 1.71,
+      "pitch_deg": -6.34
+    },
+    {
+      "t": 4.8,
+      "z": 0.1979,
+      "roll_deg": -5.38,
+      "pitch_deg": -9.26
+    },
+    {
+      "t": 5.0,
+      "z": 0.1952,
+      "roll_deg": -0.55,
+      "pitch_deg": -4.7
+    },
+    {
+      "t": 5.2,
+      "z": 0.1948,
+      "roll_deg": -2.0,
+      "pitch_deg": -6.83
+    },
+    {
+      "t": 5.4,
+      "z": 0.192,
+      "roll_deg": -1.2,
+      "pitch_deg": -5.71
+    },
+    {
+      "t": 5.6,
+      "z": 0.1997,
+      "roll_deg": 1.5,
+      "pitch_deg": -9.05
+    },
+    {
+      "t": 5.8,
+      "z": 0.1967,
+      "roll_deg": 2.05,
+      "pitch_deg": -5.99
+    },
+    {
+      "t": 6.0,
+      "z": 0.1963,
+      "roll_deg": -1.61,
+      "pitch_deg": -9.97
+    },
+    {
+      "t": 6.2,
+      "z": 0.1995,
+      "roll_deg": 2.11,
+      "pitch_deg": -5.79
+    },
+    {
+      "t": 6.4,
+      "z": 0.197,
+      "roll_deg": -1.01,
+      "pitch_deg": -5.63
+    },
+    {
+      "t": 6.6,
+      "z": 0.1988,
+      "roll_deg": 1.31,
+      "pitch_deg": -5.7
+    },
+    {
+      "t": 6.8,
+      "z": 0.1998,
+      "roll_deg": -4.69,
+      "pitch_deg": -7.18
+    },
+    {
+      "t": 7.0,
+      "z": 0.2007,
+      "roll_deg": -2.72,
+      "pitch_deg": -6.05
+    },
+    {
+      "t": 7.2,
+      "z": 0.194,
+      "roll_deg": 3.11,
+      "pitch_deg": -4.6
+    },
+    {
+      "t": 7.4,
+      "z": 0.1993,
+      "roll_deg": 1.25,
+      "pitch_deg": -7.62
+    },
+    {
+      "t": 7.6,
+      "z": 0.1991,
+      "roll_deg": 1.37,
+      "pitch_deg": -4.15
+    },
+    {
+      "t": 7.8,
+      "z": 0.1978,
+      "roll_deg": 1.39,
+      "pitch_deg": -7.2
+    },
+    {
+      "t": 8.0,
+      "z": 0.2003,
+      "roll_deg": -5.68,
+      "pitch_deg": -6.52
+    },
+    {
+      "t": 8.2,
+      "z": 0.2042,
+      "roll_deg": -5.05,
+      "pitch_deg": -8.46
+    },
+    {
+      "t": 8.4,
+      "z": 0.2009,
+      "roll_deg": -6.32,
+      "pitch_deg": -5.2
+    },
+    {
+      "t": 8.6,
+      "z": 0.1968,
+      "roll_deg": 0.35,
+      "pitch_deg": -3.71
+    },
+    {
+      "t": 8.8,
+      "z": 0.1981,
+      "roll_deg": -0.3,
+      "pitch_deg": -7.59
+    },
+    {
+      "t": 9.0,
+      "z": 0.1997,
+      "roll_deg": -0.11,
+      "pitch_deg": -6.5
+    },
+    {
+      "t": 9.2,
+      "z": 0.1973,
+      "roll_deg": -0.04,
+      "pitch_deg": -6.48
+    },
+    {
+      "t": 9.4,
+      "z": 0.2022,
+      "roll_deg": -6.91,
+      "pitch_deg": -7.45
+    },
+    {
+      "t": 9.6,
+      "z": 0.196,
+      "roll_deg": -4.02,
+      "pitch_deg": -8.17
+    },
+    {
+      "t": 9.8,
+      "z": 0.1984,
+      "roll_deg": 4.96,
+      "pitch_deg": -10.19
+    },
+    {
+      "t": 10.0,
+      "z": 0.1988,
+      "roll_deg": 2.32,
+      "pitch_deg": -6.41
+    },
+    {
+      "t": 10.2,
+      "z": 0.1991,
+      "roll_deg": -7.1,
+      "pitch_deg": -4.69
+    },
+    {
+      "t": 10.4,
+      "z": 0.2006,
+      "roll_deg": -5.19,
+      "pitch_deg": -5.19
+    },
+    {
+      "t": 10.6,
+      "z": 0.1997,
+      "roll_deg": 5.42,
+      "pitch_deg": -6.52
+    },
+    {
+      "t": 10.8,
+      "z": 0.1995,
+      "roll_deg": 1.48,
+      "pitch_deg": -7.6
+    },
+    {
+      "t": 11.0,
+      "z": 0.198,
+      "roll_deg": -0.29,
+      "pitch_deg": -5.49
+    },
+    {
+      "t": 11.2,
+      "z": 0.1999,
+      "roll_deg": 2.09,
+      "pitch_deg": -7.59
+    },
+    {
+      "t": 11.4,
+      "z": 0.2009,
+      "roll_deg": -2.13,
+      "pitch_deg": -2.5
+    },
+    {
+      "t": 11.6,
+      "z": 0.1934,
+      "roll_deg": 0.12,
+      "pitch_deg": -10.4
+    },
+    {
+      "t": 11.8,
+      "z": 0.203,
+      "roll_deg": -6.11,
+      "pitch_deg": -7.02
+    },
+    {
+      "t": 12.0,
+      "z": 0.1958,
+      "roll_deg": 2.45,
+      "pitch_deg": -5.46
+    },
+    {
+      "t": 12.0,
+      "z": 0.1958,
+      "roll_deg": 2.45,
+      "pitch_deg": -5.46
+    }
+  ],
+  "pose_first": {
+    "head_yaw": -0.88,
+    "head_pitch": 0.71,
+    "trunk_roll": 0.54,
+    "trunk_pitch": 0.02,
+    "left_hip_roll": 4.69,
+    "left_hip_pitch": -6.04,
+    "left_knee_pitch": 19.23,
+    "left_ankle_pitch": -5.95,
+    "right_hip_roll": -3.68,
+    "right_hip_pitch": -5.95,
+    "right_knee_pitch": 19.23,
+    "right_ankle_pitch": -5.94,
+    "left_shoulder_pitch": -0.63,
+    "left_shoulder_roll": 4.41,
+    "left_elbow_pitch": -3.66,
+    "left_gripper": 4.56,
+    "right_shoulder_pitch": 0.63,
+    "right_shoulder_roll": -4.42,
+    "right_elbow_pitch": -3.66,
+    "right_gripper": 4.58
+  },
+  "pose_last": {
+    "head_yaw": -0.9,
+    "head_pitch": 0.73,
+    "trunk_roll": 0.53,
+    "trunk_pitch": 0.05,
+    "left_hip_roll": 4.82,
+    "left_hip_pitch": -6.06,
+    "left_knee_pitch": 19.22,
+    "left_ankle_pitch": -5.96,
+    "right_hip_roll": -6.44,
+    "right_hip_pitch": -5.93,
+    "right_knee_pitch": 19.25,
+    "right_ankle_pitch": -5.92,
+    "left_shoulder_pitch": -0.62,
+    "left_shoulder_roll": 4.4,
+    "left_elbow_pitch": -3.67,
+    "left_gripper": 4.52,
+    "right_shoulder_pitch": 0.62,
+    "right_shoulder_roll": -4.41,
+    "right_elbow_pitch": -3.66,
+    "right_gripper": 4.57
+  },
+  "tasks": [
+    {
+      "task_id": "STAND",
+      "ok": true,
+      "history": [],
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "passed": 5,
+  "total": 5,
+  "bound_joints": 20,
+  "mapped_joints": 20,
+  "binding_ok": true,
+  "mapping_problems": [],
+  "motion_ok": true,
+  "expected_joints": 20,
+  "unbound_joints": [],
+  "mapping": "joint_mapping.json",
+  "basic_time_step_ms": 32,
+  "velocity_rad_s": 2.0,
+  "max_torque_nm": null,
+  "torque_limited_joints": 0,
+  "sim_seconds": 12.72,
+  "sim_steps": 397,
+  "wall_seconds": 0.124,
+  "simulation_alive": true,
+  "moved_joints": 20,
+  "joint_travel_deg": {
+    "head_yaw": 31.79,
+    "head_pitch": 12.99,
+    "trunk_roll": 6.61,
+    "trunk_pitch": 2.79,
+    "left_hip_roll": 29.64,
+    "left_hip_pitch": 13.96,
+    "left_knee_pitch": 30.76,
+    "left_ankle_pitch": 5.58,
+    "right_hip_roll": 34.84,
+    "right_hip_pitch": 30.22,
+    "right_knee_pitch": 26.51,
+    "right_ankle_pitch": 14.22,
+    "left_shoulder_pitch": 45.17,
+    "left_shoulder_roll": 35.51,
+    "left_elbow_pitch": 25.0,
+    "left_gripper": 35.59,
+    "right_shoulder_pitch": 46.61,
+    "right_shoulder_roll": 35.71,
+    "right_elbow_pitch": 25.0,
+    "right_gripper": 35.52
+  },
+  "pelvis_z_m": {
+    "n": 0,
+    "first": null,
+    "last": null,
+    "min": null,
+    "max": null,
+    "xy_drift_m": null
+  },
+  "imu_tilt_deg": {
+    "n": 0,
+    "roll_max_abs": null,
+    "pitch_max_abs": null
+  },
+  "mode": "tasks",
+  "stand": null,
+  "stand_trace": [],
+  "pose_first": null,
+  "pose_last": null,
+  "tasks": [
+    {
+      "task_id": "T-01",
+      "ok": true,
+      "history": [
+        "STANDBY",
+        "ENTERING",
+        "EXECUTING",
+        "FEEDBACK",
+        "DONE"
+      ],
+      "error": null
+    },
+    {
+      "task_id": "T-02",
+      "ok": true,
+      "history": [
+        "STANDBY",
+        "ENTERING",
+        "EXECUTING",
+        "FEEDBACK",
+        "DONE"
+      ],
+      "error": null
+    },
+    {
+      "task_id": "T-03",
+      "ok": true,
+      "history": [
+        "STANDBY",
+        "ENTERING",
+        "EXECUTING",
+        "FEEDBACK",
+        "DONE"
+      ],
+      "error": null
+    },
+    {
+      "task_id": "T-04",
+      "ok": true,
+      "history": [
+        "STANDBY",
+        "ENTERING",
+        "EXECUTING",
+        "FEEDBACK",
+        "DONE"
+      ],
+      "error": null
+    },
+    {
+      "task_id": "T-05",
+      "ok": true,
+      "history": [
+        "STANDBY",
+        "ENTERING",
+        "EXECUTING",
+        "FEEDBACK",
+        "DONE"
+      ],
+      "error": null
+    }
+  ]
+}
