@@ -5,12 +5,12 @@
 
 ---
 
-## 1. `design/cad/vendor/so-arm100/` —— SO-ARM100 开源机械臂几何
+## 1. `archive/v1-22dof/design/cad/vendor/so-arm100/` —— SO-ARM100 开源机械臂几何
 
 - **来源**：TheRobotStudio / SO-ARM100，<https://github.com/TheRobotStudio/SO-ARM100>
 - **许可**：Apache License, Version 2.0；许可副本见
-  `design/cad/vendor/LICENSE-Apache-2.0.txt`
-- **用途**：舵机接口几何与整机装配配合的一手实测证据；`design/cad/` 下
+  `archive/v1-22dof/design/cad/vendor/LICENSE-Apache-2.0.txt`
+- **用途**：舵机接口几何与整机装配配合的一手实测证据；备份树 `design/cad/` 下
   `measure_vendor.py`、`probe_assembly.py`、`check_mate.py`、`render_vendor.py` 的输入
 - **是否修改**：未修改。下列 10 个文件的内容与上游 `main` 分支逐字节一致（git blob SHA 相同）；
   其中 `SO100_Follower_Assembly.step` 为上游
@@ -36,14 +36,14 @@
 > This repository includes material from the SO-ARM100 project
 > (https://github.com/TheRobotStudio/SO-ARM100), licensed under the
 > Apache License, Version 2.0. A copy of the license is provided at
-> design/cad/vendor/LICENSE-Apache-2.0.txt.
+> archive/v1-22dof/design/cad/vendor/LICENSE-Apache-2.0.txt.
 
 ---
 
-## 2. `design/cad/vendor/feetech/` —— 飞特（FEETECH）官方产品规格书
+## 2. `archive/v1-22dof/design/cad/vendor/feetech/` —— 飞特（FEETECH）官方产品规格书
 
 - **来源**：深圳飞特模型有限公司（SHENZHEN FEETECH RC MODEL CO.,LTD.）官网
-  <https://www.feetechrc.com> 产品页附件（下载记录见 `design/cad/vendor/README.md`）
+  <https://www.feetechrc.com> 产品页附件（下载记录见 `archive/v1-22dof/design/cad/vendor/README.md`）
 - **许可**：厂商产品规格书，**未授予再分发许可**；本仓库内无任何再分发授权说明，
   本仓库不对这些文档主张任何权利
 - **用途**：仅作项目内部技术核验参考（外形尺寸图与电气参数），不作对外分发
@@ -61,6 +61,6 @@
 
 ## 范围说明
 
-- 本 NOTICE 覆盖 `design/cad/vendor/` 下归档的上述第三方素材；
-  来源、许可与用途的详细记录见 `design/cad/vendor/README.md`。
+- 本 NOTICE 覆盖 `archive/v1-22dof/design/cad/vendor/` 下归档的上述第三方素材；
+  来源、许可与用途的详细记录见该目录 `README.md`。当前机构 CAD 在 `design/v2/`。
 - 仓库后续新增第三方素材时，应同步更新本文件。

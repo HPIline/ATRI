@@ -21,7 +21,7 @@ Windows 仿真标定后只需按本规范导出，Mac/Windows 都能直接加载
 |---|---|---|---|
 | index | int | 否 | 帧序号，建议从 0 开始 |
 | duration_s | number | 是 | 本帧持续时间，单位秒，必须 >0 |
-| joints | object | 是 | 关节名 -> 角度（度），键必须来自 `atri/config.py` 的 22 DOF 关节名 |
+| joints | object | 是 | 关节名 -> 角度（度），键必须来自 `atri/config.py` 的 20 DOF 关节名 |
 | comment | string | 否 | 调试备注 |
 
 ## 示例

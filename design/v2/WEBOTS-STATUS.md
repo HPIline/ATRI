@@ -2,7 +2,7 @@
 
 **这是一次 URDF 导入 / 运动学冒烟测试，不是 G4，不是 5/5 任务卡验证，不是真机测试。**
 
-This is an import/kinematics smoke test of the **CAD-mesh** world, **NOT G4**, **NOT contest-task verification**, **NOT a physical robot test**. The mesh import used `atri_v2_import_check`, not `atri_controller`. Frozen 22-DOF CAD remains `webots/worlds/atri_22dof.wbt`. Software later moved to 20 DOF; default kinematic world is `webots/worlds/atri_v2.wbt`.
+This is an import/kinematics smoke test of the **CAD-mesh** world, **NOT G4**, **NOT contest-task verification**, **NOT a physical robot test**. The mesh import used `atri_v2_import_check`, not `atri_controller`. Old 22-DOF world is archived at `archive/v1-22dof/webots/worlds/atri_22dof.wbt`. Default kinematic world is `webots/worlds/atri_v2.wbt`.
 
 生成器：`design/v2/webots_v2_import.py`（自写 URDF→WBT，未安装 `urdf2webots`）。  
 参考：本仓库 `webots/tools/generate_atri_world.py`（嵌套 HingeJoint、`dampingConstant`、`gravity` 为 SFFloat、禁止 EXTERNPROTO）以及 cyberbotics/urdf2webots 的 `endPoint.translation = joint origin`、`anchor = origin`、Mesh+scale 约定。

@@ -12,7 +12,7 @@
 run_demo.py                 # 一键闭环演练入口（顺序执行五项任务卡）
 run_bringup.py              # 真机 bring-up（扫描 / 限位 / 中位 / 点动；可 Mock）
 atri/
-  config.py                 # 22 自由度关节命名、限位角与零位定义
+  config.py                 # 20 自由度关节命名、限位角与零位定义
   task_card.py              # JSON 任务卡解析、校验与参数绑定
   fsm.py                    # 任务生命周期有限状态机（待机/进入/执行/反馈/终止）
   brain.py                  # 大脑调度核心：技能注册、上下文管理、感知与语音装配
@@ -49,7 +49,7 @@ python3 -m unittest discover -s tests
 python3 run_demo.py --fast
 ```
 
-当前单元测试套件包含 **699** 项测试（零依赖环境下 46 项自动 skip；以 `python3 -m unittest discover -s tests` 当场输出为准），覆盖状态机流转、技能成败、总线限位、NaN/Inf 拒绝、感知容错、T-01 真识别/拒识与头部随动、T-02 路径序列与踩步转体、T-03 两步对准与放置区门闩、T-04 闭环与球距门限、T-05 关键词门闩与真识别记账、可调参数层（`atri/tuning.py`）及任务卡解析。
+单元测试覆盖状态机、技能、总线限位、NaN/Inf 拒绝、感知容错与五项任务卡。CadQuery 用例需仓库根 `.venv-cad`。以当场 `python3 -m unittest discover -s tests` 为准。
 
 **技能可调参数**：控制常数不再写死在代码里——优先级是
 **任务卡 params > `config/<skill>.json` > 代码默认值**（`atri/tuning.py`）。
