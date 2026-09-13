@@ -1,15 +1,17 @@
 """机器人拓扑与配置加载。
 
-关节拓扑严格对齐申报方案：22 DOF = 双腿 10 + 双臂 8 + 躯干 2 + 头部 2。
+关节拓扑对齐 ATRI-v2 A 路线：20 DOF = 双腿 8 + 双臂 8 + 躯干 2 + 头部 2。
+相对现机 22 DOF 去掉 ``left_hip_yaw`` / ``right_hip_yaw``，限位与 ``design/v2/profile.py`` 同源。
 """
 from __future__ import annotations
 
 import json
 import math
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
-DOF_COUNT = 22
+DOF_COUNT = 20
+DROPPED_VS_V1 = ("left_hip_yaw", "right_hip_yaw")
 
 # 单条指令上限：技能层与运动层共用的合法性边界，防止越界参数生成超长轨迹。
 MAX_STEPS = 20
@@ -23,34 +25,32 @@ JOINTS: Dict[str, Dict[str, Any]] = {
     "trunk_roll":      {"id": 2,  "group": "trunk",   "limit_deg": [-10, 10],   "rest_deg": 0.0},
     "trunk_pitch":     {"id": 3,  "group": "trunk",   "limit_deg": [-15, 15],   "rest_deg": 0.0},
 
-    "left_hip_yaw":    {"id": 4,  "group": "leg_l",   "limit_deg": [-45, 45],   "rest_deg": 0.0},
-    "left_hip_roll":   {"id": 5,  "group": "leg_l",   "limit_deg": [-25, 25],   "rest_deg": 0.0},
-    "left_hip_pitch":  {"id": 6,  "group": "leg_l",   "limit_deg": [-60, 60],   "rest_deg": 0.0},
-    "left_knee_pitch": {"id": 7,  "group": "leg_l",   "limit_deg": [0, 90],     "rest_deg": 0.0},
-    "left_ankle_pitch":{"id": 8,  "group": "leg_l",   "limit_deg": [-40, 40],   "rest_deg": 0.0},
+    "left_hip_roll":   {"id": 4,  "group": "leg_l",   "limit_deg": [0, 25],     "rest_deg": 0.0},
+    "left_hip_pitch":  {"id": 5,  "group": "leg_l",   "limit_deg": [-60, 60],   "rest_deg": 0.0},
+    "left_knee_pitch": {"id": 6,  "group": "leg_l",   "limit_deg": [0, 90],     "rest_deg": 0.0},
+    "left_ankle_pitch":{"id": 7,  "group": "leg_l",   "limit_deg": [-40, 40],   "rest_deg": 0.0},
 
-    "right_hip_yaw":    {"id": 9,  "group": "leg_r",  "limit_deg": [-45, 45],   "rest_deg": 0.0},
-    "right_hip_roll":   {"id": 10, "group": "leg_r",  "limit_deg": [-25, 25],   "rest_deg": 0.0},
-    "right_hip_pitch":  {"id": 11, "group": "leg_r",  "limit_deg": [-60, 60],   "rest_deg": 0.0},
-    "right_knee_pitch": {"id": 12, "group": "leg_r",  "limit_deg": [0, 90],     "rest_deg": 0.0},
-    "right_ankle_pitch":{"id": 13, "group": "leg_r",  "limit_deg": [-40, 40],   "rest_deg": 0.0},
+    "right_hip_roll":   {"id": 8,  "group": "leg_r",  "limit_deg": [-25, 0],    "rest_deg": 0.0},
+    "right_hip_pitch":  {"id": 9,  "group": "leg_r",  "limit_deg": [-60, 60],   "rest_deg": 0.0},
+    "right_knee_pitch": {"id": 10, "group": "leg_r",  "limit_deg": [0, 90],     "rest_deg": 0.0},
+    "right_ankle_pitch":{"id": 11, "group": "leg_r",  "limit_deg": [-40, 40],   "rest_deg": 0.0},
 
-    "left_shoulder_pitch":  {"id": 14, "group": "arm_l", "limit_deg": [-90, 90],  "rest_deg": 0.0},
-    "left_shoulder_roll":   {"id": 15, "group": "arm_l", "limit_deg": [-90, 90],  "rest_deg": 0.0},
-    "left_elbow_pitch":     {"id": 16, "group": "arm_l", "limit_deg": [-120, 0],  "rest_deg": -10.0},
-    "left_gripper":         {"id": 17, "group": "arm_l", "limit_deg": [0, 60],    "rest_deg": 0.0},
+    "left_shoulder_pitch":  {"id": 12, "group": "arm_l", "limit_deg": [-90, 90],  "rest_deg": 0.0},
+    "left_shoulder_roll":   {"id": 13, "group": "arm_l", "limit_deg": [0, 90],    "rest_deg": 0.0},
+    "left_elbow_pitch":     {"id": 14, "group": "arm_l", "limit_deg": [-120, 0],  "rest_deg": -10.0},
+    "left_gripper":         {"id": 15, "group": "arm_l", "limit_deg": [0, 60],    "rest_deg": 0.0},
 
-    "right_shoulder_pitch": {"id": 18, "group": "arm_r", "limit_deg": [-90, 90],  "rest_deg": 0.0},
-    "right_shoulder_roll":  {"id": 19, "group": "arm_r", "limit_deg": [-90, 90],  "rest_deg": 0.0},
-    "right_elbow_pitch":    {"id": 20, "group": "arm_r", "limit_deg": [-120, 0],  "rest_deg": -10.0},
-    "right_gripper":        {"id": 21, "group": "arm_r", "limit_deg": [0, 60],    "rest_deg": 0.0},
+    "right_shoulder_pitch": {"id": 16, "group": "arm_r", "limit_deg": [-90, 90],  "rest_deg": 0.0},
+    "right_shoulder_roll":  {"id": 17, "group": "arm_r", "limit_deg": [-90, 0],   "rest_deg": 0.0},
+    "right_elbow_pitch":    {"id": 18, "group": "arm_r", "limit_deg": [-120, 0],  "rest_deg": -10.0},
+    "right_gripper":        {"id": 19, "group": "arm_r", "limit_deg": [0, 60],    "rest_deg": 0.0},
 }
 
 GROUP_DOF = {
     "head": 2,
     "trunk": 2,
-    "leg_l": 5,
-    "leg_r": 5,
+    "leg_l": 4,
+    "leg_r": 4,
     "arm_l": 4,
     "arm_r": 4,
 }
@@ -64,7 +64,7 @@ def _assert_topology() -> None:
     if len(JOINTS) != DOF_COUNT:
         raise RuntimeError(f"关节数量 {len(JOINTS)} != {DOF_COUNT}")
     if ids != list(range(DOF_COUNT)):
-        raise RuntimeError("关节 id 必须为连续的 0..21")
+        raise RuntimeError(f"关节 id 必须为连续的 0..{DOF_COUNT - 1}")
     if sum(GROUP_DOF.values()) != DOF_COUNT:
         raise RuntimeError(f"分组自由度之和 != {DOF_COUNT}")
 
@@ -89,6 +89,25 @@ def clamp_angle(name: str, deg: float) -> float:
 
 def rest_pose() -> Dict[str, float]:
     return {name: float(spec["rest_deg"]) for name, spec in JOINTS.items()}
+
+
+def body_yaw_pose(yaw_deg: float) -> Dict[str, float]:
+    """无 hip_yaw 时的转向占位：左右髋 roll 反对称侧倾。
+
+    正值 = 左转侧倾（左髋 roll 正、右髋 roll 负），与 v2 限位同向。
+    这不是真实偏航，G4 转向误差仍开放。
+    """
+    return {
+        "left_hip_roll": clamp_angle("left_hip_roll", yaw_deg),
+        "right_hip_roll": clamp_angle("right_hip_roll", -float(yaw_deg)),
+    }
+
+
+def body_yaw_deg_from_angles(angles_by_id: Mapping[int, float]) -> float:
+    """从髋 roll 反推转向占位角（度）。"""
+    left = float(angles_by_id.get(JOINTS["left_hip_roll"]["id"], 0.0) or 0.0)
+    right = float(angles_by_id.get(JOINTS["right_hip_roll"]["id"], 0.0) or 0.0)
+    return 0.5 * (left - right)
 
 
 # ---------------------------------------------------------------------------

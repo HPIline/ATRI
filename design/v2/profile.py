@@ -318,7 +318,7 @@ JOINTS: List[Dict[str, Any]] = [
 
 GROUP_DOF = {"head": 2, "trunk": 2, "leg_l": 4, "leg_r": 4, "arm_l": 4, "arm_r": 4}
 
-# 与现机 22 DOF 软件的差：两条 hip_yaw。未过 G4 不得改 software/atri/atri/config.py。
+# 相对现机 22 DOF 去掉的两条 yaw。软件 config.py 已按本表 20 DOF 对齐；转向占位是髋 roll，G4 仍开放。
 DROPPED_VS_V1 = ("left_hip_yaw", "right_hip_yaw")
 
 # —— 运动学（mm），站立零位，轴距 ——
