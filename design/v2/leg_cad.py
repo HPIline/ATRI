@@ -164,9 +164,11 @@ def _foot_items(side):
             # DIN 7991 nominal countersunk head keeps the sole unpunctured.
             hole=cq.Workplane("XY").center(x,hole_y).circle(1.6).extrude(t).translate((0,0,bottom))
             laser_blank=laser_blank.cut(hole)
-            cone=cq.Solid.makeCone(3.0,1.5,1.7).translate((x,hole_y,bottom))
+            # A 90-degree countersink has axial depth equal to the radius
+            # difference. The old 1.7 mm cone was only 82.8 degrees.
+            cone=cq.Solid.makeCone(3.0,1.6,3.0-1.6).translate((x,hole_y,bottom))
             plate=plate.cut(hole).cut(cone)
-            fast=cq.Workplane("XY").newObject([cq.Solid.makeCone(3.,1.5,1.7)]).union(cq.Workplane("XY").circle(1.5).extrude(8.0))
+            fast=cq.Workplane("XY").newObject([cq.Solid.makeCone(3.,1.5,3.-1.5)]).union(cq.Workplane("XY").circle(1.5).extrude(8.0))
             fast=fast.cut(cq.Workplane("XY").polygon(6,2./math.cos(math.pi/6)).extrude(1.1))
             add(f"{label}-base-bolt-{n}","fastener",fast.translate((x,hole_y,bottom)),spec="M3x8 DIN7991 countersunk; nominal thread")
             add(f"{label}-base-nut-{n}","fastener",_nut().translate((x,hole_y,top+at)),spec="M3 ISO4032")
@@ -176,7 +178,7 @@ def _foot_items(side):
             nut=_nut().rotate((0,0,0),(1,0,0),-90).translate((x,inner-at-2.4 if front else inner+at,hole_z))
             add(f"{label}-side-nut-{n}","fastener",nut,spec="M3 ISO4032")
         add(f"{label}-angle","al",angle,manufacturing="cut/drill stock 15x15x1.5 aluminium angle; 20 mm long; inside radius <=1.5 mm purchase constraint")
-    add("plate","al",plate,flat=laser_blank.translate((0,0,-bottom)),manufacturing="laser 6061-T6 2 mm; four M3 countersinks after cutting; deburr")
+    add("plate","al",plate,flat=laser_blank.translate((0,0,-bottom)),manufacturing=f"laser 6061-T6 {t:g} mm; four M3 countersinks after cutting; deburr")
     sole=cq.Workplane("XY").box(K["foot_l"]-2,K["foot_w"]-2,K["sole_t"],centered=(True,True,False)).edges("|Z").fillet(6).translate((cx,0,-h))
     add("sole","tpu",sole,print_face='-Z',manufacturing="TPU95A; adhesive bond to aluminium; bond qualification required")
     return parts
