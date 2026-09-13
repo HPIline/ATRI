@@ -76,6 +76,7 @@ models/
 docs/process/sim/worlds/
 webots/worlds/atri_22dof_gravity.wbt
 webots/worlds/atri_v2_gravity.wbt
-docs/process/sim/video/
+docs/process/sim/video/*
+!docs/process/sim/video/ATRI-v2-stand.mp4
 docs/process/sim/empty_cards/
 docs/process/sim/cards_t05/
