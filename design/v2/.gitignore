@@ -39,6 +39,7 @@ out/sim/*
 !out/blender/renders/detail_gripper.png
 !out/render4k/
 !out/render4k/**
+out/render4k/exploded_numbered.png
 
 !out/webots/
 out/webots/*
