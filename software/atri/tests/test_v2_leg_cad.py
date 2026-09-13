@@ -96,3 +96,22 @@ class TestLegCad(unittest.TestCase):
                 with self.subTest(angle=angle):
                     moving=part['wp'].val().rotate((0,0,0),(0,1,0),angle)
                     self.assertLess(moving.intersect(self.servo).Volume(),.01)
+
+    def test_foot_countersink_is_90_degrees_and_seats_without_overlap(self):
+        # Inspect real B-reps: at 1.3 mm depth a diameter-6 90-degree
+        # countersink has radius 1.7 mm, so r=1.8 is retained plate.
+        p = self.parameters
+        index = {part["name"]: part["wp"].val() for part in self.items}
+        from v2.profile import K
+        bottom = -p["foot_height_mm"] + K["sole_t"]
+        for side in ("left", "right"):
+            plate = index[f"leg-{side}-foot-plate"]
+            for front, label in ((True, "front"), (False, "rear")):
+                inner = p["front_inner_mm"][2] if front else p["rear_inner_mm"][2]
+                y = inner - (1 if front else -1) * p["foot_angle_horizontal_hole_mm"]
+                for n, x in enumerate(p["foot_angle_hole_x_mm"]):
+                    self.assertTrue(plate.isInside(cq.Vector(x + 1.8, y, bottom + 1.3)))
+                    bolt = index[f"leg-{side}-foot-{label}-base-bolt-{n}"]
+                    self.assertLess(plate.intersect(bolt).Volume(), 1e-7)
+                    nut = index[f"leg-{side}-foot-{label}-base-nut-{n}"]
+                    self.assertGreaterEqual(bolt.BoundingBox().zmax, nut.BoundingBox().zmax)
