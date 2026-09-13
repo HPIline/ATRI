@@ -18,14 +18,14 @@
     python webots/tools/generate_atri_world.py        # 默认：零重力 20 DOF 运动学联调世界
 
     # 带重力校核世界（S1 静立 / S2 站立扭矩用）：
-    ATRI_WORLD_GRAVITY=-9.81 ATRI_WORLD_MAX_TORQUE=2.94 ATRI_WORLD_GROUND=1 \\
+    ATRI_WORLD_GRAVITY=9.81 ATRI_WORLD_MAX_TORQUE=2.94 ATRI_WORLD_GROUND=1 \\
         python webots/tools/generate_atri_world.py --out /tmp/atri_grav.wbt
 
 四个可选覆盖（同名命令行参数优先于环境变量；两者都不给 = 现在的默认行为）：
 
 * ``ATRI_WORLD_GRAVITY`` / ``--gravity``：``WorldInfo.gravity``，默认 ``0.0``（零重力）。
-  Webots 里它是**有符号标量**（沿 Z 轴）：向下为负（``-9.81``），给正值等于让机器人往上飞，
-  所以正数直接报错退出。
+  本机 Webots R2025a + ENU 实测：``9.81`` 落到地面，负值沿 +Z 飞走，所以 ``gravity < 0``
+  直接报错退出。
 * ``ATRI_WORLD_MAX_TORQUE`` / ``--max-torque``：逐电机 ``maxTorque``（N·m），默认**不写该字段**。
   注意"不写"≠无限大：Webots 默认 **10 N·m**，是 STS3215 堵转 2.94 N·m 的 3.4 倍，
   做扭矩校核时必须显式设成 2.94，否则结论作废。
@@ -53,12 +53,16 @@ WORLD_PATH = Path(__file__).resolve().parents[1] / "worlds" / "atri_v2.wbt"
 REPO = Path(__file__).resolve().parents[2]
 URDF_PATH = REPO / "design" / "v2" / "out" / "sim" / "atri_v2.urdf"
 sys.path.insert(0, str(REPO / "design"))
+sys.path.insert(0, str(REPO / "software" / "atri"))
 import geometry  # noqa: E402  （纯标准库）
 from v2 import profile as v2_profile  # noqa: E402
+from atri.stand_balance import pelvis_spawn_z_m  # noqa: E402
 
 # 世界标称版本：与本机验证用的 Webots R2025a 对齐（工程说明要求 R2023b 或更新）
 WORLD_VERSION = "R2025a"
 BASIC_TIME_STEP = 32
+GRAVITY_TIME_STEP = 8
+GRAVITY_JOINT_DAMPING = 2.0
 
 # --------------------------------------------------------------------------
 # 默认值：必须与提交在仓库里的 worlds/atri_v2.wbt 逐字节一致
@@ -69,7 +73,7 @@ BASIC_TIME_STEP = 32
 # 注意：Webots R2025a 里 WorldInfo.gravity 是 **SFFloat**（沿"下"轴的大小），
 # 不是 SFVec3f。写成 `gravity 0 0 0` 会让世界文件解析失败，
 # Webots 会静默回退到内置 empty.wbt——控制器一个都不会启动。
-# 它同时是**有符号标量**：默认 -9.81 指向 Z 轴负方向（向下），正值等于让机器人往上飞。
+# 本机 Webots R2025a + ENU 实测：gravity 9.81 才落到地面，-9.81 会沿 +Z 飞走。
 GRAVITY = 0.0
 DEFAULT_GRAVITY = GRAVITY
 # 不写 maxTorque = 沿用 Webots 默认 10 N·m（不是无限大）。
@@ -209,10 +213,11 @@ def resolve_options(args: argparse.Namespace) -> Options:
     if not math.isfinite(gravity):
         # nan / inf 会被原样写进 WBT，Webots 解析失败后会静默回退到 empty.wbt
         raise ValueError(f"gravity 必须是有限数，实际 {gravity}")
-    if gravity > 0:
+    if gravity < 0:
+        # R2025a + ENU 实测：gravity -9.81 沿 +Z 加速（往天上飞），
+        # gravity 9.81 才落到地面。与部分旧文档「负号向下」相反。
         raise ValueError(
-            f"gravity 必须 ≤ 0，实际 {gravity}：Webots 的 gravity 是沿 Z 轴的有符号标量，"
-            "正值向上，机器人会飞起来"
+            f"gravity 必须 ≥ 0，实际 {gravity}：本机 Webots R2025a ENU 下负值会把机器人弹上天"
         )
 
     ground_auto = False
@@ -401,7 +406,28 @@ def joint_names() -> List[str]:
     return names
 
 
-def render_joint(node: Dict[str, Any], indent: int, max_torque: Optional[float] = None) -> List[str]:
+def left_foot_chain_z_m(model: Dict[str, Any] | None = None) -> float:
+    """骨盆原点到左踝原点的 z（m，URDF 零位，负值）。"""
+    model = model or load_model()
+    by_name = {j["name"]: j for j in model["joints"]}
+    return sum(
+        by_name[name]["origin_xyz_mm"][2] / 1000.0
+        for name in (
+            "left_hip_roll",
+            "left_hip_pitch",
+            "left_knee_pitch",
+            "left_ankle_pitch",
+        )
+    )
+
+
+def render_joint(
+    node: Dict[str, Any],
+    indent: int,
+    max_torque: Optional[float] = None,
+    gravity: float = 0.0,
+    damping: float = JOINT_DAMPING,
+) -> List[str]:
     """渲染一个关节子树（HingeJoint + 电机 + 位置传感器 + 连杆 Solid）。
 
     ``max_torque`` 为 ``None`` 时不写 ``maxTorque`` 字段（= 现有世界的行为，
@@ -427,7 +453,7 @@ def render_joint(node: Dict[str, Any], indent: int, max_torque: Optional[float] 
         f"{pad}    minStop {num(math.radians(lo))}",
         f"{pad}    maxStop {num(math.radians(hi))}",
         # 不写阻尼这一行，世界会在启动瞬间把若干关节弹飞（见 JOINT_DAMPING 注释）
-        f"{pad}    dampingConstant {num(JOINT_DAMPING)}",
+        f"{pad}    dampingConstant {num(damping)}",
         f"{pad}  }}",
         f"{pad}  device [",
         *motor,
@@ -436,19 +462,61 @@ def render_joint(node: Dict[str, Any], indent: int, max_torque: Optional[float] 
         f"{pad}    }}",
         f"{pad}  ]",
         f"{pad}  endPoint Solid {{",
+        # urdf2webots / design/v2/webots_v2_import.py：子 Solid 放到关节原点。
+        # 不写 translation 时所有连杆叠在骨盆，脚盒碰不到地，带重力必坐穿。
+        f"{pad}    translation {vec(node['anchor'])}",
         f'{pad}    name "{node["name"]}_link"',
-        f"{pad}    boundingObject Box {{",
-        f"{pad}      size {vec(node['size'])}",
-        f"{pad}    }}",
+    ]
+    mass = float(node["mass"])
+    if gravity == 0.0:
+        lines += [
+            f"{pad}    boundingObject Box {{",
+            f"{pad}      size {vec(node['size'])}",
+            f"{pad}    }}",
+        ]
+    elif "ankle_pitch" in node["name"]:
+        lines += [
+            f"{pad}    boundingObject Box {{",
+            f"{pad}      size {vec(node['size'])}",
+            f"{pad}    }}",
+        ]
+    else:
+        # 小圆球只用来算惯量，避免大腿 AABB 戳进地面把整机压扁。
+        lines += [
+            f"{pad}    boundingObject Sphere {{",
+            f"{pad}      radius 0.008",
+            f"{pad}    }}",
+        ]
+    lines += [
         f"{pad}    physics Physics {{",
         f"{pad}      density -1",
-        f"{pad}      mass {num(node['mass'])}",
+        f"{pad}      mass {num(mass)}",
         f"{pad}    }}",
     ]
-    if node["children"]:
+    visual: List[str] = []
+    if gravity != 0.0:
+        # 碰撞仍用脚盒 + 其它小球；画面要用完整连杆盒，否则录屏里机器人是隐形的。
+        visual = [
+            f"{pad}    Shape {{",
+            f"{pad}      appearance Appearance {{",
+            f"{pad}        material Material {{",
+            f"{pad}          diffuseColor 0.18 0.42 0.86",
+            f"{pad}        }}",
+            f"{pad}      }}",
+            f"{pad}      geometry Box {{",
+            f"{pad}        size {vec(node['size'])}",
+            f"{pad}      }}",
+            f"{pad}    }}",
+        ]
+    nested: List[str] = []
+    for child in node["children"]:
+        nested.extend(
+            render_joint(child, indent + 3, max_torque, gravity=gravity, damping=damping)
+        )
+    if visual or nested:
         lines.append(f"{pad}    children [")
-        for child in node["children"]:
-            lines.extend(render_joint(child, indent + 3, max_torque))
+        lines.extend(visual)
+        lines.extend(nested)
         lines.append(f"{pad}    ]")
     lines.append(f"{pad}  }}")
     lines.append(f"{pad}}}")
@@ -469,7 +537,9 @@ def render_ground() -> List[str]:
         "  children [",
         "    Shape {",
         "      appearance Appearance {",
-        "        baseColor 0.5 0.5 0.55",
+        "        material Material {",
+        "          diffuseColor 0.86 0.82 0.74",
+        "        }",
         "      }",
         "      geometry Plane {",
         f"        size {num(GROUND_SIZE)} {num(GROUND_SIZE)}",
@@ -528,6 +598,15 @@ def render_world(
         # 硬约束：有重力没地面 = 自由落体，静立/站立数字全部作废
         raise ValueError("重力非 0 必须同时生成地面，否则机器人自由落体")
     _body = robot_body()
+    spawn_z = float(_body[2])
+    damping = JOINT_DAMPING
+    if gravity != 0.0:
+        spawn_z = pelvis_spawn_z_m(
+            chain_z_m=left_foot_chain_z_m(),
+            foot_half_z_m=_LINK_BOX_MM["left_foot"][2] / 2000.0,
+            clearance_m=0.008,
+        )
+        damping = GRAVITY_JOINT_DAMPING
     title = (
         "A.T.R.I. 20 DOF 桌面人形（带重力校核）"
         if gravity != 0.0
@@ -546,18 +625,62 @@ def render_world(
         "",
         "WorldInfo {",
         f'  title "{title}"',
-        f"  basicTimeStep {BASIC_TIME_STEP}",
+        f"  basicTimeStep {GRAVITY_TIME_STEP if gravity != 0.0 else BASIC_TIME_STEP}",
         f"  gravity {num(gravity)}",
-        "  ERP 0.6",
+        f"  ERP {'0.2' if gravity != 0.0 else '0.6'}",
         "  CFM 1e-05",
+    ]
+    if gravity != 0.0:
+        # ENU：Z 向上。无摩擦会劈叉。空 bumpSound 避免联网拉默认 wav。
+        lines += [
+            '  coordinateSystem "ENU"',
+            '  gpsCoordinateSystem "local"',
+            "  contactProperties [",
+            "    ContactProperties {",
+            "      coulombFriction 8",
+            "      bounce 0",
+            "      softCFM 1e-4",
+            '      bumpSound ""',
+            '      rollSound ""',
+            '      slideSound ""',
+            "    }",
+            "  ]",
+        ]
+    lines += [
         "}",
         "",
         "Viewpoint {",
-        "  orientation -0.1567 0.8935 0.4214 1.1077",
-        "  position 0.62 -0.72 0.66",
-        "  followType \"None\"",
-        "}",
     ]
+    if gravity != 0.0:
+        lines += [
+            "  orientation -0.1567 0.8935 0.4214 1.1077",
+            "  position 0.45 -0.55 0.28",
+            '  follow "ATRI"',
+            '  followType "None"',
+        ]
+    else:
+        lines += [
+            "  orientation -0.1567 0.8935 0.4214 1.1077",
+            "  position 0.62 -0.72 0.66",
+            '  followType "None"',
+        ]
+    lines += [
+        "}",
+        "",
+    ]
+    if gravity != 0.0:
+        lines += [
+            "Background {",
+            "  skyColor [ 0.62 0.72 0.88 ]",
+            "}",
+            "DirectionalLight {",
+            "  ambientIntensity 0.8",
+            "  direction 0.4 -0.6 -1",
+            "  intensity 2",
+            "  castShadows FALSE",
+            "}",
+            "",
+        ]
     if ground:
         # 地面放在 Viewpoint 之后、Robot 之前：与 Webots 样例世界的习惯顺序一致
         lines += [""] + render_ground()
@@ -566,18 +689,53 @@ def render_world(
         "Robot {",
         '  name "ATRI"',
         '  controller "atri_controller"',
-        f"  translation 0 0 {num(_body[2])}",
-        "  boundingObject Box {",
-        f"    size {vec(_body[1])}",
-        "  }",
+    ]
+    if gravity != 0.0:
+        # Supervisor 才能 movieStartRecording；默认零重力世界不加，CI 对账不变。
+        lines.append("  supervisor TRUE")
+    lines.append(f"  translation 0 0 {num(spawn_z)}")
+    if gravity == 0.0:
+        lines += [
+            "  boundingObject Box {",
+            f"    size {vec(_body[1])}",
+            "  }",
+        ]
+    else:
+        lines += [
+            "  boundingObject Sphere {",
+            "    radius 0.008",
+            "  }",
+        ]
+    lines += [
         "  physics Physics {",
         "    density -1",
         f"    mass {num(_body[0])}",
         "  }",
         "  children [",
     ]
+    if gravity != 0.0:
+        lines += [
+            "    GPS {",
+            '      name "pelvis_gps"',
+            "    }",
+            "    InertialUnit {",
+            '      name "imu"',
+            "    }",
+            "    Shape {",
+            "      appearance Appearance {",
+            "        material Material {",
+            "          diffuseColor 0.86 0.28 0.18",
+            "        }",
+            "      }",
+            "      geometry Box {",
+            f"        size {vec(_body[1])}",
+            "      }",
+            "    }",
+        ]
     for node in robot_children():
-        lines.extend(render_joint(node, 2, max_torque))
+        lines.extend(
+            render_joint(node, 2, max_torque, gravity=gravity, damping=damping)
+        )
     lines += [
         "  ]",
         "}",

@@ -3,7 +3,8 @@
 
 默认世界 ``webots/worlds/atri_v2.wbt`` 必须保持 ``gravity 0``（CI 钉死）。
 本脚本**只调用**现有生成器 ``generate_atri_world.py``，把派生世界写到
-``docs/process/sim/worlds/atri_v2_gravity.wbt``，再做三条静态自检。
+``webots/worlds/atri_v2_gravity.wbt``（控制器一定找得到），再做三条静态自检。
+不覆盖默认零重力世界。
 
 用法（仓库根目录）::
 
@@ -21,10 +22,10 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 GENERATOR = Path(__file__).resolve().parent / "generate_atri_world.py"
-DEFAULT_OUT = REPO / "docs" / "process" / "sim" / "worlds" / "atri_v2_gravity.wbt"
+DEFAULT_OUT = REPO / "webots" / "worlds" / "atri_v2_gravity.wbt"
 DEFAULT_WORLD = REPO / "webots" / "worlds" / "atri_v2.wbt"
 
-GRAVITY = -9.81
+GRAVITY = 9.81
 MAX_TORQUE = 2.94
 
 
@@ -76,14 +77,14 @@ def grep_count(text: str, needle: str) -> int:
 
 
 def verify(out: Path) -> dict:
-    """三条硬自检：gravity / maxTorque ×22 / 地面 Plane。"""
+    """三条硬自检：gravity / maxTorque ×20 / 地面 Plane。"""
     text = out.read_text(encoding="utf-8")
-    gravity_hits = grep_count(text, "gravity -9.81")
+    gravity_hits = grep_count(text, "gravity 9.81")
     torque_hits = grep_count(text, "maxTorque 2.94")
     plane_hits = text.count("Plane")
     floor_hits = text.count("Floor")
     ground_hits = plane_hits + floor_hits
-    ok = gravity_hits >= 1 and torque_hits == 22 and ground_hits >= 1
+    ok = gravity_hits >= 1 and torque_hits == 20 and ground_hits >= 1
     return {
         "ok": ok,
         "gravity_hits": gravity_hits,
@@ -101,14 +102,14 @@ def default_world_still_zero_g() -> bool:
     if not DEFAULT_WORLD.is_file():
         return False
     text = DEFAULT_WORLD.read_text(encoding="utf-8")
-    return "\n  gravity 0\n" in text and "gravity -9.81" not in text
+    return "\n  gravity 0\n" in text and "gravity 9.81" not in text
 
 
 def print_grep(result: dict, out: Path) -> None:
     rel = _rel(out)
     print("自检 grep（与 webots/README.md「带重力/带地面的校核跑法」同一套）：")
-    print(f"  grep -c \"gravity -9.81\"  {rel}   → {result['gravity_hits']}   （期望 1）")
-    print(f"  grep -c \"maxTorque 2.94\" {rel}   → {result['torque_hits']}  （期望恰好 22）")
+    print(f"  grep -c \"gravity 9.81\"  {rel}   → {result['gravity_hits']}   （期望 1）")
+    print(f"  grep -c \"maxTorque 2.94\" {rel}   → {result['torque_hits']}  （期望恰好 20）")
     print(
         f"  grep -cE \"Floor|Plane\"    {rel}   → Plane={result['plane_hits']}"
         f" Floor={result['floor_hits']}  （期望 ≥1）"

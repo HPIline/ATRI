@@ -19,6 +19,7 @@ Viewpoint {
   followType "None"
 }
 
+
 Robot {
   name "ATRI"
   controller "atri_controller"
@@ -49,6 +50,7 @@ Robot {
         }
       ]
       endPoint Solid {
+        translation 0 0 0.018
         name "trunk_roll_link"
         boundingObject Box {
           size 0.028 0.04 0.02
@@ -76,6 +78,7 @@ Robot {
               }
             ]
             endPoint Solid {
+              translation 0 0 0.025
               name "trunk_pitch_link"
               boundingObject Box {
                 size 0.055 0.09 0.08
@@ -103,6 +106,7 @@ Robot {
                     }
                   ]
                   endPoint Solid {
+                    translation 0 0 0.087
                     name "head_yaw_link"
                     boundingObject Box {
                       size 0.025 0.03 0.02
@@ -130,6 +134,7 @@ Robot {
                           }
                         ]
                         endPoint Solid {
+                          translation 0 0 0.06
                           name "head_pitch_link"
                           boundingObject Box {
                             size 0.04 0.04 0.045
@@ -161,6 +166,7 @@ Robot {
                     }
                   ]
                   endPoint Solid {
+                    translation 0 0.075 0.045
                     name "left_shoulder_pitch_link"
                     boundingObject Box {
                       size 0.022 0.022 0.05
@@ -188,6 +194,7 @@ Robot {
                           }
                         ]
                         endPoint Solid {
+                          translation 0 0.044 0
                           name "left_shoulder_roll_link"
                           boundingObject Box {
                             size 0.02 0.02 0.044
@@ -215,6 +222,7 @@ Robot {
                                 }
                               ]
                               endPoint Solid {
+                                translation 0 0 -0.058
                                 name "left_elbow_pitch_link"
                                 boundingObject Box {
                                   size 0.02 0.02 0.04
@@ -242,6 +250,7 @@ Robot {
                                       }
                                     ]
                                     endPoint Solid {
+                                      translation 0 0 -0.06
                                       name "left_gripper_link"
                                       boundingObject Box {
                                         size 0.015 0.02 0.03
@@ -279,6 +288,7 @@ Robot {
                     }
                   ]
                   endPoint Solid {
+                    translation 0 -0.075 0.045
                     name "right_shoulder_pitch_link"
                     boundingObject Box {
                       size 0.022 0.022 0.05
@@ -306,6 +316,7 @@ Robot {
                           }
                         ]
                         endPoint Solid {
+                          translation 0 -0.044 0
                           name "right_shoulder_roll_link"
                           boundingObject Box {
                             size 0.02 0.02 0.044
@@ -333,6 +344,7 @@ Robot {
                                 }
                               ]
                               endPoint Solid {
+                                translation 0 0 -0.058
                                 name "right_elbow_pitch_link"
                                 boundingObject Box {
                                   size 0.02 0.02 0.04
@@ -360,6 +372,7 @@ Robot {
                                       }
                                     ]
                                     endPoint Solid {
+                                      translation 0 0 -0.06
                                       name "right_gripper_link"
                                       boundingObject Box {
                                         size 0.015 0.02 0.03
@@ -403,6 +416,7 @@ Robot {
         }
       ]
       endPoint Solid {
+        translation 0 0.04 0
         name "left_hip_roll_link"
         boundingObject Box {
           size 0.03 0.03 0.03
@@ -430,6 +444,7 @@ Robot {
               }
             ]
             endPoint Solid {
+              translation 0 0 -0.032
               name "left_hip_pitch_link"
               boundingObject Box {
                 size 0.025 0.025 0.078
@@ -457,6 +472,7 @@ Robot {
                     }
                   ]
                   endPoint Solid {
+                    translation 0 0 -0.078
                     name "left_knee_pitch_link"
                     boundingObject Box {
                       size 0.022 0.022 0.078
@@ -484,6 +500,7 @@ Robot {
                           }
                         ]
                         endPoint Solid {
+                          translation 0 0 -0.078
                           name "left_ankle_pitch_link"
                           boundingObject Box {
                             size 0.12 0.07 0.012
@@ -521,6 +538,7 @@ Robot {
         }
       ]
       endPoint Solid {
+        translation 0 -0.04 0
         name "right_hip_roll_link"
         boundingObject Box {
           size 0.03 0.03 0.03
@@ -548,6 +566,7 @@ Robot {
               }
             ]
             endPoint Solid {
+              translation 0 0 -0.032
               name "right_hip_pitch_link"
               boundingObject Box {
                 size 0.025 0.025 0.078
@@ -575,6 +594,7 @@ Robot {
                     }
                   ]
                   endPoint Solid {
+                    translation 0 0 -0.078
                     name "right_knee_pitch_link"
                     boundingObject Box {
                       size 0.022 0.022 0.078
@@ -602,6 +622,7 @@ Robot {
                           }
                         ]
                         endPoint Solid {
+                          translation 0 0 -0.078
                           name "right_ankle_pitch_link"
                           boundingObject Box {
                             size 0.12 0.07 0.012
