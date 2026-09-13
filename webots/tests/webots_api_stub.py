@@ -27,7 +27,7 @@ import re
 import sys
 import types
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 NAN = float("nan")
 
@@ -153,7 +153,11 @@ class FakeMotor:
         self.position = 0.0
         self.velocity: Optional[float] = None
         self.commanded_positions: List[float] = []
+        self.control_pid: Optional[Tuple[float, float, float]] = None
         self.position_sensor = FakePositionSensor(f"{name}_sensor", self)
+
+    def setControlPID(self, p: float, i: float, d: float) -> None:
+        self.control_pid = (float(p), float(i), float(d))
 
     def setPosition(self, position: float) -> None:
         self.target_position = float(position)
@@ -197,11 +201,36 @@ class FakeMotor:
         return value
 
 
+class FakeContactPoint:
+    def __init__(self, point: Sequence[float]) -> None:
+        self.point = [float(v) for v in point]
+
+
+class FakeSolid:
+    """Supervisor.getSelf() 桩：两只脚接触、质心在支撑多边形内。"""
+
+    def getNumberOfContactPoints(self, includeDescendants: bool = False) -> int:
+        return 2
+
+    def getContactPoints(self, includeDescendants: bool = False) -> List[FakeContactPoint]:
+        return [
+            FakeContactPoint([0.03, 0.04, 0.0]),
+            FakeContactPoint([0.03, -0.04, 0.0]),
+        ]
+
+    def getStaticBalance(self) -> bool:
+        return True
+
+    def getCenterOfMass(self) -> List[float]:
+        return [0.0, 0.0, 0.20]
+
+
 def make_robot_class(world: "FakeWebots") -> type:
     class Robot:
         def __init__(self) -> None:
             self.name = "atri_fake_robot"
             world.instances.append(self)
+            self._self_node = FakeSolid()
 
         def getDevice(self, name: str) -> Optional[FakeMotor]:
             return world.devices.get(name)
@@ -211,6 +240,9 @@ def make_robot_class(world: "FakeWebots") -> type:
 
         def step(self, duration: int) -> int:
             return world.step(duration)
+
+        def getSelf(self) -> FakeSolid:
+            return self._self_node
 
         def movieStartRecording(self, *args: Any, **kwargs: Any) -> None:
             return None

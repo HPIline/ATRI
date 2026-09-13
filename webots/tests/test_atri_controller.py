@@ -621,10 +621,73 @@ class TestJointFrames(unittest.TestCase):
         self.assertIn("diffuseColor 0.18 0.42 0.86", text)
         self.assertIn("DirectionalLight", text)
         self.assertIn("Background", text)
+        self.assertIn('material1 "TPU95A"', text)
+        self.assertIn('material2 "vinyl_floor"', text)
+        self.assertIn('contactMaterial "TPU95A"', text)
+        self.assertIn("coulombFriction 0.7", text)
         default = self.gen.render_world()
         self.assertNotIn("supervisor TRUE", default)
         self.assertNotIn("diffuseColor 0.18 0.42 0.86", default)
         self.assertNotIn("DirectionalLight", default)
+
+    def test_gravity_foot_box_sits_at_cad_sole(self):
+        """Solid 在踝（URDF 惯量原点）；碰撞盒 120×70×44 mm，盒底在鞋底。"""
+        from v2.profile import K
+
+        text = self.gen.render_world(gravity=9.81, ground=True)
+        sole_m = K["foot_to_ankle_z"] / 1000.0
+        left = text.split('name "left_ankle_pitch_link"', 1)[1].split("HingeJoint {", 1)[0]
+        self.assertIn("boundingObject Pose {", left)
+        self.assertIn(f"translation 0 0 {self.gen.num(-sole_m / 2.0)}", left)
+        self.assertIn(f"size {self.gen.num(K['foot_l']/1000)} {self.gen.num(K['foot_w']/1000)} {self.gen.num(sole_m)}", left)
+        default = self.gen.render_world()
+        self.assertNotIn("boundingObject Pose {", default)
+        spawn = self.gen.pelvis_spawn_z_m(
+            chain_z_m=self.gen.left_foot_chain_z_m(),
+            foot_half_z_m=sole_m,
+            clearance_m=0.008,
+        )
+        self.assertIn(f"translation 0 0 {self.gen.num(spawn)}", text)
+
+    def test_gravity_uses_urdf_inertia_not_sphere(self):
+        model = self.gen.load_model()
+        pelvis = next(l for l in model["links"] if l["name"] == "pelvis")
+        text = self.gen.render_world(gravity=9.81, ground=True)
+        self.assertIn("inertiaMatrix [", text)
+        self.assertIn(self.gen.num_inertia(pelvis["inertia"][0]), text)
+        default = self.gen.render_world()
+        self.assertNotIn("inertiaMatrix [", default)
+
+    def test_gravity_writes_urdf_center_of_mass(self):
+        """Webots inertiaMatrix 绕 CoM；空 centerOfMass 会按 8 mm 球重算。"""
+        model = self.gen.load_model()
+        torso = next(l for l in model["links"] if l["name"] == "torso")
+        cx, cy, cz = torso["com"]
+        self.assertGreater(abs(cx) + abs(cy) + abs(cz), 0.005)
+        text = self.gen.render_world(gravity=9.81, ground=True)
+        torso_block = text.split('name "trunk_pitch_link"', 1)[1].split("HingeJoint {", 1)[0]
+        self.assertIn("centerOfMass [", torso_block)
+        self.assertIn(self.gen.vec((cx, cy, cz)), torso_block)
+        default = self.gen.render_world()
+        self.assertNotIn("centerOfMass [", default)
+
+    def test_gravity_motor_torque_is_sts3215_stall(self):
+        from v2.profile import SERVO
+
+        text = self.gen.render_world(gravity=9.81, ground=True)
+        self.assertIn(f"maxTorque {self.gen.num(SERVO['stall_nm'])}", text)
+        default = self.gen.render_world()
+        self.assertNotIn("maxTorque", default)
+
+    def test_gravity_ground_is_static_box(self):
+        """ODE 无限平面上薄盒摩擦经常失效；官方 NAO/KHR 地面是静态盒。"""
+        text = self.gen.render_world(gravity=9.81, max_torque=20.0, ground=True)
+        ground = text.split('name "ground"', 1)[1].split("Robot {", 1)[0]
+        self.assertIn("boundingObject Box {", ground)
+        self.assertNotIn("boundingObject Plane {", ground)
+        self.assertIn('contactMaterial "vinyl_floor"', ground)
+        default = self.gen.render_world()
+        self.assertNotIn('name "ground"', default)
 
     def test_left_ankle_chain_reaches_below_pelvis(self):
         z = 0.0
@@ -657,6 +720,23 @@ class TestStandMode(unittest.TestCase):
         code, out = _run(world, ["--exit-on-done", "--stand-s", "1"])
         self.assertEqual(code, 0, msg=out)
         self.assertIn("站立判定: ok=True", out)
+
+    def test_stand_report_logs_contact_and_static_balance(self):
+        """官方调试：getContactPoints(includeDescendants) + getStaticBalance。"""
+        world = FakeWebots(device_names=ATRI_JOINT_NAMES)
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "stand.json"
+            code, out = _run(
+                world,
+                ["--exit-on-done", "--stand-s", "1", "--report", str(report)],
+            )
+            payload = json.loads(Path(report).read_text(encoding="utf-8"))
+        self.assertEqual(code, 0, msg=out)
+        self.assertIn("contacts=", out)
+        dbg = payload.get("stand_debug") or {}
+        self.assertEqual(dbg.get("n_contacts"), 2)
+        self.assertTrue(dbg.get("static_balance"))
+        self.assertEqual(len(dbg.get("contact_xy") or []), 2)
 
     def test_movie_flag_is_a_no_op_on_stub(self):
         world = FakeWebots(device_names=ATRI_JOINT_NAMES)

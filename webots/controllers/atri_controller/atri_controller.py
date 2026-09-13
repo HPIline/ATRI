@@ -73,10 +73,15 @@ from atri.brain import Brain  # noqa: E402
 from atri.cerebellum import Cerebellum, ServoBus  # noqa: E402
 from atri.config import JOINTS  # noqa: E402
 from atri.stand_balance import (  # noqa: E402
+    STAND_AVAILABLE_TORQUE_NM,
+    STAND_CONTROL_D,
+    STAND_CONTROL_I,
+    STAND_CONTROL_P,
     STAND_KP_PITCH,
     STAND_KP_ROLL,
     STAND_SETTLE_S,
     balance_offsets,
+    com_hold_offsets,
     evaluate_stand,
     mix_pose,
     stand_base_pose,
@@ -86,6 +91,64 @@ from atri.sim import run_task_cards  # noqa: E402
 from atri.voice import MockTTS  # noqa: E402
 
 ID_TO_NAME = {spec["id"]: name for name, spec in JOINTS.items()}
+
+
+def read_support_debug(robot: Any) -> Optional[Dict[str, Any]]:
+    """Webots 官方站立调试：接触点、支撑多边形静平衡、质心。
+
+    `getNumberOfContactPoints(includeDescendants=True)` 把脚上的接触算进整机；
+    `getStaticBalance()` 看质心投影是否落在支撑多边形内；
+    `getCenterOfMass()` 是世界系质心。没有 Supervisor / getSelf 时返回 None。
+    """
+    getter = getattr(robot, "getSelf", None)
+    if getter is None:
+        return None
+    try:
+        node = getter()
+    except Exception:  # pragma: no cover - 真机 API 偶发警告
+        return None
+    if node is None:
+        return None
+    payload: Dict[str, Any] = {}
+    n_fn = getattr(node, "getNumberOfContactPoints", None)
+    if n_fn is not None:
+        try:
+            payload["n_contacts"] = int(n_fn(True))
+        except TypeError:
+            payload["n_contacts"] = int(n_fn())
+    pts_fn = getattr(node, "getContactPoints", None)
+    if pts_fn is not None:
+        try:
+            raw = pts_fn(True)
+        except TypeError:
+            raw = pts_fn()
+        points: List[List[float]] = []
+        for item in list(raw or [])[:8]:
+            pt = getattr(item, "point", item)
+            if pt is None:
+                continue
+            try:
+                points.append(
+                    [round(float(pt[0]), 4), round(float(pt[1]), 4), round(float(pt[2]), 4)]
+                )
+            except (TypeError, IndexError, ValueError):
+                continue
+        payload["contact_xy"] = points
+        payload.setdefault("n_contacts", len(points))
+    bal_fn = getattr(node, "getStaticBalance", None)
+    if bal_fn is not None:
+        payload["static_balance"] = bool(bal_fn())
+    com_fn = getattr(node, "getCenterOfMass", None)
+    if com_fn is not None:
+        com = list(com_fn() or [])
+        if len(com) >= 3:
+            payload["com_m"] = [
+                round(float(com[0]), 4),
+                round(float(com[1]), 4),
+                round(float(com[2]), 4),
+            ]
+    return payload or None
+
 
 DEFAULT_MAPPING = CONTROLLER_DIR / "joint_mapping.json"
 TASK_CARD_DIR = SOFTWARE_ROOT / "task_cards"
@@ -523,11 +586,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     console_log = install_console_log(args.log)
 
     movie_path = args.movie
-    if movie_path:
+    need_supervisor = bool(movie_path) or args.stand_s > 0
+    if need_supervisor:
         if Supervisor is None:
-            print("  [控制器] --movie 需要 Supervisor，当前环境没有", file=sys.stderr)
-            return 2
-        robot = Supervisor()
+            if movie_path:
+                print("  [控制器] --movie 需要 Supervisor，当前环境没有", file=sys.stderr)
+                return 2
+            robot = Robot()
+        else:
+            robot = Supervisor()
     else:
         robot = Robot()
     timestep = int(robot.getBasicTimeStep())
@@ -620,11 +687,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for motor in bus.motors.values():
             setter = getattr(motor, "setControlPID", None)
             if setter is not None:
-                setter(400.0, 0.0, 20.0)
+                setter(STAND_CONTROL_P, STAND_CONTROL_I, STAND_CONTROL_D)
             torque_set = getattr(motor, "setAvailableTorque", None)
             if torque_set is not None:
-                # 盒体世界要撑住 2.3 kg，2.94 N·m 会蹲穿；静立仿真用 20 N·m。
-                torque_set(20.0)
+                torque_set(STAND_AVAILABLE_TORQUE_NM)
         base = stand_base_pose()
         cerebellum.set_pose(base)
         pose_log_fh = None
@@ -658,18 +724,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if imu_rpy:
                 roll_d = imu_rpy[-1][0] * 180.0 / math.pi
                 pitch_d = imu_rpy[-1][1] * 180.0 / math.pi
-            stand_trace.append({
+            row: Dict[str, Any] = {
                 "t": round(state.get("sim_ms", 0) / 1000.0, 3),
                 "z": None if z is None else round(float(z), 4),
                 "roll_deg": None if roll_d is None else round(float(roll_d), 2),
                 "pitch_deg": None if pitch_d is None else round(float(pitch_d), 2),
-            })
+            }
+            dbg = read_support_debug(robot)
+            if dbg:
+                row.update(dbg)
+            stand_trace.append(row)
 
         _trace_stand()
+        ready = stand_trace[-1]
         print(
-            f"  [控制器] 站立姿态就绪 z={stand_trace[-1]['z']} "
-            f"roll={stand_trace[-1]['roll_deg']} pitch={stand_trace[-1]['pitch_deg']}，"
-            f"开始自主站立 {args.stand_s:.2f} 仿真秒"
+            f"  [控制器] 站立姿态就绪 z={ready['z']} "
+            f"roll={ready['roll_deg']} pitch={ready['pitch_deg']}"
+            + (
+                f" contacts={ready.get('n_contacts')} "
+                f"balance={ready.get('static_balance')} com={ready.get('com_m')}"
+                if "n_contacts" in ready
+                else ""
+            )
+            + f"，开始自主站立 {args.stand_s:.2f} 仿真秒"
         )
         remaining = max(timestep, int(round(args.stand_s * 1000)))
         next_trace_ms = state.get("sim_ms", 0) + 200
@@ -684,6 +761,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             offsets = balance_offsets(
                 rpy[0], rpy[1], kp_pitch=STAND_KP_PITCH, kp_roll=STAND_KP_ROLL
             )
+            dbg = read_support_debug(robot)
+            if dbg:
+                for name, extra in com_hold_offsets(
+                    dbg.get("com_m"), dbg.get("contact_xy")
+                ).items():
+                    offsets[name] = offsets.get(name, 0.0) + extra
             cerebellum.set_pose(mix_pose(base, offsets))
             dt = min(timestep, remaining)
             if robot.step(dt) == -1:
@@ -707,7 +790,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if not imu_rpy and zs:
             rolls = [0.0] * len(zs)
             pitches = [0.0] * len(zs)
-        stand_verdict = evaluate_stand(zs, rolls, pitches)
+        stand_verdict = evaluate_stand(zs, rolls, pitches, xy_m=pelvis_xyz)
         passed = 1 if stand_verdict.get("ok") else 0
         total = 1
         results = [{"task_id": "STAND", "ok": bool(stand_verdict.get("ok")), "history": [], "error": stand_verdict.get("reason")}]
@@ -715,7 +798,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             f"  [控制器] 站立判定: ok={stand_verdict.get('ok')} "
             f"reason={stand_verdict.get('reason')} "
             f"z=[{stand_verdict.get('z_min')}, {stand_verdict.get('z_max')}] "
-            f"tilt={stand_verdict.get('tilt_peak_deg')}"
+            f"tilt={stand_verdict.get('tilt_peak_deg')} "
+            f"xy={stand_verdict.get('xy_drift_m')}"
         )
     else:
         # 1) 先回零，让机器人进入初始站姿，并等姿态稳定
@@ -814,6 +898,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
         "mode": "stand" if args.stand_s > 0 else "tasks",
         "stand": stand_verdict,
+        "stand_debug": stand_trace[-1] if stand_trace else None,
         "stand_trace": stand_trace,
         "pose_first": (
             {k: round(v, 2) for k, v in pose_first.items()} if pose_first else None
