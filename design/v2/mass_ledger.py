@@ -15,7 +15,7 @@ def report(snapshot):
              caveat='Major-diameter thread envelopes, not measured screw masses' if kind=='fastener' else 'Material grade/density and finished mass require sample'))
     rows.extend([
       dict(item='20 C018 servos',count=20,mass_g=1100.,basis='manufacturer nominal 55±1g each',caveat='Accessory/cable inclusion in supplier weight must be established before adding them separately'),
-      dict(item=ELECTRONICS['battery']['sku'],count=1,mass_g=ELECTRONICS['battery']['mass_g'],basis='published battery mass',caveat='Check adapter and lead inclusion'),
+      dict(item=ELECTRONICS['battery']['sku']+' ×2',count=2,mass_g=2*ELECTRONICS['battery']['mass_g'],basis='published battery mass',caveat='Check adapter and lead inclusion'),
       dict(item=ELECTRONICS['sbc']['sku'],count=1,mass_g=ELECTRONICS['sbc']['mass_g'],basis='design allocation, not sample measurement',caveat='Board revision, heatsink and card not weighed')])
     unknown=['camera and lens','bus adapter','regulator','IMU','microphone/audio/speaker',
              'wires, plugs, distribution, protection and strain relief','battery straps and adhesives',
