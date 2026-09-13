@@ -1,0 +1,3 @@
+"""Machine-readable hardware additions; dimensions are reservations until sourced."""
+def reservations():
+ return {'battery_expansion': {'architecture':'two independent protected 3S sources with fuse + ideal-diode OR-ing','secondary_envelope_mm':None,'mass_g':None,'integrated_cad':False}, 'vl53l1x': {'pcb_mm':(20.,24.),'mount_hole_mm':2.,'integrated_cad':False}, 'imu': {'pcb_mm':None,'integrated_cad':False}, 'audio': {'mono_speaker':True,'microphone':True,'envelope_mm':None,'integrated_cad':False}, 'gripper': {'finger_length_mm':55.,'finger_width_mm':6.,'max_opening_mm':35.,'tpu_pad_replaceable':True,'active_sync':False}}
