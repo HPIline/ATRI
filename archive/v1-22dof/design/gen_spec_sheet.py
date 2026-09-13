@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent
+REPO = HERE.parents[2]  # design/v1-22dof/archive → repo
 sys.path.insert(0, str(HERE))
 import gen_handoff  # noqa: E402
 import gen_urdf  # noqa: E402

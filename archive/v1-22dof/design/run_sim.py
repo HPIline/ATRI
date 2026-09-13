@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent
+REPO = HERE.parents[2]  # design/v1-22dof/archive → repo
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "software" / "atri"))
 

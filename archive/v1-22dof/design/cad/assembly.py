@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent
+REPO = HERE.parents[3]  # cad/design/v1-22dof/archive → repo
 sys.path.insert(0, str(HERE))
 
 import cadquery as cq
@@ -35,7 +35,7 @@ from parts import sanitize
 from standards import SERVOS, servo
 
 OUT = HERE / "out"
-DESIGN = REPO / "design"
+DESIGN = HERE.parent  # archive/.../design
 SERVO_NAME = "STS3215"
 
 # 展示姿态（度）。零位夹爪已随轴朝外，不再穿髋；预览仍把臂抬到身前好看。

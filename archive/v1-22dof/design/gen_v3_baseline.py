@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent
+REPO = HERE.parents[2]  # design/v1-22dof/archive → repo
 MODEL_PATH = HERE / "robot_model.json"
 COMPONENTS_PATH = HERE / "components.json"
 CAD_MEAS_PATH = HERE / "reference" / "cad_assembly_measurements.json"

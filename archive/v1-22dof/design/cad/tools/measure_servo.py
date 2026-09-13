@@ -31,7 +31,7 @@ from typing import Any, Dict, List
 
 CAD = Path(__file__).resolve().parent.parent  # design/cad/
 HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
-REPO = HERE.parent.parent
+REPO = HERE.parents[3]  # cad/design/v1-22dof/archive → repo
 STEP = REPO / "design" / "reference" / "sts3215" / "STS3215_03a.step"
 
 

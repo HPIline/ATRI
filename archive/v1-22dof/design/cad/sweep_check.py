@@ -77,7 +77,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent
+REPO = HERE.parents[3]  # cad/design/v1-22dof/archive → repo
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
@@ -86,7 +86,7 @@ import cadquery as cq
 import assembly as A
 from fitcheck import bbox_of, boxes_overlap, common_volume, is_joint_mate, joint_kind, verdict
 
-DESIGN = REPO / "design"
+DESIGN = HERE.parent  # archive/.../design
 URDF = DESIGN / "atri.urdf"
 PLACEMENTS_JSON = DESIGN / "placements.json"
 OUT = HERE / "out"

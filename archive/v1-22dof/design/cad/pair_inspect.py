@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent
+REPO = HERE.parents[3]  # cad/design/v1-22dof/archive → repo
 sys.path.insert(0, str(HERE))
 
 import cadquery as cq  # noqa: E402

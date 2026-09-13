@@ -47,7 +47,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent.parent          # design/cad/tools → 仓库根
+REPO = HERE.parents[4]  # tools/cad/design/v1-22dof/archive → repo
 
 EDGE = "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
 

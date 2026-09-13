@@ -20,11 +20,12 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent
+REPO = HERE.parents[2]  # design/v1-22dof/archive → repo
 MODEL_PATH = HERE / "robot_model.json"
 
 # 同目录的几何基元模块
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(REPO / "design"))
 import geometry  # noqa: E402
 
 # 旧 CAD 线是冻结的 22 DOF；软件栈已迁到 v2 20 DOF。本校验只查模型自洽。

@@ -29,7 +29,7 @@ from typing import Any, List, Optional, Sequence, Tuple
 
 CAD = Path(__file__).resolve().parent.parent  # design/cad/
 HERE = CAD  # 产物仍写到 cad/out，不跟脚本下沉
-REPO = HERE.parent.parent
+REPO = HERE.parents[3]  # cad/design/v1-22dof/archive → repo
 sys.path.insert(0, str(CAD))
 sys.path.insert(0, str(CAD / "tools"))
 
