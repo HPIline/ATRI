@@ -284,6 +284,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Supervisor 录屏 mp4 路径（需要世界里 Robot.supervisor TRUE）",
     )
+    parser.add_argument(
+        "--cam-dir",
+        default=None,
+        help="侧视相机 JPEG 目录（stand_cam.saveImage；无头录屏用这个）",
+    )
     return parser
 
 
@@ -335,6 +340,10 @@ def resolve_options(args: argparse.Namespace) -> argparse.Namespace:
         raise ValueError(f"stand-s 必须 ≥ 0，实际 {args.stand_s}")
     if args.movie is None:
         args.movie = os.environ.get("ATRI_WEBOTS_MOVIE") or None
+    if args.cam_dir is None:
+        args.cam_dir = os.environ.get("ATRI_WEBOTS_CAM_DIR") or None
+    if not args.cam_dir and args.movie:
+        args.cam_dir = str(Path(args.movie).with_suffix("")) + "_frames"
     return args
 
 
@@ -382,6 +391,7 @@ def step_seconds(
     timestep_ms: int,
     seconds: float,
     clock: Optional[Dict[str, Any]] = None,
+    on_step: Optional[Callable[[], None]] = None,
 ) -> bool:
     """按基础步长推进 ``seconds`` 仿真秒；仿真结束返回 False。
 
@@ -395,6 +405,8 @@ def step_seconds(
             return False
         if clock is not None:
             clock["sim_ms"] = clock.get("sim_ms", 0) + dt
+        if on_step is not None:
+            on_step()
         remaining -= dt
     return True
 
@@ -415,6 +427,66 @@ def start_movie(robot: Any, path_str: str) -> Optional[str]:
     starter(str(path), 1280, 720, 0, 80, 1, False)
     print(f"  [控制器] 开始录屏: {path}")
     return str(path)
+
+
+def enable_stand_camera(robot: Any, timestep_ms: int, cam_dir: Optional[str]) -> Optional[Any]:
+    """打开骨盆侧视相机。没有这个设备时返回 None（桩/零重力世界）。"""
+    if not cam_dir:
+        return None
+    getter = getattr(robot, "getDevice", None)
+    if getter is None:
+        return None
+    cam = getter("stand_cam")
+    if cam is None:
+        print("  [控制器] 世界里没有 stand_cam，跳过相机存帧")
+        return None
+    enable = getattr(cam, "enable", None)
+    if enable is not None:
+        enable(int(timestep_ms))
+    path = Path(cam_dir)
+    if not path.is_absolute():
+        path = Path.cwd() / path
+    path.mkdir(parents=True, exist_ok=True)
+    cam._atri_dir = path  # type: ignore[attr-defined]
+    cam._atri_i = 0  # type: ignore[attr-defined]
+    print(f"  [控制器] 侧视相机存帧: {path}")
+    return cam
+
+
+def dump_stand_camera(cam: Any, every: int = 5) -> None:
+    if cam is None:
+        return
+    cam._atri_i = int(getattr(cam, "_atri_i", 0)) + 1
+    if cam._atri_i % every != 1:
+        return
+    saver = getattr(cam, "saveImage", None)
+    if saver is None:
+        return
+    dest = Path(cam._atri_dir) / f"{cam._atri_i:05d}.jpg"
+    saver(str(dest), 80)
+
+
+def dump_pose_log(
+    fh: Any,
+    state: Dict[str, Any],
+    xyz,
+    rpy,
+    pose: Dict[str, float],
+    every: int = 10,
+) -> None:
+    if fh is None:
+        return
+    fh._atri_n = int(getattr(fh, "_atri_n", 0)) + 1
+    if fh._atri_n % every != 1:
+        return
+    rec = {
+        "t": round(state.get("sim_ms", 0) / 1000.0, 3),
+        "xyz": [round(float(v), 4) for v in xyz] if xyz is not None else None,
+        "rpy": [round(float(v), 5) for v in rpy] if rpy is not None else [0.0, 0.0, 0.0],
+        "pose": {k: round(float(v), 3) for k, v in pose.items()},
+    }
+    fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    fh.flush()
 
 
 def finish_movie(robot: Any, timestep_ms: int) -> None:
@@ -460,6 +532,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         robot = Robot()
     timestep = int(robot.getBasicTimeStep())
     recording = start_movie(robot, movie_path) if movie_path else None
+    stand_cam = enable_stand_camera(robot, timestep, args.cam_dir)
 
     mapping_path = Path(args.mapping) if args.mapping else DEFAULT_MAPPING
     if not mapping_path.is_absolute():
@@ -554,10 +627,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 torque_set(20.0)
         base = stand_base_pose()
         cerebellum.set_pose(base)
+        pose_log_fh = None
+        if args.cam_dir:
+            log_dir = Path(args.cam_dir)
+            if not log_dir.is_absolute():
+                log_dir = Path.cwd() / log_dir
+            log_dir.mkdir(parents=True, exist_ok=True)
+            pose_log_fh = open(log_dir / "pose_log.jsonl", "w", encoding="utf-8")
+            print(f"  [控制器] 姿态日志: {log_dir / 'pose_log.jsonl'}")
+
+        def dump_media() -> None:
+            dump_stand_camera(stand_cam)
+            xyz = pelvis_xyz[-1] if pelvis_xyz else None
+            rpy = imu_rpy[-1] if imu_rpy else None
+            dump_pose_log(pose_log_fh, state, xyz, rpy, cerebellum.get_pose())
+
         settle_s = max(float(args.settle_s), STAND_SETTLE_S)
-        if not step_seconds(robot, timestep, settle_s, state):
+        if not step_seconds(
+            robot, timestep, settle_s, state,
+            on_step=dump_media,
+        ):
             state["alive"] = False
         sample_pose()
+        dump_media()
         pose_first = cerebellum.get_pose()
 
         def _trace_stand() -> None:
@@ -600,11 +692,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             state["sim_ms"] = state.get("sim_ms", 0) + dt
             remaining -= dt
             sample_pose()
+            dump_media()
             if state["sim_ms"] >= next_trace_ms:
                 _trace_stand()
                 next_trace_ms += 200
         _trace_stand()
         pose_last = cerebellum.get_pose()
+        if pose_log_fh is not None:
+            pose_log_fh.close()
+            pose_log_fh = None
         zs = [p[2] for p in pelvis_xyz]
         rolls = [p[0] * 180.0 / math.pi for p in imu_rpy] if imu_rpy else [0.0] * len(zs)
         pitches = [p[1] * 180.0 / math.pi for p in imu_rpy] if imu_rpy else [0.0] * len(zs)

@@ -731,6 +731,8 @@ def render_world(
             f"        size {vec(_body[1])}",
             "      }",
             "    }",
+            # 骨盆正上方往下看（相机默认朝 -Z）。用来确认 Robot 连杆会不会进画面。
+
         ]
     for node in robot_children():
         lines.extend(
