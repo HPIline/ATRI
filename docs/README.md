@@ -9,3 +9,7 @@ docs/
 │   └── sim/            仿真迭代日志（第 1–3 轮，2026-09-12：碰撞回路 / 探针证伪 / 落位修正）
 └── contest/            必须提交的参赛附件
 ```
+
+A 路线铝夹层图纸/BOM/验证：`design/v2/`（出图 `PYTHONPATH=design python3 -m v2.generate`）。
+
+`design/v2/` 是本分支当前的 A 路线机构（20 DOF、无 hip_yaw）；`software/atri/`、`webots/` 与旧 `design/cad/` 属冻结的现机 22 DOF 线，未迁移到 v2；`docs/process/` 为历史日志，不回改。
