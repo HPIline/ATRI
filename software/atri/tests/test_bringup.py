@@ -2,7 +2,7 @@
 
 守住的四件事：
   1. 角度 ↔ 脉冲换算与限位口径（上位机与固件共用的那一套公式）
-  2. 关节表完整性（22 个、ID 0..21、分支齐全）
+  2. 关节表完整性（20 个、ID 0..19、分支齐全）
   3. ServoBus 的批量写/安全/遥测语义（Mock 也要满足，否则真机实现会漏项）
   4. 标定文件的写出与回读（装配后必须能回填 sign / zero_pulse）
 """
@@ -64,8 +64,8 @@ class TestJointTable(unittest.TestCase):
 
     def test_ids_contiguous(self):
         table = joint_table()
-        self.assertEqual(len(table), 22)
-        self.assertEqual(sorted(r["id"] for r in table.values()), list(range(22)))
+        self.assertEqual(len(table), 20)
+        self.assertEqual(sorted(r["id"] for r in table.values()), list(range(20)))
 
     def test_every_joint_has_branch(self):
         for name, row in joint_table().items():
@@ -96,7 +96,7 @@ class TestServoBusSemantics(unittest.TestCase):
         self.assertFalse(self.bus.torque_on)
 
     def test_scan_finds_all(self):
-        self.assertEqual(len(self.bus.scan()), 22)
+        self.assertEqual(len(self.bus.scan()), 20)
 
     def test_telemetry_shape(self):
         tele = self.bus.read_telemetry(0)
@@ -117,8 +117,8 @@ class TestBringupFlow(unittest.TestCase):
 
     def test_limits_written_for_all(self):
         written = bringup.write_all_limits(self.bus)
-        self.assertEqual(len(written), 22)
-        self.assertEqual(len(self.bus.limits), 22)
+        self.assertEqual(len(written), 20)
+        self.assertEqual(len(self.bus.limits), 20)
 
     def test_jog_records_samples(self):
         rep = bringup.jog_test(self.bus, "head_yaw", sleeper=lambda _dt: None)

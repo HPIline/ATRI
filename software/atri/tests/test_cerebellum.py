@@ -29,7 +29,7 @@ class TestServoBusBase(unittest.TestCase):
     def test_set_angle_clamps_before_write(self):
         bus = RecordingBus()
         bus.set_angle(JOINTS["left_hip_pitch"]["id"], 999.0)
-        self.assertEqual(bus.writes, [(6, 60.0)])
+        self.assertEqual(bus.writes, [(JOINTS["left_hip_pitch"]["id"], 60.0)])
 
     def test_unknown_id_raises_value_error(self):
         with self.assertRaises(ValueError) as ctx:
@@ -38,7 +38,7 @@ class TestServoBusBase(unittest.TestCase):
 
     def test_non_finite_rejected(self):
         with self.assertRaises(ValueError):
-            RecordingBus().set_angle(6, float("nan"))
+            RecordingBus().set_angle(JOINTS["left_hip_pitch"]["id"], float("nan"))
 
     def test_mock_bus_uses_base_template(self):
         self.assertNotIn("set_angle", MockServoBus.__dict__)
@@ -52,7 +52,7 @@ class TestCerebellum(unittest.TestCase):
 
     def test_home(self):
         pose = self.cere.home()
-        self.assertEqual(len(pose), 22)
+        self.assertEqual(len(pose), 20)
         self.assertEqual(pose["head_yaw"], 0.0)
 
     def test_set_pose_limits(self):
@@ -165,8 +165,8 @@ class TestCerebellum(unittest.TestCase):
         self.assertGreaterEqual(result["frames"], 2)
         self.assertEqual(result["steps"], 3)
         pose = self.cere.get_pose()
-        self.assertGreater(abs(pose["left_hip_yaw"]), 0.0)
-        self.assertEqual(pose["left_hip_yaw"], pose["right_hip_yaw"])
+        self.assertGreater(pose["left_hip_roll"], 0.0)
+        self.assertLess(pose["right_hip_roll"], 0.0)
 
     def test_turn_rejects_non_finite(self):
         with self.assertRaises(ValueError):
@@ -194,8 +194,8 @@ class TestCerebellum(unittest.TestCase):
         }
         result = self.cere.play_action(action)
         self.assertEqual(result["frames"], 2)
-        self.assertEqual(self.bus.read_angle(6), 8.0)  # left_hip_pitch id 6
-        self.assertEqual(self.bus.read_angle(11), -8.0)  # right_hip_pitch id 11
+        self.assertEqual(self.bus.read_angle(JOINTS["left_hip_pitch"]["id"]), 8.0)
+        self.assertEqual(self.bus.read_angle(JOINTS["right_hip_pitch"]["id"]), -8.0)
 
     def test_play_action_wraps_conversion_errors(self):
         action = {

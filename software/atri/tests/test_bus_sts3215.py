@@ -36,7 +36,7 @@ from atri.bus_sts3215 import (ADDR_GOAL_POSITION, ADDR_GOAL_SPEED,
                               StsTimeoutError, StsBus, build_frame, checksum,
                               make_sync_write_frame, parse_frames)
 from atri.cerebellum import Cerebellum, ServoBus
-from atri.config import JOINTS, deg_to_pulse, pulse_limits, pulse_to_deg
+from atri.config import DOF_COUNT, JOINTS, deg_to_pulse, pulse_limits, pulse_to_deg
 
 # ---------------------------------------------------------------------------
 # 假串口 + 内存舵机总线
@@ -120,7 +120,7 @@ class FakeServoBus:
     """内存舵机总线：按飞特协议解析指令并应帧，寄存器值可直接读写用于断言。"""
 
     def __init__(self, ids: Optional[List[int]] = None) -> None:
-        self.ids = list(range(22) if ids is None else ids)
+        self.ids = list(range(DOF_COUNT) if ids is None else ids)
         self.servos: Dict[int, Dict[int, int]] = {
             sid: self._fresh() for sid in self.ids
         }
@@ -388,7 +388,7 @@ class TestFrameConstruction(unittest.TestCase):
 class TestSyncWrite(unittest.TestCase):
 
     def test_single_broadcast_frame_for_many_joints(self):
-        """核心断言：22 个目标只产生**一条**帧，且 ID=254、指令=0x83。"""
+        """核心断言：全部关节目标只产生**一条**帧，且 ID=254、指令=0x83。"""
         sim = FakeServoBus()
         bus, ser = make_bus(sim, verify=False)
         targets = {spec["id"]: 0.0 for spec in JOINTS.values()}
@@ -402,8 +402,8 @@ class TestSyncWrite(unittest.TestCase):
         self.assertEqual(frame[5], ADDR_GOAL_POSITION)
         self.assertEqual(frame[6], 2)                    # 每舵机 2 字节数据（不含行首 ID）
         self.assertEqual(checksum(frame[2:-1]), frame[-1])
-        # 22 个关节的数据段长度 = 22 × (1 ID + 2 字节数据)
-        self.assertEqual(len(frame[7:-1]), 22 * 3)
+        # 数据段长度 = DOF × (1 ID + 2 字节数据)
+        self.assertEqual(len(frame[7:-1]), DOF_COUNT * 3)
         self.assertEqual(sim.sync_write_frames, 1)
 
     def test_payload_matches_config_conversion(self):
@@ -730,7 +730,7 @@ class TestSafetyAndBringup(unittest.TestCase):
         bus, ser = make_bus(sim)
         for sid in sim.servos:
             sim.servos[sid][ADDR_GOAL_POSITION] = 1234
-        bus.scan(id_range=range(22))
+        bus.scan(id_range=range(DOF_COUNT))
         for sid in sim.servos:
             self.assertEqual(sim.servos[sid][ADDR_GOAL_POSITION], 1234)
         # 扫描期间发出的帧必须全部是 PING（指令字段在帧的第 5 字节）
@@ -846,7 +846,7 @@ class TestServoBusContract(unittest.TestCase):
         cere = Cerebellum(servo_bus=bus, sleeper=lambda _dt: None)
         applied = cere.set_pose({"head_yaw": 12.0, "left_knee_pitch": 30.0})
         self.assertEqual(applied["head_yaw"], 12.0)
-        self.assertEqual(len(sim.servos), 22)
+        self.assertEqual(len(sim.servos), DOF_COUNT)
         self.assertAlmostEqual(bus.read_angle(JOINTS["left_knee_pitch"]["id"]),
                                30.0, delta=0.2)
 
@@ -855,7 +855,7 @@ class TestServoBusContract(unittest.TestCase):
         bus, _ser = make_bus(sim)
         cere = Cerebellum(servo_bus=bus, sleeper=lambda _dt: None)
         pose = cere.get_pose()
-        self.assertEqual(len(pose), 22)
+        self.assertEqual(len(pose), DOF_COUNT)
         for name, deg in pose.items():
             self.assertAlmostEqual(deg, 0.0, delta=0.2, msg=name)
 

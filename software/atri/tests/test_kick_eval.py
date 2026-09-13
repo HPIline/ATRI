@@ -35,9 +35,10 @@ class CountingKickBus:
         self.yaw = 0.0
 
     def set_pose(self, targets):
-        for key in ("left_hip_yaw", "right_hip_yaw"):
-            if key in targets:
-                self.yaw = float(targets[key])
+        if "left_hip_roll" in targets:
+            self.yaw = float(targets["left_hip_roll"])
+        elif "right_hip_roll" in targets:
+            self.yaw = -float(targets["right_hip_roll"])
         self.calls.append(("set_pose", dict(targets)))
         return dict(targets)
 

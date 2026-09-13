@@ -657,8 +657,8 @@ class TestServoClosedLoop(unittest.TestCase):
         bus = MockServoBus()
         perception = ServoMockPerception(bus=bus, ball_x_true=4.0, gain_cm_per_deg=1.0)
         self.assertEqual(perception.detect_ball().data["x_cm"], 4.0)
-        bus.angles[JOINTS["left_hip_yaw"]["id"]] = 2.0
-        bus.angles[JOINTS["right_hip_yaw"]["id"]] = 2.0
+        bus.angles[JOINTS["left_hip_roll"]["id"]] = 2.0
+        bus.angles[JOINTS["right_hip_roll"]["id"]] = -2.0
         self.assertAlmostEqual(perception.detect_ball().data["x_cm"], 2.0)
 
     def test_static_observation_hits_iteration_cap_and_still_kicks(self):

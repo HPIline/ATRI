@@ -8,14 +8,18 @@ from atri.config import DOF_COUNT, GROUP_DOF, JOINTS, clamp_angle, rest_pose
 
 
 class TestConfig(unittest.TestCase):
-    def test_22_dof_topology(self):
+    def test_20_dof_topology(self):
+        self.assertEqual(DOF_COUNT, 20)
         self.assertEqual(len(JOINTS), DOF_COUNT)
         self.assertEqual(sum(GROUP_DOF.values()), DOF_COUNT)
         self.assertEqual([s["id"] for s in JOINTS.values()], list(range(DOF_COUNT)))
+        self.assertNotIn("left_hip_yaw", JOINTS)
+        self.assertNotIn("right_hip_yaw", JOINTS)
+        self.assertEqual(config_module.DROPPED_VS_V1, ("left_hip_yaw", "right_hip_yaw"))
 
     def test_groups(self):
-        self.assertEqual(GROUP_DOF["leg_l"], 5)
-        self.assertEqual(GROUP_DOF["leg_r"], 5)
+        self.assertEqual(GROUP_DOF["leg_l"], 4)
+        self.assertEqual(GROUP_DOF["leg_r"], 4)
         self.assertEqual(GROUP_DOF["arm_l"], 4)
         self.assertEqual(GROUP_DOF["arm_r"], 4)
         self.assertEqual(GROUP_DOF["trunk"], 2)
@@ -28,7 +32,7 @@ class TestConfig(unittest.TestCase):
 
     def test_rest_pose(self):
         pose = rest_pose()
-        self.assertEqual(len(pose), 22)
+        self.assertEqual(len(pose), 20)
 
     def test_clamp_angle_rejects_nan(self):
         for joint in ("right_knee_pitch", "head_yaw"):
@@ -75,8 +79,26 @@ class TestConfig(unittest.TestCase):
     def test_joint_by_id_mapping(self):
         mapping = config_module.JOINT_BY_ID
         self.assertEqual(len(mapping), DOF_COUNT)
-        self.assertEqual(mapping[6], "left_hip_pitch")
-        self.assertEqual(mapping[12], "right_knee_pitch")
+        self.assertEqual(mapping[5], "left_hip_pitch")
+        self.assertEqual(mapping[10], "right_knee_pitch")
+
+    def test_limits_match_v2_profile(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "design"))
+        from v2.profile import JOINTS as PROFILE_JOINTS
+        self.assertEqual([name for name in JOINTS], [j["name"] for j in PROFILE_JOINTS])
+        for spec in PROFILE_JOINTS:
+            self.assertEqual(list(JOINTS[spec["name"]]["limit_deg"]), list(spec["limit_deg"]))
+
+    def test_body_yaw_pose_uses_hip_roll(self):
+        pose = config_module.body_yaw_pose(15.0)
+        self.assertEqual(set(pose), {"left_hip_roll", "right_hip_roll"})
+        self.assertGreater(pose["left_hip_roll"], 0.0)
+        self.assertLess(pose["right_hip_roll"], 0.0)
+        yaw = config_module.body_yaw_deg_from_angles({
+            JOINTS["left_hip_roll"]["id"]: pose["left_hip_roll"],
+            JOINTS["right_hip_roll"]["id"]: pose["right_hip_roll"],
+        })
+        self.assertAlmostEqual(yaw, pose["left_hip_roll"])
 
     def test_topology_violation_raises_runtime_error(self):
         saved = dict(JOINTS)
