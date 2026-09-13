@@ -1,0 +1,12 @@
+{
+  "world": "/home/carrot/Grok build/atri-v2-al-petg/design/v2/out/webots/worlds/atri_v2.wbt",
+  "controller": "/home/carrot/Grok build/atri-v2-al-petg/design/v2/out/webots/controllers/atri_v2_import_check/atri_v2_import_check.py",
+  "meta": "/home/carrot/Grok build/atri-v2-al-petg/design/v2/out/webots/urdf-meta.json",
+  "urdf": "/home/carrot/Grok build/atri-v2-al-petg/design/v2/out/webots/atri_v2.urdf",
+  "n_revolute": 20,
+  "n_links": 21,
+  "hip_yaw": [],
+  "root": "pelvis",
+  "robot_name": "atri_v2",
+  "mesh_count": 21
+}

@@ -1,0 +1,870 @@
+{
+  "kind": "atri_v2_urdf_import_check",
+  "not_g4": true,
+  "not_task_verification": true,
+  "not_physical_robot_test": true,
+  "controller": "atri_v2_import_check",
+  "basic_time_step_ms": 32,
+  "failures": [],
+  "notes": [],
+  "devices": {
+    "count": 40,
+    "motors": [
+      "trunk_roll",
+      "trunk_pitch",
+      "head_yaw",
+      "head_pitch",
+      "left_shoulder_pitch",
+      "left_shoulder_roll",
+      "left_elbow_pitch",
+      "left_gripper",
+      "right_shoulder_pitch",
+      "right_shoulder_roll",
+      "right_elbow_pitch",
+      "right_gripper",
+      "left_hip_roll",
+      "left_hip_pitch",
+      "left_knee_pitch",
+      "left_ankle_pitch",
+      "right_hip_roll",
+      "right_hip_pitch",
+      "right_knee_pitch",
+      "right_ankle_pitch"
+    ],
+    "sensors": [
+      "trunk_roll_sensor",
+      "trunk_pitch_sensor",
+      "head_yaw_sensor",
+      "head_pitch_sensor",
+      "left_shoulder_pitch_sensor",
+      "left_shoulder_roll_sensor",
+      "left_elbow_pitch_sensor",
+      "left_gripper_sensor",
+      "right_shoulder_pitch_sensor",
+      "right_shoulder_roll_sensor",
+      "right_elbow_pitch_sensor",
+      "right_gripper_sensor",
+      "left_hip_roll_sensor",
+      "left_hip_pitch_sensor",
+      "left_knee_pitch_sensor",
+      "left_ankle_pitch_sensor",
+      "right_hip_roll_sensor",
+      "right_hip_pitch_sensor",
+      "right_knee_pitch_sensor",
+      "right_ankle_pitch_sensor"
+    ],
+    "other": []
+  },
+  "hip_yaw_names": [],
+  "hip_yaw_absent": true,
+  "revolute_count": 20,
+  "expected_revolute": 20,
+  "solid_names": [
+    "atri_v2",
+    "trunk_roll_link",
+    "torso",
+    "head_yaw_link",
+    "head",
+    "left_upper",
+    "left_fore",
+    "left_hand",
+    "left_grip",
+    "right_upper",
+    "right_fore",
+    "right_hand",
+    "right_grip",
+    "left_hip_roll_link",
+    "left_thigh",
+    "left_shank",
+    "left_foot",
+    "right_hip_roll_link",
+    "right_thigh",
+    "right_shank",
+    "right_foot"
+  ],
+  "left_grip_exists": true,
+  "right_grip_exists": true,
+  "zero_pose": [
+    {
+      "joint": "trunk_roll",
+      "child_solid": "trunk_roll_link",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        0.018
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        0.018
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        0.018
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "trunk_pitch",
+      "child_solid": "torso",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        0.025
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        0.025
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        0.025
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "head_yaw",
+      "child_solid": "head_yaw_link",
+      "axis_wbt": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "axis_urdf": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        0.087
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        0.087
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        0.087
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "head_pitch",
+      "child_solid": "head",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        0.06
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        0.06
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        0.06
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_shoulder_pitch",
+      "child_solid": "left_upper",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.075,
+        0.045
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.075,
+        0.045
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.075,
+        0.045
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_shoulder_roll",
+      "child_solid": "left_fore",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.044,
+        0.0
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.044,
+        0.0
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.044,
+        0.0
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_elbow_pitch",
+      "child_solid": "left_hand",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.058
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.058
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.058
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_gripper",
+      "child_solid": "left_grip",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.06
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.06
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.06
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_shoulder_pitch",
+      "child_solid": "right_upper",
+      "axis_wbt": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        -0.075,
+        0.045
+      ],
+      "xyz_urdf": [
+        0.0,
+        -0.075,
+        0.045
+      ],
+      "anchor_wbt": [
+        0.0,
+        -0.075,
+        0.045
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_shoulder_roll",
+      "child_solid": "right_fore",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        -0.044,
+        0.0
+      ],
+      "xyz_urdf": [
+        0.0,
+        -0.044,
+        0.0
+      ],
+      "anchor_wbt": [
+        0.0,
+        -0.044,
+        0.0
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_elbow_pitch",
+      "child_solid": "right_hand",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.058
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.058
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.058
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_gripper",
+      "child_solid": "right_grip",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.06
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.06
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.06
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_hip_roll",
+      "child_solid": "left_hip_roll_link",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.04,
+        0.0
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.04,
+        0.0
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.04,
+        0.0
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_hip_pitch",
+      "child_solid": "left_thigh",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.032
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.032
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.032
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_knee_pitch",
+      "child_solid": "left_shank",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "left_ankle_pitch",
+      "child_solid": "left_foot",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_hip_roll",
+      "child_solid": "right_hip_roll_link",
+      "axis_wbt": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_urdf": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        -0.04,
+        0.0
+      ],
+      "xyz_urdf": [
+        0.0,
+        -0.04,
+        0.0
+      ],
+      "anchor_wbt": [
+        0.0,
+        -0.04,
+        0.0
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_hip_pitch",
+      "child_solid": "right_thigh",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.032
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.032
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.032
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_knee_pitch",
+      "child_solid": "right_shank",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "zero_pose_match": true
+    },
+    {
+      "joint": "right_ankle_pitch",
+      "child_solid": "right_foot",
+      "axis_wbt": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_urdf": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "axis_match": true,
+      "translation_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "xyz_urdf": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "anchor_wbt": [
+        0.0,
+        0.0,
+        -0.078
+      ],
+      "zero_pose_match": true
+    }
+  ],
+  "mass_sample": {
+    "pelvis_via_robot": {
+      "wbt": 0.211738,
+      "urdf": 0.211738,
+      "flag": null
+    },
+    "torso": {
+      "wbt": 0.582278,
+      "urdf": 0.582278,
+      "flag": null
+    },
+    "head": {
+      "wbt": 0.132336,
+      "urdf": 0.132336,
+      "flag": null
+    },
+    "left_thigh": {
+      "wbt": 0.14557,
+      "urdf": 0.14557,
+      "flag": null
+    },
+    "left_grip": {
+      "wbt": 0.031761,
+      "urdf": 0.031761,
+      "flag": null
+    },
+    "right_grip": {
+      "wbt": 0.031761,
+      "urdf": 0.031761,
+      "flag": null
+    },
+    "atri_v2": {
+      "wbt": 0.211738,
+      "urdf": 0.211738,
+      "flag": null
+    }
+  },
+  "mass_flags": [],
+  "solids": [
+    {
+      "name": "atri_v2",
+      "type": "Robot",
+      "mass": 0.211738
+    },
+    {
+      "name": "trunk_roll_link",
+      "type": "Solid",
+      "mass": 0.052934
+    },
+    {
+      "name": "torso",
+      "type": "Solid",
+      "mass": 0.582278
+    },
+    {
+      "name": "head_yaw_link",
+      "type": "Solid",
+      "mass": 0.039701
+    },
+    {
+      "name": "head",
+      "type": "Solid",
+      "mass": 0.132336
+    },
+    {
+      "name": "left_upper",
+      "type": "Solid",
+      "mass": 0.079402
+    },
+    {
+      "name": "left_fore",
+      "type": "Solid",
+      "mass": 0.066168
+    },
+    {
+      "name": "left_hand",
+      "type": "Solid",
+      "mass": 0.039701
+    },
+    {
+      "name": "left_grip",
+      "type": "Solid",
+      "mass": 0.031761
+    },
+    {
+      "name": "right_upper",
+      "type": "Solid",
+      "mass": 0.079402
+    },
+    {
+      "name": "right_fore",
+      "type": "Solid",
+      "mass": 0.066168
+    },
+    {
+      "name": "right_hand",
+      "type": "Solid",
+      "mass": 0.039701
+    },
+    {
+      "name": "right_grip",
+      "type": "Solid",
+      "mass": 0.031761
+    },
+    {
+      "name": "left_hip_roll_link",
+      "type": "Solid",
+      "mass": 0.052934
+    },
+    {
+      "name": "left_thigh",
+      "type": "Solid",
+      "mass": 0.14557
+    },
+    {
+      "name": "left_shank",
+      "type": "Solid",
+      "mass": 0.119102
+    },
+    {
+      "name": "left_foot",
+      "type": "Solid",
+      "mass": 0.105869
+    },
+    {
+      "name": "right_hip_roll_link",
+      "type": "Solid",
+      "mass": 0.052934
+    },
+    {
+      "name": "right_thigh",
+      "type": "Solid",
+      "mass": 0.14557
+    },
+    {
+      "name": "right_shank",
+      "type": "Solid",
+      "mass": 0.119102
+    },
+    {
+      "name": "right_foot",
+      "type": "Solid",
+      "mass": 0.105869
+    }
+  ],
+  "vl53l1x": {
+    "urdf_joint": false,
+    "urdf_link": false,
+    "solid": false,
+    "note": "VL53L1X is a CAD part on the head link (electronics_cad.py), merged into meshes/head.stl. Not a URDF joint; missing ToF node is expected."
+  },
+  "motion": {
+    "joint": "head_yaw",
+    "command_rad": 0.2,
+    "before": -2.052866003290858e-14,
+    "after": 0.1992960497159692,
+    "steps": 16,
+    "delta": 0.19929604971598974
+  },
+  "sim_steps": 17,
+  "ok": true
+}
