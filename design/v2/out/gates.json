@@ -1,0 +1,22 @@
+{
+  "G0": {
+    "status": "OPEN",
+    "requirement": "12V C018 SKU 截图及真实购物车 close ≤¥3000；零售 ¥109×20 不通过，不一次购买20只。"
+  },
+  "G1": {
+    "status": "OPEN",
+    "requirement": "一只 C018：0.8/1.0/1.2 N·m 各循环30分钟，壳温≤65°C。"
+  },
+  "G2": {
+    "status": "OPEN",
+    "requirement": "单腿铝骡机称重与夹具滑移/蠕变测试；外推整机≤2300g，硬顶2450g。"
+  },
+  "G3": {
+    "status": "OPEN",
+    "requirement": "赛方书面确认头部、夹爪是否计入上肢躯干及尺寸量法。"
+  },
+  "G4": {
+    "status": "OPEN",
+    "requirement": "无 hip_yaw 转向误差实测；未关闭不得加回 yaw 或修改现机22DOF软件。"
+  }
+}

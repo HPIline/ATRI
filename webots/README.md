@@ -1,5 +1,7 @@
 # Webots 仿真（Linux 优先，Windows 实测记录保留）
 
+> **⚠️ 本目录是冻结的「现机 22 DOF」仿真世界与控制器。** A 路线机构为 **20 DOF、无 hip_yaw**，见 [`design/v2/`](../design/v2/README.md)。**v2 的 URDF 导入/冒烟**见 `design/v2/WEBOTS-STATUS.md` 与 `design/v2/out/webots/`。下文的 22 关节世界、批量跑法与实测数字**只属于现机 22 DOF**，不代表 v2 已过 Webots 任务验证；冻结世界的关节表含 `hip_yaw`，v2 没有。
+
 本目录是 A.T.R.I. 的 Webots 控制器与仿真世界。控制器复用 `software/atri` 的
 `Brain + Cerebellum + TaskCard`，只把 `ServoBus` 换成 Webots 电机，
 并用 `robot.step()` 推进仿真时间——**跑的是和无硬件闭环演示完全同一条链路**

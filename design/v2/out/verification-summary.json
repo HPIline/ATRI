@@ -1,0 +1,24 @@
+{
+  "release_ready": false,
+  "tests": {
+    "command": "PYTHONPATH=design .venv-cad/bin/python -m unittest discover -s software/atri/tests -p 'test_v2_*.py' -q",
+    "passed": 83,
+    "duration_s": 260.548
+  },
+  "cad_parts": 942,
+  "zero_intersections": 0,
+  "sampled_motion_cases": 46,
+  "sampled_motion_passed": 46,
+  "continuous_motion_verified": false,
+  "complete_wiring_verified": false,
+  "rom_tested_source_sha256": "94233faebb1d0d0b0ef5f1836b684e17fcaf065c1a60775038ace129cd56b869",
+  "current_source_sha256": "dd37eba14b91bbef8172fd32c24fca1d1375eb94e20d6686586efc59587d4011",
+  "changes_after_rom": "Trailing whitespace removed from assembly3d.py comment only. CAD geometry unchanged.",
+  "release_blockers": [
+    "C018 plug revision and complete moving harness/power distribution unresolved",
+    "IMU and audio purchase parts and mounts incomplete",
+    "Incomplete accounted mass estimate 2344.473 g already exceeds 2300 g design target",
+    "Close price estimate 3137 CNY exceeds G0 3000 CNY; no verified cart",
+    "G0 through G4 remain open; no prototype or Webots run"
+  ]
+}

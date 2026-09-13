@@ -1,0 +1,631 @@
+{
+  "part_count": 942,
+  "zero": {
+    "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+    "same_link_checked": true,
+    "narrow_phase_pairs": 537,
+    "purchased_internal_pairs_excluded": 262,
+    "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+    "intersections": [],
+    "ok": true
+  },
+  "cases": [
+    {
+      "name": "trunk_roll -10",
+      "pose_deg": {
+        "trunk_roll": -10
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 200,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "trunk_roll 10",
+      "pose_deg": {
+        "trunk_roll": 10
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 206,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "trunk_pitch -15",
+      "pose_deg": {
+        "trunk_pitch": -15
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 186,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "trunk_pitch 15",
+      "pose_deg": {
+        "trunk_pitch": 15
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 197,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "head_yaw -90",
+      "pose_deg": {
+        "head_yaw": -90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "head_yaw 90",
+      "pose_deg": {
+        "head_yaw": 90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "head_pitch -45",
+      "pose_deg": {
+        "head_pitch": -45
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 173,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "head_pitch 45",
+      "pose_deg": {
+        "head_pitch": 45
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_hip_roll 0",
+      "pose_deg": {
+        "left_hip_roll": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_hip_roll 25",
+      "pose_deg": {
+        "left_hip_roll": 25
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 249,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_hip_pitch -60",
+      "pose_deg": {
+        "left_hip_pitch": -60
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 168,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_hip_pitch 60",
+      "pose_deg": {
+        "left_hip_pitch": 60
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 164,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_knee_pitch 0",
+      "pose_deg": {
+        "left_knee_pitch": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_knee_pitch 90",
+      "pose_deg": {
+        "left_knee_pitch": 90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_ankle_pitch -40",
+      "pose_deg": {
+        "left_ankle_pitch": -40
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 176,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_ankle_pitch 40",
+      "pose_deg": {
+        "left_ankle_pitch": 40
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 186,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_hip_roll -25",
+      "pose_deg": {
+        "right_hip_roll": -25
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 248,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_hip_roll 0",
+      "pose_deg": {
+        "right_hip_roll": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_hip_pitch -60",
+      "pose_deg": {
+        "right_hip_pitch": -60
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 168,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_hip_pitch 60",
+      "pose_deg": {
+        "right_hip_pitch": 60
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 164,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_knee_pitch 0",
+      "pose_deg": {
+        "right_knee_pitch": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_knee_pitch 90",
+      "pose_deg": {
+        "right_knee_pitch": 90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_ankle_pitch -40",
+      "pose_deg": {
+        "right_ankle_pitch": -40
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 176,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_ankle_pitch 40",
+      "pose_deg": {
+        "right_ankle_pitch": 40
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 186,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_shoulder_pitch -90",
+      "pose_deg": {
+        "left_shoulder_pitch": -90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_shoulder_pitch 90",
+      "pose_deg": {
+        "left_shoulder_pitch": 90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_shoulder_roll 0",
+      "pose_deg": {
+        "left_shoulder_roll": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_shoulder_roll 90",
+      "pose_deg": {
+        "left_shoulder_roll": 90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_elbow_pitch -120",
+      "pose_deg": {
+        "left_elbow_pitch": -120
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 177,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_elbow_pitch 0",
+      "pose_deg": {
+        "left_elbow_pitch": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_gripper 0",
+      "pose_deg": {
+        "left_gripper": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "left_gripper 60",
+      "pose_deg": {
+        "left_gripper": 60
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 173,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_shoulder_pitch -90",
+      "pose_deg": {
+        "right_shoulder_pitch": -90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_shoulder_pitch 90",
+      "pose_deg": {
+        "right_shoulder_pitch": 90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_shoulder_roll -90",
+      "pose_deg": {
+        "right_shoulder_roll": -90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 167,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_shoulder_roll 0",
+      "pose_deg": {
+        "right_shoulder_roll": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_elbow_pitch -120",
+      "pose_deg": {
+        "right_elbow_pitch": -120
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 180,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_elbow_pitch 0",
+      "pose_deg": {
+        "right_elbow_pitch": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_gripper 0",
+      "pose_deg": {
+        "right_gripper": 0
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "right_gripper 60",
+      "pose_deg": {
+        "right_gripper": 60
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 173,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "shallow crouch",
+      "pose_deg": {
+        "left_hip_pitch": -20,
+        "left_knee_pitch": 40,
+        "left_ankle_pitch": -20,
+        "right_hip_pitch": -20,
+        "right_knee_pitch": 40,
+        "right_ankle_pitch": -20
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 159,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "hip abduction",
+      "pose_deg": {
+        "left_hip_roll": 25,
+        "right_hip_roll": -25
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 326,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "arms raised",
+      "pose_deg": {
+        "left_shoulder_pitch": 90,
+        "right_shoulder_pitch": -90
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "folded arms",
+      "pose_deg": {
+        "left_shoulder_roll": 90,
+        "right_shoulder_roll": -90,
+        "left_elbow_pitch": -120,
+        "right_elbow_pitch": -120
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 181,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "look left up",
+      "pose_deg": {
+        "head_yaw": 90,
+        "head_pitch": -45
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 173,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    },
+    {
+      "name": "look right down",
+      "pose_deg": {
+        "head_yaw": -90,
+        "head_pitch": 45
+      },
+      "method": "B-rep common volume > 0.01 mm3; touching allowed; no AABB ratio whitelist",
+      "same_link_checked": false,
+      "narrow_phase_pairs": 171,
+      "purchased_internal_pairs_excluded": 0,
+      "purchased_internal_scope": "Soldered vendor-board internals and conservative component envelopes are not separate ATRI mating interfaces; every vendor component is checked against external structural parts.",
+      "intersections": [],
+      "ok": true
+    }
+  ],
+  "source_sha256": "94233faebb1d0d0b0ef5f1836b684e17fcaf065c1a60775038ace129cd56b869",
+  "sampled_structural_clearance_ok": true,
+  "continuous_motion_verified": false,
+  "all_combinations_verified": false,
+  "wiring_verified": false,
+  "fastener_engagement_scope": "Intentional thread engagement excluded; local mounting tests include fixed hardware where applicable",
+  "release_ready": false
+}

@@ -1,0 +1,19 @@
+{
+  "devices": [
+    "AMD Radeon RX 7900 XT"
+  ],
+  "cpu_enabled": false,
+  "engine": "CYCLES",
+  "samples": 64,
+  "part_count": 942,
+  "renders": [
+    "product_iso.png",
+    "product_front.png",
+    "product_rear.png",
+    "detail_horn.png",
+    "detail_pelvis.png",
+    "detail_camera.png",
+    "service_exploded.png"
+  ],
+  "scope": "CAD review renders, not photographs or proof of assembly qualification"
+}

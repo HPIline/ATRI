@@ -1,0 +1,4 @@
+Camera_module_3_std_model_simple.stp / camera_module_3.stl
+Source: i2cjak/Raspberry_Pi_Camera_Module_3_Sensor_Assembly (CERN-OHL-P-2.0)
+https://github.com/i2cjak/Raspberry_Pi_Camera_Module_3_Sensor_Assembly
+This is the official-size sensor assembly (not the full 25×24 PCB module).

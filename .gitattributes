@@ -2,3 +2,15 @@
 # 强制 LF：Windows（core.autocrlf=true）与 macOS 上生成结果必须逐字节一致，
 # 否则 CI 里的 "世界文件与生成脚本一致" 检查会在 Windows 上误报。
 *.wbt text eol=lf
+
+# Preserve vendor CAD bytes; do not render million-line geometry diffs.
+design/cad/vendor/bus-servo-adapter-a/*.step binary
+design/cad/vendor/pi4b/*.stl binary
+design/cad/vendor/camera-module-3/*.step binary
+design/cad/vendor/camera-module-3/*.stp binary
+design/cad/vendor/camera-module-3/*.stl binary
+design/v2/out/manufacturing/**/*.dxf binary
+design/v2/out/manufacturing/**/*.stl binary
+# Markdown uses two trailing spaces for deliberate hard line breaks.
+design/v2/*.md whitespace=-blank-at-eol
+design/v2/out/*.md whitespace=-blank-at-eol
