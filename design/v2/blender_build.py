@@ -107,7 +107,8 @@ def render_shots(out, samples=64):
            ('product_rear',(-1,-.3,.25),parts),
            ('detail_horn',(1,.8,.4),[o for o in parts if 'left-shoulder' in o.name or o.name=='servo-left_shoulder_roll']),
            ('detail_pelvis',(1,-.6,.3),[o for o in parts if o.parent.name=='pelvis' or 'pelvis' in o.name]),
-           ('detail_camera',(1,-.6,.25),[o for o in parts if o.parent.name=='head'])]
+           ('detail_camera',(1,-.6,.25),[o for o in parts if o.parent.name=='head']),
+           ('detail_gripper',(1,1,.2),[o for o in parts if o.name.startswith('arm-left-gripper')])]
     try:
         for name,direction,focus in shots:
             frame_shot(focus,direction,1.3)
