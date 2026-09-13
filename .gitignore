@@ -71,3 +71,10 @@ models/
 # 项目标定 Python 3.14；本机没有系统级 3.14，故用 python-build-standalone 的
 # 预编译包解压到仓库内（自包含、不动系统）。版本与来源记在 .python/VERSION.txt
 .python/
+
+# ── Webots 带重力派生世界（生成产物；默认零重力世界仍入库）──
+docs/process/sim/worlds/
+webots/worlds/atri_22dof_gravity.wbt
+docs/process/sim/video/
+docs/process/sim/empty_cards/
+docs/process/sim/cards_t05/

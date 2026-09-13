@@ -3,11 +3,13 @@
 分两块，对应技能里的两条通路：
 
 **真识别通路**（本仓库新增）：检测 → 特征 → 库比对 → 播报 / 拒识。
-锁两件事：① 认不出时**绝不编造姓名**；② 结果必须标明 ``source``。
+锁三件事：① 认不出时**绝不编造姓名**；② 结果必须标明 ``source``；
+③ 有 bbox 才开环转头，无人脸 / 拒识不转（``gaze`` 字段）。
 
 **退化通路**（原有实现，未改动）：走感知接口，行为与上游一致，
 其中 ``expect_names[0]`` 兜底属于**待团队确认的口径**，这里只如实记录现状，不当作期望行为断言。
 差异见 ``design/handoff/T-01-口径差异清单.md``。
+没有 bbox 时 ``gaze="skipped"``，不瞎转。
 """
 from __future__ import annotations
 
@@ -15,7 +17,13 @@ import unittest
 from types import SimpleNamespace
 
 from atri.skills.base import SkillContext
-from atri.skills.face import DEFAULT_EXPECT_NAMES, FaceSkill
+from atri.skills.face import (
+    DEFAULT_EXPECT_NAMES,
+    DEFAULT_FRAME_HEIGHT,
+    DEFAULT_FRAME_WIDTH,
+    FaceSkill,
+    map_bbox_to_head,
+)
 from atri.voice import MockTTS
 
 
@@ -30,23 +38,41 @@ class FakeBox:
 class FakeRecognizer:
     """假识别器：直接返回预设结果，用来测技能层的行为分支。"""
 
-    def __init__(self, name=None, found=True, similarity=0.7, margin=0.3):
+    def __init__(self, name=None, found=True, similarity=0.7, margin=0.3, bbox=(0, 0, 100, 100)):
         self._name = name
         self._found = found
         self._similarity = similarity
         self._margin = margin
+        self._bbox = bbox
 
     def recognize(self, frame):
-        faces = [FakeBox()] if self._found else []
+        faces = [FakeBox(self._bbox)] if self._found else []
         best = None
         if self._name:
-            best = SimpleNamespace(name=self._name, similarity=self._similarity, margin=self._margin)
+            best = SimpleNamespace(
+                name=self._name,
+                similarity=self._similarity,
+                margin=self._margin,
+                bbox=self._bbox,
+            )
         return SimpleNamespace(
             faces=faces,
             found=self._found,
             recognized_name=self._name,
             best=best,
         )
+
+
+class FakeCerebellum:
+    """假小脑：只记 set_pose 调用，用来锁头部随动有没有真下发。"""
+
+    def __init__(self):
+        self.calls = []
+
+    def set_pose(self, targets):
+        applied = dict(targets)
+        self.calls.append(applied)
+        return applied
 
 
 class FakeFrameSource:
@@ -61,11 +87,12 @@ class FakeFrameSource:
 
 def make_ctx(**kwargs):
     params = kwargs.pop("params", {"expect_names": ["测试员A", "测试员B"]})
+    cerebellum = kwargs.pop("cerebellum", None)
     return SkillContext(
         task_id="T-01",
         task_name="人脸识别",
         params=params,
-        cerebellum=None,
+        cerebellum=cerebellum,
         **kwargs,
     )
 
@@ -151,6 +178,87 @@ class TestFaceSkillRecognitionPath(unittest.TestCase):
         result = FaceSkill().run(ctx)
         self.assertNotEqual(result["source"], "recognition")
 
+    def test_recognized_bbox_calls_set_pose(self):
+        """真识别且有 bbox：框中心映射到 yaw/pitch，小脑被调用一次。"""
+        cere = FakeCerebellum()
+        # 640×480 画面，框中心 (50, 50) → dx=-270, dy=-190
+        # 默认 0.1°/px、yaw 取负号、pitch 取正号 → yaw=27, pitch=-19
+        ctx = make_ctx(
+            face_recognizer=FakeRecognizer(name="测试员A", bbox=(0, 0, 100, 100)),
+            frame_source=FakeFrameSource(),
+            cerebellum=cere,
+            params={
+                "expect_names": ["测试员A", "测试员B"],
+                "frame_width": 640,
+                "frame_height": 480,
+            },
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["gaze"], "tracked")
+        self.assertEqual(len(cere.calls), 1)
+        self.assertAlmostEqual(cere.calls[0]["head_yaw"], 27.0)
+        self.assertAlmostEqual(cere.calls[0]["head_pitch"], -19.0)
+        self.assertAlmostEqual(result["head_yaw"], 27.0)
+        self.assertAlmostEqual(result["head_pitch"], -19.0)
+
+    def test_no_face_does_not_turn_head(self):
+        """无人脸：保持，不调用 set_pose。"""
+        cere = FakeCerebellum()
+        ctx = make_ctx(
+            face_recognizer=FakeRecognizer(name=None, found=False),
+            frame_source=FakeFrameSource(),
+            cerebellum=cere,
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["status"], "no_face")
+        self.assertEqual(result["gaze"], "hold")
+        self.assertEqual(cere.calls, [])
+
+    def test_rejected_face_does_not_turn_head(self):
+        """拒识：即使有框也不对着未过阈值的脸转。"""
+        cere = FakeCerebellum()
+        ctx = make_ctx(
+            face_recognizer=FakeRecognizer(name=None, found=True, bbox=(400, 200, 80, 80)),
+            frame_source=FakeFrameSource(),
+            cerebellum=cere,
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["status"], "rejected")
+        self.assertEqual(result["gaze"], "hold")
+        self.assertEqual(cere.calls, [])
+
+    def test_empty_frame_does_not_turn_head(self):
+        cere = FakeCerebellum()
+        ctx = make_ctx(
+            face_recognizer=FakeRecognizer(name="测试员A"),
+            frame_source=FakeFrameSource(frame=None),
+            cerebellum=cere,
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["gaze"], "skipped")
+        self.assertEqual(cere.calls, [])
+
+    def test_gaze_angles_are_clamped_to_joint_limits(self):
+        """超限位的像素偏差必须钳到 head_yaw ±90 / head_pitch ±45。"""
+        cere = FakeCerebellum()
+        ctx = make_ctx(
+            face_recognizer=FakeRecognizer(name="测试员A", bbox=(0, 0, 10, 10)),
+            frame_source=FakeFrameSource(),
+            cerebellum=cere,
+            params={
+                "expect_names": ["测试员A"],
+                "frame_width": 640,
+                "frame_height": 480,
+                "gaze_deg_per_px": 10.0,
+            },
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["gaze"], "tracked")
+        self.assertEqual(cere.calls[0]["head_yaw"], 90.0)
+        self.assertEqual(cere.calls[0]["head_pitch"], -45.0)
+
 
 class TestFaceSkillLegacyPath(unittest.TestCase):
     """退化通路（原有实现）。这些断言锁定的是**当前行为**，不是团队已定口径。"""
@@ -198,6 +306,54 @@ class TestFaceSkillLegacyPath(unittest.TestCase):
         self.assertEqual(result["source"], "params")
         self.assertEqual(result["name"], "测试员A")
         self.assertEqual(result["name"], DEFAULT_EXPECT_NAMES[0])
+        self.assertEqual(result["gaze"], "skipped")
+
+    def test_name_only_does_not_turn_head(self):
+        """退化通路只有姓名没有 bbox：不瞎转。"""
+        cere = FakeCerebellum()
+        ctx = make_ctx(
+            observation={"face": {"name": "王五"}},
+            cerebellum=cere,
+            params={},
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["gaze"], "skipped")
+        self.assertIsNone(result["head_yaw"])
+        self.assertEqual(cere.calls, [])
+
+    def test_perception_bbox_still_tracks(self):
+        """退化通路若观测里带了 bbox，同样开环对准（不是瞎转）。"""
+        cere = FakeCerebellum()
+        ctx = make_ctx(
+            observation={"face": {"name": "王五", "bbox": [0, 0, 100, 100]}},
+            cerebellum=cere,
+            params={"frame_width": 640, "frame_height": 480},
+        )
+        result = FaceSkill().run(ctx)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["gaze"], "tracked")
+        self.assertEqual(len(cere.calls), 1)
+        self.assertAlmostEqual(cere.calls[0]["head_yaw"], 27.0)
+
+
+class TestMapBboxToHead(unittest.TestCase):
+    """像素偏差 → 角度的纯函数，不碰识别器。"""
+
+    def test_centered_box_is_zero(self):
+        yaw, pitch = map_bbox_to_head(
+            (270, 190, 100, 100),
+            DEFAULT_FRAME_WIDTH,
+            DEFAULT_FRAME_HEIGHT,
+        )
+        self.assertAlmostEqual(yaw, 0.0)
+        self.assertAlmostEqual(pitch, 0.0)
+
+    def test_ten_pixels_is_one_degree(self):
+        # 中心 (330, 240)：dx=+10 → yaw = -1°；dy=0
+        yaw, pitch = map_bbox_to_head((280, 190, 100, 100), 640.0, 480.0)
+        self.assertAlmostEqual(yaw, -1.0)
+        self.assertAlmostEqual(pitch, 0.0)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@
 - LinuxTTS：Linux 系统 piper / espeak-ng / espeak / spd-say
 - VoiceService：识别 -> 回复 -> 播报组合
 - build_tts：按运行平台选择 TTS 实现
+- VoskKeywordRecognizer / build_recognizer：可选离线 ASR（惰性导入，核心包零第三方）
 
 """
 import sys
@@ -26,7 +27,20 @@ __all__ = [
     "LinuxTTS",
     "VoiceService",
     "build_tts",
+    "build_recognizer",
+    "VoskKeywordRecognizer",
+    "KeywordSpeechPerception",
+    "match_keyword",
+    "vosk_available",
 ]
+
+_LAZY_VOSK = {
+    "VoskKeywordRecognizer",
+    "KeywordSpeechPerception",
+    "build_recognizer",
+    "match_keyword",
+    "vosk_available",
+}
 
 
 def build_tts(
@@ -47,3 +61,12 @@ def build_tts(
             return MockTTS()
         return tts
     return MockTTS()
+
+
+def __getattr__(name: str) -> Any:
+    """惰性转发 vosk 子模块：不访问就不会 import vosk。"""
+    if name in _LAZY_VOSK:
+        from . import vosk as _vosk
+
+        return getattr(_vosk, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

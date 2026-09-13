@@ -1,13 +1,18 @@
-"""体育运动技能：视觉伺服踢球（多轮闭环）。"""
+"""体育运动技能：视觉伺服踢球（多轮闭环）。
+
+参数走 :mod:`atri.tuning`：任务卡 params > ``config/kick.json`` > 代码默认值。
+本文件只加读 tuning 的薄封装，**默认数值与行为保持不变**：
+死区 1 cm、最多 5 轮、不收敛也踢、球距 4–40 cm 门闩。
+"""
 from __future__ import annotations
 
 from typing import Any, Dict
 
+from ..tuning import load_tuning, param_or
 from .base import (
     Skill,
     SkillContext,
     _int_param,
-    _positive_param,
     as_finite_float,
     failed,
     lateral_servo,
@@ -25,11 +30,36 @@ KICK_STEP_CLAMP_DEG = 10.0
 KICK_MIN_DISTANCE_CM = 4.0
 KICK_MAX_DISTANCE_CM = 40.0
 
+# 代码默认值 = 设计值（未标定）。键名同时也是 config/kick.json 里可覆盖的键。
+KICK_DEFAULTS: Dict[str, Any] = {
+    "deadband_cm": KICK_DEADBAND_CM,
+    "max_iters": KICK_MAX_ITERS,
+    "step_gain": KICK_STEP_GAIN,
+    "step_clamp_deg": KICK_STEP_CLAMP_DEG,
+    "min_distance_cm": KICK_MIN_DISTANCE_CM,
+    "max_distance_cm": KICK_MAX_DISTANCE_CM,
+}
+
+
+def _num(ctx: SkillContext, tuning: Dict[str, Any], key: str, *, integer: bool = False) -> float:
+    """按 任务卡 > tuning 文件 > 代码默认值 取值，非法则回落默认值。"""
+    default = KICK_DEFAULTS[key]
+    raw = param_or(ctx.params, tuning, key, default)
+    if integer:
+        return float(_int_param({key: raw}, key, int(default)))
+    value = as_finite_float(raw)
+    if value is None or value <= 0.0:
+        return float(default)
+    return float(value)
+
 
 class KickSkill(Skill):
     name = "kick"
 
     def run(self, ctx: SkillContext) -> Dict[str, Any]:
+        t = load_tuning("kick", KICK_DEFAULTS)
+        tuning = t.values
+
         obs, reason = perception_data(ctx, "ball")
         if reason:
             return failed(self.name, reason)
@@ -43,19 +73,21 @@ class KickSkill(Skill):
         if ball_dist is None or ball_dist <= 0.0:
             return failed(self.name, f"球距离非法或缺测距: {raw_dist!r}")
 
-        min_dist = _positive_param(ctx.params, "min_distance_cm", KICK_MIN_DISTANCE_CM)
-        max_dist = _positive_param(ctx.params, "max_distance_cm", KICK_MAX_DISTANCE_CM)
+        min_dist = _num(ctx, tuning, "min_distance_cm")
+        max_dist = _num(ctx, tuning, "max_distance_cm")
         if ball_dist < min_dist or ball_dist > max_dist:
             return failed(
                 self.name,
                 f"球距离 {ball_dist:g}cm 不在 [{min_dist:g}, {max_dist:g}] cm",
             )
 
-        deadband = _positive_param(ctx.params, "deadband_cm", KICK_DEADBAND_CM)
-        max_iters = _int_param(ctx.params, "max_iters", KICK_MAX_ITERS)
+        deadband = _num(ctx, tuning, "deadband_cm")
+        max_iters = int(_num(ctx, tuning, "max_iters", integer=True))
+        step_gain = _num(ctx, tuning, "step_gain")
+        step_clamp = _num(ctx, tuning, "step_clamp_deg")
 
         ball_x, iterations, converged, reason = lateral_servo(
-            ctx, "ball", ball_x, deadband, max_iters, KICK_STEP_GAIN, KICK_STEP_CLAMP_DEG
+            ctx, "ball", ball_x, deadband, max_iters, step_gain, step_clamp
         )
         if reason:
             return failed(self.name, reason)
@@ -76,4 +108,7 @@ class KickSkill(Skill):
             "iterations": iterations,
             "converged": converged,
             "kick": kick_result,
+            "tuning_source": t.source_path.name if t.overridden else "code-defaults",
+            "tuning_overridden": list(t.overridden),
+            "tuning_warnings": list(t.warnings),
         }

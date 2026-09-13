@@ -13,14 +13,19 @@ class KeywordRecognizer(ABC):
     """离线关键词识别接口。
 
     recognize(audio) 接收可选的音频数据；Mock 实现忽略 audio。
-    后续可在 Windows 上接入 Vosk / sherpa-onnx 等离线引擎。
+    可选离线后端见 ``atri.voice.vosk.VoskKeywordRecognizer``（惰性导入 vosk，
+    没装引擎时 ``available()`` 为假，不静默假装听清）。
     """
 
     name: str = "base"
 
+    def available(self) -> bool:
+        """当前环境是否能真正识别；需要第三方引擎的实现覆盖它。"""
+        return True
+
     @abstractmethod
     def recognize(self, audio: Any = None) -> str:
-        """返回识别到的关键词。"""
+        """返回识别到的关键词；未命中时实现应返回空串，不要编造。"""
 
 
 class TTS(ABC):

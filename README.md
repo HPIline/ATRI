@@ -7,11 +7,11 @@
 [![Python 3.14](https://img.shields.io/badge/Python-3.14%20only-blue.svg)](software/atri/)
 [![DOF](https://img.shields.io/badge/DOF-22%20Active-green.svg)](design/atri.urdf)
 [![Offline Tasks](https://img.shields.io/badge/Tasks-5%2F5%20Closed--Loop-brightgreen.svg)](software/atri/run_demo.py)
-[![Tests](https://img.shields.io/badge/Tests-437%2B40%20Pass-success.svg)](software/atri/tests/)
+[![Tests](https://img.shields.io/badge/Tests-639%2B41%20Pass-success.svg)](software/atri/tests/)
 [![License](https://img.shields.io/badge/License-Pending-lightgrey.svg)](#开源声明与许可证-notice--license)
 
 ```
-22 DOF (双腿 10 · 双臂 8 · 躯干 2 · 头部 2)  ·  CAD 实装 407 × 268 × 160 mm（高×宽×深）  ·  579 主包测试 + 41 仿真测试 + 17 CAD 门禁  ·  5/5 赛题闭环  ·  Python 3.14
+22 DOF (双腿 10 · 双臂 8 · 躯干 2 · 头部 2)  ·  CAD 实装 407 × 268 × 160 mm（高×宽×深）  ·  639 主包测试 + 41 仿真测试 + 17 CAD 门禁  ·  5/5 赛题闭环  ·  Python 3.14
 ```
 
 A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人形组）及高校具身智能实验教学场景，直面阻碍双足进课堂与赛场的三大痛点：
@@ -40,13 +40,13 @@ A.T.R.I. 面向中国国际大学生创新大赛（人形机器人专项·小人
 # 1. 进入软件核心目录
 cd software/atri
 
-# 2. 运行主软件栈单元测试（556 项；零依赖环境下人脸/二维码相关 44 项自动跳过）
+# 2. 运行主软件栈单元测试（639 项；零依赖环境下 46 项自动跳过）
 python3 -m unittest discover -s tests
 
 # 3. 运行赛题五项任务无硬件闭环演练（--fast 跳过动作等待，秒级自检）
 python3 run_demo.py --fast
 
-# 4. 运行 Webots 控制器及映射离线自检（切回仓库根目录，40 项全部通过）
+# 4. 运行 Webots 控制器及映射离线自检（切回仓库根目录，41 项全部通过）
 cd ../..
 python3 -m unittest discover -s webots/tests
 ```
@@ -201,7 +201,7 @@ cd software/atri && ../../.venv-face/bin/python run_demo.py --fast \
 | **整机质量** | **≈3029.8 g（纸面推算，重量方案未定案）** | = 结构实算 + 舵机 1210 + 电子电池 316 + 线束 120；URDF 冻结基线 3436.6 g |
 | **扭矩（10 个腿部关节超额定）** | 踝 **147.5%**、膝 141.2%、髋 pitch 134.1% / roll 129.4% / yaw 124.7%（占官方连续额定 0.98 N·m） | 腰 `trunk_roll` 41.1%（零姿态）/ 45.1%（最不利），**不超**；权威数字只看 `torque_check` |
 | **功率 / 电池** | 平均 **15.97 A**、30 min 需标称 **10.40 Ah**（≈115.5 Wh，整包 ≈1.05 kg）；现选 3S 2000 mAh ≈13 min ⇒ **不得写"30 分钟续航"** | 工作占比 0.35 为工程估值 |
-| **测试** | 主包 **508 项 OK**（零依赖环境下人脸 38 项 skip）；Webots 离线桩 **41 项 OK**；CAD 布局门禁 **17 项 OK**（本机实测） | 命令见下节 |
+| **测试** | 主包 **639 项 OK**（零依赖环境下 skip 46）；Webots 离线桩 **41 项 OK**；CAD 布局门禁 **17 项 OK**（本机实测） | 命令见下节 |
 
 **口径纪律**（细节见 `design/handoff/交接档案-新会话入口.md` 第四节、《答辩材料口径核对清单》）：
 
@@ -357,9 +357,8 @@ graph TD
 - 整机包络重测为 **407（高）× 268（宽）× 160（深）mm**（合入前记录的 263 宽 / 146 深作废）；内部 270 mm 宽度门禁**只剩 2 mm**。
 - 结构件实算 **1383.8 g / 81 件**（合入前 1490 g，−7%）；整机纸面推算 **≈3029.8 g**；URDF 冻结口径 3.0367 kg（回灌于 09:06，见 `design/handoff/交接档案-新会话入口.md` §十四）。
 - 力矩力臂口径修正：`trunk_roll` 由 187–194% 回落至 **41.1%（零姿态）/ 45.1%（最不利）**，超额定关节由 11 个收敛为 **10 个腿部关节**。
-- 测试规模 **432 → 437 → 508 → 579**（主包）+ Webots 离线桩 **41 项** + CAD 布局门禁 17 项。
-  **2026-09-13 实测（Python 3.14.7）**：零依赖环境 `Ran 579 tests OK (skipped=44)`；
-  装齐可选依赖（numpy 2.5.3 + opencv-contrib 4.11）后 `Ran 579 tests OK`（0 跳过）；Webots 41 项 OK。
+- 测试规模主包以当场 `unittest` 为准：**2026-09-13 零依赖环境 `Ran 639 tests OK (skipped=46)`**（CPython 3.9.6）；Webots 离线桩 **41 项 OK**；CAD 布局门禁 17 项。历史数字 437 / 508 / 556 / 579 / 603 / 629 作废。
+  装齐可选依赖后 skip 项会减少；引用时写命令与解释器，不要混用旧徽章。
   复现：`cd software/atri && ../../.python/bin/python3 -m unittest discover -s tests`（解释器来源见 `.python/VERSION.txt`）。
 
 > 待回灌项：`design/robot_model.json` 的 `installed_envelope_mm` 与 `overall.mass_kg` 两字段仍是过期值，需要一次"包络/质量回灌"提交把它对齐到 `design/cad/out/report.md`。

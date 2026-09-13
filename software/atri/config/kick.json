@@ -1,0 +1,8 @@
+{
+  "_note": "T-04 踢球技能的可调参数（atri/skills/kick.py::KICK_DEFAULTS）。当前**一个字都没写** = 全部使用代码里的设计值；实物/相机到位后在这里标定回填，不必改代码。",
+  "_how": "只写要改的键，例如 \"deadband_cm\": 1.5。优先级：任务卡 params > 本文件 > 代码默认值。",
+  "_keys": "deadband_cm / max_iters / step_gain / step_clamp_deg / min_distance_cm / max_distance_cm",
+  "_calibration": "实机要量的三件事：① 摆腿能碰到球的最大横向偏差（→ deadband_cm）② 转 1° 身体时球在画面里移动几厘米（→ step_gain；针孔近似 = 物距 × tan(1°)，见 tools/kick_eval.py 的参数边界表，**未标定**）③ 球距门闩（→ min_distance_cm / max_distance_cm，代码默认 4–40 cm）。",
+  "_behavior": "默认行为必须保持：死区 1 cm、最多 5 轮、不收敛也踢、距离不在 4–40 cm 则失败且不下发踢。",
+  "_reference": "评测与边界表见 design/handoff/T-04-踢球-方案与评测报告.md。实机踢球成功率（未测项 B7）本文件不声称闭合。"
+}
