@@ -74,13 +74,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 if [[ -z "$WORLD" ]]; then
-    WORLD="$REPO_ROOT/webots/worlds/atri_22dof.wbt"
+    WORLD="$REPO_ROOT/webots/worlds/atri_v2.wbt"
 fi
 if [[ -z "$REPORT" ]]; then
     REPORT="$REPO_ROOT/atri_report.json"
 fi
 if [[ -z "$LOG" ]]; then
     LOG="$REPO_ROOT/atri_console.log"
+fi
+
+# 控制器的 cwd 是 webots/controllers/atri_controller/，相对路径会写到那里。
+abspath() {
+    python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$1"
+}
+WORLD="$(abspath "$WORLD")"
+REPORT="$(abspath "$REPORT")"
+LOG="$(abspath "$LOG")"
+if [[ -n "$MAPPING" ]]; then
+    MAPPING="$(abspath "$MAPPING")"
 fi
 
 RED=$'\033[0;31m'

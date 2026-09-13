@@ -1,4 +1,4 @@
-"""S2 扭矩探针：零位站姿保持，记录 22 关节扭矩峰值。
+"""S2 扭矩探针：零位站姿保持，记录 20 关节扭矩峰值。
 
 来源：从 `design/handoff/仿真请求-Webots验证清单.md` §S2 抽出为可运行文件（2026-09-12）。
 用法（队友机器）：把派生重力世界里的机器人 controller 改为 "torque_probe"，
@@ -18,13 +18,13 @@ HOLD_SIM_S = 10.0       # 站立观察时长（仿真秒）
 # 机械零位站姿（design/atri.urdf 的零位；肘部 rest 不是 0，见 software/atri/atri/config.py::rest_pose）
 REST_DEG = {"left_elbow_pitch": -10.0, "right_elbow_pitch": -10.0}
 
-# 全部 22 个关节都下发目标角（漏掉的那个会在重力下瘫掉，但扭矩记成 0，看着像"很轻松"）
+# 全部 20 个关节都下发目标角（漏掉的那个会在重力下瘫掉，但扭矩记成 0，看着像"很轻松"）
 ALL_JOINTS = [
     "head_yaw", "head_pitch", "trunk_pitch", "trunk_roll",
     "left_shoulder_pitch", "left_shoulder_roll", "left_elbow_pitch", "left_gripper",
     "right_shoulder_pitch", "right_shoulder_roll", "right_elbow_pitch", "right_gripper",
-    "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee_pitch", "left_ankle_pitch",
-    "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee_pitch", "right_ankle_pitch",
+    "left_hip_roll", "left_hip_pitch", "left_knee_pitch", "left_ankle_pitch",
+    "right_hip_roll", "right_hip_pitch", "right_knee_pitch", "right_ankle_pitch",
 ]
 
 robot = Robot()

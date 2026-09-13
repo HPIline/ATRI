@@ -1,6 +1,6 @@
-"""生成 A.T.R.I. 22 DOF 的 Webots 世界文件。
+"""生成 A.T.R.I. 20 DOF（v2，无 hip_yaw）的 Webots 运动学联调世界。
 
-为什么要生成而不是手写：22 个关节 × (HingeJoint + RotationalMotor + PositionSensor
+为什么要生成而不是手写：20 个关节 × (HingeJoint + RotationalMotor + PositionSensor
 + endPoint Solid) 手写近千行且极易写错；用脚本生成，改尺寸/改关节只需改这里的表。
 
 为什么自包含、不用 ``EXTERNPROTO``：本机（以及比赛机器的网络）访问 GitHub 受限，
@@ -9,13 +9,13 @@
 ``Box``，带地面时再加 ``Plane``——不加地面就不用）。
 
 电机名与 ``controllers/atri_controller/joint_mapping.json`` 完全一致（默认同名映射），
-所以 22 个关节全部能绑定上，联调跑的就是全关节。关节硬限位（``minStop``/``maxStop``）
-与电机 ``maxVelocity`` 也逐关节取自 ``design/robot_model.json`` 的
-``limit_deg`` / ``velocity_dps``，世界与模型不再各写一套。
+所以 20 个关节全部能绑定上，联调跑的就是全关节。关节硬限位（``minStop``/``maxStop``）
+取自 ``design/v2/profile.py``，原点/轴向/质量取自 ``design/v2/out/sim/atri_v2.urdf``。
+冻结的 22 DOF 世界仍在 ``webots/worlds/atri_22dof.wbt``，本生成器默认不再覆盖它。
 
 用法::
 
-    python webots/tools/generate_atri_world.py        # 默认：零重力运动学联调世界
+    python webots/tools/generate_atri_world.py        # 默认：零重力 20 DOF 运动学联调世界
 
     # 带重力校核世界（S1 静立 / S2 站立扭矩用）：
     ATRI_WORLD_GRAVITY=-9.81 ATRI_WORLD_MAX_TORQUE=2.94 ATRI_WORLD_GROUND=1 \\
@@ -32,9 +32,9 @@
 * ``ATRI_WORLD_GROUND`` / ``--ground``：生成 ``Plane`` 地面（4 m × 4 m，理由见 ``GROUND_SIZE``），
   默认不生成。**重力非 0 时自动强制打开**——有重力没地面就是自由落体，跑出来的数字全是废的。
 * ``--out <path>``：输出到别的路径（例如 ``docs/process/sim/worlds/`` 下的临时副本），
-  默认仍是 ``webots/worlds/atri_22dof.wbt``。
+  默认仍是 ``webots/worlds/atri_v2.wbt``。
 
-**不带任何开关跑出来的世界与提交在仓库里的 ``worlds/atri_22dof.wbt`` 逐字节一致**，
+**不带任何开关跑出来的世界与提交在仓库里的 ``worlds/atri_v2.wbt`` 逐字节一致**，
 CI 就是靠这条对账的（``git diff --exit-code``）。
 """
 from __future__ import annotations
@@ -47,15 +47,14 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Sequence
 
-WORLD_PATH = Path(__file__).resolve().parents[1] / "worlds" / "atri_22dof.wbt"
+WORLD_PATH = Path(__file__).resolve().parents[1] / "worlds" / "atri_v2.wbt"
 
-# L1 单一事实来源：几何/质量/关节全部从 design/robot_model.json 派生（v2 起）。
-# 以前这里的关节链是**手写常量**，结果长期与模型不一致（腿段 190 mm vs 模型 235 mm、
-# roll/pitch 轴向对调），而 CI 只比"生成器↔产物"，查不出这种漂移。现在改读模型。
+# v2 单一事实来源：限位来自 design/v2/profile.py，运动学树来自 atri_v2.urdf。
 REPO = Path(__file__).resolve().parents[2]
-MODEL_PATH = REPO / "design" / "robot_model.json"
+URDF_PATH = REPO / "design" / "v2" / "out" / "sim" / "atri_v2.urdf"
 sys.path.insert(0, str(REPO / "design"))
 import geometry  # noqa: E402  （纯标准库）
+from v2 import profile as v2_profile  # noqa: E402
 
 # 世界标称版本：与本机验证用的 Webots R2025a 对齐（工程说明要求 R2023b 或更新）
 WORLD_VERSION = "R2025a"
@@ -92,7 +91,7 @@ _FALSE_WORDS = {"0", "false", "no", "off", "n", ""}
 
 # 关节阻尼（HingeJointParameters.dampingConstant，单位 N·m·s/rad）。
 #
-# 必须显式写、且必须 > 0：Webots 不给关节写阻尼时，这个"零重力 + 22 个轻质连杆"
+# 必须显式写、且必须 > 0：Webots 不给关节写阻尼时，这个"零重力 + 20 个轻质连杆"
 # 世界对约束求解器是不稳定的。2026-09-12 在 Windows + Webots R2025a 上实测：
 #   * 不写阻尼：trunk_pitch / hip_pitch / knee_pitch / shoulder_pitch /
 #     elbow_pitch / gripper 在**启动 4 个物理步（128 ms）内**被弹到 -1309°、-1976°、
@@ -168,10 +167,10 @@ def _env_flag(name: str, default: bool) -> bool:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="生成 A.T.R.I. 22 DOF 的 Webots 世界文件（默认：零重力运动学联调世界）"
+        description="生成 A.T.R.I. 20 DOF 的 Webots 世界文件（默认：零重力运动学联调世界）"
     )
     parser.add_argument(
-        "--out", default=None, help="输出路径（默认 webots/worlds/atri_22dof.wbt）"
+        "--out", default=None, help="输出路径（默认 webots/worlds/atri_v2.wbt）"
     )
     parser.add_argument(
         "--gravity", type=float, default=None,
@@ -263,10 +262,86 @@ def joint(
 
 
 # --------------------------------------------------------------------------
-# 从 L1 模型生成关节树
+# 从 v2 URDF + profile 生成关节树
 # --------------------------------------------------------------------------
+_LINK_BOX_MM: Dict[str, List[float]] = {
+    "pelvis": [40.0, 80.0, 32.0],
+    "trunk_roll_link": [28.0, 40.0, 20.0],
+    "torso": [55.0, 90.0, 80.0],
+    "head_yaw_link": [25.0, 30.0, 20.0],
+    "head": [40.0, 40.0, 45.0],
+    "left_hip_roll_link": [30.0, 30.0, 30.0],
+    "right_hip_roll_link": [30.0, 30.0, 30.0],
+    "left_thigh": [25.0, 25.0, 78.0],
+    "right_thigh": [25.0, 25.0, 78.0],
+    "left_shank": [22.0, 22.0, 78.0],
+    "right_shank": [22.0, 22.0, 78.0],
+    "left_foot": [120.0, 70.0, 12.0],
+    "right_foot": [120.0, 70.0, 12.0],
+    "left_upper": [22.0, 22.0, 50.0],
+    "right_upper": [22.0, 22.0, 50.0],
+    "left_fore": [20.0, 20.0, 44.0],
+    "right_fore": [20.0, 20.0, 44.0],
+    "left_hand": [20.0, 20.0, 40.0],
+    "right_hand": [20.0, 20.0, 40.0],
+    "left_grip": [15.0, 20.0, 30.0],
+    "right_grip": [15.0, 20.0, 30.0],
+}
+
+
 def load_model() -> Dict[str, Any]:
-    return json.loads(MODEL_PATH.read_text(encoding="utf-8"))
+    """把 v2 URDF 收成旧生成器能吃的 robot_model 形字典。"""
+    import xml.etree.ElementTree as ET
+
+    if not URDF_PATH.exists():
+        raise FileNotFoundError(f"缺少 v2 URDF: {URDF_PATH}")
+    root = ET.parse(URDF_PATH).getroot()
+    limits = {j["name"]: list(j["limit_deg"]) for j in v2_profile.JOINTS}
+
+    links: List[Dict[str, Any]] = []
+    for link in root.findall("link"):
+        name = link.get("name") or ""
+        mass_el = link.find("inertial/mass")
+        mass = float(mass_el.get("value")) if mass_el is not None else 0.05
+        size = _LINK_BOX_MM.get(name, [30.0, 30.0, 30.0])
+        links.append({
+            "name": name,
+            "mass_kg": mass,
+            "geometry": {"type": "box", "size_mm": size},
+        })
+
+    joints: List[Dict[str, Any]] = []
+    for idx, joint_el in enumerate(root.findall("joint")):
+        if joint_el.get("type") != "revolute":
+            continue
+        name = joint_el.get("name") or ""
+        origin = joint_el.find("origin")
+        axis_el = joint_el.find("axis")
+        limit_el = joint_el.find("limit")
+        xyz_m = [float(v) for v in (origin.get("xyz") if origin is not None else "0 0 0").split()]
+        axis = [float(v) for v in (axis_el.get("xyz") if axis_el is not None else "0 0 1").split()]
+        vel_dps = math.degrees(float(limit_el.get("velocity"))) if limit_el is not None else 270.0
+        if name not in limits:
+            raise ValueError(f"URDF 关节 {name} 不在 v2 profile.JOINTS 里")
+        joints.append({
+            "id": idx,
+            "name": name,
+            "parent": joint_el.find("parent").get("link"),
+            "child": joint_el.find("child").get("link"),
+            "axis": axis,
+            "origin_xyz_mm": [v * 1000.0 for v in xyz_m],
+            "limit_deg": limits[name],
+            "velocity_dps": vel_dps,
+        })
+
+    envelope = v2_profile.envelope_mm()
+    return {
+        "version": "v2-20dof",
+        "base_pose_mm": [0.0, 0.0, 232.0],
+        "overall": envelope,
+        "links": links,
+        "joints": joints,
+    }
 
 
 def _bbox_m(geom: Dict[str, Any]) -> List[float]:
@@ -313,7 +388,7 @@ def robot_children(model: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
 
 
 def joint_names() -> List[str]:
-    """按生成顺序列出 22 个关节名（含断电自检用）。"""
+    """按生成顺序列出 20 个关节名（含断电自检用）。"""
     names: List[str] = []
 
     def walk(node: Dict[str, Any]) -> None:
@@ -331,7 +406,7 @@ def render_joint(node: Dict[str, Any], indent: int, max_torque: Optional[float] 
 
     ``max_torque`` 为 ``None`` 时不写 ``maxTorque`` 字段（= 现有世界的行为，
     Webots 按默认 10 N·m 处理）；给了值就**逐电机**写同一份上限——
-    22 个电机漏写任何一个，那个关节的扭矩权限就还是 10 N·m，结论不可用。
+    20 个电机漏写任何一个，那个关节的扭矩权限就还是 10 N·m，结论不可用。
     """
     pad = "  " * indent
     lo, hi = node["limit_deg"]
@@ -447,22 +522,22 @@ def render_world(
     """渲染世界文件文本。
 
     默认参数（``0.0`` / ``None`` / ``False``）= 与提交在仓库里的
-    ``worlds/atri_22dof.wbt`` **逐字节一致**，CI 就是拿这条对账的。
+    ``worlds/atri_v2.wbt`` **逐字节一致**，CI 就是拿这条对账的。
     """
     if gravity != 0.0 and not ground:
         # 硬约束：有重力没地面 = 自由落体，静立/站立数字全部作废
         raise ValueError("重力非 0 必须同时生成地面，否则机器人自由落体")
     _body = robot_body()
     title = (
-        "A.T.R.I. 22 DOF 桌面人形（带重力校核）"
+        "A.T.R.I. 20 DOF 桌面人形（带重力校核）"
         if gravity != 0.0
-        else "A.T.R.I. 22 DOF 桌面人形（运动学联调）"
+        else "A.T.R.I. 20 DOF 桌面人形（运动学联调）"
     )
     lines = [
         f"#VRML_SIM {WORLD_VERSION} utf8",
         "",
         "# 本文件由 webots/tools/generate_atri_world.py 生成，请勿手改。",
-        "# A.T.R.I. 22 DOF 桌面人形：几何与质量派生自 design/robot_model.json。",
+        "# A.T.R.I. 20 DOF 桌面人形：限位来自 design/v2/profile.py，树来自 atri_v2.urdf。",
         "# 关节限位与电机速度上限同样来自模型（minStop/maxStop/maxVelocity）。",
         "# 电机名与 controllers/atri_controller/joint_mapping.json 一一对应（默认同名映射）。",
     ]
@@ -523,10 +598,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     model = load_model()
     names = joint_names()
-    assert len(names) == 22, f"关节数应为 22，实际 {len(names)}"
-    assert len(set(names)) == 22, "关节名重复"
+    assert len(names) == 20, f"关节数应为 20，实际 {len(names)}"
+    assert len(set(names)) == 20, "关节名重复"
     assert set(names) == {j["name"] for j in model["joints"]}, \
-        "世界关节名与 robot_model.json 不一致"
+        "世界关节名与 v2 URDF 不一致"
+    assert "left_hip_yaw" not in names and "right_hip_yaw" not in names
     print(f"  模型 v{model.get('version')}，整机 "
           f"{sum(l['mass_kg'] for l in model['links']):.3f} kg，"
           f"包络 {model['overall']['height_mm']:.1f}×{model['overall']['width_mm']:.1f}"
@@ -536,7 +612,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         torque_text = (
             "不写字段（Webots 默认 10 N·m）"
             if opts.max_torque is None
-            else f"{num(opts.max_torque)} N·m × 22"
+            else f"{num(opts.max_torque)} N·m × 20"
         )
         ground_text = (
             f"有（Plane {num(GROUND_SIZE)}×{num(GROUND_SIZE)} m）" if opts.ground else "无"

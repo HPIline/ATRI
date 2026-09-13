@@ -28,9 +28,13 @@ $ErrorActionPreference = 'Stop'
 
 # $PSScriptRoot = <repo>/webots/tools
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if (-not $World)  { $World  = Join-Path $repoRoot 'webots\worlds\atri_22dof.wbt' }
+if (-not $World)  { $World  = Join-Path $repoRoot 'webots\worlds\atri_v2.wbt' }
 if (-not $Report) { $Report = Join-Path $repoRoot 'atri_report.json' }
 if (-not $Log)    { $Log    = Join-Path $repoRoot 'atri_console.log' }
+$World  = [System.IO.Path]::GetFullPath($World)
+$Report = [System.IO.Path]::GetFullPath($Report)
+$Log    = [System.IO.Path]::GetFullPath($Log)
+if ($Mapping) { $Mapping = [System.IO.Path]::GetFullPath($Mapping) }
 
 if (-not $Webots) {
     $cmd = Get-Command webots -ErrorAction SilentlyContinue

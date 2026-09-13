@@ -34,7 +34,7 @@ NAN = float("nan")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONTROLLER_DIR = REPO_ROOT / "webots" / "controllers" / "atri_controller"
 CONTROLLER_PATH = CONTROLLER_DIR / "atri_controller.py"
-WORLD_PATH = REPO_ROOT / "webots" / "worlds" / "atri_22dof.wbt"
+WORLD_PATH = REPO_ROOT / "webots" / "worlds" / "atri_v2.wbt"
 
 # 世界文件里没有的电机（例如 Nao 映射的设备）兜底用；真实 Webots 里由模型决定
 DEFAULT_MAX_VELOCITY = 10.0

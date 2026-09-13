@@ -21,19 +21,19 @@
 
 用法（GUI 演示）::
 
-    webots webots/worlds/atri_22dof.wbt
+    webots webots/worlds/atri_v2.wbt
 
 用法（无界面批量验证，Windows PowerShell）::
 
     webots --batch --mode=fast --stdout --stderr `
-        webots/worlds/atri_22dof.wbt -- --exit-on-done --report atri_report.json
+        webots/worlds/atri_v2.wbt -- --exit-on-done --report atri_report.json
 
 用法（用 Webots 内置 Nao 做临时验证）::
 
     webots --batch --mode=fast --stdout --stderr `
         webots/worlds/atri_nao.wbt -- --exit-on-done --mapping joint_mapping_nao.json
 
-退出码：``0`` = 五项任务全过、仿真全程存活、映射覆盖 22 个关节且全部绑定，
+退出码：``0`` = 五项任务全过、仿真全程存活、映射覆盖 20 个关节且全部绑定，
 并且至少有一个关节产生了实际行程；``2`` = 上述任一条不满足。
 任务卡跑完只证明 FSM 逻辑走通：映射被截断、ATRI 侧键名写错、电机被锁死
 （``--velocity 0``）时动作并没有真的走完，不能算联调通过。
@@ -227,7 +227,7 @@ def load_mapping(path: Path) -> Dict[str, str]:
 
 
 def mapping_problems(mapping: Dict[str, str]) -> List[str]:
-    """校验映射的键集合恰好是 22 个 ATRI 关节名。
+    """校验映射的键集合恰好是 20 个 ATRI 关节名。
 
     只比对"绑定数 == 映射非空条目数"无法发现两类配置错误：映射被截断时两个计数
     一起变小；ATRI 侧键名写错时坏条目同时被计入两个计数。两种情况下对应关节

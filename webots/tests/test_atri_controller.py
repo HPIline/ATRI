@@ -29,15 +29,14 @@ sys.path.insert(0, str(REPO_ROOT / "software" / "atri"))
 
 from atri.config import JOINTS  # noqa: E402
 
-ATRI_JOINT_NAMES = list(JOINTS.keys())
+sys.path.insert(0, str(REPO_ROOT / "design"))
+from v2.profile import JOINTS as PROFILE_JOINTS  # noqa: E402
 
-# L1 模型：世界文件的关节限位与速度上限应当由它派生
-MODEL_JOINTS = {
-    j["name"]: j
-    for j in json.loads(
-        (REPO_ROOT / "design" / "robot_model.json").read_text(encoding="utf-8")
-    )["joints"]
-}
+ATRI_JOINT_NAMES = list(JOINTS.keys())
+DOF = len(ATRI_JOINT_NAMES)
+
+# v2 限位单一事实：software config ↔ design/v2/profile.py
+MODEL_JOINTS = {j["name"]: j for j in PROFILE_JOINTS}
 
 
 def _run(world: FakeWebots, argv):
@@ -65,12 +64,12 @@ class TestWebotsControllerIdentityMapping(unittest.TestCase):
         self.assertEqual(self.code, 0, msg=self.out)
         self.assertIn("Webots 闭环: 5/5 项任务通过", self.out)
 
-    def test_all_22_joints_bound(self):
-        self.assertEqual(len(self.world.moved_joints()), 22)
+    def test_all_20_joints_bound(self):
+        self.assertEqual(len(self.world.moved_joints()), DOF)
 
     def test_position_sensors_are_enabled(self):
         """第一版没 enable 传感器，getValue() 全是 NaN——这是本测试要钉住的回归。"""
-        self.assertEqual(len(self.world.sensors_enabled()), 22)
+        self.assertEqual(len(self.world.sensors_enabled()), DOF)
 
     def test_sensor_reads_are_finite(self):
         for name, motor in self.world.devices.items():
@@ -111,16 +110,16 @@ class TestWebotsControllerNaoMapping(unittest.TestCase):
         self.assertEqual(self.code, 0, msg=self.out)
 
     def test_binds_only_existing_nao_joints(self):
-        # Nao 没有躯干 2 DOF 和夹爪 2 DOF，映射里留空 -> 绑定 18/22
-        self.assertEqual(len(self.world.moved_joints()), 18)
+        # Nao 没有躯干 2 DOF 和夹爪 2 DOF，映射里留空 -> 绑定 16/20
+        self.assertEqual(len(self.world.moved_joints()), 16)
 
     def test_reports_unbound_joints(self):
-        self.assertIn("已绑定 18/22 个关节", self.out)
+        self.assertIn(f"已绑定 16/{DOF} 个关节", self.out)
 
     def test_intentionally_empty_entries_do_not_fail_the_run(self):
-        """留空 = 该机型没有这个自由度，不计入“应绑定”，所以 18/22 仍判通过。"""
+        """留空 = 该机型没有这个自由度，不计入“应绑定”，所以 16/20 仍判通过。"""
         self.assertEqual(self.code, 0, msg=self.out)
-        self.assertIn("映射应绑定 18", self.out)
+        self.assertIn("映射应绑定 16", self.out)
         self.assertNotIn("绑定不完整", self.out)
 
 
@@ -143,9 +142,9 @@ class TestWebotsControllerMissingMotor(unittest.TestCase):
         # 非空映射条目没能绑定 = 世界与映射不匹配，无论任务跑得多顺都不算联调通过
         self.assertEqual(code, 2, msg=out)
         self.assertIn("找不到电机: NoSuchMotor", out)
-        self.assertIn("已绑定 21/22 个关节", out)
-        self.assertEqual(payload["bound_joints"], 21)
-        self.assertEqual(payload["mapped_joints"], 22)
+        self.assertIn(f"已绑定 {DOF - 1}/{DOF} 个关节", out)
+        self.assertEqual(payload["bound_joints"], DOF - 1)
+        self.assertEqual(payload["mapped_joints"], DOF)
         self.assertFalse(payload["binding_ok"])
 
 
@@ -168,20 +167,20 @@ class TestWebotsControllerZeroBinding(unittest.TestCase):
     def test_zero_binding_is_not_a_pass(self):
         code, out, _ = self._run_zero_binding()
         self.assertNotEqual(code, 0, msg=out)
-        self.assertIn("已绑定 0/22", out)
-        self.assertIn("映射应绑定 22", out)
+        self.assertIn(f"已绑定 0/{DOF}", out)
+        self.assertIn(f"映射应绑定 {DOF}", out)
 
     def test_zero_binding_report_is_explicit(self):
         _, _, payload = self._run_zero_binding()
         self.assertEqual(payload["bound_joints"], 0)
-        self.assertEqual(payload["mapped_joints"], 22)
+        self.assertEqual(payload["mapped_joints"], DOF)
         self.assertFalse(payload["binding_ok"])
         # 任务卡本身仍然跑完（FSM 与电机无关），但结论不能是“联调通过”
         self.assertEqual(payload["passed"], payload["total"])
 
 
 class TestWebotsControllerMappingCoverage(unittest.TestCase):
-    """映射必须覆盖全部 22 个 ATRI 关节名，且不得出现非法关节名。
+    """映射必须覆盖全部 20 个 ATRI 关节名，且不得出现非法关节名。
 
     只比较"绑定数 == 映射非空条目数"是不够的：映射被截断、或 ATRI 侧的键名写错时，
     两个计数会一起变小/一起把坏条目算进去，恰好相互抵消而判通过。
@@ -201,7 +200,7 @@ class TestWebotsControllerMappingCoverage(unittest.TestCase):
         return code, out, payload
 
     def test_truncated_mapping_is_not_a_pass(self):
-        """只声明 1 个关节：其余 21 个从未被下发指令，不能算联调通过。"""
+        """只声明 1 个关节：其余关节从未被下发指令，不能算联调通过。"""
         code, out, payload = self._run_mapping({"head_yaw": "head_yaw"})
         self.assertNotEqual(code, 0, msg=out)
         self.assertFalse(payload.get("binding_ok", True))
@@ -250,7 +249,7 @@ class TestWebotsControllerMotionEvidence(unittest.TestCase):
 
 
 class TestJointLimitsSingleSource(unittest.TestCase):
-    """控制器软钳制读 atri.config，世界硬限位读 robot_model.json——两份数据必须一致。
+    """控制器软钳制读 atri.config，限位读 design/v2/profile.py——两份数据必须一致。
 
     不一致时：软钳制更宽会让指令被 Webots 硬限位截停而报告仍按指令角记账；
     更窄则世界允许的行程永远到不了。
@@ -263,7 +262,7 @@ class TestJointLimitsSingleSource(unittest.TestCase):
                 self.assertEqual(
                     list(spec["limit_deg"]),
                     list(MODEL_JOINTS[name]["limit_deg"]),
-                    f"{name} 的限位在 atri.config 与 robot_model.json 之间不一致",
+                    f"{name} 的限位在 atri.config 与 v2 profile 之间不一致",
                 )
 
 
@@ -428,8 +427,8 @@ class TestWebotsControllerReport(unittest.TestCase):
 
         self.assertEqual(payload["passed"], 5)
         self.assertEqual(payload["total"], 5)
-        self.assertEqual(payload["bound_joints"], 22)
-        self.assertEqual(payload["expected_joints"], 22)
+        self.assertEqual(payload["bound_joints"], DOF)
+        self.assertEqual(payload["expected_joints"], DOF)
         self.assertEqual(payload["unbound_joints"], [])
         self.assertTrue(payload["simulation_alive"])
         self.assertEqual(len(payload["tasks"]), 5)
@@ -489,7 +488,7 @@ class TestAtriWorldFile(unittest.TestCase):
     而且**没有任何报错**。离线唯一能钉住它的就是这条断言。
     """
 
-    WORLD = Path(__file__).resolve().parents[1] / "worlds" / "atri_22dof.wbt"
+    WORLD = Path(__file__).resolve().parents[1] / "worlds" / "atri_v2.wbt"
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -519,12 +518,14 @@ class TestAtriWorldFile(unittest.TestCase):
         import re
 
         motors = re.findall(r'RotationalMotor\s*\{\s*name\s+"([^"]+)"', self.text)
-        self.assertEqual(len(motors), 22, f"应有 22 个电机，实际 {len(motors)}")
+        self.assertEqual(len(motors), DOF, f"应有 {DOF} 个电机，实际 {len(motors)}")
         self.assertEqual(set(motors), set(JOINTS), "世界里的电机名与 atri.config.JOINTS 不一致")
+        self.assertNotIn("left_hip_yaw", motors)
+        self.assertNotIn("right_hip_yaw", motors)
 
     def test_sensors_and_joints_count(self):
-        self.assertEqual(self.text.count("PositionSensor {"), 22)
-        self.assertEqual(self.text.count("HingeJoint {"), 22)
+        self.assertEqual(self.text.count("PositionSensor {"), DOF)
+        self.assertEqual(self.text.count("HingeJoint {"), DOF)
 
     def test_controller_is_atri_controller(self):
         self.assertIn('controller "atri_controller"', self.text)
@@ -542,12 +543,16 @@ class TestAtriWorldFile(unittest.TestCase):
                 self.assertAlmostEqual(spec["maxStop"], math.radians(hi), places=4)
 
     def test_motor_max_velocity_matches_model(self):
-        """maxVelocity 必须是逐关节的 velocity_dps，不能再统一写 2 rad/s。"""
+        """maxVelocity 必须来自 v2 URDF，不能再统一写 2 rad/s。"""
+        sys.path.insert(0, str(REPO_ROOT / "webots" / "tools"))
+        import generate_atri_world as gen
+        model = {j["name"]: j for j in gen.load_model()["joints"]}
         specs = parse_world_actuators()
         for name, spec in specs.items():
-            expected = math.radians(MODEL_JOINTS[name]["velocity_dps"])
+            expected = math.radians(model[name]["velocity_dps"])
             with self.subTest(joint=name):
                 self.assertAlmostEqual(spec["maxVelocity"], expected, places=4)
+                self.assertNotAlmostEqual(spec["maxVelocity"], 2.0, places=3)
 
     def test_joint_damping_is_set(self):
         """每个关节必须写 dampingConstant > 0（不写 = 世界在启动瞬间被弹飞）。
@@ -555,7 +560,7 @@ class TestAtriWorldFile(unittest.TestCase):
         实测（2026-09-12，Windows + Webots R2025a）：不写阻尼时 trunk_pitch /
         hip_pitch / knee_pitch / shoulder_pitch / elbow_pitch / gripper 会在启动
         4 个物理步内被弹到上千度后卡死，位置传感器读数不再是关节角——控制器据此
-        测出的"有行程关节"从 18/22 掉到 11/22，看起来像动作没下发。
+        测出的"有行程关节"从 18/20 掉到 11/20，看起来像动作没下发。
         """
         specs = parse_world_actuators()
         for name, spec in specs.items():
@@ -564,12 +569,11 @@ class TestAtriWorldFile(unittest.TestCase):
                 self.assertIsNotNone(damping, f"{name} 没有 dampingConstant")
                 self.assertGreater(damping, 0.0, f"{name} 的阻尼必须 > 0，实际 {damping}")
 
-    def test_leg_and_head_velocities_differ(self):
+    def test_all_motors_have_nonzero_velocity(self):
         specs = parse_world_actuators()
-        self.assertNotEqual(
-            specs["left_knee_pitch"]["maxVelocity"],
-            specs["head_yaw"]["maxVelocity"],
-        )
+        for name, spec in specs.items():
+            with self.subTest(joint=name):
+                self.assertGreater(spec["maxVelocity"], 0.0)
 
 
 if __name__ == "__main__":

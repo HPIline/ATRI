@@ -22,7 +22,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 GENERATOR = Path(__file__).resolve().parent / "generate_atri_world.py"
 DEFAULT_OUT = REPO / "docs" / "process" / "sim" / "worlds" / "atri_22dof_gravity.wbt"
-DEFAULT_WORLD = REPO / "webots" / "worlds" / "atri_22dof.wbt"
+DEFAULT_WORLD = REPO / "webots" / "worlds" / "atri_v2.wbt"
 
 GRAVITY = -9.81
 MAX_TORQUE = 2.94

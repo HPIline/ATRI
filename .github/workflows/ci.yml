@@ -56,4 +56,4 @@ jobs:
       - name: World file is in sync with its generator
         run: |
           python webots/tools/generate_atri_world.py
-          git diff --exit-code -- webots/worlds/atri_22dof.wbt
+          git diff --exit-code -- webots/worlds/atri_v2.wbt
