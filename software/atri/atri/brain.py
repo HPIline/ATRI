@@ -60,7 +60,7 @@ class Brain:
             for skill_name in card.skills:
                 # 用 FSM 定时器置位的中止信号判超时，不再自算 deadline：
                 # execute() 在 enter() 之后才开始，自算的基准比定时器晚了整个
-                # enter()（含首次 home() 写 22 路总线），会放过一个技能。
+                # enter()（含首次 home() 写 20 路总线），会放过一个技能。
                 if abort_event.is_set():
                     raise TaskTimeoutError(
                         f"任务超时: 超过 {card.timeout_s:g}s 预算，中止技能 {skill_name}"

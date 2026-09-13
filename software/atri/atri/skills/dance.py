@@ -1,4 +1,4 @@
-"""娱乐交互技能：离线关键词 -> 22 DOF 短舞。可选播放本地 wav。
+"""娱乐交互技能：离线关键词 -> 20 DOF 短舞。可选播放本地 wav。
 
 参数走 :mod:`atri.tuning`：**任务卡 params > ``config/dance.json`` > 代码默认值**
 （与 ``skills/carry.py`` / ``skills/kick.py`` 同一口径）。默认数值与行为保持不变：

@@ -305,11 +305,9 @@ class RenderedObjectPerception:
         self.first_cx_px: Optional[float] = None
 
     def yaw_deg(self) -> float:
-        from atri.config import JOINTS
+        from atri.config import body_yaw_deg_from_angles
 
-        left = self.bus.angles.get(JOINTS["left_hip_yaw"]["id"], 0.0)
-        right = self.bus.angles.get(JOINTS["right_hip_yaw"]["id"], 0.0)
-        return 0.5 * (left + right)
+        return body_yaw_deg_from_angles(self.bus.angles)
 
     def x_rel_cm(self) -> float:
         return self.x_true_cm - self.distance_cm * math.tan(math.radians(self.yaw_deg()))

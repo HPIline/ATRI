@@ -17,7 +17,7 @@
 2. **串口可注入**：`ser=`（现成对象）或 `serial_factory=`（可调用对象）任一即可，
    单测用内存假串口跑全流程，不需要真实硬件。
 3. **`sync_write` 是一条广播帧**（INST_SYNC_WRITE = 0x83），不是循环单点写。
-   22 关节逐个写 ≈ 9–18 ms，20 ms 控制周期会直接爆掉（见交接文档 2.4 时序预算）。
+   20 关节逐个写 ≈ 9–18 ms，20 ms 控制周期会直接爆掉（见交接文档 2.4 时序预算）。
 4. **半双工**：发出帧后必须收完/放弃回包才能再发下一帧，否则自己的回包会被
    下一帧的起始字节污染。`_transaction()` 用一个锁把所有收发串行化。
 5. **读要重试 + 校验和校验**：坏帧丢弃并计数，超次数抛 `StsTimeoutError`。
@@ -128,7 +128,7 @@ def _id_name_map() -> Dict[int, str]:
 
     `config.load_calibration()` 会就地改 `JOINTS`，测试与 bring-up 也会临时改
     `spec["id"]`；缓存下来的映射在标定/改表之后就是错的（会把 A 关节的换算
-    口径套到 B 关节上）。22 项的字典推导可忽略不计，正确性优先。
+    口径套到 B 关节上）。20 项的字典推导可忽略不计，正确性优先。
     """
     return {spec["id"]: name for name, spec in JOINTS.items()}
 
@@ -139,7 +139,7 @@ def _joint_of_id(joint_id: int) -> str:
     table = _id_name_map()
     if jid not in table:
         raise StsProtocolError(
-            f"未知关节 ID {jid}：不在 config.JOINTS 的 22 个关节里。"
+            f"未知关节 ID {jid}：不在 config.JOINTS 的 {len(JOINTS)} 个关节里。"
             f"合法 ID：{sorted(table)}"
         )
     return table[jid]

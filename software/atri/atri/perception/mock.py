@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from ..config import JOINTS
+from ..config import body_yaw_deg_from_angles
 from .base import PerceptionBackend, PerceptionResult
 
 DEFAULT_FACE = {"name": "测试员A", "found": True}
@@ -92,8 +92,8 @@ class ServoMockPerception(MockPerception):
     无硬件仿真里真的收敛（而不是对固定观测空转到上限）。
 
     无硬件时它是"闭环真正能跑"的关键：普通 MockPerception 返回常量横向偏移，
-    闭环每一轮都测到同一个数，永远进不了死区；本类把机器人当前 hip_yaw 反馈
-    进下一次观测，模拟"朝目标转过去 → 目标在画面里往中间靠"的一维几何。
+    闭环每一轮都测到同一个数，永远进不了死区；本类把机器人当前髋 roll 转向占位
+    反馈进下一次观测，模拟"朝目标转过去 → 目标在画面里往中间靠"的一维几何。
     """
 
     name = "servo-mock"
@@ -115,9 +115,7 @@ class ServoMockPerception(MockPerception):
         self._gain = float(gain_cm_per_deg)
 
     def _body_yaw_deg(self) -> float:
-        left = JOINTS["left_hip_yaw"]["id"]
-        right = JOINTS["right_hip_yaw"]["id"]
-        return 0.5 * (self._bus.angles.get(left, 0.0) + self._bus.angles.get(right, 0.0))
+        return body_yaw_deg_from_angles(getattr(self._bus, "angles", {}))
 
     def detect_ball(self, frame: Any = None) -> PerceptionResult:
         x_cm = self._ball_x_true - self._gain * self._body_yaw_deg()

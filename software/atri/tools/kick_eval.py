@@ -48,7 +48,7 @@ except ImportError:
     cv2 = None
 
 from atri.cerebellum import Cerebellum, MockServoBus  # noqa: E402
-from atri.config import JOINTS  # noqa: E402
+from atri.config import body_yaw_deg_from_angles  # noqa: E402
 from atri.perception.base import PerceptionResult  # noqa: E402
 from atri.skills.base import SkillContext  # noqa: E402
 from atri.skills.kick import KICK_DEFAULTS, KickSkill  # noqa: E402
@@ -327,9 +327,7 @@ class GeometricBallPerception:
         self.off_frame = False
 
     def yaw_deg(self) -> float:
-        left = self.bus.angles.get(JOINTS["left_hip_yaw"]["id"], 0.0)
-        right = self.bus.angles.get(JOINTS["right_hip_yaw"]["id"], 0.0)
-        return 0.5 * (left + right)
+        return body_yaw_deg_from_angles(self.bus.angles)
 
     def x_rel_cm(self) -> float:
         return self.x_true_cm - self.distance_cm * math.tan(math.radians(self.yaw_deg()))
@@ -382,9 +380,7 @@ class RenderedBallPerception:
         self.off_frame = False
 
     def yaw_deg(self) -> float:
-        left = self.bus.angles.get(JOINTS["left_hip_yaw"]["id"], 0.0)
-        right = self.bus.angles.get(JOINTS["right_hip_yaw"]["id"], 0.0)
-        return 0.5 * (left + right)
+        return body_yaw_deg_from_angles(self.bus.angles)
 
     def x_rel_cm(self) -> float:
         return self.x_true_cm - self.distance_cm * math.tan(math.radians(self.yaw_deg()))

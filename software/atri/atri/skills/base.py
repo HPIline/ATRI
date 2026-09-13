@@ -5,6 +5,7 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
+from ..config import body_yaw_pose
 from ..perception.base import PerceptionError
 from ..validation import as_finite_float, as_int_in_range
 
@@ -136,10 +137,10 @@ def lateral_servo(
     step_gain: float,
     step_clamp_deg: float,
 ) -> Tuple[float, int, bool, Optional[str]]:
-    """多轮横向视觉伺服：沿 hip_yaw 做增量偏航修正，直到 |x| 进死区或达到上限。
+    """多轮横向视觉伺服：沿髋 roll 转向占位做增量修正，直到 |x| 进死区或达到上限。
 
     每轮：把本轮测到的横向偏差换算成一步偏航（``step = clamp(x * step_gain)``），
-    **累加**进身体 yaw 并下发，然后重新感知。只有「增量累加」才能让
+    **累加**进身体 yaw 占位并下发，然后重新感知。只有「增量累加」才能让
     ``x_cm = x_true - gain*yaw`` 的一维几何收敛；绝对定位会来回震荡。
 
     返回 ``(最终 x_cm, 迭代次数, 是否收敛, 失败原因)``。中途感知失败时返回
@@ -152,7 +153,7 @@ def lateral_servo(
     while abs(x) > deadband_cm and iterations < max_iters:
         step = max(-step_clamp_deg, min(step_clamp_deg, x * step_gain))
         yaw += step
-        ctx.cerebellum.set_pose({"left_hip_yaw": yaw, "right_hip_yaw": yaw})
+        ctx.cerebellum.set_pose(body_yaw_pose(yaw))
         iterations += 1
         obs, reason = perception_data(ctx, kind)
         if reason:

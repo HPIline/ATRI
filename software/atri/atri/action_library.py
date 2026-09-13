@@ -19,7 +19,7 @@
 }
 
 约定：
-- joints 的键必须来自 atri.config.JOINTS（22 DOF 关节名），值为该关节限位内的有限数字
+- joints 的键必须来自 atri.config.JOINTS（20 DOF 关节名），值为该关节限位内的有限数字
 - duration_s 为有限正数
 - 该格式可直接由 Webots 标定脚本导出，也可由 atri.cerebellum 导入执行
 """

@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "action_id": "dance",
   "name": "短舞",
-  "description": "22 DOF 短舞关键帧示例",
+  "description": "20 DOF 短舞关键帧示例",
   "frames": [
     {"index": 0, "duration_s": 0.2, "joints": {"head_yaw": 20.0, "head_pitch": 10.0, "trunk_roll": 4.0, "left_hip_pitch": 8.0, "right_hip_pitch": -8.0, "left_shoulder_pitch": 20.0, "right_shoulder_pitch": -20.0, "left_elbow_pitch": -25.0, "right_elbow_pitch": -25.0}},
     {"index": 1, "duration_s": 0.2, "joints": {"head_yaw": -20.0, "head_pitch": -10.0, "trunk_roll": -4.0, "left_hip_pitch": -8.0, "right_hip_pitch": 8.0, "left_shoulder_pitch": -20.0, "right_shoulder_pitch": 20.0, "left_elbow_pitch": -10.0, "right_elbow_pitch": -40.0}}

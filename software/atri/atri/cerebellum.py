@@ -1,4 +1,4 @@
-"""小脑控制层：22 关节舵机总线、步态生成、抓取/踢球/舞蹈动作与脚本运动调度。"""
+"""小脑控制层：20 关节舵机总线、步态生成、抓取/踢球/舞蹈动作与脚本运动调度。"""
 from __future__ import annotations
 
 import math
@@ -12,6 +12,7 @@ from .config import (
     MAX_BARS,
     MAX_STEPS,
     MAX_TURN_DEG,
+    body_yaw_pose,
     clamp_angle,
     rest_pose,
 )
@@ -35,7 +36,7 @@ class ServoBus:
     ⚠️ **真机实现必须遵守 `atri.config` 的换算口径**（`deg_to_pulse` / `pulse_to_deg` /
     `pulse_limits`），并实现下面这批"批量写 + 安全 + 遥测"语义；
     下位机固件（STM32）实现同一套语义，两端共用一份关节表（ID/符号/零偏/限位）。
-    只实现 `set_angle` / `read_angle` 会导致：22 关节逐个发帧超时、
+    只实现 `set_angle` / `read_angle` 会导致：20 关节逐个发帧超时、
     标定前就带电锁轴、堵转时拿不到温度与电流。
     """
 
@@ -58,7 +59,7 @@ class ServoBus:
     def read_angle(self, joint_id: int) -> float:
         raise NotImplementedError
 
-    # —— 批量写：一个控制周期内 22 关节一次发完（20 ms 周期的硬性前提）——
+    # —— 批量写：一个控制周期内 20 关节一次发完（20 ms 周期的硬性前提）——
     def sync_write(self, targets: Dict[int, float]) -> None:
         """默认退化为逐个写；真机应实现为舵机总线的 SYNC WRITE 指令。"""
         for jid, deg in targets.items():
@@ -174,7 +175,7 @@ class Cerebellum:
         """下发一组关节目标角（按名称），返回实际限位后的角度。
 
         走 `sync_write`：真机上是一条 SYNC WRITE 帧写完所有关节，
-        而不是 22 次往返（后者在 20 ms 周期里会顶到总线时间上限）。
+        而不是 20 次往返（后者在 20 ms 周期里会顶到总线时间上限）。
         未知关节名、NaN/Inf 一律抛 ValueError，不静默丢弃。
         """
         unknown = [name for name in targets if name not in JOINTS]
@@ -268,10 +269,10 @@ class Cerebellum:
         return self.execute_trajectory(frames)
 
     def turn(self, deg: float, **kwargs: Any) -> Dict[str, Any]:
-        """踩步转体：若干步正弦步态，每步叠加左右髋偏航，而不是只拧髋角。
+        """踩步转体：若干步正弦步态，每步叠加髋 roll 转向占位。
 
-        桌面尺度下约 30°/步；符号与 ``deg`` 同向。这是 T-02「按指示路径行走」
-        的转向实现，开环关键帧，不是动力学平衡。
+        桌面尺度下约 30°/步；符号与 ``deg`` 同向。v2 没有 hip_yaw，用左右髋
+        roll 反对称侧倾代替偏航（G4 未关闭）。开环关键帧，不是动力学平衡。
         """
         if isinstance(deg, bool):
             raise ValueError(f"deg 必须是有限数值，收到 {deg!r}")
@@ -293,9 +294,8 @@ class Cerebellum:
         for i, frame in enumerate(frames):
             progress = min(1.0, (i + 1) / max(1, len(frames)))
             yaw = yaw_per_step * math.ceil(progress * steps)
-            # 左右髋同向偏航 = 原地扭转；限位由 clamp_angle 收住。
-            frame["left_hip_yaw"] = clamp_angle("left_hip_yaw", yaw)
-            frame["right_hip_yaw"] = clamp_angle("right_hip_yaw", yaw)
+            # 无 hip_yaw：髋 roll 反对称侧倾作为转向占位。
+            frame.update(body_yaw_pose(yaw))
             applied.append(frame)
         result = self.execute_trajectory(applied)
         result.update({"action": "turn", "deg": angle, "steps": steps,
@@ -353,7 +353,7 @@ class Cerebellum:
         return {"action": "release", "side": side}
 
     def dance(self, bars: int = 4) -> Dict[str, Any]:
-        """22 DOF 短舞序列（音舞同步占位）。"""
+        """20 DOF 短舞序列（音舞同步占位）。"""
         bars = _check_count("bars", bars, MAX_BARS)
         self.home()
         frames = []
@@ -461,13 +461,13 @@ class Cerebellum:
         elbow = max(-120.0, min(0.0, -10.0 - abs(x_cm)))
         if x_cm >= 0.0:
             targets = {
-                "right_shoulder_roll": yaw,
+                "right_shoulder_roll": -abs(yaw),
                 "right_shoulder_pitch": reach,
                 "right_elbow_pitch": elbow,
             }
         else:
             targets = {
-                "left_shoulder_roll": yaw,
+                "left_shoulder_roll": abs(yaw),
                 "left_shoulder_pitch": reach,
                 "left_elbow_pitch": elbow,
             }
