@@ -17,6 +17,10 @@ jobs:
       run:
         working-directory: software/atri
 
+    env:
+      # design.v2 / v2.* 在仓库根和 design/ 下；CAD 测试无 CadQuery 时 skip。
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/design
+
     steps:
       - uses: actions/checkout@v4
 
@@ -49,6 +53,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Stand-video test deps
+        run: pip install numpy pillow matplotlib
 
       - name: Webots controller offline tests
         run: python -m unittest discover -s webots/tests -v

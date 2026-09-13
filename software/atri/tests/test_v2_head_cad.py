@@ -1,12 +1,16 @@
 """Physical head interfaces; run with the repository CadQuery environment."""
 import unittest
 
-from v2.cad_parts import sts3215_components
-from v2.head_cad import build_head_items
-from v2.electronics_cad import build_electronics
-from v2.pelvis_cad import cyl
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.cad_parts import sts3215_components
+    from v2.head_cad import build_head_items
+    from v2.electronics_cad import build_electronics
+    from v2.pelvis_cad import cyl
 
 
+@skip_without_cadquery
 class HeadAssemblyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

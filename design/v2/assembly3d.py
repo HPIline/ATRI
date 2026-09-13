@@ -9,6 +9,15 @@ from .layout import SANDWICH, SERVO_AXIAL, horn_center, idle_center
 from .plates import Hole, all_plates
 from .profile import JOINTS, K, SERVO, PELVIS, CAD_INTERFACE, standing_height_mm
 
+
+def has_passive_support(j: Dict[str, Any]) -> bool:
+    """后支承只给工程上成对的髋/腰侧摆；不依赖 CadQuery。"""
+    if j["name"] in ("left_hip_roll", "right_hip_roll", "trunk_roll"):
+        return True
+    if j["group"] in ("arm_l", "arm_r"):
+        return False
+    return j["name"] not in PELVIS["housing_clock_deg"] and j["name"] != "head_yaw"
+
 Vec = Tuple[float, float, float]
 
 

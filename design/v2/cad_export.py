@@ -10,7 +10,16 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from .assembly3d import HEAD_PITCH_Z, KINDS, TORSO_UP, fk, kinematic_tree, m_apply, m_ident
+from .assembly3d import (  # noqa: F401
+    HEAD_PITCH_Z,
+    KINDS,
+    TORSO_UP,
+    fk,
+    has_passive_support,
+    kinematic_tree,
+    m_apply,
+    m_ident,
+)
 from .cad_parts import (
     horn_disc,
     limb_side_plate,
@@ -55,15 +64,6 @@ def _color(kind: str) -> Any:
     rgb = [c / 255.0 for c in KINDS[kind]["color"]]
     a = 1.0
     return cq.Color(rgb[0], rgb[1], rgb[2], a)
-
-
-def has_passive_support(j):
-    """Only engineered paired supports receive a freely rotating rear disc."""
-    if j['name'] in ('left_hip_roll', 'right_hip_roll', 'trunk_roll'):
-        return True
-    if j['group'] in ('arm_l', 'arm_r'):
-        return False  # Arm paired supports still need whole-body clearance.
-    return j['name'] not in PELVIS['housing_clock_deg'] and j['name'] != 'head_yaw'
 
 
 def build_items() -> List[Dict[str, Any]]:

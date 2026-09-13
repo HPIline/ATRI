@@ -1,12 +1,16 @@
 """Candidate arm assembly checks using exact CAD, not envelope whitelists."""
 import unittest
-from v2.arm_cad import build_arm_items
-from v2.cad_parts import sts3215_components, orient_y_to_axis
-from v2.assembly3d import kinematic_tree, fk
-from v2.cad_export import _moved
-from v2.profile import CAD_INTERFACE
-from v2.arm_cad import parameters
-from v2.pelvis_cad import cyl
+
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.arm_cad import build_arm_items
+    from v2.cad_parts import sts3215_components, orient_y_to_axis
+    from v2.assembly3d import kinematic_tree, fk
+    from v2.cad_export import _moved
+    from v2.profile import CAD_INTERFACE
+    from v2.arm_cad import parameters
+    from v2.pelvis_cad import cyl
 
 
 def collisions(parts, transforms, moving_only=False):
@@ -38,6 +42,7 @@ def collisions(parts, transforms, moving_only=False):
     return result
 
 
+@skip_without_cadquery
 class ArmAssemblyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

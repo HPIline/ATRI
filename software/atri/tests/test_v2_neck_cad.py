@@ -1,8 +1,13 @@
 import unittest
-from v2.cad_parts import sts3215_components
-from v2.profile import PELVIS
+
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.cad_parts import sts3215_components
+    from v2.profile import PELVIS
 
 
+@skip_without_cadquery
 class NeckTests(unittest.TestCase):
     def test_neck_mount_is_valid_and_clears_fixed_pitch_case(self):
         from v2.neck_cad import build_neck_items

@@ -1,7 +1,10 @@
 """Integrated passive-bearing ownership; not a load certification."""
+import sys
 import unittest
-from v2.assembly3d import kinematic_tree
-from v2.cad_export import has_passive_support
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "design"))
+from v2.assembly3d import has_passive_support, kinematic_tree  # noqa: E402
 
 
 class DualIntegrationTests(unittest.TestCase):

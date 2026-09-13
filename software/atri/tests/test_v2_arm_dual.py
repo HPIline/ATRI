@@ -1,9 +1,15 @@
 """Mechanical checks for the passive-side arm support candidate."""
 import unittest
-from v2.arm_dual_cad import build_arm_dual_items
-from v2.assembly3d import kinematic_tree, fk
-from .test_v2_arm_cad import collisions
 
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.arm_dual_cad import build_arm_dual_items
+    from v2.assembly3d import kinematic_tree, fk
+    from test_v2_arm_cad import collisions
+
+
+@skip_without_cadquery
 class ArmDualTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

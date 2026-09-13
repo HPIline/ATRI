@@ -1,11 +1,16 @@
 """Waist stock-angle geometry regressions, not structural certification."""
 import unittest
-from v2.pelvis_cad import build_pelvis_items, cyl
-from v2.profile import PELVIS as P, CASE_MOUNT as C
-from v2.assembly3d import kinematic_tree
-from v2.cad_audit import intersections
+
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.pelvis_cad import build_pelvis_items, cyl
+    from v2.profile import PELVIS as P, CASE_MOUNT as C
+    from v2.assembly3d import kinematic_tree
+    from v2.cad_audit import intersections
 
 
+@skip_without_cadquery
 class WaistCadTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

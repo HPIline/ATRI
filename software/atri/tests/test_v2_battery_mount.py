@@ -1,6 +1,9 @@
 import unittest
 
+from atri.optional_cadquery import skip_without_cadquery
 
+
+@skip_without_cadquery
 class BatteryMountTests(unittest.TestCase):
     def test_supports_and_straps_do_not_penetrate_battery(self):
         from v2.battery_mount import build_battery_mount

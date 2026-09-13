@@ -1,5 +1,9 @@
+import sys
 import unittest
-from design.v2.power_expansion import candidate
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from design.v2.power_expansion import candidate  # noqa: E402
 
 class PowerExpansionTest(unittest.TestCase):
     def test_never_invents_unselected_pack(self):

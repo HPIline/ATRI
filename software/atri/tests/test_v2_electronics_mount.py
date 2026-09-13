@@ -1,8 +1,13 @@
 import unittest
-import cadquery as cq
-from v2.profile import ELECTRONICS as E
+
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    import cadquery as cq
+    from v2.profile import ELECTRONICS as E
 
 
+@skip_without_cadquery
 class ElectronicsMountTests(unittest.TestCase):
     def test_official_board_holes_are_open_at_transformed_datums(self):
         from v2.electronics_cad import build_electronics

@@ -1,10 +1,16 @@
 """Hip front adapter fit and manufacturable template regressions."""
 import unittest
-from v2.pelvis_cad import build_pelvis_items,cyl
-from v2.cad_export import _moved
-from v2.assembly3d import kinematic_tree,fk
-from v2.profile import PELVIS as P, CASE_MOUNT as C
 
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.pelvis_cad import build_pelvis_items, cyl
+    from v2.cad_export import _moved
+    from v2.assembly3d import kinematic_tree, fk
+    from v2.profile import PELVIS as P, CASE_MOUNT as C
+
+
+@skip_without_cadquery
 class HipFrontAdapterTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):

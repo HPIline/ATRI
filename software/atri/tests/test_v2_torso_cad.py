@@ -1,8 +1,13 @@
 import unittest
-from v2.cad_parts import sts3215_components
-from v2.profile import CAD_INTERFACE
+
+from atri.optional_cadquery import HAS_CADQUERY, skip_without_cadquery
+
+if HAS_CADQUERY:
+    from v2.cad_parts import sts3215_components
+    from v2.profile import CAD_INTERFACE
 
 
+@skip_without_cadquery
 class TorsoTests(unittest.TestCase):
     def test_torso_solids_clear_trunk_pitch_housing(self):
         from v2.torso_cad import build_torso_items
