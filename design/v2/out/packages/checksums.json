@@ -1,22 +1,22 @@
 {
   "release_ready": false,
   "gate_status": "G0-G4 OPEN",
-  "step_uncompressed_sha256": "6f43c3d62ca8720e7514e107336af5c53e0cc193d0b96eefef717bcff03b6b8a",
+  "step_uncompressed_sha256": "e97668c3ef483715635dc9a2f01bf94bbc2cef6ac1ba04021ea6292ed6980ddc",
   "artifacts": [
     {
       "file": "ATRI-v2-manufacturing-review.zip",
-      "bytes": 22089267,
-      "sha256": "9b908c5f31240edb794a73f305a20927b5d1d9e91a9be1990b8112d1d0e02fc8"
+      "bytes": 23243371,
+      "sha256": "71605899da8ef0270f4c29aaf3b35a56475f2aafc6e004556184af33c0d41e38"
     },
     {
       "file": "ATRI-v2-review.step.gz",
-      "bytes": 17079519,
-      "sha256": "5d4cc3465d93f8669b326afd1360990f776b7cf0a9683d09e36147681535a7f9"
+      "bytes": 17144981,
+      "sha256": "d2adc7d78c6d7f67c70a2173643c4380e57a926c0175ecfc0726fc9a8ac3a291"
     },
     {
       "file": "ATRI-v2-simulation-review.zip",
-      "bytes": 39227981,
-      "sha256": "1068be9e8e078b4655dbadc644c5ca3fc8fe30a41a9ee6f1f657769247a0e8a5"
+      "bytes": 41413725,
+      "sha256": "58be6bcdd5f241fb2d43140cd0e44b92b77ab98c5917292f020ee5c266071128"
     }
   ]
 }
